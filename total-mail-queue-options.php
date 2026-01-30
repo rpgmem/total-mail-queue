@@ -1,15 +1,15 @@
 <?php
 
 /* ***************************************************************
-Options Page 
+Options Page
 **************************************************************** */
- 
+
 function wp_tmq_actionlinks ( $actions ) {
     $links = array(
-       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue').'">Settings</a>',
-       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-log').'">Log</a>',
-       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-queue').'">Queue</a>',
-       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-faq').'">FAQs</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue').'">' . __( 'Settings', 'total-mail-queue' ) . '</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-log').'">' . __( 'Log', 'total-mail-queue' ) . '</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-queue').'">' . __( 'Queue', 'total-mail-queue' ) . '</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-faq').'">' . __( 'FAQs', 'total-mail-queue' ) . '</a>',
     );
     return array_merge($actions,$links );
 }
@@ -18,12 +18,12 @@ add_filter('plugin_action_links_total-mail-queue/total-mail-queue.php','wp_tmq_a
 // Options Page
 function wp_tmq_settings_page_menuitem() {
     add_menu_page('Total Mail Queue','Total Mail Queue','manage_options','wp_tmq_mail_queue','wp_tmq_settings_page','data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTc4IiBoZWlnaHQ9IjE3OCIgdmlld0JveD0iMCAwIDE3OCAxNzgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNzguNzI0MSA1LjI1MzA5Qzc2LjkwNzQgNC43MDgxIDc0Ljk0MDEgNS4wNTQxMyA3My40MTg0IDYuMTg2MjlDNzEuODk2OCA3LjMxODQ1IDcxIDkuMTAzNDEgNzEgMTEuMDAwMVYxNjdDNzEgMTY4Ljg5NyA3MS44OTY4IDE3MC42ODIgNzMuNDE4NCAxNzEuODE0Qzc0Ljk0MDEgMTcyLjk0NiA3Ni45MDc0IDE3My4yOTIgNzguNzI0MSAxNzIuNzQ3TDE1OC43MjQgMTQ4Ljc0N0MxNjEuMjYyIDE0Ny45ODYgMTYzIDE0NS42NSAxNjMgMTQzVjM1QzE2MyAzMi4zNTA0IDE2MS4yNjIgMzAuMDE0NSAxNTguNzI0IDI5LjI1MzFMNzguNzI0MSA1LjI1MzA5Wk04NS43ODg3IDIyLjM4NDZDODcuNzg1NCAyMS40Mzk0IDkwLjE3MDMgMjIuMjkxOSA5MS4xMTU0IDI0LjI4ODdMMTIyLjg1MiA5MS4zMzc4TDE0My4zMzQgNDQuNDAwMkMxNDQuMjE3IDQyLjM3NTUgMTQ2LjU3NSA0MS40NTAzIDE0OC42IDQyLjMzMzhDMTUwLjYyNSA0My4yMTc0IDE1MS41NSA0NS41NzUgMTUwLjY2NiA0Ny41OTk4TDEyNi42NjYgMTAyLjZDMTI2LjAzOSAxMDQuMDM3IDEyNC42MjkgMTA0Ljk3NiAxMjMuMDYxIDEwNUMxMjEuNDkzIDEwNS4wMjQgMTIwLjA1NiAxMDQuMTI5IDExOS4zODUgMTAyLjcxMUw4My44ODQ2IDI3LjcxMTNDODIuOTM5NCAyNS43MTQ2IDgzLjc5MTkgMjMuMzI5NyA4NS43ODg3IDIyLjM4NDZaIiBmaWxsPSIjYTdhYWFkIi8+CjxwYXRoIGQ9Ik00OSAxM0M1Mi4zMTM3IDEzIDU1IDE1LjY4NjMgNTUgMTlWMTU5QzU1IDE2Mi4zMTQgNTIuMzEzNyAxNjUgNDkgMTY1QzQ1LjY4NjMgMTY1IDQzIDE2Mi4zMTQgNDMgMTU5VjE5QzQzIDE1LjY4NjMgNDUuNjg2MyAxMyA0OSAxM1oiIGZpbGw9IiNhN2FhYWQiLz4KPHBhdGggZD0iTTIxIDIxQzI0LjMxMzcgMjEgMjcgMjMuNjg2MyAyNyAyN1YxNTFDMjcgMTU0LjMxNCAyNC4zMTM3IDE1NyAyMSAxNTdDMTcuNjg2MyAxNTcgMTUgMTU0LjMxNCAxNSAxNTFWMjdDMTUgMjMuNjg2MyAxNy42ODYzIDIxIDIxIDIxWiIgZmlsbD0iI2E3YWFhZCIvPgo8L3N2Zz4=');
-    add_submenu_page('wp_tmq_mail_queue','Settings','Settings','manage_options','wp_tmq_mail_queue','wp_tmq_settings_page');
-    add_submenu_page('wp_tmq_mail_queue','Log','Log','manage_options','wp_tmq_mail_queue-tab-log','wp_tmq_settings_page');
-    add_submenu_page('wp_tmq_mail_queue','Queue','Queue','manage_options','wp_tmq_mail_queue-tab-queue','wp_tmq_settings_page');
-    add_submenu_page('wp_tmq_mail_queue','FAQ','FAQ','manage_options','wp_tmq_mail_queue-tab-faq','wp_tmq_settings_page');
+    add_submenu_page('wp_tmq_mail_queue', __( 'Settings', 'total-mail-queue' ), __( 'Settings', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue','wp_tmq_settings_page');
+    add_submenu_page('wp_tmq_mail_queue', __( 'Log', 'total-mail-queue' ), __( 'Log', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-log','wp_tmq_settings_page');
+    add_submenu_page('wp_tmq_mail_queue', __( 'Queue', 'total-mail-queue' ), __( 'Queue', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-queue','wp_tmq_settings_page');
+    add_submenu_page('wp_tmq_mail_queue', __( 'FAQ', 'total-mail-queue' ), __( 'FAQ', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-faq','wp_tmq_settings_page');
     if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
-        add_submenu_page('wp_tmq_mail_queue','Cron Information','Cron Information','manage_options','wp_tmq_mail_queue-tab-croninfo','wp_tmq_settings_page');
+        add_submenu_page('wp_tmq_mail_queue', __( 'Cron Information', 'total-mail-queue' ), __( 'Cron Information', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-croninfo','wp_tmq_settings_page');
     }
 }
 add_action('admin_menu','wp_tmq_settings_page_menuitem');
@@ -75,13 +75,14 @@ function wp_tmq_settings_page() {
         if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
             echo '<div class="notice notice-warning notice-large">';
             $url = esc_url(get_option('siteurl').'/wp-cron.php');
-            echo '<p><strong>Please note:</strong><br />Your normal WP Cron is disabled. Please make sure you\'re running the Cron manually by calling <a href="'.$url.'" target="_blank">'.$url.'</a> every couple of minutes.</p>';
-            echo '<p><a href="?page=wp_tmq_mail_queue-tab-croninfo">More information</a></p>';
+            /* translators: %s: wp-cron.php URL */
+            echo '<p><strong>' . __( 'Please note:', 'total-mail-queue' ) . '</strong><br />' . sprintf( __( 'Your normal WP Cron is disabled. Please make sure you\'re running the Cron manually by calling %s every couple of minutes.', 'total-mail-queue' ), '<a href="'.$url.'" target="_blank">'.$url.'</a>' ) . '</p>';
+            echo '<p><a href="?page=wp_tmq_mail_queue-tab-croninfo">' . __( 'More information', 'total-mail-queue' ) . '</a></p>';
             echo '</div>';
         }
     }
     wp_tmq_settings_page_navi($tab); // Tabs
- 
+
     // Options Page Content
     if ($tab == 'wp_tmq_mail_queue') {
         echo '<form action="options.php" method="post">';
@@ -89,10 +90,10 @@ function wp_tmq_settings_page() {
         do_settings_sections('wp_tmq_settings_page');
         submit_button();
         echo '</form>';
-    } else if ($tab == 'wp_tmq_mail_queue-tab-log') {      
-        echo '<form method="post">';          
+    } else if ($tab == 'wp_tmq_mail_queue-tab-log') {
+        echo '<form method="post">';
         $logtable = new wp_tmq_Log_Table();
-        $logtable->prepare_items(); 
+        $logtable->prepare_items();
         $logtable->display();
         echo '</form>';
     } else if ($tab == 'wp_tmq_mail_queue-tab-queue') {
@@ -103,74 +104,82 @@ function wp_tmq_settings_page() {
             $data = array(
                 'timestamp'=>current_time('mysql',false),
                 'recipient'=>$wp_tmq_options['email'],
-                'subject'=>'Testmail #'.time(),
-                'message'=>'This is just a test email send by the Total Mail Queue plugin.',
+                /* translators: %s: timestamp */
+                'subject'=> sprintf( __( 'Testmail #%s', 'total-mail-queue' ), time() ),
+                'message'=> __( 'This is just a test email sent by the Total Mail Queue plugin.', 'total-mail-queue' ),
                 'status' => 'queue'
             );
             $wpdb->insert($tableName,$data);
         }
- 
+
         $next_cron_timestamp = wp_next_scheduled('wp_tmq_mail_queue_hook');
         if ($next_cron_timestamp) {
             if ($next_cron_timestamp > time()) {
-                echo '<div class="notice notice-success"><p>Next Sending will be triggered in '.esc_html(human_time_diff($next_cron_timestamp)).' at '.esc_html(wp_date('H:i',$next_cron_timestamp)).'.</p></div>';
+                /* translators: %1$s: human-readable time diff, %2$s: scheduled time */
+                echo '<div class="notice notice-success"><p>' . sprintf( __( 'Next sending will be triggered in %1$s at %2$s.', 'total-mail-queue' ), esc_html( human_time_diff( $next_cron_timestamp ) ), esc_html( wp_date( 'H:i', $next_cron_timestamp ) ) ) . '</p></div>';
             }
         } else {
-            echo '<div class="notice notice-error"><p>The Queue is not enabled at the moment. Enable it in the <a href="admin.php?page=wp_tmq_mail_queue">Settings</a>.</p></div>';
+            echo '<div class="notice notice-error"><p>' . sprintf( __( 'The Queue is not enabled at the moment. Enable it in the %sSettings%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue">', '</a>' ) . '</p></div>';
         }
 
         echo '<form method="post" action="admin.php?page=wp_tmq_mail_queue-tab-queue">';
         $queuetable = new wp_tmq_Log_Table();
-        $queuetable->prepare_items(); 
+        $queuetable->prepare_items();
         $queuetable->display();
         echo '</form>';
     } else if ($tab == 'wp_tmq_mail_queue-tab-faq') {
         echo '<div class="tmq-box">';
-        echo '<h3>How does this Plugin work?</h3>';
-        echo '<p>If enabled this plugin intercepts the <a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a> function. Instead of sending the mails directly, it stores them in the database and sends them step by step with a delay during the <i>WP Cron</i>.</p>';
-        echo '<p>Current state: ';
+        echo '<h3>' . __( 'How does this Plugin work?', 'total-mail-queue' ) . '</h3>';
+        echo '<p>' . sprintf( __( 'If enabled this plugin intercepts the %s function. Instead of sending the mails directly, it stores them in the database and sends them step by step with a delay during the %s.', 'total-mail-queue' ), '<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>', '<i>WP Cron</i>' ) . '</p>';
+        echo '<p>' . __( 'Current state:', 'total-mail-queue' ) . ' ';
         if ($wp_tmq_options['enabled'] == '1') {
-            echo '<b class="tmq-ok">The plugin is enabled</b> All Mails sent through <a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a> are delayed by the <a href="admin.php?page=wp_tmq_mail_queue-tab-queue">Queue</a>.';
+            echo '<b class="tmq-ok">' . __( 'The plugin is enabled', 'total-mail-queue' ) . '</b> ' . sprintf( __( 'All Mails sent through %1$s are delayed by the %2$sQueue%3$s.', 'total-mail-queue' ), '<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>', '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' );
         } else {
-            echo '<b>The plugin is disabled</b>. The plugin has no impact at the moment, no Mails inside the Queue are going to be sent.';
+            echo '<b>' . __( 'The plugin is disabled', 'total-mail-queue' ) . '</b>. ' . __( 'The plugin has no impact at the moment, no Mails inside the Queue are going to be sent.', 'total-mail-queue' );
         }
         echo '</p>';
         echo '</div>';
         echo '<div class="tmq-box">';
-        echo '<h3>Does this plugin change the way <b>HOW</b> emails are sent?</h3>';
-        echo '<p>No, don\'t worry. This plugin only affects <b>WHEN</b> emails are sent, not how. It delays the sending (by the Queue), nonetheless all emails are sent through the standard <a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a> function.</p>';
-        echo '<p>If you use SMTP for sending, or an external service like Mailgun, everything will still work as expected.</p>';
+        echo '<h3>' . sprintf( __( 'Does this plugin change the way %sHOW%s emails are sent?', 'total-mail-queue' ), '<b>', '</b>' ) . '</h3>';
+        echo '<p>' . sprintf( __( 'No, don\'t worry. This plugin only affects %1$sWHEN%2$s emails are sent, not how. It delays the sending (by the Queue), nonetheless all emails are sent through the standard %3$s function.', 'total-mail-queue' ), '<b>', '</b>', '<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>' ) . '</p>';
+        echo '<p>' . __( 'If you use SMTP for sending, or an external service like Mailgun, everything will still work as expected.', 'total-mail-queue' ) . '</p>';
         echo '</div>';
         echo '<div class="tmq-box">';
-        echo '<h3>Does this plugin work, if I have a Caching Plugin installed? E.g. <i>W3 Total Cache</i> or similar?</h3>';
-        echo '<p>If you\'re using a Caching plugin like <i>W3 Total Cache</i>, <i>WP Rocket</i> or any other caching solution which generates static html-files and serves them to visitors, you\'ll have to make sure you\'re calling the <a href="'.esc_url(get_option('siteurl')).'/wp-cron.php" target="_blank">wp-cron file</a> manually every couple of minutes.</p>';
-        echo '<p>Otherwise your normal WP Cron wouldn\'t be called as often as it should be and scheduled messages would be sent with big delays.</p>';
+        echo '<h3>' . sprintf( __( 'Does this plugin work, if I have a Caching Plugin installed? E.g. %s or similar?', 'total-mail-queue' ), '<i>W3 Total Cache</i>' ) . '</h3>';
+        /* translators: %s: wp-cron.php link */
+        echo '<p>' . sprintf( __( 'If you\'re using a Caching plugin like %1$s, %2$s or any other caching solution which generates static html-files and serves them to visitors, you\'ll have to make sure you\'re calling the %3$s manually every couple of minutes.', 'total-mail-queue' ), '<i>W3 Total Cache</i>', '<i>WP Rocket</i>', '<a href="'.esc_url(get_option('siteurl')).'/wp-cron.php" target="_blank">' . __( 'wp-cron file', 'total-mail-queue' ) . '</a>' ) . '</p>';
+        echo '<p>' . __( 'Otherwise your normal WP Cron wouldn\'t be called as often as it should be and scheduled messages would be sent with big delays.', 'total-mail-queue' ) . '</p>';
         echo '</div>';
         echo '<div class="tmq-box">';
-        echo '<h3>What about Proxy-Caching, e.g. NGINX?</h3>';
-        echo '<p>Same situation here. Please make sure you\'re calling the <a href="'.esc_url(get_option('siteurl')).'/wp-cron.php" target="_blank">WordPress Cron</a> by an external service or your webhoster every couple of minutes.</p>';
+        echo '<h3>' . __( 'What about Proxy-Caching, e.g. NGINX?', 'total-mail-queue' ) . '</h3>';
+        /* translators: %s: WordPress Cron link */
+        echo '<p>' . sprintf( __( 'Same situation here. Please make sure you\'re calling the %s by an external service or your webhoster every couple of minutes.', 'total-mail-queue' ), '<a href="'.esc_url(get_option('siteurl')).'/wp-cron.php" target="_blank">' . __( 'WordPress Cron', 'total-mail-queue' ) . '</a>' ) . '</p>';
         echo '</div>';
         echo '<div class="tmq-box">';
-        echo '<h3>My form builder supports attachments. What about them?</h3>';
-        echo '<p>You are covered. All attachments are stored temporarily in the queue until they are sent along with their corresponding emails.</p>';
+        echo '<h3>' . __( 'My form builder supports attachments. What about them?', 'total-mail-queue' ) . '</h3>';
+        echo '<p>' . __( 'You are covered. All attachments are stored temporarily in the queue until they are sent along with their corresponding emails.', 'total-mail-queue' ) . '</p>';
         echo '</div>';
         echo '<div class="tmq-box">';
-        echo '<h3>What are Queue alerts?</h3>';
-        echo '<p>This is a simple and effective way to improve the security of your WordPress installation.</p><p>Imagine: In case your website is sending spam through <a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>, the email Queue would fill up very quickly preventing your website from sending so many spam emails at once. This gives you time and avoids a lot of trouble.</p><p>Queue Alerts warn you, if the Queue is longer than usal. You decide at which point you want to be alerted. So you get the chance to have a look if there might be something wrong on the website.</p>';
-        echo '<p>Current state: ';
+        echo '<h3>' . __( 'What are Queue alerts?', 'total-mail-queue' ) . '</h3>';
+        echo '<p>' . __( 'This is a simple and effective way to improve the security of your WordPress installation.', 'total-mail-queue' ) . '</p>';
+        echo '<p>' . sprintf( __( 'Imagine: In case your website is sending spam through %s, the email Queue would fill up very quickly preventing your website from sending so many spam emails at once. This gives you time and avoids a lot of trouble.', 'total-mail-queue' ), '<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>' ) . '</p>';
+        echo '<p>' . __( 'Queue Alerts warn you, if the Queue is longer than usual. You decide at which point you want to be alerted. So you get the chance to have a look if there might be something wrong on the website.', 'total-mail-queue' ) . '</p>';
+        echo '<p>' . __( 'Current state:', 'total-mail-queue' ) . ' ';
         if ($wp_tmq_options['alert_enabled'] == '1') {
-            echo '<b class="tmq-ok">Alerts are enabled</b> If more than '.esc_html($wp_tmq_options['email_amount']).' emails are waiting in the Queue, WordPress will sent an alert email to <i>'.esc_html($wp_tmq_options['email']).'</i>.';
+            /* translators: %1$s: email amount threshold, %2$s: alert email address */
+            echo '<b class="tmq-ok">' . __( 'Alerts are enabled', 'total-mail-queue' ) . '</b> ' . sprintf( __( 'If more than %1$s emails are waiting in the Queue, WordPress will send an alert email to %2$s.', 'total-mail-queue' ), esc_html( $wp_tmq_options['email_amount'] ), '<i>' . esc_html( $wp_tmq_options['email'] ) . '</i>' );
         } else {
-            echo '<b>Alerting is disabled</b>. No alerts will be sent.';
+            echo '<b>' . __( 'Alerting is disabled', 'total-mail-queue' ) . '</b>. ' . __( 'No alerts will be sent.', 'total-mail-queue' );
         }
         echo '</p>';
-        echo '<p>Please note: This plugin will only send one alert every six hours.</p>';
+        echo '<p>' . __( 'Please note: This plugin will only send one alert every six hours.', 'total-mail-queue' ) . '</p>';
         echo '</div>';
 
         echo '<div class="tmq-box">';
-            echo '<h3>Can I add emails with a high priority to the queue?</h3>';
-            echo '<p>Yes, you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`High`</i> to your email. High priority emails will be sent through the standard Total Mail Queue sending cycle but before all normal emails lacking a priority header in the queue.</p>';
-            echo '<p><b>Example 1 (add priority to Woocommerce emails):</b></p>';
+            echo '<h3>' . __( 'Can I add emails with a high priority to the queue?', 'total-mail-queue' ) . '</h3>';
+            echo '<p>' . __( 'Yes, you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`High`</i> to your email. High priority emails will be sent through the standard Total Mail Queue sending cycle but before all normal emails lacking a priority header in the queue.', 'total-mail-queue' ) . '</p>';
+            /* translators: Example code labels - not translatable code blocks */
+            echo '<p><b>' . __( 'Example 1 (add priority to Woocommerce emails):', 'total-mail-queue' ) . '</b></p>';
             echo '<pre><code>add_filter(\'woocommerce_mail_callback_params\',function ( $array ) {
     $prio_header = \'X-Mail-Queue-Prio: High\';
     if (is_array($array[3])) {
@@ -181,10 +190,10 @@ function wp_tmq_settings_page() {
     }
     return $array;
 },10,1);</code></pre>';
-            echo '<p><b>Example 2 (add priority to Contact Form 7 form emails):</b></p>';
-            echo '<p>When editing a form in Contact Form 7 just add an additional line to the <i>`Additional Headers`</i> field under the <i>`Mail`</i> tab panel.</p>';
+            echo '<p><b>' . __( 'Example 2 (add priority to Contact Form 7 form emails):', 'total-mail-queue' ) . '</b></p>';
+            echo '<p>' . __( 'When editing a form in Contact Form 7 just add an additional line to the <i>`Additional Headers`</i> field under the <i>`Mail`</i> tab panel.', 'total-mail-queue' ) . '</p>';
             echo '<pre><code>X-Mail-Queue-Prio: High</code></pre>';
-            echo '<p><b>Example 3 (add priority to WordPress reset password emails):</b></p>';
+            echo '<p><b>' . __( 'Example 3 (add priority to WordPress reset password emails):', 'total-mail-queue' ) . '</b></p>';
             echo '<pre><code>add_filter(\'retrieve_password_notification_email\', function ($defaults, $key, $user_login, $user_data) {
     $prio_header = \'X-Mail-Queue-Prio: High\';
     if (is_array($defaults[\'headers\'])) {
@@ -196,13 +205,13 @@ function wp_tmq_settings_page() {
     return $defaults;
 }, 10, 4);</code></pre>';
         echo '</div>';
-           
+
         echo '<div class="tmq-box">';
-            echo '<h3>Can I send emails <i>instantly</i> without going through the queue?</h3>';
-            echo '<p>Yes, this is possible (if you absolutely need to do this).</p>';
-            echo '<p>For this you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`Instant`</i> to your email. These emails are sent instantly circumventing the mail queue. They still appear in the Total Mail Queue log flagged as `instant`.</p>';
-            echo '<p>Mind that this is a potential security risk and should be considered carefully. Please use only as an exception.</p>';
-            echo '<p><b>Example 1 (instantly send Woocommerce emails):</b></p>';
+            echo '<h3>' . __( 'Can I send emails <i>instantly</i> without going through the queue?', 'total-mail-queue' ) . '</h3>';
+            echo '<p>' . __( 'Yes, this is possible (if you absolutely need to do this).', 'total-mail-queue' ) . '</p>';
+            echo '<p>' . __( 'For this you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`Instant`</i> to your email. These emails are sent instantly circumventing the mail queue. They still appear in the Total Mail Queue log flagged as `instant`.', 'total-mail-queue' ) . '</p>';
+            echo '<p>' . __( 'Mind that this is a potential security risk and should be considered carefully. Please use only as an exception.', 'total-mail-queue' ) . '</p>';
+            echo '<p><b>' . __( 'Example 1 (instantly send Woocommerce emails):', 'total-mail-queue' ) . '</b></p>';
             echo '<pre><code>add_filter(\'woocommerce_mail_callback_params\',function ( $array ) {
     $prio_header = \'X-Mail-Queue-Prio: Instant\';
     if (is_array($array[3])) {
@@ -213,10 +222,10 @@ function wp_tmq_settings_page() {
     }
     return $array;
 },10,1);</code></pre>';
-            echo '<p><b>Example 2 (instantly send Contact Form 7 form emails):</b></p>';
-            echo '<p>When editing a form in Contact Form 7 just add an additional line to the <i>`Additional Headers`</i> field under the <i>`Mail`</i> tab panel.</p>';
+            echo '<p><b>' . __( 'Example 2 (instantly send Contact Form 7 form emails):', 'total-mail-queue' ) . '</b></p>';
+            echo '<p>' . __( 'When editing a form in Contact Form 7 just add an additional line to the <i>`Additional Headers`</i> field under the <i>`Mail`</i> tab panel.', 'total-mail-queue' ) . '</p>';
             echo '<pre><code>X-Mail-Queue-Prio: Instant</code></pre>';
-            echo '<p><b>Example 3 (instantly send WordPress reset password emails):</b></p>';
+            echo '<p><b>' . __( 'Example 3 (instantly send WordPress reset password emails):', 'total-mail-queue' ) . '</b></p>';
             echo '<pre><code>add_filter(\'retrieve_password_notification_email\', function ($defaults, $key, $user_login, $user_data) {
     $prio_header = \'X-Mail-Queue-Prio: Instant\';
     if (is_array($defaults[\'headers\'])) {
@@ -230,19 +239,21 @@ function wp_tmq_settings_page() {
         echo '</div>';
 
         echo '<div class="tmq-box">';
-        echo '<h3>Want to put a test email into the Queue?</h3>';
-        echo '<p><a class="button" href="admin.php?page=wp_tmq_mail_queue-tab-queue&addtestmail">Sure! Put a Test Email for '.esc_html($wp_tmq_options['email']).' into the Queue</a></p>';
+        echo '<h3>' . __( 'Want to put a test email into the Queue?', 'total-mail-queue' ) . '</h3>';
+        /* translators: %s: admin email address */
+        echo '<p><a class="button" href="admin.php?page=wp_tmq_mail_queue-tab-queue&addtestmail">' . sprintf( __( 'Sure! Put a Test Email for %s into the Queue', 'total-mail-queue' ), esc_html( $wp_tmq_options['email'] ) ) . '</a></p>';
         echo '</div>';
-         
+
     } else if ($tab == 'wp_tmq_mail_queue-tab-croninfo') {
         echo '<div class="tmq-box">';
-            echo '<h3>Information: Your common WP Cron is disabled</h3>';
-            echo '<p>It look\'s like you deactived the WP Cron by <i>define( \' DISABLE_WP_CRON \' , true )</i>.</p>';
+            echo '<h3>' . __( 'Information: Your common WP Cron is disabled', 'total-mail-queue' ) . '</h3>';
+            echo '<p>' . __( 'It looks like you deactivated the WP Cron by <i>define( \'DISABLE_WP_CRON\', true )</i>.', 'total-mail-queue' ) . '</p>';
             $url = esc_url(get_option('siteurl').'/wp-cron.php');
-            echo '<p>In general, this is no problem at all. We just want to remind you to make sure you\'re running the Cron manually by calling <a href="'.$url.'" target="_blank">'.$url.'</a> every couple of minutes.</p>';
+            /* translators: %s: wp-cron.php URL */
+            echo '<p>' . sprintf( __( 'In general, this is no problem at all. We just want to remind you to make sure you\'re running the Cron manually by calling %s every couple of minutes.', 'total-mail-queue' ), '<a href="'.$url.'" target="_blank">'.$url.'</a>' ) . '</p>';
         echo '</div>';
 
-        
+
             if (function_exists('_get_cron_array')) {
                 $next_tasks = _get_cron_array();
                 if ($next_tasks) {
@@ -256,27 +267,28 @@ function wp_tmq_settings_page() {
                     }
                     if ($tasks_in_past) {
                         echo '<div class="tmq-box">';
-                            echo '<h3>Attention: It seams that your WP Cron is not running. There are some jobs waiting to be completed.</h3>';
+                            echo '<h3>' . __( 'Attention: It seems that your WP Cron is not running. There are some jobs waiting to be completed.', 'total-mail-queue' ) . '</h3>';
                             if ($tasks_of_mailqueue_in_past) {
-                                echo '<p><body>The Queue wasn\'t been able to be executed since '.esc_html(human_time_diff($tasks_of_mailqueue_in_past,time())).'.</b></p>';
+                                /* translators: %s: human-readable time diff */
+                                echo '<p><b>' . sprintf( __( 'The Queue hasn\'t been able to be executed since %s.', 'total-mail-queue' ), esc_html( human_time_diff( $tasks_of_mailqueue_in_past, time() ) ) ) . '</b></p>';
                             }
                         echo '</div>';
                     }
                 }
             }
-            
-        
+
+
     }
 
     echo '</div>';
 
 }
- 
+
 if(!class_exists('WP_List_Table')){
     require_once( ABSPATH . 'wp-admin/includes/screen.php' );
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
- 
+
 class wp_tmq_Log_Table extends WP_List_Table {
 
     function get_log() {
@@ -293,18 +305,18 @@ class wp_tmq_Log_Table extends WP_List_Table {
 
     function get_columns() {
         $columns = array(
-            'cb'          => '<label><span class="screen-reader-text">Select all</span><input class="tmq-select-all" type="checkbox"></label>',
-            'timestamp'   => 'Time',
-            'status'      => 'Status',
-            'recipient'   => 'Recipient',
-            'subject'     => 'Subject',
-            'message'     => 'Message',
-            'headers'     => 'Headers',
-            'attachments' => 'Attachments',
+            'cb'          => '<label><span class="screen-reader-text">' . __( 'Select all', 'total-mail-queue' ) . '</span><input class="tmq-select-all" type="checkbox"></label>',
+            'timestamp'   => __( 'Time', 'total-mail-queue' ),
+            'status'      => __( 'Status', 'total-mail-queue' ),
+            'recipient'   => __( 'Recipient', 'total-mail-queue' ),
+            'subject'     => __( 'Subject', 'total-mail-queue' ),
+            'message'     => __( 'Message', 'total-mail-queue' ),
+            'headers'     => __( 'Headers', 'total-mail-queue' ),
+            'attachments' => __( 'Attachments', 'total-mail-queue' ),
         );
         return $columns;
     }
- 
+
     public function prepare_items() {
         $type = sanitize_key($_GET['page']);
         $columns = $this->get_columns();
@@ -329,9 +341,9 @@ class wp_tmq_Log_Table extends WP_List_Table {
         }
         $this->items = $data;
     }
- 
+
     public function column_default( $item, $column_name ) {
-        switch( $column_name ) { 
+        switch( $column_name ) {
             case 'timestamp':
             case 'subject':
             case 'info':
@@ -340,7 +352,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
             case 'recipient':
             case 'headers':
                 $return = maybe_unserialize($item[$column_name]);
-                if (is_array($return)) { 
+                if (is_array($return)) {
                     return esc_html( implode(',',$return) );
                 } else {
                     return esc_html( $return );
@@ -348,7 +360,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 break;
             case 'attachments':
                 $return = maybe_unserialize($item[$column_name]);
-                if (is_array($return)) { 
+                if (is_array($return)) {
                     $betterreturn = array();
                     foreach($return as $item) {
                         array_push($betterreturn,basename($item));
@@ -363,9 +375,11 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 if ( $item[$column_name] === 'alert' ) {
                     $alertData = json_decode($info,/*associative*/true);
                     if ( $alertData ) {
-                        $info =  '<strong>Emails in queue</strong>: '.esc_html($alertData['in_queue']);
-                        $info .= '<br /><strong>Queue settings</strong>: Send max '.esc_html($alertData['queue_amount']).' email(s) every '.esc_html($alertData['queue_interval']/60).' minute(s).';
-                        $info .= '<br /><strong>Alert settings</strong>: Send alert if more than '.esc_html($alertData['email_amount']).' email(s) in the queue.';
+                        $info =  '<strong>' . __( 'Emails in queue', 'total-mail-queue' ) . '</strong>: '.esc_html($alertData['in_queue']);
+                        /* translators: %1$s: max emails, %2$s: interval in minutes */
+                        $info .= '<br /><strong>' . __( 'Queue settings', 'total-mail-queue' ) . '</strong>: ' . sprintf( __( 'Send max %1$s email(s) every %2$s minute(s).', 'total-mail-queue' ), esc_html( $alertData['queue_amount'] ), esc_html( $alertData['queue_interval'] / 60 ) );
+                        /* translators: %s: email threshold */
+                        $info .= '<br /><strong>' . __( 'Alert settings', 'total-mail-queue' ) . '</strong>: ' . sprintf( __( 'Send alert if more than %s email(s) in the queue.', 'total-mail-queue' ), esc_html( $alertData['email_amount'] ) );
                     } else {
                         $info = '';
                     }
@@ -374,16 +388,17 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 $cssStatus = $htmlInfo ? ' tmq-status-has-info' : '';
                 return '<span class="tmq-status tmq-status-'.sanitize_title($item[$column_name]).esc_html($cssStatus).'">'.$item[$column_name].$htmlInfo.'</span>';
                 break;
-            case 'message':          
+            case 'message':
                 $message = $item[$column_name];
                 if ( $message ) {
                     $messageLen = strlen($message);
                     $return  = '<details>';
-                    $return .=   '<summary class="tmq-view-source" data-tmq-list-message-toggle="'.esc_attr($item['id']).'">View message <i>('.esc_html($messageLen).' bytes)</i></summary>';
-                    $return .=   '<div class="tmq-email-source" data-tmq-list-message-content>Loading …</div>';
+                    /* translators: %s: message size in bytes */
+                    $return .=   '<summary class="tmq-view-source" data-tmq-list-message-toggle="'.esc_attr($item['id']).'">' . sprintf( __( 'View message %s', 'total-mail-queue' ), '<i>(' . esc_html( $messageLen ) . ' bytes)</i>' ) . '</summary>';
+                    $return .=   '<div class="tmq-email-source" data-tmq-list-message-content>' . __( 'Loading...', 'total-mail-queue' ) . '</div>';
                     $return .= '</details>';
                 } else {
-                    $return = '<em>Empty</em>';
+                    $return = '<em>' . __( 'Empty', 'total-mail-queue' ) . '</em>';
                 }
                 return $return;
                 break;
@@ -395,7 +410,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
     protected function column_cb ( $item ) {
         return '<input type="checkbox" name="id[]" value="'.esc_attr($item['id']).'" />';
     }
- 
+
     public function get_bulk_actions() {
         if (isset($_GET['page']) && $_GET['page'] == 'wp_tmq_mail_queue-tab-queue') {
             $actions = array(
@@ -407,18 +422,18 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 'resend' => __( 'Resend', 'total-mail-queue'),
             );
         }
-        
+
         return $actions;
     }
- 
-    public function process_bulk_action() {       
-         
+
+    public function process_bulk_action() {
+
         // security check!
         if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
             $nonce  = sanitize_key( $_POST['_wpnonce'] );
             $action = 'bulk-' . $this->_args['plural'];
             if ( ! wp_verify_nonce( $nonce, $action ) )
-                wp_die( 'Nope! Security check failed!' );
+                wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
         }
 
         // get IDs
@@ -432,13 +447,13 @@ class wp_tmq_Log_Table extends WP_List_Table {
             case 'delete':
                 foreach($request_ids as $id) {
                     $wpdb->delete($tableName,array('id'=>intval($id)),'%d');
-                }                
+                }
                 break;
             case 'resend':
                 foreach($request_ids as $id) {
                     $count_resend = 0;
                     $count_error  = 0;
-                    $maildata = $wpdb->get_row("SELECT * FROM `$tableName` WHERE `id` = '$id'");
+                    $maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
                     if (!$maildata->attachments || $maildata->attachments == '') {
                         $count_resend++;
                         $data = array(
@@ -454,8 +469,9 @@ class wp_tmq_Log_Table extends WP_List_Table {
                     } else {
                         $count_error++;
                         $notice = '<div class="notice notice-error is-dismissible">';
-                        $notice .= '<p><b>Sorry, your email to '.$maildata->recipient.' can\'t be sent again.</b></p>';
-                        $notice .= '<p>The email used to have attachments, which are not available anymore. Only emails without attachments can be resend.</p>';
+                        /* translators: %s: recipient email address */
+                        $notice .= '<p><b>' . sprintf( __( 'Sorry, your email to %s can\'t be sent again.', 'total-mail-queue' ), esc_html( $maildata->recipient ) ) . '</b></p>';
+                        $notice .= '<p>' . __( 'The email used to have attachments, which are not available anymore. Only emails without attachments can be resent.', 'total-mail-queue' ) . '</p>';
                         $notice .= '</div>';
                         echo $notice;
                     }
@@ -465,52 +481,52 @@ class wp_tmq_Log_Table extends WP_List_Table {
                     exit;
                 } else if ($count_error > 0 && $count_resend > 0) {
                     $notice = '<div class="notice notice-success is-dismissible">';
-                    $notice .= '<p>The other emails have been put again into the <a href="admin.php?page=wp_tmq_mail_queue-tab-queue">Queue</a>.</p>';
+                    $notice .= '<p>' . sprintf( __( 'The other emails have been put again into the %sQueue%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' ) . '</p>';
                     $notice .= '</div>';
                     echo $notice;
-                }              
+                }
                 break;
         }
 
         return;
- 
+
     }
- 
+
 }
- 
+
 function wp_tmq_settings_page_navi($tab) {
     echo '<nav class="nav-tab-wrapper">';
-        echo '<a href="?page=wp_tmq_mail_queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue') { echo ' nav-tab-active'; } echo '">Settings</a>';
-        echo '<a href="?page=wp_tmq_mail_queue-tab-log" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-log') { echo ' nav-tab-active'; } echo '">Log</a>';
-        echo '<a href="?page=wp_tmq_mail_queue-tab-queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-queue') { echo ' nav-tab-active'; } echo '">Queue</a>';
-        echo '<a href="?page=wp_tmq_mail_queue-tab-faq" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-faq') { echo ' nav-tab-active'; } echo '">FAQ</a>';
+        echo '<a href="?page=wp_tmq_mail_queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue') { echo ' nav-tab-active'; } echo '">' . __( 'Settings', 'total-mail-queue' ) . '</a>';
+        echo '<a href="?page=wp_tmq_mail_queue-tab-log" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-log') { echo ' nav-tab-active'; } echo '">' . __( 'Log', 'total-mail-queue' ) . '</a>';
+        echo '<a href="?page=wp_tmq_mail_queue-tab-queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-queue') { echo ' nav-tab-active'; } echo '">' . __( 'Queue', 'total-mail-queue' ) . '</a>';
+        echo '<a href="?page=wp_tmq_mail_queue-tab-faq" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-faq') { echo ' nav-tab-active'; } echo '">' . __( 'FAQ', 'total-mail-queue' ) . '</a>';
         if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
-            echo '<a href="?page=wp_tmq_mail_queue-tab-croninfo" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-croninfo') { echo ' nav-tab-active'; } echo '">Cron Information</a>';
+            echo '<a href="?page=wp_tmq_mail_queue-tab-croninfo" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-croninfo') { echo ' nav-tab-active'; } echo '">' . __( 'Cron Information', 'total-mail-queue' ) . '</a>';
         }
     echo '</nav>';
 }
- 
+
 function wp_tmq_settings_init() {
     global $wp_tmq_options;
     register_setting('wp_tmq_settings','wp_tmq_settings');
     add_settings_section('wp_tmq_settings_section','',null,'wp_tmq_settings_page');
-    add_settings_field('wp_tmq_status','Queue + Log enabled','wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
-    add_settings_field('wp_tmq_queue','Queue','wp_tmq_render_option_queue','wp_tmq_settings_page','wp_tmq_settings_section');
-    add_settings_field('wp_tmq_log','Log','wp_tmq_render_option_log','wp_tmq_settings_page','wp_tmq_settings_section');
-    add_settings_field('wp_tmq_alert_status','Alert enabled','wp_tmq_render_option_alert_status','wp_tmq_settings_page','wp_tmq_settings_section');
-    add_settings_field('wp_tmq_sensitivity','Alert Sensitivity','wp_tmq_render_option_sensitivity','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_status', __( 'Queue + Log enabled', 'total-mail-queue' ),'wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_queue', __( 'Queue', 'total-mail-queue' ),'wp_tmq_render_option_queue','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_log', __( 'Log', 'total-mail-queue' ),'wp_tmq_render_option_log','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_alert_status', __( 'Alert enabled', 'total-mail-queue' ),'wp_tmq_render_option_alert_status','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_sensitivity', __( 'Alert Sensitivity', 'total-mail-queue' ),'wp_tmq_render_option_sensitivity','wp_tmq_settings_page','wp_tmq_settings_section');
 }
 add_action('admin_init','wp_tmq_settings_init');
- 
+
 function wp_tmq_render_option_status() {
     global $wp_tmq_options;
     if ($wp_tmq_options['enabled'] == '1') {
         echo '<input type="checkbox" name="wp_tmq_settings[enabled]" value="1" checked />';
     } else {
-        echo '<input type="checkbox" name="wp_tmq_settings[enabled]" value="1" /> &nbsp; &nbsp; <span class="tmq-warning"> &larr; Check this to enable the Queue. </span> Otherwise this plugin won\'t have any effect on your website.';
+        echo '<input type="checkbox" name="wp_tmq_settings[enabled]" value="1" /> &nbsp; &nbsp; <span class="tmq-warning"> &larr; ' . __( 'Check this to enable the Queue.', 'total-mail-queue' ) . ' </span> ' . __( 'Otherwise this plugin won\'t have any effect on your website.', 'total-mail-queue' );
     }
 }
- 
+
 function wp_tmq_render_option_alert_status() {
     global $wp_tmq_options;
     if ($wp_tmq_options['alert_enabled'] == '1') {
@@ -519,7 +535,7 @@ function wp_tmq_render_option_alert_status() {
         echo '<input type="checkbox" name="wp_tmq_settings[alert_enabled]" value="1" />';
     }
 }
- 
+
 function wp_tmq_render_option_queue() {
     global $wp_tmq_options;
     if ($wp_tmq_options['queue_interval_unit'] == 'seconds') {
@@ -527,27 +543,25 @@ function wp_tmq_render_option_queue() {
     } else {
         $number = intval($wp_tmq_options['queue_interval']) / 60;
     }
-    
-    echo 'Send max. <input name="wp_tmq_settings[queue_amount]" type="number" min="1" value="'.esc_attr($wp_tmq_options['queue_amount']).'" /> email(s) every <input name="wp_tmq_settings[queue_interval]" type="number" min="1" value="'.esc_attr($number).'" />';
-    
-    if ($wp_tmq_options['queue_interval_unit'] == 'seconds')  {
-        echo '<select name="wp_tmq_settings[queue_interval_unit]"><option value="minutes">minute(s)</option><option selected value="seconds">second(s)</option></select>';
-    } else {
-        echo '<select name="wp_tmq_settings[queue_interval_unit]"><option selected value="minutes">minute(s)</option><option value="seconds">second(s)</option></select>';
-    }
-    
-    echo ' by <i><a href="https://developer.wordpress.org/plugins/cron/" target="_blank">WP Cron</a></i>. ';
-    
+
+    echo __( 'Send max.', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[queue_amount]" type="number" min="1" value="'.esc_attr($wp_tmq_options['queue_amount']).'" /> ' . __( 'email(s) every', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[queue_interval]" type="number" min="1" value="'.esc_attr($number).'" />';
+
+    $min_selected = ($wp_tmq_options['queue_interval_unit'] != 'seconds') ? ' selected' : '';
+    $sec_selected = ($wp_tmq_options['queue_interval_unit'] == 'seconds') ? ' selected' : '';
+    echo '<select name="wp_tmq_settings[queue_interval_unit]"><option'.$min_selected.' value="minutes">' . __( 'minute(s)', 'total-mail-queue' ) . '</option><option'.$sec_selected.' value="seconds">' . __( 'second(s)', 'total-mail-queue' ) . '</option></select>';
+
+    echo ' ' . sprintf( __( 'by %sWP Cron%s.', 'total-mail-queue' ), '<i><a href="https://developer.wordpress.org/plugins/cron/" target="_blank">', '</a></i>' ) . ' ';
+
 }
 
 function wp_tmq_render_option_log() {
     global $wp_tmq_options;
-    echo 'Delete Log entries older than <input name="wp_tmq_settings[clear_queue]" type="number" min="1" value="'.esc_attr(intval($wp_tmq_options['clear_queue']) / 24).'" /> days.';
+    echo __( 'Delete Log entries older than', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[clear_queue]" type="number" min="1" value="'.esc_attr(intval($wp_tmq_options['clear_queue']) / 24).'" /> ' . __( 'days.', 'total-mail-queue' );
 }
 
 function wp_tmq_render_option_sensitivity() {
     global $wp_tmq_options;
-    echo 'Send alert to <input type="text" name="wp_tmq_settings[email]" value="'.esc_attr(sanitize_email($wp_tmq_options['email'])).'" /> if more than <input name="wp_tmq_settings[email_amount]" type="number" min="1" value="'.esc_attr(intval($wp_tmq_options['email_amount'])).'" /> email(s) in the <a href="admin.php?page=wp_tmq_mail_queue-tab-queue">Queue</a>.';
+    echo __( 'Send alert to', 'total-mail-queue' ) . ' <input type="text" name="wp_tmq_settings[email]" value="'.esc_attr(sanitize_email($wp_tmq_options['email'])).'" /> ' . __( 'if more than', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[email_amount]" type="number" min="1" value="'.esc_attr(intval($wp_tmq_options['email_amount'])).'" /> ' . sprintf( __( 'email(s) in the %sQueue%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' );
 }
 
 
@@ -569,16 +583,18 @@ function wp_tmq_checkLogForErrors() {
     if ($last_mail['status'] == 'error') {
         if (current_user_can('manage_options')) {
             $notice = '<div class="notice notice-error is-dismissible">';
-            $notice .= '<h1>Attention: Your website has problems sending e-mails</h1>';
-            $notice .= '<p>This is an important message from your <i>Total Mail Queue</i> plugin. Please take a look at your <a href="admin.php?page=wp_tmq_mail_queue-tab-log">Mail Log</a>. The last email(s) couldn\'t be sent properly.</p>';
-            $notice .= '<p>Last error message was: <b>'.$last_mail['info'].'</b></p>';
+            $notice .= '<h1>' . __( 'Attention: Your website has problems sending e-mails', 'total-mail-queue' ) . '</h1>';
+            $notice .= '<p>' . sprintf( __( 'This is an important message from your %sTotal Mail Queue%s plugin. Please take a look at your %sMail Log%s. The last email(s) couldn\'t be sent properly.', 'total-mail-queue' ), '<i>', '</i>', '<a href="admin.php?page=wp_tmq_mail_queue-tab-log">', '</a>' ) . '</p>';
+            /* translators: %s: error message */
+            $notice .= '<p>' . sprintf( __( 'Last error message was: %s', 'total-mail-queue' ), '<b>' . esc_html( $last_mail['info'] ) . '</b>' ) . '</p>';
             $notice .= '</div>';
             echo $notice;
         } else if (current_user_can('edit_posts')) {
             $notice = '<div class="notice notice-error is-dismissible">';
-            $notice .= '<h1>Attention: Your website has problems sending e-mails</h1>';
-            $notice .= '<p>Please contact your Administrator. It seems that WordPress is not able to send emails.</p>';
-            $notice .= '<p>Last error message: <b>'.$last_mail['info'].'</b></p>';
+            $notice .= '<h1>' . __( 'Attention: Your website has problems sending e-mails', 'total-mail-queue' ) . '</h1>';
+            $notice .= '<p>' . __( 'Please contact your Administrator. It seems that WordPress is not able to send emails.', 'total-mail-queue' ) . '</p>';
+            /* translators: %s: error message */
+            $notice .= '<p>' . sprintf( __( 'Last error message: %s', 'total-mail-queue' ), '<b>' . esc_html( $last_mail['info'] ) . '</b>' ) . '</p>';
             $notice .= '</div>';
             echo $notice;
         }
@@ -599,14 +615,14 @@ function wp_tmq_checkLogForErrors() {
         if (count($wpMailOmittingPluginsInstalled) > 0) {
             $notice  = '<div class="notice notice-warning is-dismissible">';
             $notice .=   '<p>';
-            $notice .=     '<strong>Please note:</strong>';
-            $notice .=     '<br />This plugin is not supported when using in combination with plugins that do not use the standard <i>wp_mail()</i> function.';
+            $notice .=     '<strong>' . __( 'Please note:', 'total-mail-queue' ) . '</strong>';
+            $notice .=     '<br />' . __( 'This plugin is not supported when using in combination with plugins that do not use the standard <i>wp_mail()</i> function.', 'total-mail-queue' );
             $notice .=   '</p>';
             $notice .=   '<p>';
-            $notice .=     'It seems you are using the following plugin(s) that do not use <i>wp_mail()</i>:';
+            $notice .=     __( 'It seems you are using the following plugin(s) that do not use <i>wp_mail()</i>:', 'total-mail-queue' );
             $notice .=     '<br />'.implode(', ', array_map(function($plugin) use ($wpMailOmittingPlugins) { return $wpMailOmittingPlugins[$plugin]; },$wpMailOmittingPluginsInstalled));
             $notice .=   '</p>';
-            $notice .=   '<p><a href="'.get_admin_url(null,'admin.php?page=wp_tmq_mail_queue-tab-faq').'">More information</a></p>';
+            $notice .=   '<p><a href="'.get_admin_url(null,'admin.php?page=wp_tmq_mail_queue-tab-faq').'">' . __( 'More information', 'total-mail-queue' ) . '</a></p>';
             $notice .= '</div>';
             echo $notice;
         }

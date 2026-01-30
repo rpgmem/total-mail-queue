@@ -27,6 +27,14 @@ PLUGIN VERSION
 $wp_tmq_version = '1.5.0';
 
 
+/* ***************************************************************
+LOAD TEXT DOMAIN FOR i18n
+**************************************************************** */
+function wp_tmq_load_textdomain() {
+    load_plugin_textdomain( 'total-mail-queue', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+}
+add_action( 'plugins_loaded', 'wp_tmq_load_textdomain' );
+
 
 
 
@@ -177,7 +185,7 @@ function wp_tmq_prewpmail($return, $atts) {
         $foldercreated = wp_mkdir_p(plugin_dir_path(__FILE__).'attachments/'.$subfolder);
         if (!$foldercreated) {
             error_log('Could not create Subfolder for Email attachment');
-            $data['info'] = 'Error: Could not store attachments';
+            $data['info'] = __( 'Error: Could not store attachments', 'total-mail-queue' );
         } else {
             if (!is_array($attachments)) { $attachments = array($attachments); }
             $newattachments = array();
@@ -215,7 +223,7 @@ function wp_tmq_mail_failed( $wp_error ) {
     global $wpdb,$wp_tmq_options,$wp_tmq_mailid;
     if (isset($wp_tmq_mailid) && $wp_tmq_mailid != 0) {
         $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
-        $wpMailFailedError = isset( $wp_error->errors ) && isset( $wp_error->errors['wp_mail_failed'][0] ) ? implode( '; ', $wp_error->errors['wp_mail_failed'] ) : '<em>Unknown</em>';
+        $wpMailFailedError = isset( $wp_error->errors ) && isset( $wp_error->errors['wp_mail_failed'][0] ) ? implode( '; ', $wp_error->errors['wp_mail_failed'] ) : '<em>' . __( 'Unknown', 'total-mail-queue' ) . '</em>';
         $wpdb->update($tableName,array('timestamp'=>current_time('mysql',false),'status'=>'error', 'info'=>$wpMailFailedError),array('id'=>intval($wp_tmq_mailid)),array('%s', '%s', '%s'),'%d');
     }
     return error_log(print_r($wp_error, true));
@@ -254,19 +262,22 @@ function wp_tmq_search_mail_from_queue() {
 
         // If no alerts, then send one
        if (!$alerts) {
-            $alertMessage = 'Hi,';
+            $alertMessage = __( 'Hi,', 'total-mail-queue' );
             $alertMessage .= "\n\n";
-            $alertMessage .= 'this is an important message from your WordPress website '.esc_url(get_option('siteurl')).'.';
+            /* translators: %s: site URL */
+            $alertMessage .= sprintf( __( 'this is an important message from your WordPress website %s.', 'total-mail-queue' ), esc_url( get_option( 'siteurl' ) ) );
             $alertMessage .= "\n";
-            $alertMessage .= "\n".'The Total Mail Queue Plugin has detected that your website tries to send more emails than expected (currently '.$mailjobsTotal.').';
-            $alertMessage .= "\n".'Please take a close look at the email queue, because it contains more messages than the specified limit.';
+            /* translators: %s: number of emails in queue */
+            $alertMessage .= "\n" . sprintf( __( 'The Total Mail Queue Plugin has detected that your website tries to send more emails than expected (currently %s).', 'total-mail-queue' ), $mailjobsTotal );
+            $alertMessage .= "\n" . __( 'Please take a close look at the email queue, because it contains more messages than the specified limit.', 'total-mail-queue' );
             $alertMessage .= "\n";
-            $alertMessage .= "\n".'In case this is the usual amount of emails, you can adjust the threshold for alerts in the settings of your Total Mail Queue Plugin.';
+            $alertMessage .= "\n" . __( 'In case this is the usual amount of emails, you can adjust the threshold for alerts in the settings of your Total Mail Queue Plugin.', 'total-mail-queue' );
             $alertMessage .= "\n\n";
             $alertMessage .= "-- ";
             $alertMessage .= "\n";
             $alertMessage .= admin_url();
-            $alertSubject = '🔴 WordPress Total Mail Queue Alert - '.esc_html(get_option('blogname'));
+            /* translators: %s: blog name */
+            $alertSubject = sprintf( __( '🔴 WordPress Total Mail Queue Alert - %s', 'total-mail-queue' ), esc_html( get_option( 'blogname' ) ) );
             $data = array(
                 'timestamp'=> current_time('mysql',false),
                 'recipient'=> sanitize_email($wp_tmq_options['email']),
@@ -316,7 +327,7 @@ function wp_tmq_search_mail_from_queue() {
     }
 
     // Delete old logs
-    $wpdb->query("DELETE FROM `$tableName` WHERE `status` != 'queue' AND `timestamp` < NOW() - INTERVAL ".esc_sql($wp_tmq_options['clear_queue'])." HOUR");
+    $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `timestamp` < NOW() - INTERVAL %d HOUR", intval( $wp_tmq_options['clear_queue'] ) ) );
 
 }
 add_action('wp_tmq_mail_queue_hook','wp_tmq_search_mail_from_queue');
@@ -357,7 +368,7 @@ function wp_tmq_uninstall () {
     delete_option( $optionName );
 
     $tableName = $wpdb->prefix.'total_mail_queue';
-    $wpdb->query( "DROP TABLE IF EXISTS $tableName" );
+    $wpdb->query( $wpdb->prepare( "DROP TABLE IF EXISTS %i", $tableName ) );
 }
 
 /* Delete Cron when Plugin deactivated */
@@ -504,10 +515,10 @@ function wp_tmq_render_list_message ($message, $is_content_type_html) {
         $footer = '';
     }
     $html  = '';
-    $html .= '<details class="tmq-email-source-meta" open><summary>Text</summary><pre class="tmq-email-plain-text">'.esc_html( $text ).'</pre></details>';
-    $html .= $header ? '<details class="tmq-email-source-meta"><summary>HTML Header</summary><pre>'.esc_html( wp_tmq_render_html_for_display($header) ).'</pre></details>' : '';
-    $html .= $body   ? '<details class="tmq-email-source-meta"><summary>HTML Body</summary><pre>'.esc_html( wp_tmq_render_html_for_display($body) ).'</pre></details>' : '';
-    $html .= $footer ? '<details class="tmq-email-source-meta"><summary>HTML Footer</summary><pre>'.esc_html( wp_tmq_render_html_for_display($footer) ).'</pre></details>' : '';
+    $html .= '<details class="tmq-email-source-meta" open><summary>' . esc_html__( 'Text', 'total-mail-queue' ) . '</summary><pre class="tmq-email-plain-text">'.esc_html( $text ).'</pre></details>';
+    $html .= $header ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Header', 'total-mail-queue' ) . '</summary><pre>'.esc_html( wp_tmq_render_html_for_display($header) ).'</pre></details>' : '';
+    $html .= $body   ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Body', 'total-mail-queue' ) . '</summary><pre>'.esc_html( wp_tmq_render_html_for_display($body) ).'</pre></details>' : '';
+    $html .= $footer ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Footer', 'total-mail-queue' ) . '</summary><pre>'.esc_html( wp_tmq_render_html_for_display($footer) ).'</pre></details>' : '';
     return $html;
 }
 
