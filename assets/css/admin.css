@@ -1,0 +1,43 @@
+
+.wrap summary                                                 { cursor: pointer; }
+.tmq-box, .toplevel_page_wp_tmq_mail_queue form[action="options.php"] { padding: 2rem; background-color: #fff; }
+.toplevel_page_wp_tmq_mail_queue form[action="options.php"] { background: url("../img/total-mail-queue-postman.svg?v=1.0.0") scroll no-repeat bottom 3.5rem right 2rem #fff; }
+@media (min-width: 100em) {
+	.toplevel_page_wp_tmq_mail_queue form[action="options.php"] { background-position: bottom 3.5rem right 5rem; }
+}
+.tmq-select-all                                          { margin-left: 0 !important; }
+h1.tmq-title                                             { position: relative; padding: 3rem 0 3rem 7.5rem; }
+h1.tmq-title::before                                     { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 6rem; height: 6rem; background: url("../img/total-mail-queue-icon.gif?v=1.0.0") scroll no-repeat center center/contain transparent; }
+@media (-webkit-min-device-pixel-ratio: 1.5) {
+	h1.tmq-title::before                                   { background-image: url("../img/total-mail-queue-icon-2x.gif?v=1.0.0"); }
+}
+.tmq-logo                                                { width: 18rem; height: auto; }
+.tmq-box + .tmq-box                                 { border-top: 1px solid #ddd; }
+.tmq-box h2                                              { margin-top: .5em; font-size: 2.5em; }
+.tmq-box p                                               { font-size: 1rem; }
+span.tmq-status                                                   { background: #ccc; border-radius: 5px; display: inline-block; padding: 5px 10px; line-height: 1; }
+span.tmq-status + span.tmq-status                                     { margin-left: 10px; }
+.tmq-ok, .tmq-warning                               { padding: .25em .5em; border-radius: .25em; }
+.tmq-ok                                                  { background: green; color: white; }
+.tmq-warning                                             { background: red; color: white; }
+span.tmq-status.tmq-status-high,
+span.tmq-status.tmq-status-sent,
+span.tmq-status.tmq-status-sent-from-queue          { background: green; color: white; }
+span.tmq-status.tmq-status-instant                  { background: orange; color: white; }
+span.tmq-status.tmq-status-alert                    { background: #1d2327; color: white; }
+.tmq-status-has-info                                     { position: relative; }
+.tmq-status-has-info::after                              { content: ""; position: absolute; right: -2em; top: 60%; transform: translateY(-50%); width: 1.5em; height: 1.5em; margin-left: .25em; background: scroll no-repeat center center/contain transparent; opacity: .35;
+	                                                              background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor'%3E%3Cpath d='M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm0-10a1 1 0 0 1 1 1v5a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm0-1a1 1 0 1 1 0-2 1 1 0 0 1 0 2z'%3E%3C/path%3E%3C/svg%3E"); }
+.tmq-info                                                { position: absolute; top: 50%; left: calc(100% + 1.25rem); z-index: 9; visibility: hidden; padding: .75rem; background-color: #1d2327; color: #fff; line-height: 1.35; border-radius: 5px; box-shadow: 0 .5rem 4rem -1rem rgba(0,0,0,.15); white-space: pre; }
+.tmq-status-has-info:hover .tmq-info                { visibility: visible; }
+.column-id                                                    { width: 30px; }
+.column-timestamp                                             { width: 150px; }
+.column-status                                                { width: 80px; }
+.column-message                                               { width: 20%; }
+.tmq-view-source                                         { position: relative; }
+.tmq-view-source::after                                  { content: ""; position: absolute; left: 0; top: 100%; width: 100%; height: 10px; }
+.tmq-email-source                                        { position: relative; left: 50%; transform: translateX(-50%); z-index: 1; width: 50vw; max-width: 50em; max-height: 50vh; overflow-y: auto; padding: .5rem; border: 1px solid #ccc; margin: 1em 0; font-family: monospace; background-color: #fff; color: #000; box-shadow: 0 .5rem 4rem -1rem rgba(0,0,0,.15); }
+.tmq-email-source-meta                                   { color: #50575e; }
+.tmq-email-source-meta summary                           { font-weight: bold; }
+.tmq-email-source-meta summary + pre                     { margin-top: .125rem; }
+.tmq-email-plain-text                                    { white-space: break-spaces; }
