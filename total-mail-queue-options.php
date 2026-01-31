@@ -51,6 +51,7 @@ function wp_tmq_settings_page_inline_script () {
     $d .=   'tmq.restNonce = "'.esc_html( wp_create_nonce( 'wp_rest' ) ).'";';
     $d .=   'tmq.i18n = tmq.i18n || {};';
     $d .=   'tmq.i18n.errorLoadingMessage = "'.esc_js( __( 'There was an error loading the message.', 'total-mail-queue' ) ).'";';
+    $d .=   'tmq.i18n.confirmDelete = "'.esc_js( __( 'Are you sure you want to delete the selected items? This action cannot be undone.', 'total-mail-queue' ) ).'";';
     $d .=   'tmq.i18n.testing = "'.esc_js( __( 'Testing...', 'total-mail-queue' ) ).'";';
     $d .=   'tmq.i18n.testConnection = "'.esc_js( __( 'Test Connection', 'total-mail-queue' ) ).'";';
     $d .=   'tmq.ajaxUrl = "'.esc_url( admin_url( 'admin-ajax.php' ) ).'";';
@@ -155,6 +156,14 @@ function wp_tmq_settings_page() {
         $logtable->display();
         echo '</form>';
     } else if ($tab == 'wp_tmq_mail_queue-tab-queue') {
+
+        if ( isset( $_GET['resent'] ) ) {
+            $resent_count = intval( $_GET['resent'] );
+            if ( $resent_count > 0 ) {
+                /* translators: %d: number of emails resent */
+                echo '<div class="notice notice-success is-dismissible"><p>' . sprintf( __( '%d email(s) have been added back to the queue for resending.', 'total-mail-queue' ), $resent_count ) . '</p></div>';
+            }
+        }
 
         if (isset($_GET['addtestmail'])) {
             global $wpdb;
@@ -633,7 +642,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                     }
                 }
                 if ($count_error == 0 && $count_resend > 0) {
-                    wp_redirect('admin.php?page=wp_tmq_mail_queue-tab-queue');
+                    wp_redirect('admin.php?page=wp_tmq_mail_queue-tab-queue&resent=' . $count_resend);
                     exit;
                 } else if ($count_error > 0 && $count_resend > 0) {
                     $notice = '<div class="notice notice-success is-dismissible">';
@@ -680,7 +689,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                     }
                 }
                 if ( $count_force_error == 0 && $count_force > 0 ) {
-                    wp_redirect( 'admin.php?page=wp_tmq_mail_queue-tab-queue' );
+                    wp_redirect( 'admin.php?page=wp_tmq_mail_queue-tab-queue&resent=' . $count_force );
                     exit;
                 } else if ( $count_force > 0 ) {
                     $notice = '<div class="notice notice-success is-dismissible">';

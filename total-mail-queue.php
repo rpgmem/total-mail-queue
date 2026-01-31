@@ -305,6 +305,7 @@ function wp_tmq_prewpmail($return, $atts) {
     $inserted = $wpdb->insert($tableName,$data);
 
     if ($status == 'instant') {
+        $wp_tmq_mailid = $wpdb->insert_id;
         return null;
     } else if ( !$inserted ) {
         // No database entry, email cannot be send
@@ -412,6 +413,26 @@ function wp_tmq_mail_failed( $wp_error ) {
 }
 add_action('wp_mail_failed','wp_tmq_mail_failed',10,1);
 
+// Mark instant emails as sent on success
+function wp_tmq_mail_succeeded( $mail_data ) {
+    global $wpdb, $wp_tmq_options, $wp_tmq_mailid;
+    if ( isset( $wp_tmq_mailid ) && $wp_tmq_mailid != 0 ) {
+        $tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
+        $current = $wpdb->get_row( $wpdb->prepare( "SELECT `status` FROM `$tableName` WHERE `id` = %d", intval( $wp_tmq_mailid ) ), ARRAY_A );
+        if ( $current && $current['status'] === 'instant' ) {
+            $wpdb->update(
+                $tableName,
+                array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '' ),
+                array( 'id' => intval( $wp_tmq_mailid ) ),
+                array( '%s', '%s', '%s' ),
+                array( '%d' )
+            );
+        }
+        $wp_tmq_mailid = 0;
+    }
+}
+add_action( 'wp_mail_succeeded', 'wp_tmq_mail_succeeded', 10, 1 );
+
 
 
 
@@ -452,7 +473,7 @@ function wp_tmq_search_mail_from_queue() {
     if ($wp_tmq_options['alert_enabled'] == '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
 
         // Last alerts older than 6 hours?
-        $alerts = $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'alert' AND `timestamp` > NOW() - INTERVAL 6 HOUR",'ARRAY_A');
+        $alerts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'alert' AND `timestamp` > %s - INTERVAL 6 HOUR", current_time( 'mysql', false ) ), 'ARRAY_A' );
 
         // If no alerts, then send one
        if (!$alerts) {
@@ -625,7 +646,7 @@ function wp_tmq_search_mail_from_queue() {
     }
 
     // Delete old logs (by date)
-    $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < NOW() - INTERVAL %d HOUR", intval( $wp_tmq_options['clear_queue'] ) ) );
+    $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < %s - INTERVAL %d HOUR", current_time( 'mysql', false ), intval( $wp_tmq_options['clear_queue'] ) ) );
 
     // Delete excess log entries (by total records limit)
     $log_max = intval( $wp_tmq_options['log_max_records'] );
