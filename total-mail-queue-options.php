@@ -31,10 +31,11 @@ function wp_tmq_settings_page_menuitem() {
 add_action('admin_menu','wp_tmq_settings_page_menuitem');
 
 function wp_tmq_settings_page_assets () {
+    global $wp_tmq_version;
     $screen = get_current_screen();
     if ( preg_match( '#wp_tmq_mail_queue#', $screen->base ) ) {
-        wp_enqueue_style( 'wp_tmq_style', plugins_url( 'assets/css/admin.css', __FILE__ ) );
-        wp_enqueue_script( 'wp_tmq_script', plugins_url( 'assets/js/tmq-admin.js', __FILE__ ), [ 'jquery' ], false, true );
+        wp_enqueue_style( 'wp_tmq_style', plugins_url( 'assets/css/admin.css', __FILE__ ), [], $wp_tmq_version );
+        wp_enqueue_script( 'wp_tmq_script', plugins_url( 'assets/js/tmq-admin.js', __FILE__ ), [ 'jquery' ], $wp_tmq_version, true );
 		wp_add_inline_script( 'wp_tmq_script', wp_tmq_settings_page_inline_script(), 'before' );
     }
 }
