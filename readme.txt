@@ -2,12 +2,12 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 1.5.0
+Stable tag: 2.2.0
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Take control of emails sent by WordPress. Queue outgoing emails and get notified instantly if your website is trying to send too many emails at once!
+Take control of emails sent by WordPress. Queue outgoing emails, manage SMTP accounts with daily/monthly limits, and get notified instantly if your website is trying to send too many emails at once!
 
 == Description ==
 
@@ -17,9 +17,15 @@ If your site exhibits unusual behavior — such as a spam bot repeatedly submitt
 
 * Intercepts wp_mail() and places outgoing messages in a queue
 * Configure how many emails are sent and at what interval
-* Log all queued email submissions
+* Manage multiple SMTP accounts with priority, daily and monthly sending limits
+* Test SMTP connections before sending
+* Log all queued email submissions with status filter (sent / error / alert)
+* Auto-retry failed emails with configurable retry limit
+* Resend or force-resend failed emails from the log
 * Receive alerts when the queue grows unexpectedly
 * Receive alerts when WordPress is unable to send emails
+* Export/import plugin settings and SMTP accounts via XML
+* Detects and resolves conflicts with other email plugins
 
 **This plugin is a fork of [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM.**
 
@@ -39,9 +45,9 @@ When enabled, the plugin intercepts wp_mail(). Instead of sending emails immedia
 
 = Does this plugin change the way HOW the emails are sent? =
 
-No. This plugin does not change HOW the emails are sent. For example: If you use SMTP for sending, or a third-party-service like Mailgun, everything will still work.
+It depends on your configuration. In the default `auto` send method the plugin preserves whatever email delivery mechanism you already have (SMTP from another plugin, PHP mail, Mailgun, etc.).
 
-This plugin changes WHEN the emails are sent. By the email Queue it gives you control about how many emails should be sent in which interval.
+If you configure SMTP accounts within the plugin, it will use those to send emails with full control over daily/monthly limits. You can also set the send method to `php` to always use WordPress's default mail function.
 
 = Does this plugin work, if I have a caching Plugin installed? =
 
@@ -170,6 +176,45 @@ Upload the the plugin, activate it, and go to the Settings to enable the Queue.
 Please make sure that your WP Cron is running reliably.
 
 == Changelog ==
+
+= 2.2.0 =
+* SMTP test connection button to verify credentials before sending
+* Export/import plugin settings and SMTP accounts via XML
+* Status filter on the log table (sent / error / alert)
+* Auto-retry failed emails with configurable retry limit
+* Resend and force-resend actions that remove the original log entry
+* Cron diagnostics panel on the Retention tab
+* Detection of conflicting pre_wp_mail filters from other plugins
+* Info column in the log with retry count and error details
+* Success message after resend redirects to queue
+* Bulk delete confirmation dialog
+* Security: mandatory nonce verification on all bulk actions
+* Security: nonce protection on test email insertion
+* Security: XXE prevention on XML import (LIBXML_NONET)
+* Security: settings whitelist on import and register_setting sanitize_callback
+* Security: encrypted captured SMTP passwords in queue headers
+* Performance: SQL LIMIT/OFFSET pagination instead of loading all rows
+* Performance: database indexes on status column (idx_status_retry, idx_status_timestamp)
+* Performance: SMTP counter reset runs once per cron instead of per email
+* Fix: set envelope sender ($phpmailer->Sender) alongside From header
+* Fix: instant email tracking now correctly updates status on success/failure
+* Fix: NOW() replaced with WordPress local time in SQL queries
+* Fix: attachments stored in wp-content/uploads/tmq-attachments/ with .htaccess protection
+* Fix: use wp_generate_password() for attachment subfolder names
+* Code quality: JSON serialization instead of PHP serialize (with backwards compatibility)
+* Code quality: strict comparisons throughout, wp_kses_post on notices, consistent wpdb formats
+* Code quality: inline CSS moved to admin.css
+* Browser autofill prevention on SMTP username field
+* Asset cache-busting via version parameter
+
+= 2.1.0 =
+* SMTP accounts management with priority, daily and monthly sending limits
+* Multiple send methods: auto, SMTP only, PHP default
+* Capture and replay phpmailer_init configurations from other plugins
+* Block mode: retain all emails without sending
+* Log max records limit setting
+* Database table for SMTP accounts
+* Encrypted SMTP password storage (AES-256-CBC)
 
 = 1.5.0 =
 * Fork of Mail Queue by WDM

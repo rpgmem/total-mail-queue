@@ -12,6 +12,16 @@
 		});
 	});
 
+	// confirm before bulk delete
+	$doc.on( "submit", 'form', function ( e ) {
+		const action = $( 'select[name="action"]', this ).val() || $( 'select[name="action2"]', this ).val();
+		if ( action === "delete" ) {
+			if ( ! confirm( i18n.confirmDelete ) ) {
+				e.preventDefault();
+			}
+		}
+	});
+
 	// test SMTP connection
 	$doc.on( "click", "#tmq-test-smtp", function () {
 		const $btn = $( this );
