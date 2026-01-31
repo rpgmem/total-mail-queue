@@ -59,6 +59,17 @@ function wp_tmq_settings_page_inline_script () {
     return $d;
 }
 
+// Handle export early (before any output) via admin_init
+function wp_tmq_maybe_handle_export() {
+    if ( ! isset( $_POST['wp_tmq_export'] ) ) { return; }
+    if ( ! current_user_can( 'manage_options' ) ) { return; }
+    if ( ! isset( $_POST['wp_tmq_export_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_export_nonce'] ), 'wp_tmq_export' ) ) {
+        wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+    }
+    wp_tmq_handle_export();
+}
+add_action( 'admin_init', 'wp_tmq_maybe_handle_export' );
+
 // Options Page Settings
 function wp_tmq_settings_page() {
 
@@ -67,15 +78,6 @@ function wp_tmq_settings_page() {
 
     // Settings
     global $wp_tmq_options;
-
-    // Handle export before any output
-    if ( isset( $_POST['wp_tmq_export'] ) ) {
-        if ( ! isset( $_POST['wp_tmq_export_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_export_nonce'] ), 'wp_tmq_export' ) ) {
-            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
-        }
-        wp_tmq_handle_export();
-        return;
-    }
 
     // Handle import
     $import_notice = '';
