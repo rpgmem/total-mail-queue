@@ -159,8 +159,8 @@ function wp_tmq_render_smtp_page() {
         echo '<th scope="row"><label for="smtp_encryption">' . __( 'Encryption', 'total-mail-queue' ) . '</label></th>';
         echo '<td><select id="smtp_encryption" name="smtp_encryption">';
         echo '<option value="none"' . selected( $account['encryption'], 'none', false ) . '>' . __( 'None', 'total-mail-queue' ) . '</option>';
-        echo '<option value="tls"' . selected( $account['encryption'], 'tls', false ) . '>TLS</option>';
-        echo '<option value="ssl"' . selected( $account['encryption'], 'ssl', false ) . '>SSL</option>';
+        echo '<option value="tls"' . selected( $account['encryption'], 'tls', false ) . '>' . __( 'TLS', 'total-mail-queue' ) . '</option>';
+        echo '<option value="ssl"' . selected( $account['encryption'], 'ssl', false ) . '>' . __( 'SSL', 'total-mail-queue' ) . '</option>';
         echo '</select></td>';
         echo '</tr>';
 
