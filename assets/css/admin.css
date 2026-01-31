@@ -43,3 +43,6 @@ span.tmq-status.tmq-status-alert                    { background: #1d2327; color
 .tmq-email-plain-text                                    { white-space: break-spaces; }
 .tmq-warning-block                                       { color: #d63638; }
 .tmq-inline-form                                         { display: inline; }
+.tmq-export-import                                       { display: flex; gap: 2em; flex-wrap: wrap; }
+.tmq-export-import > .tmq-box                            { flex: 1; min-width: 300px; }
+#tmq-test-smtp-result                                    { display: none; }

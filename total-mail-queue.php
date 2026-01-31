@@ -61,7 +61,7 @@ function wp_tmq_get_settings() {
     $args = get_option('wp_tmq_settings');
     $options = wp_parse_args($args,$defaults);
 
-    if ($options['queue_interval_unit'] == 'seconds') {
+    if ($options['queue_interval_unit'] === 'seconds') {
         $options['queue_interval'] = intval($options['queue_interval']);
         if ($options['queue_interval'] < 10) { $options['queue_interval'] = 10; } // Minimum Interval 10 Seconds
     } else {
@@ -315,7 +315,7 @@ function wp_tmq_prewpmail($return, $atts) {
     if (isset($headers) && $headers) { $data['headers'] = wp_tmq_encode($headers); }
 
     // store attachments in /attachments/ Folder, to address them later
-    if (isset($attachments) && $attachments && $attachments != '') {
+    if ( ! empty( $attachments ) ) {
 
         $attachments_base = wp_tmq_attachments_dir();
         // Protect attachments directory from web access
@@ -347,7 +347,7 @@ function wp_tmq_prewpmail($return, $atts) {
     }
     $inserted = $wpdb->insert($tableName,$data);
 
-    if ($status == 'instant') {
+    if ($status === 'instant') {
         $wp_tmq_mailid = $wpdb->insert_id;
         return null;
     } else if ( !$inserted ) {
@@ -513,7 +513,7 @@ function wp_tmq_search_mail_from_queue() {
     $mailsInQueue = is_array($mailjobs) ? count($mailjobs) : 0;
 
     // Alert Admin, if too many mails in the Queue.
-    if ($wp_tmq_options['alert_enabled'] == '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
+    if ($wp_tmq_options['alert_enabled'] === '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
 
         // Last alerts older than 6 hours?
         $alerts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'alert' AND `timestamp` > DATE_SUB(%s, INTERVAL 6 HOUR)", current_time( 'mysql', false ) ), 'ARRAY_A' );
@@ -571,9 +571,9 @@ function wp_tmq_search_mail_from_queue() {
     if ($mailsInQueue > 0) {
         if ($mailjobs && count($mailjobs) > 0) {
             foreach($mailjobs as $index => $item) {
-                if ($item['recipient'] && $item['recipient'] != '') { $to = wp_tmq_decode($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
-                if ($item['headers'] && $item['headers'] != '') { $headers = wp_tmq_decode($item['headers']); } else { $headers = ''; }
-                if ($item['attachments'] && $item['attachments'] != '') { $attachments = wp_tmq_decode($item['attachments']); } else { $attachments = ''; }
+                if ( ! empty( $item['recipient'] ) ) { $to = wp_tmq_decode($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
+                if ( ! empty( $item['headers'] ) ) { $headers = wp_tmq_decode($item['headers']); } else { $headers = ''; }
+                if ( ! empty( $item['attachments'] ) ) { $attachments = wp_tmq_decode($item['attachments']); } else { $attachments = ''; }
                 $wp_tmq_mailid = $item['id'];
 
                 // Extract captured phpmailer config from headers if present
@@ -607,8 +607,8 @@ function wp_tmq_search_mail_from_queue() {
                         $tableName,
                         array( 'info' => __( 'Waiting: no SMTP account available (check if accounts are enabled and limits are not exceeded).', 'total-mail-queue' ) ),
                         array( 'id' => $item['id'] ),
-                        '%s',
-                        '%d'
+                        array( '%s' ),
+                        array( '%d' )
                     );
                     $diag['result'] = 'smtp_unavailable';
                     break; // No SMTP available — no point trying other emails in this batch
@@ -659,7 +659,7 @@ function wp_tmq_search_mail_from_queue() {
                 }
 
                 if ($sendstatus) {
-                    $wpdb->update($tableName,array('timestamp'=>current_time('mysql',false),'status'=>'sent','info'=>''),array('id'=>$item['id']),'%s','%d');
+                    $wpdb->update( $tableName, array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '' ), array( 'id' => $item['id'] ), array( '%s', '%s', '%s' ), array( '%d' ) );
                     // Increment SMTP counter
                     if ( $smtp_to_use ) {
                         wp_tmq_increment_smtp_counter( $smtp_to_use['id'] );
@@ -674,8 +674,8 @@ function wp_tmq_search_mail_from_queue() {
                             $tableName,
                             array( 'info' => __( 'wp_mail() returned false. Check for conflicting email plugins or server mail configuration.', 'total-mail-queue' ) ),
                             array( 'id' => $item['id'] ),
-                            '%s',
-                            '%d'
+                            array( '%s' ),
+                            array( '%d' )
                         );
                     }
                 }
@@ -729,9 +729,9 @@ add_filter('cron_schedules','wp_tmq_cron_interval');
 
 // Set or Remove Cron (enabled=1 needs cron, enabled=2 block mode doesn't need cron)
 $next_tmq_cron_timestamp = wp_next_scheduled('wp_tmq_mail_queue_hook');
-if ($next_tmq_cron_timestamp && $wp_tmq_options['enabled'] != '1') {
+if ($next_tmq_cron_timestamp && $wp_tmq_options['enabled'] !== '1') {
     wp_unschedule_event($next_tmq_cron_timestamp,'wp_tmq_mail_queue_hook');
-} else if (!$next_tmq_cron_timestamp && $wp_tmq_options['enabled'] == '1') {
+} else if (!$next_tmq_cron_timestamp && $wp_tmq_options['enabled'] === '1') {
     wp_schedule_event(time(),'wp_tmq_interval','wp_tmq_mail_queue_hook');
 }
 

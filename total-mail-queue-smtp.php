@@ -231,7 +231,7 @@ function wp_tmq_render_smtp_page() {
         echo '<button type="button" id="tmq-test-smtp" class="button" data-smtp-id="' . esc_attr( $account['id'] ) . '">' . esc_html__( 'Test Connection', 'total-mail-queue' ) . '</button> ';
         echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '" class="button">' . __( 'Cancel', 'total-mail-queue' ) . '</a>';
         echo '</p>';
-        echo '<div id="tmq-test-smtp-result" style="display:none;"></div>';
+        echo '<div id="tmq-test-smtp-result"></div>';
         echo '</form>';
         echo '</div>';
 
