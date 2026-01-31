@@ -724,10 +724,12 @@ SMTP Test Connection (AJAX)
 function wp_tmq_ajax_test_smtp_connection() {
 
     if ( ! current_user_can( 'manage_options' ) ) {
-        wp_send_json_error( array( 'message' => __( 'Permission denied.', 'total-mail-queue' ) ) );
+        wp_send_json_error( array( 'message' => __( 'Permission denied.', 'total-mail-queue' ) ), 403 );
     }
 
-    check_ajax_referer( 'wp_tmq_test_smtp', '_nonce' );
+    if ( ! check_ajax_referer( 'wp_tmq_test_smtp', '_nonce', false ) ) {
+        wp_send_json_error( array( 'message' => __( 'Security check failed. Please reload the page and try again.', 'total-mail-queue' ) ), 403 );
+    }
 
     $host       = sanitize_text_field( wp_unslash( $_POST['host'] ?? '' ) );
     $port       = intval( $_POST['port'] ?? 587 );

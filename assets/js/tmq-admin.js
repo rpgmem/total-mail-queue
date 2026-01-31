@@ -30,11 +30,19 @@
 			username:   $( "#smtp_username" ).val(),
 			password:   $( "#smtp_password" ).val(),
 			smtp_id:    $btn.data( "smtp-id" ) || 0
-		}).always( function ( response ) {
+		}).done( function ( response ) {
 			const ok = response.success;
 			const msg = response.data && response.data.message ? response.data.message : i18n.errorLoadingMessage;
 			$result
 				.addClass( ok ? "notice notice-success" : "notice notice-error" )
+				.html( "<p>" + $( "<span>" ).text( msg ).html() + "</p>" )
+				.show();
+			$btn.prop( "disabled", false ).text( i18n.testConnection );
+		}).fail( function ( jqXHR ) {
+			const data = jqXHR.responseJSON;
+			const msg = data && data.data && data.data.message ? data.data.message : i18n.errorLoadingMessage;
+			$result
+				.addClass( "notice notice-error" )
 				.html( "<p>" + $( "<span>" ).text( msg ).html() + "</p>" )
 				.show();
 			$btn.prop( "disabled", false ).text( i18n.testConnection );
