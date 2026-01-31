@@ -22,6 +22,11 @@
 		}
 	});
 
+	// remove readonly on focus to defeat browser autofill
+	$doc.on( "focus", ".tmq-no-autofill", function () {
+		this.removeAttribute( "readonly" );
+	});
+
 	// test SMTP connection
 	$doc.on( "click", "#tmq-test-smtp", function () {
 		const $btn = $( this );

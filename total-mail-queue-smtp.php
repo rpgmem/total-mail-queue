@@ -129,7 +129,12 @@ function wp_tmq_render_smtp_page() {
 
         echo '<div class="tmq-box">';
         echo '<h3>' . esc_html( $form_title ) . '</h3>';
-        echo '<form method="post" action="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '">';
+        echo '<form method="post" autocomplete="off" action="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '">';
+        // Hidden decoy fields to absorb browser autofill
+        echo '<div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden;">';
+        echo '<input type="text" name="tmq_decoy_user" tabindex="-1" />';
+        echo '<input type="password" name="tmq_decoy_pass" tabindex="-1" />';
+        echo '</div>';
         wp_nonce_field( 'wp_tmq_smtp_save', 'wp_tmq_smtp_nonce' );
         if ( $is_edit ) {
             echo '<input type="hidden" name="smtp_id" value="' . esc_attr( $account['id'] ) . '" />';
@@ -173,13 +178,13 @@ function wp_tmq_render_smtp_page() {
         // Username
         echo '<tr>';
         echo '<th scope="row"><label for="smtp_username">' . __( 'Username', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text" autocomplete="new-password" /></td>';
+        echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text tmq-no-autofill" readonly="readonly" autocomplete="off" /></td>';
         echo '</tr>';
 
         // Password
         echo '<tr>';
         echo '<th scope="row"><label for="smtp_password">' . __( 'Password', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="password" id="smtp_password" name="smtp_password" value="" class="regular-text" autocomplete="new-password"';
+        echo '<td><input type="password" id="smtp_password" name="smtp_password" value="" class="regular-text tmq-no-autofill" readonly="readonly" autocomplete="off"';
         if ( $is_edit && ! empty( $account['password'] ) ) {
             echo ' placeholder="' . esc_attr( str_repeat( "\xE2\x80\xA2", 8 ) ) . '"';
         }
