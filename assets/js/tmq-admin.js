@@ -22,10 +22,12 @@
 		}
 	});
 
-	// remove readonly on focus to defeat browser autofill
-	$doc.on( "focus", ".tmq-no-autofill", function () {
-		this.removeAttribute( "readonly" );
-	});
+	// remove readonly after page load to defeat browser autofill
+	// (fields start readonly so the browser skips them during autofill,
+	// then we unlock them once autofill has already run)
+	setTimeout( function () {
+		$( ".tmq-no-autofill" ).removeAttr( "readonly" );
+	}, 500 );
 
 	// test SMTP connection
 	$doc.on( "click", "#tmq-test-smtp", function () {
