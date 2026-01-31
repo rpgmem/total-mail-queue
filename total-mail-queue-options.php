@@ -638,11 +638,15 @@ class wp_tmq_Log_Table extends WP_List_Table {
             case 'resend':
                 $count_resend = 0;
                 $count_error  = 0;
+                $count_skipped_sent  = 0;
+                $count_skipped_queue = 0;
                 foreach($request_ids as $id) {
                     $maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
                     if ( ! $maildata ) { continue; }
-                    // Only resend emails that are in a final state (not already queued)
-                    if ( in_array( $maildata->status, array( 'queue', 'high' ), true ) ) { continue; }
+                    // Block emails that were already sent successfully
+                    if ( $maildata->status === 'sent' ) { $count_skipped_sent++; continue; }
+                    // Block emails already in the queue
+                    if ( in_array( $maildata->status, array( 'queue', 'high' ), true ) ) { $count_skipped_queue++; continue; }
                     if (!$maildata->attachments || $maildata->attachments === '') {
                         $count_resend++;
                         $data = array(
@@ -667,12 +671,29 @@ class wp_tmq_Log_Table extends WP_List_Table {
                         echo wp_kses_post( $notice );
                     }
                 }
-                if ($count_error == 0 && $count_resend > 0) {
+                // Show warnings for skipped items
+                if ( $count_skipped_sent > 0 ) {
+                    $notice = '<div class="notice notice-warning is-dismissible">';
+                    /* translators: %d: number of skipped emails */
+                    $notice .= '<p>' . sprintf( __( '%d email(s) were skipped because they have already been sent successfully. Sent emails cannot be re-queued.', 'total-mail-queue' ), $count_skipped_sent ) . '</p>';
+                    $notice .= '</div>';
+                    echo wp_kses_post( $notice );
+                }
+                if ( $count_skipped_queue > 0 ) {
+                    $notice = '<div class="notice notice-warning is-dismissible">';
+                    /* translators: %d: number of skipped emails */
+                    $notice .= '<p>' . sprintf( __( '%d email(s) were skipped because they are already in the queue waiting to be sent.', 'total-mail-queue' ), $count_skipped_queue ) . '</p>';
+                    $notice .= '</div>';
+                    echo wp_kses_post( $notice );
+                }
+                $has_skips = ( $count_error > 0 || $count_skipped_sent > 0 || $count_skipped_queue > 0 );
+                if ( ! $has_skips && $count_resend > 0 ) {
                     wp_redirect('admin.php?page=wp_tmq_mail_queue-tab-queue&resent=' . $count_resend);
                     exit;
-                } else if ($count_error > 0 && $count_resend > 0) {
+                } else if ( $count_resend > 0 ) {
                     $notice = '<div class="notice notice-success is-dismissible">';
-                    $notice .= '<p>' . sprintf( __( 'The other emails have been put again into the %sQueue%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' ) . '</p>';
+                    /* translators: %1$d: count, %2$s: link open, %3$s: link close */
+                    $notice .= '<p>' . sprintf( __( '%1$d email(s) have been put again into the %2$sQueue%3$s.', 'total-mail-queue' ), $count_resend, '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' ) . '</p>';
                     $notice .= '</div>';
                     echo wp_kses_post( $notice );
                 }
@@ -680,9 +701,15 @@ class wp_tmq_Log_Table extends WP_List_Table {
             case 'force_resend':
                 $count_force = 0;
                 $count_force_error = 0;
+                $count_force_skipped_sent  = 0;
+                $count_force_skipped_queue = 0;
                 foreach($request_ids as $id) {
                     $maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
                     if ( ! $maildata ) { continue; }
+                    // Block emails that were already sent successfully
+                    if ( $maildata->status === 'sent' ) { $count_force_skipped_sent++; continue; }
+                    // Block emails already in the queue
+                    if ( in_array( $maildata->status, array( 'queue', 'high' ), true ) ) { $count_force_skipped_queue++; continue; }
                     if ( $maildata->status !== 'error' ) {
                         $count_force_error++;
                         continue;
@@ -714,7 +741,23 @@ class wp_tmq_Log_Table extends WP_List_Table {
                         echo wp_kses_post( $notice );
                     }
                 }
-                if ( $count_force_error == 0 && $count_force > 0 ) {
+                // Show warnings for skipped items
+                if ( $count_force_skipped_sent > 0 ) {
+                    $notice = '<div class="notice notice-warning is-dismissible">';
+                    /* translators: %d: number of skipped emails */
+                    $notice .= '<p>' . sprintf( __( '%d email(s) were skipped because they have already been sent successfully. Sent emails cannot be re-queued.', 'total-mail-queue' ), $count_force_skipped_sent ) . '</p>';
+                    $notice .= '</div>';
+                    echo wp_kses_post( $notice );
+                }
+                if ( $count_force_skipped_queue > 0 ) {
+                    $notice = '<div class="notice notice-warning is-dismissible">';
+                    /* translators: %d: number of skipped emails */
+                    $notice .= '<p>' . sprintf( __( '%d email(s) were skipped because they are already in the queue waiting to be sent.', 'total-mail-queue' ), $count_force_skipped_queue ) . '</p>';
+                    $notice .= '</div>';
+                    echo wp_kses_post( $notice );
+                }
+                $has_force_skips = ( $count_force_error > 0 || $count_force_skipped_sent > 0 || $count_force_skipped_queue > 0 );
+                if ( ! $has_force_skips && $count_force > 0 ) {
                     wp_redirect( 'admin.php?page=wp_tmq_mail_queue-tab-queue&resent=' . $count_force );
                     exit;
                 } else if ( $count_force > 0 ) {
