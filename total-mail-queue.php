@@ -713,7 +713,14 @@ function wp_tmq_search_mail_from_queue() {
                 }
 
                 if ($sendstatus) {
-                    $wpdb->update( $tableName, array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '' ), array( 'id' => $item['id'] ), array( '%s', '%s', '%s' ), array( '%d' ) );
+                    $sent_smtp_id = $smtp_to_use ? intval( $smtp_to_use['id'] ) : 0;
+                    $wpdb->update(
+                        $tableName,
+                        array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '', 'smtp_account_id' => $sent_smtp_id ),
+                        array( 'id' => $item['id'] ),
+                        array( '%s', '%s', '%s', '%d' ),
+                        array( '%d' )
+                    );
                     // Increment SMTP counter (DB for persistence + in-memory for next iteration)
                     if ( $smtp_to_use ) {
                         wp_tmq_increment_smtp_counter( $smtp_to_use['id'] );
@@ -856,6 +863,7 @@ function wp_tmq_updateDatabaseTables() {
     attachments text NOT NULL,
     info varchar(255) DEFAULT '' NOT NULL,
     retry_count smallint(5) DEFAULT 0 NOT NULL,
+    smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
     PRIMARY KEY  (id),
     KEY idx_status_retry (status, retry_count, id),
     KEY idx_status_timestamp (status, timestamp)

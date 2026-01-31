@@ -462,6 +462,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
             'cb'          => '<label><span class="screen-reader-text">' . __( 'Select all', 'total-mail-queue' ) . '</span><input class="tmq-select-all" type="checkbox"></label>',
             'timestamp'   => __( 'Time', 'total-mail-queue' ),
             'status'      => __( 'Status', 'total-mail-queue' ),
+            'smtp_account_id' => __( 'SMTP', 'total-mail-queue' ),
             'info'        => __( 'Info', 'total-mail-queue' ),
             'recipient'   => __( 'Recipient', 'total-mail-queue' ),
             'subject'     => __( 'Subject', 'total-mail-queue' ),
@@ -469,6 +470,11 @@ class wp_tmq_Log_Table extends WP_List_Table {
             'headers'     => __( 'Headers', 'total-mail-queue' ),
             'attachments' => __( 'Attachments', 'total-mail-queue' ),
         );
+        // Only show SMTP column on the log tab (queued items haven't been sent yet)
+        $type = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+        if ( $type !== 'wp_tmq_mail_queue-tab-log' ) {
+            unset( $columns['smtp_account_id'] );
+        }
         return $columns;
     }
 
@@ -580,6 +586,25 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 $raw    = $item[ $column_name ];
                 $label  = isset( $status_labels[ $raw ] ) ? $status_labels[ $raw ] : esc_html( $raw );
                 return '<span class="tmq-status tmq-status-' . sanitize_title( $raw ) . '">' . esc_html( $label ) . '</span>';
+                break;
+            case 'smtp_account_id':
+                $acct_id = intval( $item['smtp_account_id'] ?? 0 );
+                if ( $acct_id === 0 ) {
+                    return '<span class="description">—</span>';
+                }
+                // Static cache: load all SMTP account names once
+                static $smtp_names = null;
+                if ( $smtp_names === null ) {
+                    global $wpdb, $wp_tmq_options;
+                    $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+                    $rows = $wpdb->get_results( "SELECT `id`, `name` FROM `$smtpTable`", ARRAY_A );
+                    $smtp_names = array();
+                    foreach ( $rows as $r ) {
+                        $smtp_names[ intval( $r['id'] ) ] = $r['name'];
+                    }
+                }
+                $name = isset( $smtp_names[ $acct_id ] ) ? $smtp_names[ $acct_id ] : __( 'Deleted', 'total-mail-queue' );
+                return '<span title="#' . esc_attr( $acct_id ) . '">#' . esc_html( $acct_id ) . ' ' . esc_html( $name ) . '</span>';
                 break;
             case 'message':
                 $message = $item[$column_name];
