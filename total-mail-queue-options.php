@@ -68,6 +68,24 @@ function wp_tmq_settings_page() {
     // Settings
     global $wp_tmq_options;
 
+    // Handle export before any output
+    if ( isset( $_POST['wp_tmq_export'] ) ) {
+        if ( ! isset( $_POST['wp_tmq_export_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_export_nonce'] ), 'wp_tmq_export' ) ) {
+            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+        }
+        wp_tmq_handle_export();
+        return;
+    }
+
+    // Handle import
+    $import_notice = '';
+    if ( isset( $_POST['wp_tmq_import'] ) ) {
+        if ( ! isset( $_POST['wp_tmq_import_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_import_nonce'] ), 'wp_tmq_import' ) ) {
+            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+        }
+        $import_notice = wp_tmq_handle_import();
+    }
+
     // Get the active tab from the $_GET param
     $tab = isset($_GET['page']) ? sanitize_key($_GET['page']) : 'wp_tmq_mail_queue';
 
@@ -94,6 +112,40 @@ function wp_tmq_settings_page() {
         do_settings_sections('wp_tmq_settings_page');
         submit_button();
         echo '</form>';
+
+        // Export / Import section
+        echo '<hr />';
+        echo '<h2>' . __( 'Export / Import', 'total-mail-queue' ) . '</h2>';
+
+        if ( $import_notice ) {
+            echo $import_notice;
+        }
+
+        echo '<div class="tmq-export-import" style="display:flex;gap:2em;flex-wrap:wrap;">';
+
+        // Export
+        echo '<div class="tmq-box" style="flex:1;min-width:300px;">';
+        echo '<h3>' . __( 'Export', 'total-mail-queue' ) . '</h3>';
+        echo '<p>' . __( 'Download a JSON file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys.', 'total-mail-queue' ) . '</p>';
+        echo '<form method="post">';
+        wp_nonce_field( 'wp_tmq_export', 'wp_tmq_export_nonce' );
+        echo '<button type="submit" name="wp_tmq_export" class="button button-primary">' . __( 'Export Settings', 'total-mail-queue' ) . '</button>';
+        echo '</form>';
+        echo '</div>';
+
+        // Import
+        echo '<div class="tmq-box" style="flex:1;min-width:300px;">';
+        echo '<h3>' . __( 'Import', 'total-mail-queue' ) . '</h3>';
+        echo '<p>' . __( 'Upload a previously exported JSON file to restore settings and SMTP accounts. This will replace all current settings and SMTP accounts.', 'total-mail-queue' ) . '</p>';
+        echo '<form method="post" enctype="multipart/form-data">';
+        wp_nonce_field( 'wp_tmq_import', 'wp_tmq_import_nonce' );
+        echo '<input type="file" name="wp_tmq_import_file" accept=".json" required /> ';
+        echo '<button type="submit" name="wp_tmq_import" class="button" onclick="return confirm(\'' . esc_js( __( 'This will replace all current settings and SMTP accounts. Continue?', 'total-mail-queue' ) ) . '\');">' . __( 'Import Settings', 'total-mail-queue' ) . '</button>';
+        echo '</form>';
+        echo '</div>';
+
+        echo '</div>';
+
     } else if ($tab == 'wp_tmq_mail_queue-tab-log') {
         echo '<form method="post">';
         $logtable = new wp_tmq_Log_Table();
@@ -778,3 +830,95 @@ function wp_tmq_checkLogForErrors() {
     }
 }
 add_action('admin_notices', 'wp_tmq_checkLogForErrors');
+
+
+/* ***************************************************************
+Export / Import Settings
+**************************************************************** */
+
+function wp_tmq_handle_export() {
+    global $wpdb, $wp_tmq_options;
+
+    $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+    $smtp_accounts = $wpdb->get_results( "SELECT * FROM `$smtpTable`", ARRAY_A );
+
+    // Remove auto-increment IDs and transient counters from SMTP accounts
+    if ( $smtp_accounts ) {
+        foreach ( $smtp_accounts as &$account ) {
+            unset( $account['id'] );
+            $account['daily_sent']  = 0;
+            $account['monthly_sent'] = 0;
+        }
+        unset( $account );
+    }
+
+    $export = array(
+        'plugin'         => 'total-mail-queue',
+        'version'        => get_option( 'wp_tmq_version', '' ),
+        'exported_at'    => current_time( 'mysql', false ),
+        'settings'       => get_option( 'wp_tmq_settings', array() ),
+        'smtp_accounts'  => $smtp_accounts ? $smtp_accounts : array(),
+    );
+
+    $filename = 'total-mail-queue-export-' . wp_date( 'Y-m-d-His' ) . '.json';
+
+    header( 'Content-Type: application/json; charset=utf-8' );
+    header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+    header( 'Cache-Control: no-cache, no-store, must-revalidate' );
+    echo wp_json_encode( $export, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+    exit;
+}
+
+function wp_tmq_handle_import() {
+    global $wpdb, $wp_tmq_options;
+
+    if ( ! isset( $_FILES['wp_tmq_import_file'] ) || $_FILES['wp_tmq_import_file']['error'] !== UPLOAD_ERR_OK ) {
+        return '<div class="notice notice-error"><p>' . __( 'Error uploading file. Please try again.', 'total-mail-queue' ) . '</p></div>';
+    }
+
+    $file_content = file_get_contents( $_FILES['wp_tmq_import_file']['tmp_name'] );
+    $data = json_decode( $file_content, true );
+
+    if ( ! $data || ! is_array( $data ) ) {
+        return '<div class="notice notice-error"><p>' . __( 'Invalid JSON file.', 'total-mail-queue' ) . '</p></div>';
+    }
+
+    if ( ! isset( $data['plugin'] ) || $data['plugin'] !== 'total-mail-queue' ) {
+        return '<div class="notice notice-error"><p>' . __( 'This file is not a valid Total Mail Queue export.', 'total-mail-queue' ) . '</p></div>';
+    }
+
+    // Import settings
+    if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
+        update_option( 'wp_tmq_settings', $data['settings'] );
+    }
+
+    // Import SMTP accounts
+    if ( isset( $data['smtp_accounts'] ) && is_array( $data['smtp_accounts'] ) ) {
+        $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+
+        // Get existing columns to filter import data
+        $columns = $wpdb->get_col( "DESCRIBE `$smtpTable`", 0 );
+
+        // Clear existing accounts
+        $wpdb->query( "TRUNCATE TABLE `$smtpTable`" );
+
+        foreach ( $data['smtp_accounts'] as $account ) {
+            // Remove id if present (auto-increment)
+            unset( $account['id'] );
+
+            // Only keep columns that exist in the table
+            $account = array_intersect_key( $account, array_flip( $columns ) );
+
+            if ( ! empty( $account ) ) {
+                $wpdb->insert( $smtpTable, $account );
+            }
+        }
+    }
+
+    // Reload settings
+    $wp_tmq_options = wp_tmq_get_settings();
+
+    /* translators: %s: export date */
+    $date_info = isset( $data['exported_at'] ) ? ' ' . sprintf( __( '(exported on %s)', 'total-mail-queue' ), esc_html( $data['exported_at'] ) ) : '';
+    return '<div class="notice notice-success"><p>' . __( 'Settings and SMTP accounts imported successfully.', 'total-mail-queue' ) . esc_html( $date_info ) . '</p></div>';
+}
