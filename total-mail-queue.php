@@ -4,7 +4,7 @@
  * Plugin Name:       Total Mail Queue
  * Plugin URI:
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
- * Version:           2.1.0
+ * Version:           2.2.0
  * Requires at least: 5.9
  * Requires PHP:      7.4
  * Author:
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) { exit; }
 PLUGIN VERSION
 **************************************************************** */
 
-$wp_tmq_version = '2.1.0';
+$wp_tmq_version = '2.2.0';
 
 
 /* ***************************************************************
