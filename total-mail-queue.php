@@ -137,9 +137,18 @@ function wp_tmq_reset_smtp_counters() {
 
     $today = current_time( 'Y-m-d' );
     $this_month = current_time( 'Y-m' );
+    $now = current_time( 'mysql', false );
 
-    // Reset per-cycle bulk counter at the start of each cron run
-    $wpdb->query( "UPDATE `$smtpTable` SET `cycle_sent` = 0" );
+    // Reset per-cycle bulk counter:
+    // - Accounts with send_interval=0 (global): reset every cron run (each cron = one cycle)
+    // - Accounts with send_interval>0: reset only when the interval has elapsed (new cycle)
+    $wpdb->query(
+        "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` = 0"
+    );
+    $wpdb->query( $wpdb->prepare(
+        "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s",
+        $now
+    ) );
 
     // Reset daily counters if day changed
     $wpdb->query( $wpdb->prepare(
