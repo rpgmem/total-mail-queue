@@ -95,7 +95,7 @@ function wp_tmq_settings_page() {
     echo '<div class="wrap">';
 
     // Options Header
-    echo '<h1 class="tmq-title"><img class="tmq-logo" src="'.esc_url(plugins_url('assets/img/total-mail-queue-logo-wordmark.svg', __FILE__)).'" alt="Total Mail Queue" width="308" height="56" /></h1>';
+    echo '<h1 class="tmq-title"><img class="tmq-logo" src="'.esc_url(plugins_url('assets/img/total-mail-queue-logo-wordmark.svg', __FILE__)).'" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="308" height="56" /></h1>';
     if ($tab !== 'wp_tmq_mail_queue-tab-croninfo' ) {
         if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
             echo '<div class="notice notice-warning notice-large">';
