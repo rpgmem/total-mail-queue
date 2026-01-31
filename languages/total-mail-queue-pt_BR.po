@@ -1,0 +1,976 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Total Mail Queue\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-31 00:52+0000\n"
+"PO-Revision-Date: 2026-01-31 13:32+0000\n"
+"Last-Translator: Alex Meusburger\n"
+"Language-Team: Português do Brasil\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.8.1; wp-6.9; php-8.3.23\n"
+"X-Domain: total-mail-queue"
+
+#. %1$d: number of emails resent, %2$s: link open, %3$s: link close
+#: total-mail-queue-options.php:688
+#, php-format
+msgid "%1$d email(s) have been force-resent to the %2$sRetention%3$s queue."
+msgstr "%1$d e-mails foram reenviados à força para a fila %2$sRetention%3$s."
+
+#: total-mail-queue-options.php:217
+msgid "(closure)"
+msgstr "(fechamento)"
+
+#. %s: export date
+#: total-mail-queue-options.php:987
+#, php-format
+msgid "(exported on %s)"
+msgstr "(exportado em %s)"
+
+#: total-mail-queue-options.php:781
+msgid "0 = no retries, email is immediately marked as error"
+msgstr "0 = sem tentativas, o e-mail é imediatamente marcado como erro."
+
+#: total-mail-queue-options.php:775 total-mail-queue-smtp.php:212 total-mail-queue-smtp.php:219
+msgid "0 = unlimited"
+msgstr "0 = ilimitado"
+
+#: total-mail-queue-smtp.php:274
+msgid "Actions"
+msgstr "Ações"
+
+#: total-mail-queue-smtp.php:124 total-mail-queue-smtp.php:250
+msgid "Add SMTP Account"
+msgstr "Adicionar conta SMTP"
+
+#: total-mail-queue-options.php:458
+msgid "Alert"
+msgstr "Alerta"
+
+#: total-mail-queue-options.php:723
+msgid "Alert enabled"
+msgstr "Alerta ativado"
+
+#: total-mail-queue-options.php:724
+msgid "Alert Sensitivity"
+msgstr "Sensibilidade de Alerta"
+
+#: total-mail-queue-options.php:283
+msgid "Alerting is disabled"
+msgstr "O alerta está desativado."
+
+#. %1$s: email amount threshold, %2$s: alert email address
+#: total-mail-queue-options.php:281
+msgid "Alerts are enabled"
+msgstr "Os alertas estão ativados."
+
+#: total-mail-queue-options.php:245
+#, php-format
+msgid "All Mails sent through %1$s are delayed by the %2$sQueue%3$s."
+msgstr "Todos os e-mails enviados através de %1$s são atrasados ​​pela fila %2$sQueue%3$s."
+
+#: total-mail-queue-options.php:739
+msgid "All outgoing emails are being blocked!"
+msgstr "Todos os e-mails enviados estão sendo bloqueados!"
+
+#: total-mail-queue-options.php:247
+msgid "All outgoing emails are being retained and will NOT be sent."
+msgstr "Todos os e-mails enviados estão sendo retidos e NÃO serão reenviados."
+
+#: total-mail-queue-options.php:175
+msgid "All outgoing emails are being retained and will NOT be sent. No emails will leave this server."
+msgstr "Todos os e-mails enviados estão sendo retidos e NÃO serão reenviados. Nenhum e-mail sairá deste servidor."
+
+#: total-mail-queue-smtp.php:91
+msgid "All sending counters have been reset."
+msgstr "Todos os contadores de envio foram reiniciados."
+
+#: total-mail-queue-options.php:455
+msgid "All statuses"
+msgstr "Todos os status"
+
+#: total-mail-queue-smtp.php:308
+msgid "Are you sure you want to delete this SMTP account?"
+msgstr "Tem certeza de que deseja excluir esta conta SMTP?"
+
+#: total-mail-queue-smtp.php:255
+msgid "Are you sure you want to reset all sending counters to zero?"
+msgstr "Tem certeza de que deseja zerar todos os contadores de envio?"
+
+#: total-mail-queue-options.php:443
+msgid "Attachments"
+msgstr "Anexos"
+
+#. %d: number of retry attempts
+#: total-mail-queue-options.php:513
+msgid "Attempt #%d"
+msgstr "Tentativa nº %d"
+
+#: total-mail-queue-options.php:393
+msgid "Attention: It seems that your WP Cron is not running. There are some jobs waiting to be completed."
+msgstr "Atenção: Parece que seu WP Cron não está em execução. Há algumas tarefas aguardando conclusão."
+
+#: total-mail-queue-options.php:821 total-mail-queue-options.php:829
+msgid "Attention: Your website has problems sending e-mails"
+msgstr "Atenção: Seu site está com problemas para enviar e-mails."
+
+#: total-mail-queue-smtp.php:165
+msgid "Authentication"
+msgstr "Autenticação"
+
+#: total-mail-queue-options.php:722
+msgid "Auto-Retry"
+msgstr "Tentativa Automática"
+
+#: total-mail-queue-options.php:356
+msgid "Automatic"
+msgstr "Automático"
+
+#: total-mail-queue-options.php:788
+msgid "Automatic — Use plugin SMTP if available, then captured config, then WordPress default"
+msgstr "Automático — Usar SMTP do plugin, se disponível, depois a configuração capturada e, por fim, a configuração padrão do WordPress."
+
+#: total-mail-queue-options.php:175
+msgid "Block Mode Active"
+msgstr "Modo de Bloqueio Ativo"
+
+#: total-mail-queue-options.php:247
+msgid "Block mode is active"
+msgstr "O modo de bloqueio está ativo"
+
+#: total-mail-queue-options.php:734
+msgid "Block — Retain all emails, never send (block all outgoing)"
+msgstr "Bloquear — Reter todos os emails, nunca enviar (bloquear todos os emails de saída)"
+
+#: total-mail-queue-options.php:766
+#, php-format
+msgid "by %sWP Cron%s."
+msgstr "por %sWP Cron%s."
+
+#: total-mail-queue-options.php:290
+msgid "Can I add emails with a high priority to the queue?"
+msgstr "Posso adicionar e-mails com alta prioridade à fila?"
+
+#: total-mail-queue-options.php:321
+msgid "Can I send emails <i>instantly</i> without going through the queue?"
+msgstr "Posso enviar e-mails <i>instantaneamente</i> sem passar pela fila?"
+
+#: total-mail-queue-smtp.php:232
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: total-mail-queue-options.php:175
+#, php-format
+msgid "Change this in %sSettings%s."
+msgstr "Altere isso em %sSettings%s."
+
+#: total-mail-queue.php:843
+msgid "Connection successful! SMTP server responded correctly."
+msgstr "Conexão bem-sucedida! O servidor SMTP respondeu corretamente."
+
+#: total-mail-queue-options.php:27 total-mail-queue-options.php:708
+msgid "Cron Information"
+msgstr "Informações sobre a Cron"
+
+#: total-mail-queue-options.php:243 total-mail-queue-options.php:278
+msgid "Current state:"
+msgstr "Estado atual:"
+
+#: total-mail-queue-smtp.php:210 total-mail-queue-smtp.php:271
+msgid "Daily Limit"
+msgstr "Limite Diário"
+
+#: total-mail-queue-options.php:772
+msgid "days."
+msgstr "dias."
+
+#: total-mail-queue-options.php:570 total-mail-queue-options.php:574 total-mail-queue-smtp.php:308
+msgid "Delete"
+msgstr "Excluir"
+
+#: total-mail-queue-options.php:772
+msgid "Delete Log entries older than"
+msgstr "Excluir entradas de log mais antigas que"
+
+#: total-mail-queue-options.php:732
+msgid "Disabled — No interception, emails sent normally"
+msgstr "Desativado — Sem interceptação, e-mails enviados normalmente"
+
+#: total-mail-queue-options.php:254
+#, php-format
+msgid "Does this plugin change the way %sHOW%s emails are sent?"
+msgstr "Este plugin altera a forma %sCOMO%s os e-mails da  são enviados?"
+
+#: total-mail-queue-options.php:259
+#, php-format
+msgid "Does this plugin work, if I have a Caching Plugin installed? E.g. %s or similar?"
+msgstr "Este plugin funciona se eu tiver um plugin de cache instalado? Por exemplo, %s ou similar?"
+
+#: total-mail-queue-options.php:131
+msgid "Download an XML file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys."
+msgstr "Faça o download de um arquivo XML com todas as configurações do plugin e contas SMTP. As senhas estão incluídas de forma criptografada e só podem ser importadas em um site com as mesmas chaves de segurança do WordPress."
+
+#: total-mail-queue-smtp.php:307
+msgid "Edit"
+msgstr "Editar"
+
+#: total-mail-queue-smtp.php:124
+msgid "Edit SMTP Account"
+msgstr "Editar Conta SMTP"
+
+#: total-mail-queue-options.php:760
+msgid "email(s) every"
+msgstr "e-mail(s) a cada"
+
+#: total-mail-queue-options.php:799
+#, php-format
+msgid "email(s) in the %sQueue%s."
+msgstr "email(s) na %sQueue%s."
+
+#: total-mail-queue-options.php:357
+msgid "Emails will ONLY be sent via SMTP accounts configured in this plugin. If no account is available (limits reached or none configured), emails will remain in the retention queue waiting until an SMTP account becomes available. This is useful if you want to guarantee all emails go through your own SMTP servers."
+msgstr "Os e-mails serão enviados SOMENTE por meio das contas SMTP configuradas neste plugin. Se nenhuma conta estiver disponível (limites atingidos ou nenhuma configurada), os e-mails permanecerão na fila de retenção aguardando até que uma conta SMTP fique disponível. Isso é útil se você quiser garantir que todos os e-mails passem por seus próprios servidores SMTP."
+
+#: total-mail-queue-options.php:793
+msgid "Emails will wait in the retention queue until an SMTP account with available limits is found."
+msgstr "Os e-mails ficarão na fila de retenção até que uma conta SMTP com limites disponíveis seja encontrada."
+
+#: total-mail-queue-options.php:554
+msgid "Empty"
+msgstr "Vazia"
+
+#: total-mail-queue-smtp.php:224 total-mail-queue-smtp.php:273
+msgid "Enabled"
+msgstr "Habilitado"
+
+#: total-mail-queue-smtp.php:155
+msgid "Encryption"
+msgstr "Criptografia"
+
+#: total-mail-queue.php:509
+msgid "ERROR"
+msgstr "ERRO"
+
+#: total-mail-queue-options.php:457
+msgid "Error"
+msgstr "Erro"
+
+#: total-mail-queue-options.php:933
+msgid "Error uploading file. Please try again."
+msgstr "Erro ao enviar o arquivo. Tente novamente."
+
+#: total-mail-queue.php:288
+msgid "Error: Could not store attachments"
+msgstr "Erro: Não foi possível armazenar os anexos."
+
+#: total-mail-queue-options.php:194
+msgid "Errors:"
+msgstr "Erros:"
+
+#. Example code labels - not translatable code blocks
+#: total-mail-queue-options.php:293
+msgid "Example 1 (add priority to Woocommerce emails):"
+msgstr "Exemplo 1 (adicionar prioridade aos e-mails do WooCommerce):"
+
+#: total-mail-queue-options.php:325
+msgid "Example 1 (instantly send Woocommerce emails):"
+msgstr "Exemplo 1 (envio instantâneo de e-mails do WooCommerce):"
+
+#: total-mail-queue-options.php:304
+msgid "Example 2 (add priority to Contact Form 7 form emails):"
+msgstr "Exemplo 2 (adicionar prioridade aos e-mails do formulário Contact Form 7):"
+
+#: total-mail-queue-options.php:336
+msgid "Example 2 (instantly send Contact Form 7 form emails):"
+msgstr "Exemplo 2 (envio instantâneo de e-mails com formulários do Contact Form 7):"
+
+#: total-mail-queue-options.php:307
+msgid "Example 3 (add priority to WordPress reset password emails):"
+msgstr "Exemplo 3 (adicionar prioridade aos e-mails de redefinição de senha do WordPress):"
+
+#: total-mail-queue-options.php:339
+msgid "Example 3 (instantly send WordPress reset password emails):"
+msgstr "Exemplo 3 (envio instantâneo de e-mails de redefinição de senha do WordPress):"
+
+#: total-mail-queue-options.php:130
+msgid "Export"
+msgstr "Exportar"
+
+#: total-mail-queue-options.php:120
+msgid "Export / Import"
+msgstr "Exportar/Importar"
+
+#: total-mail-queue-options.php:134
+#| msgid "Alert settings"
+msgid "Export Settings"
+msgstr "Configurações de Exportação"
+
+#. %1$d: total attempts, %2$s: error message
+#: total-mail-queue.php:396
+#, php-format
+msgid "Failed after %1$d attempt(s) — %2$s"
+msgstr "Falha após %1$d tentativa(s) — %2$s"
+
+#: total-mail-queue-options.php:13 total-mail-queue-options.php:29 total-mail-queue-options.php:29 total-mail-queue-options.php:710
+msgid "FAQ"
+msgstr "FAQ"
+
+#: total-mail-queue-options.php:471
+msgid "Filter"
+msgstr "Filtro"
+
+#: total-mail-queue-options.php:323
+msgid "For this you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`Instant`</i> to your email. These emails are sent instantly circumventing the mail queue. They still appear in the Total Mail Queue log flagged as `instant`."
+msgstr "Para isso, você pode adicionar o cabeçalho personalizado <i>`X-Mail-Queue-Prio`</i> definido como <i>`Instant`</i> ao seu e-mail. Esses e-mails são enviados instantaneamente, contornando a fila de e-mails. Eles ainda aparecem no registro da fila de e-mails total sinalizados como `instant`."
+
+#: total-mail-queue-options.php:576
+msgid "Force Resend (ignore retry limit)"
+msgstr "Forçar Reenvio (ignorar limite de tentativas)"
+
+#. %s: original error info
+#: total-mail-queue-options.php:667
+#, php-format
+msgid "Force resent — Original: %s"
+msgstr "Forçar reenvio — Original: %s"
+
+#: total-mail-queue-smtp.php:269
+msgid "From"
+msgstr "De"
+
+#: total-mail-queue-smtp.php:191
+msgid "From Email"
+msgstr "Do E-mail"
+
+#: total-mail-queue-smtp.php:197
+msgid "From Name"
+msgstr "De Nome"
+
+#: total-mail-queue-options.php:442
+msgid "Headers"
+msgstr "Cabeçalhos"
+
+#: total-mail-queue.php:459
+msgid "Hi,"
+msgstr "Oi,"
+
+#: total-mail-queue-smtp.php:143
+msgid "Host"
+msgstr "Host"
+
+#: total-mail-queue-smtp.php:268
+msgid "Host:Port"
+msgstr "Host:Port"
+
+#: total-mail-queue-options.php:241
+msgid "How does this Plugin work?"
+msgstr "Como funciona este plugin?"
+
+#: total-mail-queue.php:938
+msgid "HTML Body"
+msgstr "HTML do Corpo"
+
+#: total-mail-queue.php:939
+msgid "HTML Footer"
+msgstr "HTML do Rodapé"
+
+#: total-mail-queue.php:937
+msgid "HTML Header"
+msgstr "HTML do Cabeçalho"
+
+#: total-mail-queue-options.php:242
+#, php-format
+msgid "If enabled this plugin intercepts the %s function. Instead of sending the mails directly, it stores them in the database and sends them step by step with a delay during the %s."
+msgstr "Se ativado, este plugin intercepta a função %s. Em vez de enviar os e-mails diretamente, ele os armazena no banco de dados e os envia passo a passo com um atraso durante a execução da função %s."
+
+#: total-mail-queue-options.php:799
+msgid "if more than"
+msgstr "se mais de"
+
+#: total-mail-queue-options.php:281
+#, php-format
+msgid "If more than %1$s emails are waiting in the Queue, WordPress will send an alert email to %2$s."
+msgstr "Se houver mais de %1$s e-mails aguardando na fila, o WordPress enviará um e-mail de alerta para %2$s."
+
+#: total-mail-queue-options.php:780
+msgid "If sending fails, retry up to"
+msgstr "Se o envio falhar, tente novamente até"
+
+#: total-mail-queue-options.php:256
+msgid "If you use SMTP for sending, or an external service like Mailgun, everything will still work as expected."
+msgstr "Se você usa SMTP para envio, ou um serviço externo como o Mailgun, tudo continuará funcionando como esperado."
+
+#. %s: wp-cron.php link
+#: total-mail-queue-options.php:261
+#, php-format
+msgid "If you're using a Caching plugin like %1$s, %2$s or any other caching solution which generates static html-files and serves them to visitors, you'll have to make sure you're calling the %3$s manually every couple of minutes."
+msgstr "Se você estiver usando um plugin de cache como %1$s, %2$s ou qualquer outra solução de cache que gere arquivos HTML estáticos e os sirva aos visitantes, você terá que garantir que está chamando o %3$s manualmente a cada poucos minutos."
+
+#: total-mail-queue-options.php:358
+msgid "Ignores all SMTP accounts configured in this plugin and any captured configurations. Emails are sent using whatever wp_mail() does by default — which could be the PHP mail() function or another SMTP plugin like WP Mail SMTP."
+msgstr "Ignora todas as contas SMTP configuradas neste plugin e quaisquer configurações capturadas. Os e-mails são enviados usando o que a função wp_mail() faz por padrão — que pode ser a função mail() do PHP ou outro plugin SMTP como o WP Mail SMTP."
+
+#: total-mail-queue-options.php:276
+#, php-format
+msgid "Imagine: In case your website is sending spam through %s, the email Queue would fill up very quickly preventing your website from sending so many spam emails at once. This gives you time and avoids a lot of trouble."
+msgstr "Imagine: caso seu site esteja enviando spam por meio de %s, a fila de e-mails se encheria rapidamente, impedindo o envio de tantos e-mails de spam de uma só vez. Isso lhe dá tempo e evita muitos problemas."
+
+#: total-mail-queue-options.php:140
+msgid "Import"
+msgstr "Importar"
+
+#: total-mail-queue-options.php:145
+msgid "Import Settings"
+msgstr "Configurações de Importação"
+
+#: total-mail-queue.php:468
+msgid "In case this is the usual amount of emails, you can adjust the threshold for alerts in the settings of your Total Mail Queue Plugin."
+msgstr "Caso essa seja a quantidade usual de e-mails, você pode ajustar o limite de alertas nas configurações do seu plugin Total Mail Queue."
+
+#. %s: wp-cron.php URL
+#: total-mail-queue-options.php:376
+#, php-format
+msgid "In general, this is no problem at all. We just want to remind you to make sure you're running the Cron manually by calling %s every couple of minutes."
+msgstr "Em geral, isso não é problema algum. Apenas queremos lembrar que você deve executar o Cron manualmente, chamando %s a cada poucos minutos."
+
+#: total-mail-queue-options.php:438
+msgid "Info"
+msgstr "Info"
+
+#: total-mail-queue-options.php:372
+msgid "Information: Your common WP Cron is disabled"
+msgstr "Informação: Seu WP Cron comum está desativado."
+
+#: total-mail-queue-options.php:944
+msgid "Invalid XML file."
+msgstr "Arquivo XML inválido."
+
+#: total-mail-queue-options.php:373
+msgid "It looks like you deactivated the WP Cron by <i>define( 'DISABLE_WP_CRON', true )</i>."
+msgstr "Parece que você desativou o WP Cron por <i>define( 'DISABLE_WP_CRON', true )</i>."
+
+#: total-mail-queue-options.php:857
+msgid "It seems you are using the following plugin(s) that do not use <i>wp_mail()</i>:"
+msgstr "Parece que você está usando os seguintes plugins que não utilizam a função `wp_mail()`:"
+
+#: total-mail-queue-options.php:774
+msgid "Keep a maximum of"
+msgstr "Mantenha um máximo de"
+
+#: total-mail-queue-options.php:188
+msgid "Last cron run:"
+msgstr "Última execução da cron:"
+
+#. %s: error message
+#: total-mail-queue-options.php:824
+#, php-format
+msgid "Last error message was: %s"
+msgstr "A última mensagem de erro foi: %s"
+
+#. %s: error message
+#: total-mail-queue-options.php:832
+#, php-format
+msgid "Last error message: %s"
+msgstr "Última mensagem de erro: %s"
+
+#: total-mail-queue-smtp.php:184
+msgid "Leave blank to keep the current password."
+msgstr "Deixe em branco para manter a senha atual."
+
+#: total-mail-queue-options.php:551
+msgid "Loading..."
+msgstr "Carregando..."
+
+#: total-mail-queue-options.php:10 total-mail-queue-options.php:23 total-mail-queue-options.php:23 total-mail-queue-options.php:704 total-mail-queue-options.php:720
+msgid "Log"
+msgstr "Registro"
+
+#: total-mail-queue-options.php:774
+msgid "log records."
+msgstr "registros de log."
+
+#: total-mail-queue-smtp.php:205
+msgid "Lower number = higher priority."
+msgstr "Número menor = prioridade maior."
+
+#: total-mail-queue-options.php:441
+msgid "Message"
+msgstr "Mensagem"
+
+#: total-mail-queue.php:898
+msgid "Message not found"
+msgstr "Mensagem não encontrada"
+
+#: total-mail-queue-options.php:324
+msgid "Mind that this is a potential security risk and should be considered carefully. Please use only as an exception."
+msgstr "Tenha em mente que isso representa um risco potencial de segurança e deve ser considerado com cautela. Utilize apenas em casos excepcionais."
+
+#: total-mail-queue-options.php:764
+msgid "minute(s)"
+msgstr "minuto(s)"
+
+#: total-mail-queue-smtp.php:217 total-mail-queue-smtp.php:272
+msgid "Monthly Limit"
+msgstr "Limite Mensal"
+
+#: total-mail-queue-options.php:104 total-mail-queue-options.php:860
+msgid "More information"
+msgstr "Mais informações"
+
+#: total-mail-queue-options.php:270
+msgid "My form builder supports attachments. What about them?"
+msgstr "Meu construtor de formulários suporta anexos. E quanto a eles?"
+
+#: total-mail-queue-smtp.php:137 total-mail-queue-smtp.php:267
+msgid "Name"
+msgstr "Nome"
+
+#. %1$s: human-readable time diff, %2$s: scheduled time
+#: total-mail-queue-options.php:181
+#, php-format
+msgid "Next sending will be triggered in %1$s at %2$s."
+msgstr "O próximo envio será acionado em %1$s às %2$s."
+
+#: total-mail-queue-smtp.php:305
+msgid "No"
+msgstr "Não"
+
+#: total-mail-queue-options.php:283
+msgid "No alerts will be sent."
+msgstr "Nenhum alerta será enviado."
+
+#: total-mail-queue-smtp.php:262
+msgid "No SMTP accounts configured yet."
+msgstr "Nenhuma conta SMTP configurada ainda."
+
+#: total-mail-queue-options.php:255
+#, php-format
+msgid "No, don't worry. This plugin only affects %1$sWHEN%2$s emails are sent, not how. It delays the sending (by the Queue), nonetheless all emails are sent through the standard %3$s function."
+msgstr "Não, não se preocupe. Este plugin afeta apenas %1$sQUANDO%2$s os e-mails são enviados, não como. Ele atrasa o envio (pela fila), mas todos os e-mails são enviados pela função padrão %3$s."
+
+#: total-mail-queue-smtp.php:157
+msgid "None"
+msgstr "Nenhum"
+
+#: total-mail-queue-options.php:718
+msgid "Operation Mode"
+msgstr "Modo de Operação"
+
+#: total-mail-queue-options.php:262
+msgid "Otherwise your normal WP Cron wouldn't be called as often as it should be and scheduled messages would be sent with big delays."
+msgstr "Caso contrário, seu WP Cron normal não seria chamado com a frequência necessária e as mensagens agendadas seriam enviadas com grandes atrasos."
+
+#: total-mail-queue-smtp.php:177
+msgid "Password"
+msgstr "Senha"
+
+#: total-mail-queue.php:791
+msgid "Permission denied."
+msgstr "Permissão negada."
+
+#: total-mail-queue-options.php:830
+msgid "Please contact your Administrator. It seems that WordPress is not able to send emails."
+msgstr "Por favor, entre em contato com o administrador. Parece que o WordPress não está conseguindo enviar e-mails."
+
+#. %s: wp-cron.php URL
+#: total-mail-queue-options.php:103 total-mail-queue-options.php:853
+msgid "Please note:"
+msgstr "Por favor, observe:"
+
+#: total-mail-queue-options.php:286
+msgid "Please note: This plugin will only send one alert every six hours."
+msgstr "Atenção: Este plugin enviará apenas um alerta a cada seis horas."
+
+#: total-mail-queue.php:466
+msgid "Please take a close look at the email queue, because it contains more messages than the specified limit."
+msgstr "Por favor, verifique atentamente a fila de e-mails, pois ela contém mais mensagens do que o limite especificado."
+
+#: total-mail-queue-options.php:357
+msgid "Plugin SMTP only"
+msgstr "Plugin SMTP apenas"
+
+#: total-mail-queue-options.php:789
+msgid "Plugin SMTP only — Only send via SMTP accounts configured in this plugin (hold emails if none available)"
+msgstr "Plugin SMTP apenas — Envie e-mails somente por meio de contas SMTP configuradas neste plugin (retenha os e-mails caso nenhum esteja disponível)."
+
+#: total-mail-queue-smtp.php:149
+msgid "Port"
+msgstr "Porta"
+
+#: total-mail-queue-smtp.php:203 total-mail-queue-smtp.php:270
+msgid "Priority"
+msgstr "Prioridade"
+
+#: total-mail-queue-options.php:719
+msgid "Queue"
+msgstr "Fila"
+
+#: total-mail-queue-options.php:277
+msgid "Queue Alerts warn you, if the Queue is longer than usual. You decide at which point you want to be alerted. So you get the chance to have a look if there might be something wrong on the website."
+msgstr "Os alertas de fila avisam quando a fila está mais longa que o normal. Você decide quando quer ser alertado, tendo assim a oportunidade de verificar se há algum problema no site."
+
+#: total-mail-queue-options.php:733
+msgid "Queue — Retain emails and send via queue"
+msgstr "Fila — Reter e-mails e enviá-los por meio de fila."
+
+#: total-mail-queue-options.php:191
+msgid "Queue:"
+msgstr "Fila:"
+
+#: total-mail-queue-options.php:439
+msgid "Recipient"
+msgstr "Recebedor"
+
+#: total-mail-queue-options.php:575
+msgid "Resend"
+msgstr "Reenviar"
+
+#: total-mail-queue-smtp.php:255
+msgid "Reset Counters"
+msgstr "Reiniciar Contadores"
+
+#: total-mail-queue-options.php:189
+msgid "Result:"
+msgstr "Resultado:"
+
+#: total-mail-queue-options.php:11 total-mail-queue-options.php:24 total-mail-queue-options.php:24 total-mail-queue-options.php:705
+msgid "Retention"
+msgstr "Retenção"
+
+#. %1$d: current attempt number, %2$d: max attempts, %3$s: error message
+#: total-mail-queue.php:379
+#, php-format
+msgid "Retry %1$d/%2$d — %3$s"
+msgstr "Tentar novamente %1$d/%2$d — %3$s"
+
+#. %s: WordPress Cron link
+#: total-mail-queue-options.php:267
+#, php-format
+msgid "Same situation here. Please make sure you're calling the %s by an external service or your webhoster every couple of minutes."
+msgstr "Aqui está a mesma situação. Certifique-se de que está a chamar o %s através de um serviço externo ou do seu fornecedor de alojamento web a cada poucos minutos."
+
+#: total-mail-queue-smtp.php:230
+msgid "Save SMTP Account"
+msgstr "Salvar conta SMTP"
+
+#: total-mail-queue-options.php:764
+msgid "second(s)"
+msgstr "segundo(s)"
+
+#: total-mail-queue-options.php:67 total-mail-queue-options.php:86 total-mail-queue-options.php:590 total-mail-queue-smtp.php:28 total-mail-queue-smtp.php:74 total-mail-queue-smtp.php:87
+msgid "Security check failed!"
+msgstr "A verificação de segurança falhou!"
+
+#: total-mail-queue.php:795
+msgid "Security check failed. Please reload the page and try again."
+msgstr "A verificação de segurança falhou. Recarregue a página e tente novamente."
+
+#: total-mail-queue-options.php:435
+msgid "Select all"
+msgstr "Selecionar tudo"
+
+#: total-mail-queue-options.php:799
+msgid "Send alert to"
+msgstr "Enviar alerta para"
+
+#: total-mail-queue-options.php:760
+msgid "Send max."
+msgstr "Enviar no máximo"
+
+#: total-mail-queue-options.php:721
+msgid "Send Method"
+msgstr "Método de Envio"
+
+#: total-mail-queue-options.php:193
+msgid "Send method:"
+msgstr "Método de envio:"
+
+#: total-mail-queue-options.php:456
+msgid "Sent"
+msgstr "Enviado"
+
+#: total-mail-queue-options.php:194
+msgid "Sent:"
+msgstr "Enviado:"
+
+#: total-mail-queue-options.php:9 total-mail-queue-options.php:22 total-mail-queue-options.php:22 total-mail-queue-options.php:703
+msgid "Settings"
+msgstr "Configurações"
+
+#: total-mail-queue-options.php:988
+msgid "Settings and SMTP accounts imported successfully."
+msgstr "Configurações e contas SMTP importadas com sucesso."
+
+#: total-mail-queue-options.php:12
+msgid "SMTP"
+msgstr "SMTP"
+
+#: total-mail-queue-smtp.php:62
+msgid "SMTP account added."
+msgstr "Conta SMTP adicionada."
+
+#: total-mail-queue-smtp.php:78
+msgid "SMTP account deleted."
+msgstr "Conta SMTP excluída."
+
+#: total-mail-queue-smtp.php:56
+msgid "SMTP account updated."
+msgstr "Conta SMTP atualizada."
+
+#: total-mail-queue-options.php:25 total-mail-queue-options.php:706 total-mail-queue-smtp.php:248
+msgid "SMTP Accounts"
+msgstr "Contas SMTP"
+
+#: total-mail-queue-options.php:192
+msgid "SMTP accounts:"
+msgstr "Contas SMTP:"
+
+#: total-mail-queue.php:807
+msgid "SMTP host is required."
+msgstr "É necessário um servidor SMTP."
+
+#. %s: recipient email address
+#: total-mail-queue-options.php:629 total-mail-queue-options.php:676
+#, php-format
+msgid "Sorry, your email to %s can't be sent again."
+msgstr "Desculpe, seu e-mail para %s não poderá ser reenviado."
+
+#: total-mail-queue-options.php:437
+msgid "Status"
+msgstr "Status"
+
+#: total-mail-queue-options.php:440
+msgid "Subject"
+msgstr "Assunto"
+
+#. %s: admin email address
+#: total-mail-queue-options.php:365
+#, php-format
+msgid "Sure! Put a Test Email for %s into the Queue"
+msgstr "Claro! Coloque um e-mail de teste para %s na fila."
+
+#. Description of the plugin
+msgid "Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual."
+msgstr "Assuma o controle e melhore a segurança do wp_mail(). Coloque em fila e registre os e-mails enviados e receba alertas caso seu site tente enviar mais e-mails do que o normal."
+
+#: total-mail-queue-options.php:55 total-mail-queue-smtp.php:231
+msgid "Test Connection"
+msgstr "Testar Conexão"
+
+#: total-mail-queue-options.php:54
+msgid "Testing..."
+msgstr "Testando..."
+
+#. %s: timestamp
+#: total-mail-queue-options.php:166
+#, php-format
+msgid "Testmail #%s"
+msgstr "E-mail teste #%s"
+
+#: total-mail-queue.php:936
+msgid "Text"
+msgstr "Texto"
+
+#: total-mail-queue-options.php:630 total-mail-queue-options.php:677
+msgid "The email used to have attachments, which are not available anymore. Only emails without attachments can be resent."
+msgstr "O e-mail costumava conter anexos, que não estão mais disponíveis. Somente e-mails sem anexos podem ser reenviados."
+
+#. %s: list of filter names
+#: total-mail-queue-options.php:225
+#, php-format
+msgid "The following filter(s) on %1$s may interfere with email sending: %2$s. Consider deactivating conflicting email plugins when using SMTP accounts from Total Mail Queue."
+msgstr "Os seguintes filtros em %1$s podem interferir no envio de e-mails: %2$s. Considere desativar os plugins de e-mail conflitantes ao usar contas SMTP do Total Mail Queue."
+
+#: total-mail-queue-options.php:640
+#, php-format
+msgid "The other emails have been put again into the %sQueue%s."
+msgstr "Os outros e-mails foram colocados novamente na fila %sQueue%s."
+
+#: total-mail-queue-options.php:249
+msgid "The plugin has no impact at the moment, no Mails inside the Queue are going to be sent."
+msgstr "O plugin não tem impacto neste momento, nenhum e-mail na fila será enviado."
+
+#: total-mail-queue-options.php:737
+msgid "The plugin is currently disabled and has no effect."
+msgstr "O plugin está atualmente desativado e não tem efeito."
+
+#: total-mail-queue-options.php:200
+#, php-format
+msgid "The plugin is currently disabled. Enable it in the %sSettings%s."
+msgstr "O plugin está atualmente desativado. Ative-o em %sSettings%s."
+
+#: total-mail-queue-options.php:249
+msgid "The plugin is disabled"
+msgstr "O plugin está desativado"
+
+#: total-mail-queue-options.php:245
+msgid "The plugin is enabled"
+msgstr "O plugin está ativado."
+
+#. %s: human-readable time diff
+#: total-mail-queue-options.php:396
+#, php-format
+msgid "The Queue hasn't been able to be executed since %s."
+msgstr "A fila não pôde ser executada desde %s."
+
+#: total-mail-queue-options.php:354
+msgid "The Send Method setting controls how emails from the retention queue are delivered. There are three options:"
+msgstr "A configuração \"Método de Envio\" controla como os e-mails da fila de retenção são entregues. Existem três opções:"
+
+#. %s: number of emails in queue
+#: total-mail-queue.php:465
+#, php-format
+msgid "The Total Mail Queue Plugin has detected that your website tries to send more emails than expected (currently %s)."
+msgstr "O plugin Total Mail Queue detectou que seu site está tentando enviar mais e-mails do que o esperado (atualmente %s)."
+
+#: total-mail-queue-options.php:53
+msgid "There was an error loading the message."
+msgstr "Ocorreu um erro ao carregar a mensagem."
+
+#: total-mail-queue-options.php:948
+msgid "This file is not a valid Total Mail Queue export."
+msgstr "Este arquivo não é uma exportação válida do Total Mail Queue."
+
+#: total-mail-queue-options.php:275
+msgid "This is a simple and effective way to improve the security of your WordPress installation."
+msgstr "Esta é uma forma simples e eficaz de melhorar a segurança da sua instalação do WordPress."
+
+#: total-mail-queue-options.php:822
+#, php-format
+msgid "This is an important message from your %sTotal Mail Queue%s plugin. Please take a look at your %sMail Log%s. The last email(s) couldn't be sent properly."
+msgstr "Esta é uma mensagem importante do seu plugin %sTotal Mail Queue%s. Por favor, verifique seu %sMail Log%s. Os últimos e-mails não puderam ser enviados corretamente."
+
+#. %s: site URL
+#: total-mail-queue.php:462
+#, php-format
+msgid "this is an important message from your WordPress website %s."
+msgstr "esta é uma mensagem importante do seu site WordPress %s."
+
+#: total-mail-queue-options.php:167
+msgid "This is just a test email sent by the Total Mail Queue plugin."
+msgstr "Este é apenas um e-mail de teste enviado pelo plugin Total Mail Queue."
+
+#: total-mail-queue-options.php:356
+msgid "This is the default. The plugin will first try to use an SMTP account configured in the SMTP Accounts tab. If no SMTP account is available (none configured or all have reached their limits), it will try to replay any captured SMTP configuration from other plugins. If neither is available, it falls back to the standard WordPress wp_mail() function."
+msgstr "Esta é a configuração padrão. O plugin primeiro tentará usar uma conta SMTP configurada na aba Contas SMTP. Se nenhuma conta SMTP estiver disponível (nenhuma configurada ou todas atingiram seus limites), ele tentará reproduzir qualquer configuração SMTP capturada de outros plugins. Se nenhuma estiver disponível, ele recorrerá à função padrão do WordPress, wp_mail()."
+
+#: total-mail-queue-options.php:854
+msgid "This plugin is not supported when using in combination with plugins that do not use the standard <i>wp_mail()</i> function."
+msgstr "Este plugin não é compatível quando usado em conjunto com plugins que não utilizam a função padrão <i>wp_mail()</i>."
+
+#: total-mail-queue-options.php:145
+msgid "This will replace all current settings and SMTP accounts. Continue?"
+msgstr "Isso substituirá todas as configurações e contas SMTP atuais. Continuar?"
+
+#: total-mail-queue-options.php:436
+msgid "Time"
+msgstr "Tempo"
+
+#: total-mail-queue-options.php:780
+msgid "time(s) before marking as error."
+msgstr "vez(es) antes de marcar como erro."
+
+#. Name of the plugin
+#: total-mail-queue.php:657
+msgid "Total Mail Queue"
+msgstr "Total Mail Queue"
+
+#: total-mail-queue.php:368
+msgid "Unknown"
+msgstr "Desconhecido"
+
+#: total-mail-queue-smtp.php:282 total-mail-queue-smtp.php:285
+msgid "unlimited"
+msgstr "ilimitado"
+
+#: total-mail-queue-options.php:141
+msgid "Upload a previously exported XML file to restore settings and SMTP accounts. This will replace all current settings and SMTP accounts."
+msgstr "Faça o upload de um arquivo XML exportado anteriormente para restaurar as configurações e as contas SMTP. Isso substituirá todas as configurações e contas SMTP atuais."
+
+#: total-mail-queue-smtp.php:171
+msgid "Username"
+msgstr "Nome de usuário"
+
+#. %s: message size in bytes
+#: total-mail-queue-options.php:550
+#, php-format
+msgid "View message %s"
+msgstr "Visualizar mensagem %s"
+
+#: total-mail-queue.php:543
+msgid "Waiting: no SMTP account available (check if accounts are enabled and limits are not exceeded)."
+msgstr "Aguardando: nenhuma conta SMTP disponível (verifique se as contas estão habilitadas e se os limites não foram excedidos)."
+
+#: total-mail-queue-options.php:363
+msgid "Want to put a test email into the Queue?"
+msgstr "Deseja adicionar um e-mail de teste à fila?"
+
+#: total-mail-queue-options.php:222
+msgid "Warning: conflicting email plugin detected."
+msgstr "Aviso: foi detectado um plugin de e-mail conflitante."
+
+#: total-mail-queue-options.php:265
+msgid "What about Proxy-Caching, e.g. NGINX?"
+msgstr "E quanto ao cache de proxy, por exemplo, o NGINX?"
+
+#: total-mail-queue-options.php:274
+msgid "What are Queue alerts?"
+msgstr "O que são alertas de fila?"
+
+#: total-mail-queue-options.php:353
+msgid "What is the \"Send Method\" setting?"
+msgstr "O que é a configuração \"Método de Envio\"?"
+
+#: total-mail-queue-options.php:305 total-mail-queue-options.php:337
+msgid "When editing a form in Contact Form 7 just add an additional line to the <i>`Additional Headers`</i> field under the <i>`Mail`</i> tab panel."
+msgstr "Ao editar um formulário no Contact Form 7, basta adicionar uma linha adicional ao campo <i>`Cabeçalhos Adicionais`</i> no painel da guia <i>`E-mail`</i>."
+
+#: total-mail-queue-options.php:267
+msgid "WordPress Cron"
+msgstr "Cron do WordPress"
+
+#: total-mail-queue-options.php:358
+msgid "WordPress default"
+msgstr "Padrão do WordPress"
+
+#: total-mail-queue-options.php:790
+msgid "WordPress default — Ignore plugin SMTP accounts, send via standard wp_mail()"
+msgstr "Configuração padrão do WordPress — Ignorar contas SMTP de plugins, enviar via wp_mail() padrão."
+
+#: total-mail-queue-options.php:261
+msgid "wp-cron file"
+msgstr "Arquivo wp-cron"
+
+#: total-mail-queue.php:607
+msgid "wp_mail() returned false. Check for conflicting email plugins or server mail configuration."
+msgstr "A função wp_mail() retornou falso. Verifique se há conflitos com plugins de e-mail ou configurações de e-mail do servidor."
+
+#: total-mail-queue-smtp.php:305
+msgid "Yes"
+msgstr "Sim"
+
+#: total-mail-queue-options.php:322
+msgid "Yes, this is possible (if you absolutely need to do this)."
+msgstr "Sim, isso é possível (se você realmente precisar fazer isso)."
+
+#: total-mail-queue-options.php:291
+msgid "Yes, you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`High`</i> to your email. High priority emails will be sent through the standard Total Mail Queue sending cycle but before all normal emails lacking a priority header in the queue."
+msgstr "Sim, você pode adicionar o cabeçalho personalizado <i>`X-Mail-Queue-Prio`</i> definido como <i>`High`</i> ao seu e-mail. E-mails de alta prioridade serão enviados pelo ciclo de envio padrão da fila Total Mail Queue, mas antes de todos os e-mails normais que não possuem um cabeçalho de prioridade na fila."
+
+#: total-mail-queue-options.php:271
+msgid "You are covered. All attachments are stored temporarily in the queue until they are sent along with their corresponding emails."
+msgstr "Você está coberto. Todos os anexos são armazenados temporariamente na fila até serem enviados juntamente com seus respectivos e-mails."
+
+#: total-mail-queue-options.php:103
+#, php-format
+msgid "Your normal WP Cron is disabled. Please make sure you're running the Cron manually by calling %s every couple of minutes."
+msgstr "Seu WP Cron padrão está desativado. Certifique-se de executar o Cron manualmente chamando %s a cada poucos minutos."
+
+#. %s: blog name
+#: total-mail-queue.php:474
+#, php-format
+msgid "🔴 WordPress Total Mail Queue Alert - %s"
+msgstr "🔴 Alerta de fila de e-mails do WordPress Total - %s"
