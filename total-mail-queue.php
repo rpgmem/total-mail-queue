@@ -567,9 +567,22 @@ function wp_tmq_search_mail_from_queue() {
                     add_action( 'phpmailer_init', $tmq_phpmailer_hook, 999999 );
                 }
 
-                remove_filter('pre_wp_mail', 'wp_tmq_prewpmail', $wp_tmq_pre_wp_mail_priority);
+                // Remove ALL other pre_wp_mail filters to prevent conflicts, keep only ours to re-add later
+                global $wp_filter;
+                $saved_pre_wp_mail = null;
+                if ( isset( $wp_filter['pre_wp_mail'] ) ) {
+                    $saved_pre_wp_mail = clone $wp_filter['pre_wp_mail'];
+                }
+                remove_all_filters( 'pre_wp_mail' );
+
                 $sendstatus = wp_mail($to,$item['subject'],$item['message'],$headers,$attachments); // Finally sends the email for real
-                add_filter('pre_wp_mail', 'wp_tmq_prewpmail', $wp_tmq_pre_wp_mail_priority, 2);
+
+                // Restore all pre_wp_mail filters
+                if ( $saved_pre_wp_mail ) {
+                    $wp_filter['pre_wp_mail'] = $saved_pre_wp_mail;
+                } else {
+                    add_filter('pre_wp_mail', 'wp_tmq_prewpmail', $wp_tmq_pre_wp_mail_priority, 2);
+                }
 
                 // Remove temporary phpmailer hook
                 if ( $tmq_phpmailer_hook ) {
@@ -585,6 +598,17 @@ function wp_tmq_search_mail_from_queue() {
                     $diag['sent']++;
                 } else {
                     $diag['errors']++;
+                    // If wp_mail_failed hook didn't update info, write a fallback diagnostic
+                    $current_info = $wpdb->get_var( $wpdb->prepare( "SELECT `info` FROM `$tableName` WHERE `id` = %d", $item['id'] ) );
+                    if ( empty( $current_info ) ) {
+                        $wpdb->update(
+                            $tableName,
+                            array( 'info' => __( 'wp_mail() returned false. Check for conflicting email plugins or server mail configuration.', 'total-mail-queue' ) ),
+                            array( 'id' => $item['id'] ),
+                            '%s',
+                            '%d'
+                        );
+                    }
                 }
                 if (is_array($attachments)) {
                     global $wp_filesystem;

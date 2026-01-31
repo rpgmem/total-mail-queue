@@ -146,6 +146,37 @@ function wp_tmq_settings_page() {
             echo '<div class="notice notice-warning"><p>' . sprintf( __( 'The plugin is currently disabled. Enable it in the %sSettings%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue">', '</a>' ) . '</p></div>';
         }
 
+        // Warn about conflicting email plugins
+        if ( $wp_tmq_options['enabled'] === '1' ) {
+            global $wp_filter;
+            if ( isset( $wp_filter['pre_wp_mail'] ) ) {
+                $other_filters = array();
+                foreach ( $wp_filter['pre_wp_mail']->callbacks as $priority => $callbacks ) {
+                    foreach ( $callbacks as $id => $callback ) {
+                        $func = $callback['function'];
+                        if ( is_string( $func ) && $func === 'wp_tmq_prewpmail' ) { continue; }
+                        if ( is_array( $func ) ) {
+                            $other_filters[] = ( is_object( $func[0] ) ? get_class( $func[0] ) : $func[0] ) . '::' . $func[1];
+                        } else if ( is_string( $func ) ) {
+                            $other_filters[] = $func;
+                        } else {
+                            $other_filters[] = __( '(closure)', 'total-mail-queue' );
+                        }
+                    }
+                }
+                if ( ! empty( $other_filters ) ) {
+                    echo '<div class="notice notice-warning"><p><strong>' . __( 'Warning: conflicting email plugin detected.', 'total-mail-queue' ) . '</strong> ';
+                    echo sprintf(
+                        /* translators: %s: list of filter names */
+                        __( 'The following filter(s) on %1$s may interfere with email sending: %2$s. Consider deactivating conflicting email plugins when using SMTP accounts from Total Mail Queue.', 'total-mail-queue' ),
+                        '<code>pre_wp_mail</code>',
+                        '<code>' . esc_html( implode( '</code>, <code>', $other_filters ) ) . '</code>'
+                    );
+                    echo '</p></div>';
+                }
+            }
+        }
+
         echo '<form method="post" action="admin.php?page=wp_tmq_mail_queue-tab-queue">';
         $queuetable = new wp_tmq_Log_Table();
         $queuetable->prepare_items();
