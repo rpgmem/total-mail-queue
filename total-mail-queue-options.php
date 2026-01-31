@@ -42,14 +42,14 @@ add_action( 'admin_enqueue_scripts', 'wp_tmq_settings_page_assets' );
 // Options Page Script
 function wp_tmq_settings_page_inline_script () {
     $d  = '';
-    $d .= '<script>';
     $d .= '( function ( global ) {';
     $d .=   '"use strict";';
     $d .=   'const tmq = global.tmq = global.tmq || {};';
     $d .=   'tmq.restUrl = "'.esc_url( wp_make_link_relative( rest_url() ) ).'";';
     $d .=   'tmq.restNonce = "'.esc_html( wp_create_nonce( 'wp_rest' ) ).'";';
+    $d .=   'tmq.i18n = tmq.i18n || {};';
+    $d .=   'tmq.i18n.errorLoadingMessage = "'.esc_js( __( 'There was an error loading the message.', 'total-mail-queue' ) ).'";';
     $d .= '}) ( this );';
-    $d .= '</script>';
     return $d;
 }
 
@@ -63,15 +63,12 @@ function wp_tmq_settings_page() {
     global $wp_tmq_options;
 
     // Get the active tab from the $_GET param
-    $default_tab = null;
-    $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : $default_tab;
+    $tab = isset($_GET['page']) ? sanitize_key($_GET['page']) : 'wp_tmq_mail_queue';
 
     echo '<div class="wrap">';
 
     // Options Header
     echo '<h1 class="tmq-title"><img class="tmq-logo" src="'.esc_url(plugins_url('assets/img/total-mail-queue-logo-wordmark.svg', __FILE__)).'" alt="Total Mail Queue" width="308" height="56" /></h1>';
-
-    $tab = sanitize_key($_GET['page']);
     if ($tab != 'wp_tmq_mail_queue-tab-croninfo' ) {
         if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
             echo '<div class="notice notice-warning notice-large">';
@@ -138,8 +135,10 @@ function wp_tmq_settings_page() {
         echo '<h3>' . __( 'How does this Plugin work?', 'total-mail-queue' ) . '</h3>';
         echo '<p>' . sprintf( __( 'If enabled this plugin intercepts the %s function. Instead of sending the mails directly, it stores them in the database and sends them step by step with a delay during the %s.', 'total-mail-queue' ), '<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>', '<i>WP Cron</i>' ) . '</p>';
         echo '<p>' . __( 'Current state:', 'total-mail-queue' ) . ' ';
-        if ($wp_tmq_options['enabled'] == '1') {
+        if ($wp_tmq_options['enabled'] === '1') {
             echo '<b class="tmq-ok">' . __( 'The plugin is enabled', 'total-mail-queue' ) . '</b> ' . sprintf( __( 'All Mails sent through %1$s are delayed by the %2$sQueue%3$s.', 'total-mail-queue' ), '<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>', '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' );
+        } else if ($wp_tmq_options['enabled'] === '2') {
+            echo '<b class="tmq-warning">' . __( 'Block mode is active', 'total-mail-queue' ) . '</b>. ' . __( 'All outgoing emails are being retained and will NOT be sent.', 'total-mail-queue' );
         } else {
             echo '<b>' . __( 'The plugin is disabled', 'total-mail-queue' ) . '</b>. ' . __( 'The plugin has no impact at the moment, no Mails inside the Queue are going to be sent.', 'total-mail-queue' );
         }
@@ -467,9 +466,9 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 }
                 break;
             case 'resend':
+                $count_resend = 0;
+                $count_error  = 0;
                 foreach($request_ids as $id) {
-                    $count_resend = 0;
-                    $count_error  = 0;
                     $maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
                     if (!$maildata->attachments || $maildata->attachments == '') {
                         $count_resend++;
@@ -594,7 +593,7 @@ function wp_tmq_render_option_status() {
     if ( $mode === '0' ) {
         echo ' <span class="tmq-warning">' . __( 'The plugin is currently disabled and has no effect.', 'total-mail-queue' ) . '</span>';
     } else if ( $mode === '2' ) {
-        echo ' <span class="tmq-warning" style="color:#d63638;">' . __( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
+        echo ' <span class="tmq-warning tmq-warning-block">' . __( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
     }
 }
 

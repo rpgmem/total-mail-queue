@@ -248,7 +248,7 @@ function wp_tmq_render_smtp_page() {
     echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp&smtp-action=add' ) ) . '" class="button button-primary">' . __( 'Add SMTP Account', 'total-mail-queue' ) . '</a> ';
 
     if ( ! empty( $accounts ) ) {
-        echo '<form method="post" style="display:inline;">';
+        echo '<form method="post" class="tmq-inline-form">';
         wp_nonce_field( 'wp_tmq_smtp_reset_counters', 'wp_tmq_smtp_reset_nonce' );
         echo '<input type="submit" name="wp_tmq_smtp_reset_counters" class="button" value="' . esc_attr__( 'Reset Counters', 'total-mail-queue' ) . '" onclick="return confirm(\'' . esc_js( __( 'Are you sure you want to reset all sending counters to zero?', 'total-mail-queue' ) ) . '\');" />';
         echo '</form>';

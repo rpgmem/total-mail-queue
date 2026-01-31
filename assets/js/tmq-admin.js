@@ -2,7 +2,7 @@
 	"use strict";
 
 	const $doc = $( document );
-	const { restUrl, restNonce } = tmq;
+	const { restUrl, restNonce, i18n } = tmq;
 
 	// select/deselect all table rows
 	$doc.on( "click", '.tmq-select-all', function () {
@@ -23,7 +23,7 @@
 			} else {
 				const responseData = response.responseJSON || response.data;
 				console.log( responseData );
-				alert( "There was an error loading the message." );
+				alert( i18n.errorLoadingMessage );
 			}
 		});
 	});

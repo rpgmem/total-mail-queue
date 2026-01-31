@@ -165,7 +165,7 @@ $wp_tmq_options = wp_tmq_get_settings(); // Get Settings
 $wp_tmq_pre_wp_mail_priority = 99999;
 
 // Enable interception for both queue mode (1) and block mode (2)
-if (in_array($wp_tmq_options['enabled'], array('1','2')) && wp_doing_cron() == false) {
+if (in_array($wp_tmq_options['enabled'], array('1','2')) && wp_doing_cron() === false) {
     // High priority: run late in the game to react to previous filters
     add_filter('pre_wp_mail', 'wp_tmq_prewpmail', $wp_tmq_pre_wp_mail_priority, 2);
 }
@@ -480,14 +480,11 @@ function wp_tmq_search_mail_from_queue() {
 
     // Get available SMTP accounts (ordered by priority, with available limits)
     $smtp_accounts = wp_tmq_get_available_smtp();
-    $current_smtp_index = 0;
-
     // Send Mails in Queue
     if ($mailsInQueue > 0) {
-        $results = array_slice($mailjobs,0,intval($wp_tmq_options['queue_amount']));
-        if ($results && count($results) > 0) {
-            foreach($results as $index => $item) {
-                if ($item['recipient'] && $item['recipient'] != '') { $to = maybe_unserialize($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = 'ERROR // '.$item['subject']; }
+        if ($mailjobs && count($mailjobs) > 0) {
+            foreach($mailjobs as $index => $item) {
+                if ($item['recipient'] && $item['recipient'] != '') { $to = maybe_unserialize($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
                 if ($item['headers'] && $item['headers'] != '') { $headers = maybe_unserialize($item['headers']); } else { $headers = ''; }
                 if ($item['attachments'] && $item['attachments'] != '') { $attachments = maybe_unserialize($item['attachments']); } else { $attachments = ''; }
                 $wp_tmq_mailid = $item['id'];
@@ -680,13 +677,13 @@ function wp_tmq_updateDatabaseTables() {
     update_option( 'wp_tmq_version', $wp_tmq_version, /*autoload*/true );
 }
 
-/* Update database and register hooks on activation */
+/* Update database on activation */
 function wp_tmq_activate() {
     wp_tmq_updateDatabaseTables();
-    register_uninstall_hook( __FILE__, 'wp_tmq_uninstall' );
-    register_deactivation_hook( __FILE__, 'wp_tmq_deactivate' );
 }
 register_activation_hook( __FILE__, 'wp_tmq_activate' );
+register_deactivation_hook( __FILE__, 'wp_tmq_deactivate' );
+register_uninstall_hook( __FILE__, 'wp_tmq_uninstall' );
 
 /* Upgrade routine: check for mismatching version numbers and run database update if necessary */
 function wp_tmq_check_update_db () {

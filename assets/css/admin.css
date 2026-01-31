@@ -41,3 +41,5 @@ span.tmq-status.tmq-status-alert                    { background: #1d2327; color
 .tmq-email-source-meta summary                           { font-weight: bold; }
 .tmq-email-source-meta summary + pre                     { margin-top: .125rem; }
 .tmq-email-plain-text                                    { white-space: break-spaces; }
+.tmq-warning-block                                       { color: #d63638; }
+.tmq-inline-form                                         { display: inline; }
