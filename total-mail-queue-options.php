@@ -8,7 +8,7 @@ function wp_tmq_actionlinks ( $actions ) {
     $links = array(
        '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue').'">' . __( 'Settings', 'total-mail-queue' ) . '</a>',
        '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-log').'">' . __( 'Log', 'total-mail-queue' ) . '</a>',
-       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-queue').'">' . __( 'Queue', 'total-mail-queue' ) . '</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-queue').'">' . __( 'Retention', 'total-mail-queue' ) . '</a>',
        '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-faq').'">' . __( 'FAQs', 'total-mail-queue' ) . '</a>',
     );
     return array_merge($actions,$links );
@@ -20,8 +20,9 @@ function wp_tmq_settings_page_menuitem() {
     add_menu_page('Total Mail Queue','Total Mail Queue','manage_options','wp_tmq_mail_queue','wp_tmq_settings_page','data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTc4IiBoZWlnaHQ9IjE3OCIgdmlld0JveD0iMCAwIDE3OCAxNzgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNzguNzI0MSA1LjI1MzA5Qzc2LjkwNzQgNC43MDgxIDc0Ljk0MDEgNS4wNTQxMyA3My40MTg0IDYuMTg2MjlDNzEuODk2OCA3LjMxODQ1IDcxIDkuMTAzNDEgNzEgMTEuMDAwMVYxNjdDNzEgMTY4Ljg5NyA3MS44OTY4IDE3MC42ODIgNzMuNDE4NCAxNzEuODE0Qzc0Ljk0MDEgMTcyLjk0NiA3Ni45MDc0IDE3My4yOTIgNzguNzI0MSAxNzIuNzQ3TDE1OC43MjQgMTQ4Ljc0N0MxNjEuMjYyIDE0Ny45ODYgMTYzIDE0NS42NSAxNjMgMTQzVjM1QzE2MyAzMi4zNTA0IDE2MS4yNjIgMzAuMDE0NSAxNTguNzI0IDI5LjI1MzFMNzguNzI0MSA1LjI1MzA5Wk04NS43ODg3IDIyLjM4NDZDODcuNzg1NCAyMS40Mzk0IDkwLjE3MDMgMjIuMjkxOSA5MS4xMTU0IDI0LjI4ODdMMTIyLjg1MiA5MS4zMzc4TDE0My4zMzQgNDQuNDAwMkMxNDQuMjE3IDQyLjM3NTUgMTQ2LjU3NSA0MS40NTAzIDE0OC42IDQyLjMzMzhDMTUwLjYyNSA0My4yMTc0IDE1MS41NSA0NS41NzUgMTUwLjY2NiA0Ny41OTk4TDEyNi42NjYgMTAyLjZDMTI2LjAzOSAxMDQuMDM3IDEyNC42MjkgMTA0Ljk3NiAxMjMuMDYxIDEwNUMxMjEuNDkzIDEwNS4wMjQgMTIwLjA1NiAxMDQuMTI5IDExOS4zODUgMTAyLjcxMUw4My44ODQ2IDI3LjcxMTNDODIuOTM5NCAyNS43MTQ2IDgzLjc5MTkgMjMuMzI5NyA4NS43ODg3IDIyLjM4NDZaIiBmaWxsPSIjYTdhYWFkIi8+CjxwYXRoIGQ9Ik00OSAxM0M1Mi4zMTM3IDEzIDU1IDE1LjY4NjMgNTUgMTlWMTU5QzU1IDE2Mi4zMTQgNTIuMzEzNyAxNjUgNDkgMTY1QzQ1LjY4NjMgMTY1IDQzIDE2Mi4zMTQgNDMgMTU5VjE5QzQzIDE1LjY4NjMgNDUuNjg2MyAxMyA0OSAxM1oiIGZpbGw9IiNhN2FhYWQiLz4KPHBhdGggZD0iTTIxIDIxQzI0LjMxMzcgMjEgMjcgMjMuNjg2MyAyNyAyN1YxNTFDMjcgMTU0LjMxNCAyNC4zMTM3IDE1NyAyMSAxNTdDMTcuNjg2MyAxNTcgMTUgMTU0LjMxNCAxNSAxNTFWMjdDMTUgMjMuNjg2MyAxNy42ODYzIDIxIDIxIDIxWiIgZmlsbD0iI2E3YWFhZCIvPgo8L3N2Zz4=');
     add_submenu_page('wp_tmq_mail_queue', __( 'Settings', 'total-mail-queue' ), __( 'Settings', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue','wp_tmq_settings_page');
     add_submenu_page('wp_tmq_mail_queue', __( 'Log', 'total-mail-queue' ), __( 'Log', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-log','wp_tmq_settings_page');
-    add_submenu_page('wp_tmq_mail_queue', __( 'Queue', 'total-mail-queue' ), __( 'Queue', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-queue','wp_tmq_settings_page');
+    add_submenu_page('wp_tmq_mail_queue', __( 'Retention', 'total-mail-queue' ), __( 'Retention', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-queue','wp_tmq_settings_page');
     add_submenu_page('wp_tmq_mail_queue', __( 'FAQ', 'total-mail-queue' ), __( 'FAQ', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-faq','wp_tmq_settings_page');
+    add_submenu_page('wp_tmq_mail_queue', __( 'SMTP Accounts', 'total-mail-queue' ), __( 'SMTP Accounts', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-smtp','wp_tmq_settings_page');
     if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
         add_submenu_page('wp_tmq_mail_queue', __( 'Cron Information', 'total-mail-queue' ), __( 'Cron Information', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-croninfo','wp_tmq_settings_page');
     }
@@ -112,14 +113,19 @@ function wp_tmq_settings_page() {
             $wpdb->insert($tableName,$data);
         }
 
-        $next_cron_timestamp = wp_next_scheduled('wp_tmq_mail_queue_hook');
-        if ($next_cron_timestamp) {
-            if ($next_cron_timestamp > time()) {
-                /* translators: %1$s: human-readable time diff, %2$s: scheduled time */
-                echo '<div class="notice notice-success"><p>' . sprintf( __( 'Next sending will be triggered in %1$s at %2$s.', 'total-mail-queue' ), esc_html( human_time_diff( $next_cron_timestamp ) ), esc_html( wp_date( 'H:i', $next_cron_timestamp ) ) ) . '</p></div>';
+        // Show mode-specific notices
+        if ( $wp_tmq_options['enabled'] === '2' ) {
+            echo '<div class="notice notice-error"><p><strong>' . __( 'Block Mode Active', 'total-mail-queue' ) . '</strong> — ' . __( 'All outgoing emails are being retained and will NOT be sent. No emails will leave this server.', 'total-mail-queue' ) . ' ' . sprintf( __( 'Change this in %sSettings%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue">', '</a>' ) . '</p></div>';
+        } else if ( $wp_tmq_options['enabled'] === '1' ) {
+            $next_cron_timestamp = wp_next_scheduled('wp_tmq_mail_queue_hook');
+            if ($next_cron_timestamp) {
+                if ($next_cron_timestamp > time()) {
+                    /* translators: %1$s: human-readable time diff, %2$s: scheduled time */
+                    echo '<div class="notice notice-success"><p>' . sprintf( __( 'Next sending will be triggered in %1$s at %2$s.', 'total-mail-queue' ), esc_html( human_time_diff( $next_cron_timestamp ) ), esc_html( wp_date( 'H:i', $next_cron_timestamp ) ) ) . '</p></div>';
+                }
             }
         } else {
-            echo '<div class="notice notice-error"><p>' . sprintf( __( 'The Queue is not enabled at the moment. Enable it in the %sSettings%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue">', '</a>' ) . '</p></div>';
+            echo '<div class="notice notice-warning"><p>' . sprintf( __( 'The plugin is currently disabled. Enable it in the %sSettings%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue">', '</a>' ) . '</p></div>';
         }
 
         echo '<form method="post" action="admin.php?page=wp_tmq_mail_queue-tab-queue">';
@@ -244,6 +250,8 @@ function wp_tmq_settings_page() {
         echo '<p><a class="button" href="admin.php?page=wp_tmq_mail_queue-tab-queue&addtestmail">' . sprintf( __( 'Sure! Put a Test Email for %s into the Queue', 'total-mail-queue' ), esc_html( $wp_tmq_options['email'] ) ) . '</a></p>';
         echo '</div>';
 
+    } else if ($tab == 'wp_tmq_mail_queue-tab-smtp') {
+        wp_tmq_render_smtp_page();
     } else if ($tab == 'wp_tmq_mail_queue-tab-croninfo') {
         echo '<div class="tmq-box">';
             echo '<h3>' . __( 'Information: Your common WP Cron is disabled', 'total-mail-queue' ) . '</h3>';
@@ -498,8 +506,9 @@ function wp_tmq_settings_page_navi($tab) {
     echo '<nav class="nav-tab-wrapper">';
         echo '<a href="?page=wp_tmq_mail_queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue') { echo ' nav-tab-active'; } echo '">' . __( 'Settings', 'total-mail-queue' ) . '</a>';
         echo '<a href="?page=wp_tmq_mail_queue-tab-log" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-log') { echo ' nav-tab-active'; } echo '">' . __( 'Log', 'total-mail-queue' ) . '</a>';
-        echo '<a href="?page=wp_tmq_mail_queue-tab-queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-queue') { echo ' nav-tab-active'; } echo '">' . __( 'Queue', 'total-mail-queue' ) . '</a>';
+        echo '<a href="?page=wp_tmq_mail_queue-tab-queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-queue') { echo ' nav-tab-active'; } echo '">' . __( 'Retention', 'total-mail-queue' ) . '</a>';
         echo '<a href="?page=wp_tmq_mail_queue-tab-faq" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-faq') { echo ' nav-tab-active'; } echo '">' . __( 'FAQ', 'total-mail-queue' ) . '</a>';
+        echo '<a href="?page=wp_tmq_mail_queue-tab-smtp" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-smtp') { echo ' nav-tab-active'; } echo '">' . __( 'SMTP Accounts', 'total-mail-queue' ) . '</a>';
         if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
             echo '<a href="?page=wp_tmq_mail_queue-tab-croninfo" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-croninfo') { echo ' nav-tab-active'; } echo '">' . __( 'Cron Information', 'total-mail-queue' ) . '</a>';
         }
@@ -510,7 +519,7 @@ function wp_tmq_settings_init() {
     global $wp_tmq_options;
     register_setting('wp_tmq_settings','wp_tmq_settings');
     add_settings_section('wp_tmq_settings_section','',null,'wp_tmq_settings_page');
-    add_settings_field('wp_tmq_status', __( 'Queue + Log enabled', 'total-mail-queue' ),'wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_status', __( 'Operation Mode', 'total-mail-queue' ),'wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_queue', __( 'Queue', 'total-mail-queue' ),'wp_tmq_render_option_queue','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_log', __( 'Log', 'total-mail-queue' ),'wp_tmq_render_option_log','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_alert_status', __( 'Alert enabled', 'total-mail-queue' ),'wp_tmq_render_option_alert_status','wp_tmq_settings_page','wp_tmq_settings_section');
@@ -520,10 +529,16 @@ add_action('admin_init','wp_tmq_settings_init');
 
 function wp_tmq_render_option_status() {
     global $wp_tmq_options;
-    if ($wp_tmq_options['enabled'] == '1') {
-        echo '<input type="checkbox" name="wp_tmq_settings[enabled]" value="1" checked />';
-    } else {
-        echo '<input type="checkbox" name="wp_tmq_settings[enabled]" value="1" /> &nbsp; &nbsp; <span class="tmq-warning"> &larr; ' . __( 'Check this to enable the Queue.', 'total-mail-queue' ) . ' </span> ' . __( 'Otherwise this plugin won\'t have any effect on your website.', 'total-mail-queue' );
+    $mode = $wp_tmq_options['enabled'];
+    echo '<select name="wp_tmq_settings[enabled]">';
+    echo '<option value="0"' . selected( $mode, '0', false ) . '>' . __( 'Disabled — No interception, emails sent normally', 'total-mail-queue' ) . '</option>';
+    echo '<option value="1"' . selected( $mode, '1', false ) . '>' . __( 'Queue — Retain emails and send via queue', 'total-mail-queue' ) . '</option>';
+    echo '<option value="2"' . selected( $mode, '2', false ) . '>' . __( 'Block — Retain all emails, never send (block all outgoing)', 'total-mail-queue' ) . '</option>';
+    echo '</select>';
+    if ( $mode === '0' ) {
+        echo ' <span class="tmq-warning">' . __( 'The plugin is currently disabled and has no effect.', 'total-mail-queue' ) . '</span>';
+    } else if ( $mode === '2' ) {
+        echo ' <span class="tmq-warning" style="color:#d63638;">' . __( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
     }
 }
 
@@ -574,10 +589,10 @@ Alert WordPress User if last email in log could not be sent
 function wp_tmq_checkLogForErrors() {
 
     global $wpdb,$wp_tmq_options;
-    if ($wp_tmq_options['enabled'] != '1') { return; }
+    if ( ! in_array( $wp_tmq_options['enabled'], array( '1', '2' ) ) ) { return; }
 
     $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
-    $last_mail = $wpdb->get_row("SELECT * FROM `$tableName` WHERE `status` != 'queue' ORDER BY `id` DESC",'ARRAY_A');
+    $last_mail = $wpdb->get_row("SELECT * FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `id` DESC",'ARRAY_A');
     if (!$last_mail) { return; }
 
     if ($last_mail['status'] == 'error') {
