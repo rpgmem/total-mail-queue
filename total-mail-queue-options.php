@@ -165,7 +165,7 @@ function wp_tmq_settings_page() {
             }
         }
 
-        if (isset($_GET['addtestmail'])) {
+        if ( isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wp_tmq_addtestmail' ) ) {
             global $wpdb;
             $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
             $data = array(
@@ -371,7 +371,7 @@ function wp_tmq_settings_page() {
         echo '<div class="tmq-box">';
         echo '<h3>' . __( 'Want to put a test email into the Queue?', 'total-mail-queue' ) . '</h3>';
         /* translators: %s: admin email address */
-        echo '<p><a class="button" href="admin.php?page=wp_tmq_mail_queue-tab-queue&addtestmail">' . sprintf( __( 'Sure! Put a Test Email for %s into the Queue', 'total-mail-queue' ), esc_html( $wp_tmq_options['email'] ) ) . '</a></p>';
+        echo '<p><a class="button" href="' . esc_url( wp_nonce_url( 'admin.php?page=wp_tmq_mail_queue-tab-queue&addtestmail', 'wp_tmq_addtestmail' ) ) . '">' . sprintf( __( 'Sure! Put a Test Email for %s into the Queue', 'total-mail-queue' ), esc_html( $wp_tmq_options['email'] ) ) . '</a></p>';
         echo '</div>';
 
     } else if ($tab == 'wp_tmq_mail_queue-tab-smtp') {
@@ -591,12 +591,13 @@ class wp_tmq_Log_Table extends WP_List_Table {
 
     public function process_bulk_action() {
 
-        // security check!
-        if ( isset( $_POST['_wpnonce'] ) && ! empty( $_POST['_wpnonce'] ) ) {
-            $nonce  = sanitize_key( $_POST['_wpnonce'] );
-            $action = 'bulk-' . $this->_args['plural'];
-            if ( ! wp_verify_nonce( $nonce, $action ) )
-                wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+        // No action selected — nothing to do
+        if ( ! $this->current_action() ) { return; }
+
+        // security check — nonce is mandatory for any bulk action
+        $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_key( $_POST['_wpnonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'bulk-' . $this->_args['plural'] ) ) {
+            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
         }
 
         // get IDs
@@ -944,9 +945,9 @@ function wp_tmq_handle_import() {
 
     $file_content = file_get_contents( $_FILES['wp_tmq_import_file']['tmp_name'] );
 
-    // Suppress XML errors and load
+    // Suppress XML errors and disable external entities (XXE protection)
     $use_errors = libxml_use_internal_errors( true );
-    $xml = simplexml_load_string( $file_content );
+    $xml = simplexml_load_string( $file_content, 'SimpleXMLElement', LIBXML_NONET );
     libxml_use_internal_errors( $use_errors );
 
     if ( ! $xml ) {
@@ -957,14 +958,23 @@ function wp_tmq_handle_import() {
         return '<div class="notice notice-error"><p>' . __( 'This file is not a valid Total Mail Queue export.', 'total-mail-queue' ) . '</p></div>';
     }
 
-    // Import settings
+    // Import settings (whitelist allowed keys to prevent injection of tableName etc.)
+    $allowed_keys = array(
+        'enabled', 'alert_enabled', 'email', 'email_amount',
+        'queue_amount', 'queue_interval', 'queue_interval_unit',
+        'clear_queue', 'log_max_records', 'send_method', 'max_retries',
+    );
     if ( isset( $xml->settings ) ) {
-        $settings = array();
+        $current_settings = get_option( 'wp_tmq_settings', array() );
+        if ( ! is_array( $current_settings ) ) { $current_settings = array(); }
         foreach ( $xml->settings->children() as $node ) {
-            $settings[ $node->getName() ] = (string) $node;
+            $key = $node->getName();
+            if ( in_array( $key, $allowed_keys, true ) ) {
+                $current_settings[ $key ] = (string) $node;
+            }
         }
-        if ( ! empty( $settings ) ) {
-            update_option( 'wp_tmq_settings', $settings );
+        if ( ! empty( $current_settings ) ) {
+            update_option( 'wp_tmq_settings', $current_settings );
         }
     }
 
