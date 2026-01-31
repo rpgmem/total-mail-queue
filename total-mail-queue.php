@@ -185,6 +185,37 @@ function wp_tmq_get_available_smtp() {
     return $accounts ? $accounts : array();
 }
 
+/**
+ * Pick the first available SMTP account from the in-memory list.
+ *
+ * Checks cycle_sent against send_bulk without hitting the database.
+ * Returns the account array or null if none available.
+ */
+function wp_tmq_pick_available_smtp( &$smtp_accounts ) {
+    foreach ( $smtp_accounts as $acct ) {
+        $bulk = intval( $acct['send_bulk'] );
+        if ( $bulk === 0 || intval( $acct['cycle_sent'] ) < $bulk ) {
+            return $acct;
+        }
+    }
+    return null;
+}
+
+/**
+ * Update the in-memory SMTP accounts list after a successful send.
+ *
+ * Increments cycle_sent for the given account in the array.
+ */
+function wp_tmq_update_memory_counter( &$smtp_accounts, $smtp_id ) {
+    foreach ( $smtp_accounts as &$acct ) {
+        if ( intval( $acct['id'] ) === intval( $smtp_id ) ) {
+            $acct['cycle_sent'] = intval( $acct['cycle_sent'] ) + 1;
+            break;
+        }
+    }
+    unset( $acct );
+}
+
 function wp_tmq_increment_smtp_counter( $smtp_id ) {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
@@ -615,14 +646,10 @@ function wp_tmq_search_mail_from_queue() {
                 // Determine send method
                 $send_method = isset( $wp_tmq_options['send_method'] ) ? $wp_tmq_options['send_method'] : 'auto';
 
-                // Find available SMTP account (skip if send_method is 'php')
+                // Find available SMTP account from in-memory list (skip if send_method is 'php')
                 $smtp_to_use = null;
                 if ( $send_method !== 'php' && ! empty( $smtp_accounts ) ) {
-                    // Re-check availability (counters may have changed during this batch)
-                    $smtp_accounts = wp_tmq_get_available_smtp();
-                    if ( ! empty( $smtp_accounts ) ) {
-                        $smtp_to_use = $smtp_accounts[0]; // First available by priority
-                    }
+                    $smtp_to_use = wp_tmq_pick_available_smtp( $smtp_accounts );
                 }
 
                 // In 'smtp' mode, if no SMTP account is available, skip remaining emails
@@ -686,10 +713,18 @@ function wp_tmq_search_mail_from_queue() {
                 }
 
                 if ($sendstatus) {
-                    $wpdb->update( $tableName, array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '' ), array( 'id' => $item['id'] ), array( '%s', '%s', '%s' ), array( '%d' ) );
-                    // Increment SMTP counter
+                    $sent_smtp_id = $smtp_to_use ? intval( $smtp_to_use['id'] ) : 0;
+                    $wpdb->update(
+                        $tableName,
+                        array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '', 'smtp_account_id' => $sent_smtp_id ),
+                        array( 'id' => $item['id'] ),
+                        array( '%s', '%s', '%s', '%d' ),
+                        array( '%d' )
+                    );
+                    // Increment SMTP counter (DB for persistence + in-memory for next iteration)
                     if ( $smtp_to_use ) {
                         wp_tmq_increment_smtp_counter( $smtp_to_use['id'] );
+                        wp_tmq_update_memory_counter( $smtp_accounts, $smtp_to_use['id'] );
                     }
                     $diag['sent']++;
                 } else {
@@ -828,6 +863,7 @@ function wp_tmq_updateDatabaseTables() {
     attachments text NOT NULL,
     info varchar(255) DEFAULT '' NOT NULL,
     retry_count smallint(5) DEFAULT 0 NOT NULL,
+    smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
     PRIMARY KEY  (id),
     KEY idx_status_retry (status, retry_count, id),
     KEY idx_status_timestamp (status, timestamp)

@@ -287,6 +287,7 @@ function wp_tmq_render_smtp_page() {
         echo '<table class="widefat striped">';
         echo '<thead>';
         echo '<tr>';
+        echo '<th>' . __( 'ID', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'Name', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'Host:Port', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'From', 'total-mail-queue' ) . '</th>';
@@ -321,6 +322,7 @@ function wp_tmq_render_smtp_page() {
             );
 
             echo '<tr>';
+            echo '<td>#' . esc_html( $acct['id'] ) . '</td>';
             echo '<td>' . esc_html( $acct['name'] ) . '</td>';
             echo '<td>' . esc_html( $acct['host'] ) . ':' . esc_html( $acct['port'] ) . '</td>';
             echo '<td>' . $from_display . '</td>';
