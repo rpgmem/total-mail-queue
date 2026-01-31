@@ -323,7 +323,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
     function get_queue() {
         global $wpdb, $wp_tmq_options;
         $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
-        return $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `timestamp` ASC",'ARRAY_A');
+        return $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `timestamp` ASC",'ARRAY_A');
     }
 
     function get_columns() {
@@ -331,6 +331,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
             'cb'          => '<label><span class="screen-reader-text">' . __( 'Select all', 'total-mail-queue' ) . '</span><input class="tmq-select-all" type="checkbox"></label>',
             'timestamp'   => __( 'Time', 'total-mail-queue' ),
             'status'      => __( 'Status', 'total-mail-queue' ),
+            'info'        => __( 'Info', 'total-mail-queue' ),
             'recipient'   => __( 'Recipient', 'total-mail-queue' ),
             'subject'     => __( 'Subject', 'total-mail-queue' ),
             'message'     => __( 'Message', 'total-mail-queue' ),
@@ -369,8 +370,20 @@ class wp_tmq_Log_Table extends WP_List_Table {
         switch( $column_name ) {
             case 'timestamp':
             case 'subject':
-            case 'info':
                 return esc_html( maybe_unserialize($item[$column_name]) );
+                break;
+            case 'info':
+                $info = isset( $item['info'] ) && $item['info'] ? $item['info'] : '';
+                $retry_count = isset( $item['retry_count'] ) ? intval( $item['retry_count'] ) : 0;
+                $parts = array();
+                if ( $retry_count > 0 ) {
+                    /* translators: %d: number of retry attempts */
+                    $parts[] = '<strong>' . sprintf( esc_html__( 'Attempt #%d', 'total-mail-queue' ), $retry_count + 1 ) . '</strong>';
+                }
+                if ( $info ) {
+                    $parts[] = esc_html( $info );
+                }
+                return implode( '<br>', $parts );
                 break;
             case 'recipient':
             case 'headers':
@@ -394,30 +407,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 }
                 break;
             case 'status':
-                $info = isset( $item[ 'info' ] ) && $item[ 'info' ] ? $item[ 'info' ] : '';
-                $retry_count = isset( $item['retry_count'] ) ? intval( $item['retry_count'] ) : 0;
-                if ( $item[$column_name] === 'alert' ) {
-                    $alertData = json_decode($info,/*associative*/true);
-                    if ( $alertData ) {
-                        $info =  '<strong>' . __( 'Emails in queue', 'total-mail-queue' ) . '</strong>: '.esc_html($alertData['in_queue']);
-                        /* translators: %1$s: max emails, %2$s: interval in minutes */
-                        $info .= '<br /><strong>' . __( 'Queue settings', 'total-mail-queue' ) . '</strong>: ' . sprintf( __( 'Send max %1$s email(s) every %2$s minute(s).', 'total-mail-queue' ), esc_html( $alertData['queue_amount'] ), esc_html( $alertData['queue_interval'] / 60 ) );
-                        /* translators: %s: email threshold */
-                        $info .= '<br /><strong>' . __( 'Alert settings', 'total-mail-queue' ) . '</strong>: ' . sprintf( __( 'Send alert if more than %s email(s) in the queue.', 'total-mail-queue' ), esc_html( $alertData['email_amount'] ) );
-                    } else {
-                        $info = '';
-                    }
-                } else if ( $retry_count > 0 ) {
-                    // Show retry information
-                    /* translators: %d: number of retry attempts */
-                    $retry_label = sprintf( __( 'Attempt #%d', 'total-mail-queue' ), $retry_count + 1 );
-                    $info = $info ? '<strong>' . esc_html( $retry_label ) . '</strong><br />' . esc_html( $info ) : '<strong>' . esc_html( $retry_label ) . '</strong>';
-                } else if ( $item[$column_name] === 'error' && $info ) {
-                    $info = esc_html( $info );
-                }
-                $htmlInfo = $info ? '<span class="tmq-info">'.$info.'</span>' : '';
-                $cssStatus = $htmlInfo ? ' tmq-status-has-info' : '';
-                return '<span class="tmq-status tmq-status-'.sanitize_title($item[$column_name]).esc_html($cssStatus).'">'.$item[$column_name].$htmlInfo.'</span>';
+                return '<span class="tmq-status tmq-status-' . sanitize_title( $item[$column_name] ) . '">' . esc_html( $item[$column_name] ) . '</span>';
                 break;
             case 'message':
                 $message = $item[$column_name];

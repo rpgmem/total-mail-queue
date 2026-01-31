@@ -433,7 +433,7 @@ function wp_tmq_search_mail_from_queue() {
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
 
     // Mails to send
-    $mailjobs     = $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `id` LIMIT ".intval($wp_tmq_options['queue_amount']),'ARRAY_A');
+    $mailjobs     = $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT ".intval($wp_tmq_options['queue_amount']),'ARRAY_A');
     $mailsInQueue = is_array($mailjobs) ? count($mailjobs) : 0;
 
     // Alert Admin, if too many mails in the Queue.
@@ -515,9 +515,16 @@ function wp_tmq_search_mail_from_queue() {
                     }
                 }
 
-                // In 'smtp' mode, if no SMTP account is available, skip this email (keep in queue)
+                // In 'smtp' mode, if no SMTP account is available, skip remaining emails
                 if ( $send_method === 'smtp' && ! $smtp_to_use ) {
-                    continue;
+                    $wpdb->update(
+                        $tableName,
+                        array( 'info' => __( 'Waiting: no SMTP account available (check if accounts are enabled and limits are not exceeded).', 'total-mail-queue' ) ),
+                        array( 'id' => $item['id'] ),
+                        '%s',
+                        '%d'
+                    );
+                    break; // No SMTP available — no point trying other emails in this batch
                 }
 
                 // Configure phpmailer_init hook for this email
