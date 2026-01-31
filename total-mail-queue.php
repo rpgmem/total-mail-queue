@@ -152,6 +152,7 @@ function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
     }
     if ( ! empty( $smtp_account['from_email'] ) ) {
         $phpmailer->From     = $smtp_account['from_email'];
+        $phpmailer->Sender   = $smtp_account['from_email'];
         $phpmailer->FromName = ! empty( $smtp_account['from_name'] ) ? $smtp_account['from_name'] : $phpmailer->FromName;
     }
 }
