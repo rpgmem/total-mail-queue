@@ -423,20 +423,38 @@ if(!class_exists('WP_List_Table')){
 
 class wp_tmq_Log_Table extends WP_List_Table {
 
-    function get_log( $status_filter = '' ) {
-        global $wpdb, $wp_tmq_options;
-        $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
-        $where = "`status` != 'queue' AND `status` != 'high'";
+    function get_log_where( $status_filter = '' ) {
+        global $wpdb;
         if ( $status_filter && in_array( $status_filter, array( 'sent', 'error', 'alert' ), true ) ) {
-            $where = $wpdb->prepare( "`status` = %s", $status_filter );
+            return $wpdb->prepare( "`status` = %s", $status_filter );
         }
-        return $wpdb->get_results("SELECT * FROM `$tableName` WHERE $where ORDER BY `timestamp` DESC",'ARRAY_A');
+        return "`status` != 'queue' AND `status` != 'high'";
     }
 
-    function get_queue() {
+    function get_log_count( $status_filter = '' ) {
         global $wpdb, $wp_tmq_options;
         $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
-        return $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `timestamp` ASC",'ARRAY_A');
+        $where = $this->get_log_where( $status_filter );
+        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE $where" );
+    }
+
+    function get_log( $status_filter = '', $per_page = 50, $offset = 0 ) {
+        global $wpdb, $wp_tmq_options;
+        $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
+        $where = $this->get_log_where( $status_filter );
+        return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), 'ARRAY_A' );
+    }
+
+    function get_queue_count() {
+        global $wpdb, $wp_tmq_options;
+        $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
+        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
+    }
+
+    function get_queue( $per_page = 50, $offset = 0 ) {
+        global $wpdb, $wp_tmq_options;
+        $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
+        return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), 'ARRAY_A' );
     }
 
     function get_columns() {
@@ -488,22 +506,26 @@ class wp_tmq_Log_Table extends WP_List_Table {
         $sortable = array();
         $this->_column_headers = array($columns, $hidden, $sortable);
         $this->process_bulk_action();
+
+        $perPage     = 50;
+        $currentPage = $this->get_pagenum();
+        $offset      = ( $currentPage - 1 ) * $perPage;
+        $totalItems  = 0;
+        $data        = array();
+
         if ($type == 'wp_tmq_mail_queue-tab-log') {
             $status_filter = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
-            $data = $this->get_log( $status_filter );
+            $totalItems = $this->get_log_count( $status_filter );
+            $data = $this->get_log( $status_filter, $perPage, $offset );
         } else if ($type == 'wp_tmq_mail_queue-tab-queue') {
-            $data = $this->get_queue();
+            $totalItems = $this->get_queue_count();
+            $data = $this->get_queue( $perPage, $offset );
         }
-        if ($data && is_array($data)) {
-            $perPage = 50;
-            $currentPage = $this->get_pagenum();
-            $totalItems = count($data);
-            $this->set_pagination_args( array(
-                'total_items' => $totalItems,
-                'per_page'    => $perPage
-            ) );
-            $data = array_slice($data,(($currentPage-1)*$perPage),$perPage);
-        }
+
+        $this->set_pagination_args( array(
+            'total_items' => $totalItems,
+            'per_page'    => $perPage,
+        ) );
         $this->items = $data;
     }
 

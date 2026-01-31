@@ -100,7 +100,7 @@ function wp_tmq_decrypt_password( $encrypted_text ) {
 /* ***************************************************************
 SMTP Account Helpers
 **************************************************************** */
-function wp_tmq_get_available_smtp() {
+function wp_tmq_reset_smtp_counters() {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
 
@@ -118,6 +118,11 @@ function wp_tmq_get_available_smtp() {
         "UPDATE `$smtpTable` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s",
         $today, $this_month
     ) );
+}
+
+function wp_tmq_get_available_smtp() {
+    global $wpdb, $wp_tmq_options;
+    $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
 
     // Get enabled SMTP accounts ordered by priority, where limits not reached
     $accounts = $wpdb->get_results(
@@ -512,7 +517,8 @@ function wp_tmq_search_mail_from_queue() {
 
     }
 
-    // Get available SMTP accounts (ordered by priority, with available limits)
+    // Reset SMTP counters once per cron run, then get available accounts
+    wp_tmq_reset_smtp_counters();
     $smtp_accounts = wp_tmq_get_available_smtp();
 
     // Track diagnostics
@@ -738,7 +744,9 @@ function wp_tmq_updateDatabaseTables() {
     attachments text NOT NULL,
     info varchar(255) DEFAULT '' NOT NULL,
     retry_count smallint(5) DEFAULT 0 NOT NULL,
-    PRIMARY KEY  (id)
+    PRIMARY KEY  (id),
+    KEY idx_status_retry (status, retry_count, id),
+    KEY idx_status_timestamp (status, timestamp)
     ) $charset_collate;";
 
     // SMTP accounts table
