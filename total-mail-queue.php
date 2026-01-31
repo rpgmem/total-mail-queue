@@ -187,6 +187,11 @@ function wp_tmq_increment_smtp_counter( $smtp_id ) {
 }
 
 function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
+    // Close any existing SMTP connection so we start fresh
+    // (WordPress reuses the same PHPMailer instance across wp_mail calls)
+    if ( method_exists( $phpmailer, 'smtpClose' ) ) {
+        $phpmailer->smtpClose();
+    }
     $phpmailer->isSMTP();
     $phpmailer->Host       = $smtp_account['host'];
     $phpmailer->Port       = intval( $smtp_account['port'] );
@@ -634,6 +639,9 @@ function wp_tmq_search_mail_from_queue() {
                 } else if ( $send_method === 'auto' && $captured_phpmailer_config && is_array( $captured_phpmailer_config ) ) {
                     // Replay captured phpmailer config only in 'auto' mode
                     $tmq_phpmailer_hook = function( $phpmailer ) use ( $captured_phpmailer_config ) {
+                        if ( method_exists( $phpmailer, 'smtpClose' ) ) {
+                            $phpmailer->smtpClose();
+                        }
                         foreach ( $captured_phpmailer_config as $prop => $val ) {
                             if ( property_exists( $phpmailer, $prop ) ) {
                                 if ( $prop === 'Password' ) {
