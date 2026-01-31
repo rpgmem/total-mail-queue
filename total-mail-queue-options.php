@@ -9,7 +9,8 @@ function wp_tmq_actionlinks ( $actions ) {
        '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue').'">' . __( 'Settings', 'total-mail-queue' ) . '</a>',
        '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-log').'">' . __( 'Log', 'total-mail-queue' ) . '</a>',
        '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-queue').'">' . __( 'Retention', 'total-mail-queue' ) . '</a>',
-       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-faq').'">' . __( 'FAQs', 'total-mail-queue' ) . '</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-smtp').'">' . __( 'SMTP', 'total-mail-queue' ) . '</a>',
+       '<a href="'.admin_url('admin.php?page=wp_tmq_mail_queue-tab-faq').'">' . __( 'FAQ', 'total-mail-queue' ) . '</a>',
     );
     return array_merge($actions,$links );
 }
@@ -21,11 +22,11 @@ function wp_tmq_settings_page_menuitem() {
     add_submenu_page('wp_tmq_mail_queue', __( 'Settings', 'total-mail-queue' ), __( 'Settings', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue','wp_tmq_settings_page');
     add_submenu_page('wp_tmq_mail_queue', __( 'Log', 'total-mail-queue' ), __( 'Log', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-log','wp_tmq_settings_page');
     add_submenu_page('wp_tmq_mail_queue', __( 'Retention', 'total-mail-queue' ), __( 'Retention', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-queue','wp_tmq_settings_page');
-    add_submenu_page('wp_tmq_mail_queue', __( 'FAQ', 'total-mail-queue' ), __( 'FAQ', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-faq','wp_tmq_settings_page');
     add_submenu_page('wp_tmq_mail_queue', __( 'SMTP Accounts', 'total-mail-queue' ), __( 'SMTP Accounts', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-smtp','wp_tmq_settings_page');
     if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
         add_submenu_page('wp_tmq_mail_queue', __( 'Cron Information', 'total-mail-queue' ), __( 'Cron Information', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-croninfo','wp_tmq_settings_page');
     }
+    add_submenu_page('wp_tmq_mail_queue', __( 'FAQ', 'total-mail-queue' ), __( 'FAQ', 'total-mail-queue' ),'manage_options','wp_tmq_mail_queue-tab-faq','wp_tmq_settings_page');
 }
 add_action('admin_menu','wp_tmq_settings_page_menuitem');
 
@@ -241,6 +242,16 @@ function wp_tmq_settings_page() {
     }
     return $defaults;
 }, 10, 4);</code></pre>';
+        echo '</div>';
+
+        echo '<div class="tmq-box">';
+        echo '<h3>' . __( 'What is the "Send Method" setting?', 'total-mail-queue' ) . '</h3>';
+        echo '<p>' . __( 'The Send Method setting controls how emails from the retention queue are delivered. There are three options:', 'total-mail-queue' ) . '</p>';
+        echo '<ul>';
+        echo '<li><b>' . __( 'Automatic', 'total-mail-queue' ) . '</b> — ' . __( 'This is the default. The plugin will first try to use an SMTP account configured in the SMTP Accounts tab. If no SMTP account is available (none configured or all have reached their limits), it will try to replay any captured SMTP configuration from other plugins. If neither is available, it falls back to the standard WordPress wp_mail() function.', 'total-mail-queue' ) . '</li>';
+        echo '<li><b>' . __( 'Plugin SMTP only', 'total-mail-queue' ) . '</b> — ' . __( 'Emails will ONLY be sent via SMTP accounts configured in this plugin. If no account is available (limits reached or none configured), emails will remain in the retention queue waiting until an SMTP account becomes available. This is useful if you want to guarantee all emails go through your own SMTP servers.', 'total-mail-queue' ) . '</li>';
+        echo '<li><b>' . __( 'WordPress default', 'total-mail-queue' ) . '</b> — ' . __( 'Ignores all SMTP accounts configured in this plugin and any captured configurations. Emails are sent using whatever wp_mail() does by default — which could be the PHP mail() function or another SMTP plugin like WP Mail SMTP.', 'total-mail-queue' ) . '</li>';
+        echo '</ul>';
         echo '</div>';
 
         echo '<div class="tmq-box">';
@@ -561,11 +572,11 @@ function wp_tmq_settings_page_navi($tab) {
         echo '<a href="?page=wp_tmq_mail_queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue') { echo ' nav-tab-active'; } echo '">' . __( 'Settings', 'total-mail-queue' ) . '</a>';
         echo '<a href="?page=wp_tmq_mail_queue-tab-log" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-log') { echo ' nav-tab-active'; } echo '">' . __( 'Log', 'total-mail-queue' ) . '</a>';
         echo '<a href="?page=wp_tmq_mail_queue-tab-queue" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-queue') { echo ' nav-tab-active'; } echo '">' . __( 'Retention', 'total-mail-queue' ) . '</a>';
-        echo '<a href="?page=wp_tmq_mail_queue-tab-faq" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-faq') { echo ' nav-tab-active'; } echo '">' . __( 'FAQ', 'total-mail-queue' ) . '</a>';
         echo '<a href="?page=wp_tmq_mail_queue-tab-smtp" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-smtp') { echo ' nav-tab-active'; } echo '">' . __( 'SMTP Accounts', 'total-mail-queue' ) . '</a>';
         if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
             echo '<a href="?page=wp_tmq_mail_queue-tab-croninfo" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-croninfo') { echo ' nav-tab-active'; } echo '">' . __( 'Cron Information', 'total-mail-queue' ) . '</a>';
         }
+        echo '<a href="?page=wp_tmq_mail_queue-tab-faq" class="nav-tab'; if($tab==='wp_tmq_mail_queue-tab-faq') { echo ' nav-tab-active'; } echo '">' . __( 'FAQ', 'total-mail-queue' ) . '</a>';
     echo '</nav>';
 }
 
@@ -576,6 +587,7 @@ function wp_tmq_settings_init() {
     add_settings_field('wp_tmq_status', __( 'Operation Mode', 'total-mail-queue' ),'wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_queue', __( 'Queue', 'total-mail-queue' ),'wp_tmq_render_option_queue','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_log', __( 'Log', 'total-mail-queue' ),'wp_tmq_render_option_log','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_send_method', __( 'Send Method', 'total-mail-queue' ),'wp_tmq_render_option_send_method','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_retry', __( 'Auto-Retry', 'total-mail-queue' ),'wp_tmq_render_option_retry','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_alert_status', __( 'Alert enabled', 'total-mail-queue' ),'wp_tmq_render_option_alert_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_sensitivity', __( 'Alert Sensitivity', 'total-mail-queue' ),'wp_tmq_render_option_sensitivity','wp_tmq_settings_page','wp_tmq_settings_section');
@@ -636,6 +648,19 @@ function wp_tmq_render_option_retry() {
     global $wp_tmq_options;
     echo __( 'If sending fails, retry up to', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[max_retries]" type="number" min="0" value="'.esc_attr(intval($wp_tmq_options['max_retries'])).'" /> ' . __( 'time(s) before marking as error.', 'total-mail-queue' );
     echo ' <span class="description">' . __( '0 = no retries, email is immediately marked as error', 'total-mail-queue' ) . '</span>';
+}
+
+function wp_tmq_render_option_send_method() {
+    global $wp_tmq_options;
+    $method = isset( $wp_tmq_options['send_method'] ) ? $wp_tmq_options['send_method'] : 'auto';
+    echo '<select name="wp_tmq_settings[send_method]">';
+    echo '<option value="auto"' . selected( $method, 'auto', false ) . '>' . __( 'Automatic — Use plugin SMTP if available, then captured config, then WordPress default', 'total-mail-queue' ) . '</option>';
+    echo '<option value="smtp"' . selected( $method, 'smtp', false ) . '>' . __( 'Plugin SMTP only — Only send via SMTP accounts configured in this plugin (hold emails if none available)', 'total-mail-queue' ) . '</option>';
+    echo '<option value="php"' . selected( $method, 'php', false ) . '>' . __( 'WordPress default — Ignore plugin SMTP accounts, send via standard wp_mail()', 'total-mail-queue' ) . '</option>';
+    echo '</select>';
+    if ( $method === 'smtp' ) {
+        echo ' <span class="description">' . __( 'Emails will wait in the retention queue until an SMTP account with available limits is found.', 'total-mail-queue' ) . '</span>';
+    }
 }
 
 function wp_tmq_render_option_sensitivity() {

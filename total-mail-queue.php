@@ -52,6 +52,7 @@ function wp_tmq_get_settings() {
         'queue_interval_unit' => 'minutes',
         'clear_queue'    => '14',
         'log_max_records'=> '0',   // 0=unlimited, >0=max number of log entries to keep
+        'send_method'    => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only
         'max_retries'    => '3',   // 0=no retries, >0=auto-retry failed emails up to N times
         'tableName'      => 'total_mail_queue',
         'smtpTableName'  => 'total_mail_queue_smtp',
@@ -501,14 +502,22 @@ function wp_tmq_search_mail_from_queue() {
                     }
                 }
 
-                // Find available SMTP account
+                // Determine send method
+                $send_method = isset( $wp_tmq_options['send_method'] ) ? $wp_tmq_options['send_method'] : 'auto';
+
+                // Find available SMTP account (skip if send_method is 'php')
                 $smtp_to_use = null;
-                if ( ! empty( $smtp_accounts ) ) {
+                if ( $send_method !== 'php' && ! empty( $smtp_accounts ) ) {
                     // Re-check availability (counters may have changed during this batch)
                     $smtp_accounts = wp_tmq_get_available_smtp();
                     if ( ! empty( $smtp_accounts ) ) {
                         $smtp_to_use = $smtp_accounts[0]; // First available by priority
                     }
+                }
+
+                // In 'smtp' mode, if no SMTP account is available, skip this email (keep in queue)
+                if ( $send_method === 'smtp' && ! $smtp_to_use ) {
+                    continue;
                 }
 
                 // Configure phpmailer_init hook for this email
@@ -518,8 +527,8 @@ function wp_tmq_search_mail_from_queue() {
                         wp_tmq_configure_phpmailer( $phpmailer, $smtp_to_use );
                     };
                     add_action( 'phpmailer_init', $tmq_phpmailer_hook, 999999 );
-                } else if ( $captured_phpmailer_config && is_array( $captured_phpmailer_config ) ) {
-                    // Replay captured phpmailer config when no SMTP accounts are configured
+                } else if ( $send_method === 'auto' && $captured_phpmailer_config && is_array( $captured_phpmailer_config ) ) {
+                    // Replay captured phpmailer config only in 'auto' mode
                     $tmq_phpmailer_hook = function( $phpmailer ) use ( $captured_phpmailer_config ) {
                         foreach ( $captured_phpmailer_config as $prop => $val ) {
                             if ( property_exists( $phpmailer, $prop ) ) {
