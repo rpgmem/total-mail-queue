@@ -570,7 +570,16 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 }
                 break;
             case 'status':
-                return '<span class="tmq-status tmq-status-' . sanitize_title( $item[$column_name] ) . '">' . esc_html( $item[$column_name] ) . '</span>';
+                $status_labels = array(
+                    'sent'  => __( 'Sent', 'total-mail-queue' ),
+                    'error' => __( 'Error', 'total-mail-queue' ),
+                    'alert' => __( 'Alert', 'total-mail-queue' ),
+                    'queue' => __( 'Queue', 'total-mail-queue' ),
+                    'high'  => __( 'High', 'total-mail-queue' ),
+                );
+                $raw    = $item[ $column_name ];
+                $label  = isset( $status_labels[ $raw ] ) ? $status_labels[ $raw ] : esc_html( $raw );
+                return '<span class="tmq-status tmq-status-' . sanitize_title( $raw ) . '">' . esc_html( $label ) . '</span>';
                 break;
             case 'message':
                 $message = $item[$column_name];
