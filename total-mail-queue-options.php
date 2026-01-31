@@ -819,6 +819,22 @@ function wp_tmq_render_option_queue() {
 
     echo ' ' . sprintf( __( 'by %sWP Cron%s.', 'total-mail-queue' ), '<i><a href="https://developer.wordpress.org/plugins/cron/" target="_blank">', '</a></i>' ) . ' ';
 
+    // Warn if any SMTP account has per-cycle bulk higher than global queue_amount
+    global $wpdb;
+    $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+    $global_amount = intval( $wp_tmq_options['queue_amount'] );
+    $exceeding = $wpdb->get_results( $wpdb->prepare(
+        "SELECT `name`, `send_bulk` FROM `$smtpTable` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0",
+        $global_amount
+    ), ARRAY_A );
+    if ( ! empty( $exceeding ) ) {
+        $names = array_map( function ( $a ) { return '<strong>' . esc_html( $a['name'] ) . '</strong> (' . intval( $a['send_bulk'] ) . ')'; }, $exceeding );
+        echo '<br /><span class="tmq-warning">' . sprintf(
+            __( 'Warning: The following SMTP account(s) have a per-cycle limit higher than the global limit of %d: %s. The global limit will be applied as the ceiling.', 'total-mail-queue' ),
+            $global_amount,
+            implode( ', ', $names )
+        ) . '</span>';
+    }
 }
 
 function wp_tmq_render_option_log() {

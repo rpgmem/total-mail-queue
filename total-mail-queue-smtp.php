@@ -42,6 +42,8 @@ function wp_tmq_render_smtp_page() {
             'priority'      => intval( $_POST['smtp_priority'] ?? 0 ),
             'daily_limit'   => intval( $_POST['smtp_daily_limit'] ?? 0 ),
             'monthly_limit' => intval( $_POST['smtp_monthly_limit'] ?? 0 ),
+            'send_interval' => intval( $_POST['smtp_send_interval'] ?? 0 ),
+            'send_bulk'     => intval( $_POST['smtp_send_bulk'] ?? 0 ),
             'enabled'       => isset( $_POST['smtp_enabled'] ) ? 1 : 0,
         );
 
@@ -110,6 +112,8 @@ function wp_tmq_render_smtp_page() {
             'priority'      => 0,
             'daily_limit'   => 0,
             'monthly_limit' => 0,
+            'send_interval' => 0,
+            'send_bulk'     => 0,
             'enabled'       => 1,
         );
 
@@ -219,6 +223,20 @@ function wp_tmq_render_smtp_page() {
         echo '<span class="description">' . __( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
         echo '</tr>';
 
+        // Send Interval
+        echo '<tr>';
+        echo '<th scope="row"><label for="smtp_send_interval">' . __( 'Send Interval (minutes)', 'total-mail-queue' ) . '</label></th>';
+        echo '<td><input type="number" id="smtp_send_interval" name="smtp_send_interval" value="' . esc_attr( $account['send_interval'] ) . '" min="0" /> ';
+        echo '<span class="description">' . __( 'Minimum minutes between sending cycles for this account. 0 = use global interval.', 'total-mail-queue' ) . '</span></td>';
+        echo '</tr>';
+
+        // Send Bulk
+        echo '<tr>';
+        echo '<th scope="row"><label for="smtp_send_bulk">' . __( 'Emails per Cycle', 'total-mail-queue' ) . '</label></th>';
+        echo '<td><input type="number" id="smtp_send_bulk" name="smtp_send_bulk" value="' . esc_attr( $account['send_bulk'] ) . '" min="0" /> ';
+        echo '<span class="description">' . __( 'Maximum emails to send per cycle for this account. 0 = use global limit.', 'total-mail-queue' ) . '</span></td>';
+        echo '</tr>';
+
         // Enabled
         echo '<tr>';
         echo '<th scope="row"><label for="smtp_enabled">' . __( 'Enabled', 'total-mail-queue' ) . '</label></th>';
@@ -270,6 +288,8 @@ function wp_tmq_render_smtp_page() {
         echo '<th>' . __( 'Priority', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'Daily Limit', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'Monthly Limit', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . __( 'Interval', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . __( 'Per Cycle', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'Enabled', 'total-mail-queue' ) . '</th>';
         echo '<th>' . __( 'Actions', 'total-mail-queue' ) . '</th>';
         echo '</tr>';
@@ -302,6 +322,12 @@ function wp_tmq_render_smtp_page() {
             echo '<td>' . esc_html( $acct['priority'] ) . '</td>';
             echo '<td>' . $daily_display . '</td>';
             echo '<td>' . $monthly_display . '</td>';
+
+            $interval_display = intval( $acct['send_interval'] ) === 0 ? __( 'global', 'total-mail-queue' ) : esc_html( $acct['send_interval'] ) . ' min';
+            $bulk_display     = intval( $acct['send_bulk'] ) === 0 ? __( 'global', 'total-mail-queue' ) : esc_html( $acct['send_bulk'] );
+            echo '<td>' . $interval_display . '</td>';
+            echo '<td>' . $bulk_display . '</td>';
+
             echo '<td>' . ( intval( $acct['enabled'] ) ? '<span class="tmq-ok">' . __( 'Yes', 'total-mail-queue' ) . '</span>' : __( 'No', 'total-mail-queue' ) ) . '</td>';
             echo '<td>';
             echo '<a href="' . esc_url( $edit_url ) . '">' . __( 'Edit', 'total-mail-queue' ) . '</a> | ';

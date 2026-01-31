@@ -138,6 +138,9 @@ function wp_tmq_reset_smtp_counters() {
     $today = current_time( 'Y-m-d' );
     $this_month = current_time( 'Y-m' );
 
+    // Reset per-cycle bulk counter at the start of each cron run
+    $wpdb->query( "UPDATE `$smtpTable` SET `cycle_sent` = 0" );
+
     // Reset daily counters if day changed
     $wpdb->query( $wpdb->prepare(
         "UPDATE `$smtpTable` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s",
@@ -154,15 +157,21 @@ function wp_tmq_reset_smtp_counters() {
 function wp_tmq_get_available_smtp() {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+    $now = current_time( 'mysql', false );
 
-    // Get enabled SMTP accounts ordered by priority, where limits not reached
-    $accounts = $wpdb->get_results(
+    // Get enabled SMTP accounts ordered by priority, where:
+    // - daily/monthly limits not reached
+    // - per-account bulk limit not reached (cycle_sent < send_bulk, or send_bulk=0 means unlimited)
+    // - per-account interval cooldown elapsed (last_sent_at + send_interval minutes <= now, or send_interval=0 means no cooldown)
+    $accounts = $wpdb->get_results( $wpdb->prepare(
         "SELECT * FROM `$smtpTable` WHERE `enabled` = 1
          AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`)
          AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`)
+         AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`)
+         AND (`send_interval` = 0 OR DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s)
          ORDER BY `priority` ASC",
-        ARRAY_A
-    );
+        $now
+    ), ARRAY_A );
 
     return $accounts ? $accounts : array();
 }
@@ -170,9 +179,10 @@ function wp_tmq_get_available_smtp() {
 function wp_tmq_increment_smtp_counter( $smtp_id ) {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+    $now = current_time( 'mysql', false );
     $wpdb->query( $wpdb->prepare(
-        "UPDATE `$smtpTable` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1 WHERE `id` = %d",
-        intval( $smtp_id )
+        "UPDATE `$smtpTable` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d",
+        $now, intval( $smtp_id )
     ) );
 }
 
@@ -827,6 +837,10 @@ function wp_tmq_updateDatabaseTables() {
     last_daily_reset date DEFAULT '2000-01-01' NOT NULL,
     last_monthly_reset date DEFAULT '2000-01-01' NOT NULL,
     enabled tinyint(1) DEFAULT 1 NOT NULL,
+    send_interval int(11) DEFAULT 0 NOT NULL,
+    send_bulk int(11) DEFAULT 0 NOT NULL,
+    last_sent_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
+    cycle_sent int(11) DEFAULT 0 NOT NULL,
     PRIMARY KEY  (id)
     ) $charset_collate;";
 
