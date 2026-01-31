@@ -98,6 +98,37 @@ function wp_tmq_decrypt_password( $encrypted_text ) {
 
 
 /* ***************************************************************
+Attachments directory helper
+**************************************************************** */
+function wp_tmq_attachments_dir() {
+    $upload_dir = wp_upload_dir();
+    return trailingslashit( $upload_dir['basedir'] ) . 'tmq-attachments/';
+}
+
+/* ***************************************************************
+Safe serialization helpers (JSON, with backwards-compat for old PHP-serialized data)
+**************************************************************** */
+function wp_tmq_encode( $value ) {
+    return wp_json_encode( $value );
+}
+
+function wp_tmq_decode( $raw ) {
+    if ( empty( $raw ) || ! is_string( $raw ) ) {
+        return $raw;
+    }
+    // Try JSON first (new format)
+    $json = json_decode( $raw, true );
+    if ( json_last_error() === JSON_ERROR_NONE ) {
+        return $json;
+    }
+    // Fall back to PHP unserialize for legacy data (read-only, safe with allowed_classes)
+    if ( is_serialized( $raw ) ) {
+        return @unserialize( $raw, array( 'allowed_classes' => false ) );
+    }
+    return $raw;
+}
+
+/* ***************************************************************
 SMTP Account Helpers
 **************************************************************** */
 function wp_tmq_reset_smtp_counters() {
@@ -267,7 +298,7 @@ function wp_tmq_prewpmail($return, $atts) {
     // We store them so when sending from queue we can replay them
     $phpmailer_config = wp_tmq_capture_phpmailer_config();
     if ( $phpmailer_config ) {
-        $headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( maybe_serialize( $phpmailer_config ) );
+        $headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( wp_tmq_encode( $phpmailer_config ) );
     }
 
 
@@ -275,18 +306,18 @@ function wp_tmq_prewpmail($return, $atts) {
     $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
     $data = array(
         'timestamp'=> current_time('mysql',false),
-        'recipient'=> maybe_serialize($to),
+        'recipient'=> wp_tmq_encode($to),
         'subject'=> $subject,
         'message'=> $message,
         'status' => $status,
         'attachments' => ''
     );
-    if (isset($headers) && $headers) { $data['headers'] = maybe_serialize($headers); }
+    if (isset($headers) && $headers) { $data['headers'] = wp_tmq_encode($headers); }
 
     // store attachments in /attachments/ Folder, to address them later
     if (isset($attachments) && $attachments && $attachments != '') {
 
-        $attachments_base = plugin_dir_path(__FILE__) . 'attachments/';
+        $attachments_base = wp_tmq_attachments_dir();
         // Protect attachments directory from web access
         if ( ! file_exists( $attachments_base . '.htaccess' ) ) {
             wp_mkdir_p( $attachments_base );
@@ -311,7 +342,7 @@ function wp_tmq_prewpmail($return, $atts) {
                 $wp_filesystem->copy($item,$newfile);
                 array_push($newattachments,$newfile);
             }
-            $data['attachments'] = maybe_serialize($newattachments);
+            $data['attachments'] = wp_tmq_encode($newattachments);
         }
     }
     $inserted = $wpdb->insert($tableName,$data);
@@ -363,7 +394,7 @@ function wp_tmq_capture_phpmailer_config() {
         $config['SMTPSecure'] = $test_mailer->SMTPSecure;
         $config['SMTPAuth']   = $test_mailer->SMTPAuth;
         $config['Username']   = $test_mailer->Username;
-        $config['Password']   = $test_mailer->Password;
+        $config['Password']   = wp_tmq_encrypt_password( $test_mailer->Password );
         $config['From']       = $test_mailer->From;
         $config['FromName']   = $test_mailer->FromName;
     }
@@ -540,9 +571,9 @@ function wp_tmq_search_mail_from_queue() {
     if ($mailsInQueue > 0) {
         if ($mailjobs && count($mailjobs) > 0) {
             foreach($mailjobs as $index => $item) {
-                if ($item['recipient'] && $item['recipient'] != '') { $to = maybe_unserialize($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
-                if ($item['headers'] && $item['headers'] != '') { $headers = maybe_unserialize($item['headers']); } else { $headers = ''; }
-                if ($item['attachments'] && $item['attachments'] != '') { $attachments = maybe_unserialize($item['attachments']); } else { $attachments = ''; }
+                if ($item['recipient'] && $item['recipient'] != '') { $to = wp_tmq_decode($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
+                if ($item['headers'] && $item['headers'] != '') { $headers = wp_tmq_decode($item['headers']); } else { $headers = ''; }
+                if ($item['attachments'] && $item['attachments'] != '') { $attachments = wp_tmq_decode($item['attachments']); } else { $attachments = ''; }
                 $wp_tmq_mailid = $item['id'];
 
                 // Extract captured phpmailer config from headers if present
@@ -550,7 +581,7 @@ function wp_tmq_search_mail_from_queue() {
                 if ( is_array( $headers ) ) {
                     foreach ( $headers as $hindex => $hval ) {
                         if ( preg_match( '/^X-TMQ-PHPMailer-Config: (.+)$/i', $hval, $matches ) ) {
-                            $captured_phpmailer_config = maybe_unserialize( base64_decode( trim( $matches[1] ) ) );
+                            $captured_phpmailer_config = wp_tmq_decode( base64_decode( trim( $matches[1] ) ) );
                             array_splice( $headers, $hindex, 1 );
                             break;
                         }
@@ -595,6 +626,9 @@ function wp_tmq_search_mail_from_queue() {
                     $tmq_phpmailer_hook = function( $phpmailer ) use ( $captured_phpmailer_config ) {
                         foreach ( $captured_phpmailer_config as $prop => $val ) {
                             if ( property_exists( $phpmailer, $prop ) ) {
+                                if ( $prop === 'Password' ) {
+                                    $val = wp_tmq_decrypt_password( $val );
+                                }
                                 $phpmailer->$prop = $val;
                             }
                         }
@@ -725,6 +759,22 @@ function wp_tmq_uninstall () {
 
     $smtpTableName = $wpdb->prefix.'total_mail_queue_smtp';
     $wpdb->query( $wpdb->prepare( "DROP TABLE IF EXISTS %i", $smtpTableName ) );
+
+    // Clean up attachments directories (new location in uploads + legacy in plugin dir)
+    global $wp_filesystem;
+    if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base' ) ) {
+        include_once ABSPATH . 'wp-admin/includes/file.php';
+        WP_Filesystem();
+    }
+    $upload_dir = wp_upload_dir();
+    $new_path = trailingslashit( $upload_dir['basedir'] ) . 'tmq-attachments/';
+    if ( is_dir( $new_path ) ) {
+        $wp_filesystem->delete( $new_path, true, 'd' );
+    }
+    $legacy_path = plugin_dir_path( __FILE__ ) . 'attachments/';
+    if ( is_dir( $legacy_path ) ) {
+        $wp_filesystem->delete( $legacy_path, true, 'd' );
+    }
 }
 
 /* Delete Cron when Plugin deactivated */
@@ -912,7 +962,7 @@ function wp_tmq_rest_get_message ($request) {
     if ($row) {
         // Search for content-type header to detect html emails
         $is_content_type_html = false;
-        $headers = maybe_unserialize( $row['headers'] );
+        $headers = wp_tmq_decode( $row['headers'] );
         if (is_string($headers)) {
             $headers = [ $headers ];
         } else if (!is_array($headers)) {
@@ -927,7 +977,7 @@ function wp_tmq_rest_get_message ($request) {
         return array(
             'status' => 'ok',
             'data'   => array(
-                'html'   => wp_tmq_render_list_message(maybe_unserialize($row['message']),$is_content_type_html),
+                'html'   => wp_tmq_render_list_message(wp_tmq_decode($row['message']),$is_content_type_html),
             ),
         );
     } else {

@@ -533,7 +533,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
         switch( $column_name ) {
             case 'timestamp':
             case 'subject':
-                return esc_html( maybe_unserialize($item[$column_name]) );
+                return esc_html( wp_tmq_decode($item[$column_name]) );
                 break;
             case 'info':
                 $info = isset( $item['info'] ) && $item['info'] ? $item['info'] : '';
@@ -550,7 +550,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 break;
             case 'recipient':
             case 'headers':
-                $return = maybe_unserialize($item[$column_name]);
+                $return = wp_tmq_decode($item[$column_name]);
                 if (is_array($return)) {
                     return esc_html( implode(',',$return) );
                 } else {
@@ -558,7 +558,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 }
                 break;
             case 'attachments':
-                $return = maybe_unserialize($item[$column_name]);
+                $return = wp_tmq_decode($item[$column_name]);
                 if (is_array($return)) {
                     $betterreturn = array();
                     foreach($return as $item) {
