@@ -12,6 +12,35 @@
 		});
 	});
 
+	// test SMTP connection
+	$doc.on( "click", "#tmq-test-smtp", function () {
+		const $btn = $( this );
+		const $result = $( "#tmq-test-smtp-result" );
+
+		$btn.prop( "disabled", true ).text( i18n.testing );
+		$result.removeAttr( "class" ).hide();
+
+		$.post( tmq.ajaxUrl, {
+			action:     "wp_tmq_test_smtp",
+			_nonce:     tmq.testSmtpNonce,
+			host:       $( "#smtp_host" ).val(),
+			port:       $( "#smtp_port" ).val(),
+			encryption: $( "#smtp_encryption" ).val(),
+			auth:       $( "#smtp_auth" ).is( ":checked" ) ? 1 : 0,
+			username:   $( "#smtp_username" ).val(),
+			password:   $( "#smtp_password" ).val(),
+			smtp_id:    $btn.data( "smtp-id" ) || 0
+		}).always( function ( response ) {
+			const ok = response.success;
+			const msg = response.data && response.data.message ? response.data.message : i18n.errorLoadingMessage;
+			$result
+				.addClass( ok ? "notice notice-success" : "notice notice-error" )
+				.html( "<p>" + $( "<span>" ).text( msg ).html() + "</p>" )
+				.show();
+			$btn.prop( "disabled", false ).text( i18n.testConnection );
+		});
+	});
+
 	// dynamically load message when opening a details element for the first time
 	$doc.on( "click", '[data-tmq-list-message-toggle]',function () {
 		const $btn = $( this );

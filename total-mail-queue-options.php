@@ -50,6 +50,10 @@ function wp_tmq_settings_page_inline_script () {
     $d .=   'tmq.restNonce = "'.esc_html( wp_create_nonce( 'wp_rest' ) ).'";';
     $d .=   'tmq.i18n = tmq.i18n || {};';
     $d .=   'tmq.i18n.errorLoadingMessage = "'.esc_js( __( 'There was an error loading the message.', 'total-mail-queue' ) ).'";';
+    $d .=   'tmq.i18n.testing = "'.esc_js( __( 'Testing...', 'total-mail-queue' ) ).'";';
+    $d .=   'tmq.i18n.testConnection = "'.esc_js( __( 'Test Connection', 'total-mail-queue' ) ).'";';
+    $d .=   'tmq.ajaxUrl = "'.esc_url( admin_url( 'admin-ajax.php' ) ).'";';
+    $d .=   'tmq.testSmtpNonce = "'.esc_js( wp_create_nonce( 'wp_tmq_test_smtp' ) ).'";';
     $d .= '}) ( this );';
     return $d;
 }

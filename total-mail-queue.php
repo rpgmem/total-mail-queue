@@ -718,6 +718,74 @@ if (is_admin()) {
 
 
 /* ***************************************************************
+SMTP Test Connection (AJAX)
+**************************************************************** */
+
+function wp_tmq_ajax_test_smtp_connection() {
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( array( 'message' => __( 'Permission denied.', 'total-mail-queue' ) ) );
+    }
+
+    check_ajax_referer( 'wp_tmq_test_smtp', '_nonce' );
+
+    $host       = sanitize_text_field( wp_unslash( $_POST['host'] ?? '' ) );
+    $port       = intval( $_POST['port'] ?? 587 );
+    $encryption = sanitize_key( $_POST['encryption'] ?? 'tls' );
+    $auth       = intval( $_POST['auth'] ?? 0 );
+    $username   = sanitize_text_field( wp_unslash( $_POST['username'] ?? '' ) );
+    $password   = wp_unslash( $_POST['password'] ?? '' );
+    $smtp_id    = intval( $_POST['smtp_id'] ?? 0 );
+
+    if ( empty( $host ) ) {
+        wp_send_json_error( array( 'message' => __( 'SMTP host is required.', 'total-mail-queue' ) ) );
+    }
+
+    // If password is empty and we are editing an existing account, use the stored password
+    if ( $password === '' && $smtp_id > 0 ) {
+        global $wpdb, $wp_tmq_options;
+        $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+        $stored = $wpdb->get_var( $wpdb->prepare( "SELECT `password` FROM `$smtpTable` WHERE `id` = %d", $smtp_id ) );
+        if ( $stored ) {
+            $password = wp_tmq_decrypt_password( $stored );
+        }
+    }
+
+    // Use WordPress built-in PHPMailer
+    global $phpmailer;
+    require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+    require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
+    require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+
+    $mail = new PHPMailer\PHPMailer\PHPMailer( true );
+
+    try {
+        $mail->isSMTP();
+        $mail->Host       = $host;
+        $mail->Port       = $port;
+        $mail->SMTPSecure = $encryption === 'none' ? '' : $encryption;
+        $mail->SMTPAuth   = (bool) $auth;
+        if ( $auth ) {
+            $mail->Username = $username;
+            $mail->Password = $password;
+        }
+        $mail->Timeout = 15;
+
+        $mail->smtpConnect();
+        $mail->smtpClose();
+
+        wp_send_json_success( array( 'message' => __( 'Connection successful! SMTP server responded correctly.', 'total-mail-queue' ) ) );
+
+    } catch ( PHPMailer\PHPMailer\Exception $e ) {
+        wp_send_json_error( array( 'message' => $mail->ErrorInfo ) );
+    } catch ( \Exception $e ) {
+        wp_send_json_error( array( 'message' => $e->getMessage() ) );
+    }
+}
+add_action( 'wp_ajax_wp_tmq_test_smtp', 'wp_tmq_ajax_test_smtp_connection' );
+
+
+/* ***************************************************************
 REST API
 **************************************************************** */
 
