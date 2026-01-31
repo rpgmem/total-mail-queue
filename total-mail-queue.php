@@ -191,7 +191,7 @@ function wp_tmq_get_available_smtp() {
  * Checks cycle_sent against send_bulk without hitting the database.
  * Returns the account array or null if none available.
  */
-function wp_tmq_pick_available_smtp( &$smtp_accounts ) {
+function wp_tmq_pick_available_smtp( $smtp_accounts ) {
     foreach ( $smtp_accounts as $acct ) {
         $bulk = intval( $acct['send_bulk'] );
         if ( $bulk === 0 || intval( $acct['cycle_sent'] ) < $bulk ) {
@@ -204,16 +204,16 @@ function wp_tmq_pick_available_smtp( &$smtp_accounts ) {
 /**
  * Update the in-memory SMTP accounts list after a successful send.
  *
- * Increments cycle_sent for the given account in the array.
+ * Increments cycle_sent for the given account key in the array.
  */
 function wp_tmq_update_memory_counter( &$smtp_accounts, $smtp_id ) {
-    foreach ( $smtp_accounts as &$acct ) {
-        if ( intval( $acct['id'] ) === intval( $smtp_id ) ) {
-            $acct['cycle_sent'] = intval( $acct['cycle_sent'] ) + 1;
+    $target_id = intval( $smtp_id );
+    foreach ( $smtp_accounts as $key => $acct ) {
+        if ( intval( $acct['id'] ) === $target_id ) {
+            $smtp_accounts[ $key ]['cycle_sent'] = intval( $acct['cycle_sent'] ) + 1;
             break;
         }
     }
-    unset( $acct );
 }
 
 function wp_tmq_increment_smtp_counter( $smtp_id ) {
@@ -700,12 +700,13 @@ function wp_tmq_search_mail_from_queue() {
 
                 $sendstatus = wp_mail($to,$item['subject'],$item['message'],$headers,$attachments); // Finally sends the email for real
 
-                // Restore all pre_wp_mail filters
+                // Restore all pre_wp_mail filters that were present before
                 if ( $saved_pre_wp_mail ) {
                     $wp_filter['pre_wp_mail'] = $saved_pre_wp_mail;
-                } else {
-                    add_filter('pre_wp_mail', 'wp_tmq_prewpmail', $wp_tmq_pre_wp_mail_priority, 2);
                 }
+                // Note: we do NOT re-add wp_tmq_prewpmail here — during cron
+                // it was never registered, and re-adding it would intercept
+                // subsequent wp_mail() calls in this batch.
 
                 // Remove temporary phpmailer hook
                 if ( $tmq_phpmailer_hook ) {
