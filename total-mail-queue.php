@@ -4,7 +4,7 @@
  * Plugin Name:       Total Mail Queue
  * Plugin URI:
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
- * Version:           2.0.0
+ * Version:           2.1.0
  * Requires at least: 5.9
  * Requires PHP:      7.4
  * Author:
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) { exit; }
 PLUGIN VERSION
 **************************************************************** */
 
-$wp_tmq_version = '2.0.0';
+$wp_tmq_version = '2.1.0';
 
 
 /* ***************************************************************
@@ -51,6 +51,8 @@ function wp_tmq_get_settings() {
         'queue_interval' => '5',
         'queue_interval_unit' => 'minutes',
         'clear_queue'    => '14',
+        'log_max_records'=> '0',   // 0=unlimited, >0=max number of log entries to keep
+        'max_retries'    => '3',   // 0=no retries, >0=auto-retry failed emails up to N times
         'tableName'      => 'total_mail_queue',
         'smtpTableName'  => 'total_mail_queue_smtp',
         'triggercount'   => 0,
@@ -356,13 +358,53 @@ function wp_tmq_capture_phpmailer_config() {
 }
 
 
-// show wp_mail() errors
+// show wp_mail() errors — with auto-retry support
 function wp_tmq_mail_failed( $wp_error ) {
     global $wpdb,$wp_tmq_options,$wp_tmq_mailid;
     if (isset($wp_tmq_mailid) && $wp_tmq_mailid != 0) {
         $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
         $wpMailFailedError = isset( $wp_error->errors ) && isset( $wp_error->errors['wp_mail_failed'][0] ) ? implode( '; ', $wp_error->errors['wp_mail_failed'] ) : '<em>' . __( 'Unknown', 'total-mail-queue' ) . '</em>';
-        $wpdb->update($tableName,array('timestamp'=>current_time('mysql',false),'status'=>'error', 'info'=>$wpMailFailedError),array('id'=>intval($wp_tmq_mailid)),array('%s', '%s', '%s'),'%d');
+
+        // Get current retry count for this email
+        $current = $wpdb->get_row( $wpdb->prepare( "SELECT `retry_count`, `status` FROM `$tableName` WHERE `id` = %d", intval( $wp_tmq_mailid ) ), ARRAY_A );
+        $retry_count = $current ? intval( $current['retry_count'] ) : 0;
+        $max_retries = intval( $wp_tmq_options['max_retries'] );
+
+        if ( $max_retries > 0 && $retry_count < $max_retries ) {
+            // Auto-retry: increment counter and return to queue for another attempt
+            $new_retry = $retry_count + 1;
+            /* translators: %1$d: current attempt number, %2$d: max attempts, %3$s: error message */
+            $retry_info = sprintf( __( 'Retry %1$d/%2$d — %3$s', 'total-mail-queue' ), $new_retry, $max_retries, $wpMailFailedError );
+            $wpdb->update(
+                $tableName,
+                array(
+                    'timestamp'   => current_time( 'mysql', false ),
+                    'status'      => 'queue',
+                    'retry_count' => $new_retry,
+                    'info'        => $retry_info,
+                ),
+                array( 'id' => intval( $wp_tmq_mailid ) ),
+                array( '%s', '%s', '%d', '%s' ),
+                '%d'
+            );
+        } else {
+            // Max retries reached or retries disabled: mark as final error
+            if ( $max_retries > 0 && $retry_count >= $max_retries ) {
+                /* translators: %1$d: total attempts, %2$s: error message */
+                $wpMailFailedError = sprintf( __( 'Failed after %1$d attempt(s) — %2$s', 'total-mail-queue' ), $retry_count + 1, $wpMailFailedError );
+            }
+            $wpdb->update(
+                $tableName,
+                array(
+                    'timestamp' => current_time( 'mysql', false ),
+                    'status'    => 'error',
+                    'info'      => $wpMailFailedError,
+                ),
+                array( 'id' => intval( $wp_tmq_mailid ) ),
+                array( '%s', '%s', '%s' ),
+                '%d'
+            );
+        }
     }
     return error_log(print_r($wp_error, true));
 }
@@ -520,8 +562,21 @@ function wp_tmq_search_mail_from_queue() {
         }
     }
 
-    // Delete old logs
+    // Delete old logs (by date)
     $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < NOW() - INTERVAL %d HOUR", intval( $wp_tmq_options['clear_queue'] ) ) );
+
+    // Delete excess log entries (by total records limit)
+    $log_max = intval( $wp_tmq_options['log_max_records'] );
+    if ( $log_max > 0 ) {
+        $total_log = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high'" );
+        if ( $total_log > $log_max ) {
+            $excess = $total_log - $log_max;
+            $wpdb->query( $wpdb->prepare(
+                "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `timestamp` ASC LIMIT %d",
+                intval( $excess )
+            ) );
+        }
+    }
 
 }
 add_action('wp_tmq_mail_queue_hook','wp_tmq_search_mail_from_queue');
@@ -591,6 +646,7 @@ function wp_tmq_updateDatabaseTables() {
     headers text NOT NULL,
     attachments text NOT NULL,
     info varchar(255) DEFAULT '' NOT NULL,
+    retry_count smallint(5) DEFAULT 0 NOT NULL,
     PRIMARY KEY  (id)
     ) $charset_collate;";
 

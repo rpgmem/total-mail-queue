@@ -380,6 +380,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 break;
             case 'status':
                 $info = isset( $item[ 'info' ] ) && $item[ 'info' ] ? $item[ 'info' ] : '';
+                $retry_count = isset( $item['retry_count'] ) ? intval( $item['retry_count'] ) : 0;
                 if ( $item[$column_name] === 'alert' ) {
                     $alertData = json_decode($info,/*associative*/true);
                     if ( $alertData ) {
@@ -391,6 +392,13 @@ class wp_tmq_Log_Table extends WP_List_Table {
                     } else {
                         $info = '';
                     }
+                } else if ( $retry_count > 0 ) {
+                    // Show retry information
+                    /* translators: %d: number of retry attempts */
+                    $retry_label = sprintf( __( 'Attempt #%d', 'total-mail-queue' ), $retry_count + 1 );
+                    $info = $info ? '<strong>' . esc_html( $retry_label ) . '</strong><br />' . esc_html( $info ) : '<strong>' . esc_html( $retry_label ) . '</strong>';
+                } else if ( $item[$column_name] === 'error' && $info ) {
+                    $info = esc_html( $info );
                 }
                 $htmlInfo = $info ? '<span class="tmq-info">'.$info.'</span>' : '';
                 $cssStatus = $htmlInfo ? ' tmq-status-has-info' : '';
@@ -426,8 +434,9 @@ class wp_tmq_Log_Table extends WP_List_Table {
             );
         } else {
             $actions = array(
-                'delete' => __( 'Delete', 'total-mail-queue'),
-                'resend' => __( 'Resend', 'total-mail-queue'),
+                'delete'       => __( 'Delete', 'total-mail-queue'),
+                'resend'       => __( 'Resend', 'total-mail-queue'),
+                'force_resend' => __( 'Force Resend (ignore retry limit)', 'total-mail-queue'),
             );
         }
 
@@ -494,6 +503,52 @@ class wp_tmq_Log_Table extends WP_List_Table {
                     echo $notice;
                 }
                 break;
+            case 'force_resend':
+                $count_force = 0;
+                $count_force_error = 0;
+                foreach($request_ids as $id) {
+                    $maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
+                    if ( ! $maildata ) { continue; }
+                    if ( $maildata->status !== 'error' ) {
+                        $count_force_error++;
+                        continue;
+                    }
+                    if ( ! $maildata->attachments || $maildata->attachments == '' ) {
+                        $count_force++;
+                        $data = array(
+                            'timestamp'   => current_time( 'mysql', false ),
+                            'recipient'   => $maildata->recipient,
+                            'subject'     => $maildata->subject,
+                            'message'     => $maildata->message,
+                            'status'      => 'queue',
+                            'attachments' => '',
+                            'headers'     => $maildata->headers,
+                            'retry_count' => 0,
+                            /* translators: %s: original error info */
+                            'info'        => sprintf( __( 'Force resent — Original: %s', 'total-mail-queue' ), $maildata->info ),
+                        );
+                        $wpdb->insert( $tableName, $data );
+                    } else {
+                        $count_force_error++;
+                        $notice = '<div class="notice notice-error is-dismissible">';
+                        /* translators: %s: recipient email address */
+                        $notice .= '<p><b>' . sprintf( __( 'Sorry, your email to %s can\'t be sent again.', 'total-mail-queue' ), esc_html( $maildata->recipient ) ) . '</b></p>';
+                        $notice .= '<p>' . __( 'The email used to have attachments, which are not available anymore. Only emails without attachments can be resent.', 'total-mail-queue' ) . '</p>';
+                        $notice .= '</div>';
+                        echo $notice;
+                    }
+                }
+                if ( $count_force_error == 0 && $count_force > 0 ) {
+                    wp_redirect( 'admin.php?page=wp_tmq_mail_queue-tab-queue' );
+                    exit;
+                } else if ( $count_force > 0 ) {
+                    $notice = '<div class="notice notice-success is-dismissible">';
+                    /* translators: %1$d: number of emails resent, %2$s: link open, %3$s: link close */
+                    $notice .= '<p>' . sprintf( __( '%1$d email(s) have been force-resent to the %2$sRetention%3$s queue.', 'total-mail-queue' ), $count_force, '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' ) . '</p>';
+                    $notice .= '</div>';
+                    echo $notice;
+                }
+                break;
         }
 
         return;
@@ -522,6 +577,7 @@ function wp_tmq_settings_init() {
     add_settings_field('wp_tmq_status', __( 'Operation Mode', 'total-mail-queue' ),'wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_queue', __( 'Queue', 'total-mail-queue' ),'wp_tmq_render_option_queue','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_log', __( 'Log', 'total-mail-queue' ),'wp_tmq_render_option_log','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_retry', __( 'Auto-Retry', 'total-mail-queue' ),'wp_tmq_render_option_retry','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_alert_status', __( 'Alert enabled', 'total-mail-queue' ),'wp_tmq_render_option_alert_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_sensitivity', __( 'Alert Sensitivity', 'total-mail-queue' ),'wp_tmq_render_option_sensitivity','wp_tmq_settings_page','wp_tmq_settings_section');
 }
@@ -572,6 +628,15 @@ function wp_tmq_render_option_queue() {
 function wp_tmq_render_option_log() {
     global $wp_tmq_options;
     echo __( 'Delete Log entries older than', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[clear_queue]" type="number" min="1" value="'.esc_attr(intval($wp_tmq_options['clear_queue']) / 24).'" /> ' . __( 'days.', 'total-mail-queue' );
+    echo '<br /><br />';
+    echo __( 'Keep a maximum of', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[log_max_records]" type="number" min="0" value="'.esc_attr(intval($wp_tmq_options['log_max_records'])).'" /> ' . __( 'log records.', 'total-mail-queue' );
+    echo ' <span class="description">' . __( '0 = unlimited', 'total-mail-queue' ) . '</span>';
+}
+
+function wp_tmq_render_option_retry() {
+    global $wp_tmq_options;
+    echo __( 'If sending fails, retry up to', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[max_retries]" type="number" min="0" value="'.esc_attr(intval($wp_tmq_options['max_retries'])).'" /> ' . __( 'time(s) before marking as error.', 'total-mail-queue' );
+    echo ' <span class="description">' . __( '0 = no retries, email is immediately marked as error', 'total-mail-queue' ) . '</span>';
 }
 
 function wp_tmq_render_option_sensitivity() {
