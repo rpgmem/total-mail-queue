@@ -127,6 +127,21 @@ function wp_tmq_settings_page() {
                     echo '<div class="notice notice-success"><p>' . sprintf( __( 'Next sending will be triggered in %1$s at %2$s.', 'total-mail-queue' ), esc_html( human_time_diff( $next_cron_timestamp ) ), esc_html( wp_date( 'H:i', $next_cron_timestamp ) ) ) . '</p></div>';
                 }
             }
+            // Show last cron run diagnostics
+            $last_cron = get_option( 'wp_tmq_last_cron' );
+            if ( $last_cron && is_array( $last_cron ) ) {
+                $diag_parts = array();
+                $diag_parts[] = '<strong>' . __( 'Last cron run:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['time'] ?? '—' );
+                $diag_parts[] = '<strong>' . __( 'Result:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['result'] ?? '—' );
+                if ( isset( $last_cron['queue_total'] ) ) {
+                    $diag_parts[] = '<strong>' . __( 'Queue:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['queue_total'] ) . ' total, ' . esc_html( $last_cron['queue_batch'] ) . ' batch';
+                    $diag_parts[] = '<strong>' . __( 'SMTP accounts:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['smtp_accounts'] );
+                    $diag_parts[] = '<strong>' . __( 'Send method:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['send_method'] );
+                    $diag_parts[] = '<strong>' . __( 'Sent:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['sent'] ) . ' | <strong>' . __( 'Errors:', 'total-mail-queue' ) . '</strong> ' . esc_html( $last_cron['errors'] );
+                }
+                $notice_class = ( $last_cron['result'] ?? '' ) === 'ok' ? 'notice-info' : 'notice-warning';
+                echo '<div class="notice ' . $notice_class . '"><p>' . implode( ' &nbsp;|&nbsp; ', $diag_parts ) . '</p></div>';
+            }
         } else {
             echo '<div class="notice notice-warning"><p>' . sprintf( __( 'The plugin is currently disabled. Enable it in the %sSettings%s.', 'total-mail-queue' ), '<a href="admin.php?page=wp_tmq_mail_queue">', '</a>' ) . '</p></div>';
         }

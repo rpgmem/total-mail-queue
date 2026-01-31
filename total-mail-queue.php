@@ -421,13 +421,24 @@ function wp_tmq_search_mail_from_queue() {
 
     global $wpdb,$wp_tmq_options, $wp_tmq_mailid, $wp_tmq_pre_wp_mail_priority;
 
+    // Track cron execution for diagnostics
+    $diag = array( 'time' => current_time( 'mysql', false ) );
+
     // Only process queue in mode 1 (queue). Mode 2 (block) retains but never sends.
-    if ($wp_tmq_options['enabled'] !== '1') { return; }
+    if ($wp_tmq_options['enabled'] !== '1') {
+        $diag['result'] = 'skipped: plugin not in queue mode (enabled=' . $wp_tmq_options['enabled'] . ')';
+        update_option( 'wp_tmq_last_cron', $diag, false );
+        return;
+    }
     $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
 
     // Triggercount to avoid multiple runs
     $wp_tmq_options['triggercount']++;
-    if ($wp_tmq_options['triggercount'] > 1) { return; }
+    if ($wp_tmq_options['triggercount'] > 1) {
+        $diag['result'] = 'skipped: duplicate trigger';
+        update_option( 'wp_tmq_last_cron', $diag, false );
+        return;
+    }
 
     // Total Mails waiting in the Queue?
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
@@ -481,6 +492,15 @@ function wp_tmq_search_mail_from_queue() {
 
     // Get available SMTP accounts (ordered by priority, with available limits)
     $smtp_accounts = wp_tmq_get_available_smtp();
+
+    // Track diagnostics
+    $diag['queue_total']    = $mailjobsTotal;
+    $diag['queue_batch']    = $mailsInQueue;
+    $diag['smtp_accounts']  = count( $smtp_accounts );
+    $diag['send_method']    = isset( $wp_tmq_options['send_method'] ) ? $wp_tmq_options['send_method'] : 'auto';
+    $diag['sent']           = 0;
+    $diag['errors']         = 0;
+
     // Send Mails in Queue
     if ($mailsInQueue > 0) {
         if ($mailjobs && count($mailjobs) > 0) {
@@ -524,6 +544,7 @@ function wp_tmq_search_mail_from_queue() {
                         '%s',
                         '%d'
                     );
+                    $diag['result'] = 'smtp_unavailable';
                     break; // No SMTP available — no point trying other emails in this batch
                 }
 
@@ -556,11 +577,14 @@ function wp_tmq_search_mail_from_queue() {
                 }
 
                 if ($sendstatus) {
-                    $wpdb->update($tableName,array('timestamp'=>current_time('mysql',false),'status'=>'sent'),array('id'=>$item['id']),'%s','%d');
+                    $wpdb->update($tableName,array('timestamp'=>current_time('mysql',false),'status'=>'sent','info'=>''),array('id'=>$item['id']),'%s','%d');
                     // Increment SMTP counter
                     if ( $smtp_to_use ) {
                         wp_tmq_increment_smtp_counter( $smtp_to_use['id'] );
                     }
+                    $diag['sent']++;
+                } else {
+                    $diag['errors']++;
                 }
                 if (is_array($attachments)) {
                     global $wp_filesystem;
@@ -590,6 +614,12 @@ function wp_tmq_search_mail_from_queue() {
             ) );
         }
     }
+
+    // Save cron diagnostics
+    if ( ! isset( $diag['result'] ) ) {
+        $diag['result'] = 'ok';
+    }
+    update_option( 'wp_tmq_last_cron', $diag, false );
 
 }
 add_action('wp_tmq_mail_queue_hook','wp_tmq_search_mail_from_queue');
@@ -628,6 +658,8 @@ function wp_tmq_uninstall () {
 
     $optionName = 'wp_tmq_version';
     delete_option( $optionName );
+
+    delete_option( 'wp_tmq_last_cron' );
 
     $tableName = $wpdb->prefix.'total_mail_queue';
     $wpdb->query( $wpdb->prepare( "DROP TABLE IF EXISTS %i", $tableName ) );
