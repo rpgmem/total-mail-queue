@@ -169,7 +169,7 @@ function wp_tmq_render_smtp_page() {
         // Username
         echo '<tr>';
         echo '<th scope="row"><label for="smtp_username">' . __( 'Username', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text" autocomplete="off" /></td>';
+        echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text" autocomplete="new-password" /></td>';
         echo '</tr>';
 
         // Password
