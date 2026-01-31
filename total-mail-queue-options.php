@@ -640,6 +640,9 @@ class wp_tmq_Log_Table extends WP_List_Table {
                 $count_error  = 0;
                 foreach($request_ids as $id) {
                     $maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
+                    if ( ! $maildata ) { continue; }
+                    // Only resend emails that are in a final state (not already queued)
+                    if ( in_array( $maildata->status, array( 'queue', 'high' ), true ) ) { continue; }
                     if (!$maildata->attachments || $maildata->attachments == '') {
                         $count_resend++;
                         $data = array(
@@ -743,9 +746,28 @@ function wp_tmq_settings_page_navi($tab) {
     echo '</nav>';
 }
 
+function wp_tmq_sanitize_settings( $input ) {
+    $allowed_keys = array(
+        'enabled', 'alert_enabled', 'email', 'email_amount',
+        'queue_amount', 'queue_interval', 'queue_interval_unit',
+        'clear_queue', 'log_max_records', 'send_method', 'max_retries',
+    );
+    $sanitized = array();
+    if ( is_array( $input ) ) {
+        foreach ( $input as $key => $value ) {
+            if ( in_array( $key, $allowed_keys, true ) ) {
+                $sanitized[ $key ] = sanitize_text_field( $value );
+            }
+        }
+    }
+    return $sanitized;
+}
+
 function wp_tmq_settings_init() {
     global $wp_tmq_options;
-    register_setting('wp_tmq_settings','wp_tmq_settings');
+    register_setting('wp_tmq_settings','wp_tmq_settings', array(
+        'sanitize_callback' => 'wp_tmq_sanitize_settings',
+    ));
     add_settings_section('wp_tmq_settings_section','',null,'wp_tmq_settings_page');
     add_settings_field('wp_tmq_status', __( 'Operation Mode', 'total-mail-queue' ),'wp_tmq_render_option_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_queue', __( 'Queue', 'total-mail-queue' ),'wp_tmq_render_option_queue','wp_tmq_settings_page','wp_tmq_settings_section');

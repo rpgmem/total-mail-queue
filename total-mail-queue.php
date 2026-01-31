@@ -180,7 +180,7 @@ if (in_array($wp_tmq_options['enabled'], array('1','2')) && wp_doing_cron() === 
 // pre WP Mail Filter
 function wp_tmq_prewpmail($return, $atts) {
 
-    global $wpdb, $wp_tmq_options;
+    global $wpdb, $wp_tmq_options, $wp_tmq_mailid;
 
     if (!is_null($return)) {
         // Another pre_wp_mail filter has already returned a value, so the mail is not added to the queue
@@ -286,8 +286,15 @@ function wp_tmq_prewpmail($return, $atts) {
     // store attachments in /attachments/ Folder, to address them later
     if (isset($attachments) && $attachments && $attachments != '') {
 
-        $subfolder = time().'-'.rand(0,999999);
-        $foldercreated = wp_mkdir_p(plugin_dir_path(__FILE__).'attachments/'.$subfolder);
+        $attachments_base = plugin_dir_path(__FILE__) . 'attachments/';
+        // Protect attachments directory from web access
+        if ( ! file_exists( $attachments_base . '.htaccess' ) ) {
+            wp_mkdir_p( $attachments_base );
+            @file_put_contents( $attachments_base . '.htaccess', "Deny from all\n" );
+            @file_put_contents( $attachments_base . 'index.php', "<?php // Silence is golden.\n" );
+        }
+        $subfolder = time().'-'.wp_generate_password(12, false);
+        $foldercreated = wp_mkdir_p( $attachments_base . $subfolder );
         if (!$foldercreated) {
             error_log('Could not create Subfolder for Email attachment');
             $data['info'] = __( 'Error: Could not store attachments', 'total-mail-queue' );
@@ -300,7 +307,7 @@ function wp_tmq_prewpmail($return, $atts) {
                 WP_Filesystem();
             }
             foreach($attachments as $item) {
-                $newfile = plugin_dir_path(__FILE__).'attachments/'.$subfolder.'/'.basename($item);
+                $newfile = $attachments_base . $subfolder . '/' . basename($item);
                 $wp_filesystem->copy($item,$newfile);
                 array_push($newattachments,$newfile);
             }
@@ -478,7 +485,7 @@ function wp_tmq_search_mail_from_queue() {
     if ($wp_tmq_options['alert_enabled'] == '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
 
         // Last alerts older than 6 hours?
-        $alerts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'alert' AND `timestamp` > %s - INTERVAL 6 HOUR", current_time( 'mysql', false ) ), 'ARRAY_A' );
+        $alerts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'alert' AND `timestamp` > DATE_SUB(%s, INTERVAL 6 HOUR)", current_time( 'mysql', false ) ), 'ARRAY_A' );
 
         // If no alerts, then send one
        if (!$alerts) {
@@ -652,7 +659,7 @@ function wp_tmq_search_mail_from_queue() {
     }
 
     // Delete old logs (by date)
-    $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < %s - INTERVAL %d HOUR", current_time( 'mysql', false ), intval( $wp_tmq_options['clear_queue'] ) ) );
+    $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < DATE_SUB(%s, INTERVAL %d HOUR)", current_time( 'mysql', false ), intval( $wp_tmq_options['clear_queue'] ) ) );
 
     // Delete excess log entries (by total records limit)
     $log_max = intval( $wp_tmq_options['log_max_records'] );
