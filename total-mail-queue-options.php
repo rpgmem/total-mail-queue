@@ -534,6 +534,8 @@ class wp_tmq_Log_Table extends WP_List_Table {
                             'headers' => $maildata->headers,
                         );
                         $wpdb->insert($tableName,$data);
+                        // Remove original log entry to prevent duplicate resends
+                        $wpdb->delete( $tableName, array( 'id' => intval( $id ) ), '%d' );
                     } else {
                         $count_error++;
                         $notice = '<div class="notice notice-error is-dismissible">';
@@ -579,6 +581,8 @@ class wp_tmq_Log_Table extends WP_List_Table {
                             'info'        => sprintf( __( 'Force resent — Original: %s', 'total-mail-queue' ), $maildata->info ),
                         );
                         $wpdb->insert( $tableName, $data );
+                        // Remove original log entry to prevent duplicate resends
+                        $wpdb->delete( $tableName, array( 'id' => intval( $id ) ), '%d' );
                     } else {
                         $count_force_error++;
                         $notice = '<div class="notice notice-error is-dismissible">';
