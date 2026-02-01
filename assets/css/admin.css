@@ -46,3 +46,5 @@ span.tmq-status.tmq-status-alert                    { background: #1d2327; color
 .tmq-export-import                                       { display: flex; gap: 2em; flex-wrap: wrap; }
 .tmq-export-import > .tmq-box                            { flex: 1; min-width: 300px; }
 #tmq-test-smtp-result                                    { display: none; }
+.tmq-conn-row.tmq-conn-locked                            { opacity: .5; }
+.tmq-conn-field:disabled                                 { background-color: #f0f0f1; cursor: not-allowed; }
