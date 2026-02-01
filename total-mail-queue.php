@@ -54,6 +54,7 @@ function wp_tmq_get_settings() {
         'log_max_records'=> '0',   // 0=unlimited, >0=max number of log entries to keep
         'send_method'    => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only
         'max_retries'    => '3',   // 0=no retries, >0=auto-retry failed emails up to N times
+        'cron_lock_ttl'  => '300', // seconds — safety timeout for the cross-process cron lock
         'tableName'      => 'total_mail_queue',
         'smtpTableName'  => 'total_mail_queue_smtp',
         'triggercount'   => 0,
@@ -564,7 +565,8 @@ function wp_tmq_search_mail_from_queue() {
     // takes longer than the cron interval). Uses a transient with a TTL as a
     // safety net so the lock auto-expires if the process dies unexpectedly.
     $lock_key     = 'wp_tmq_cron_lock';
-    $lock_timeout = max( 300, intval( $wp_tmq_options['queue_amount'] ) * 5 ); // 5s per email, min 5 min
+    $lock_timeout = intval( $wp_tmq_options['cron_lock_ttl'] );
+    if ( $lock_timeout < 30 ) { $lock_timeout = 30; } // absolute minimum safety
     if ( get_transient( $lock_key ) ) {
         $diag['result'] = 'skipped: another batch is still running';
         update_option( 'wp_tmq_last_cron', $diag, false );
