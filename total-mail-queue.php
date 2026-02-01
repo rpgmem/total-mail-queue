@@ -552,13 +552,25 @@ function wp_tmq_search_mail_from_queue() {
     }
     $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
 
-    // Triggercount to avoid multiple runs
+    // Triggercount to avoid multiple runs within the same PHP request
     $wp_tmq_options['triggercount']++;
     if ($wp_tmq_options['triggercount'] > 1) {
         $diag['result'] = 'skipped: duplicate trigger';
         update_option( 'wp_tmq_last_cron', $diag, false );
         return;
     }
+
+    // Cross-process lock: prevent overlapping cron batches (e.g. when a batch
+    // takes longer than the cron interval). Uses a transient with a TTL as a
+    // safety net so the lock auto-expires if the process dies unexpectedly.
+    $lock_key     = 'wp_tmq_cron_lock';
+    $lock_timeout = max( 300, intval( $wp_tmq_options['queue_amount'] ) * 5 ); // 5s per email, min 5 min
+    if ( get_transient( $lock_key ) ) {
+        $diag['result'] = 'skipped: another batch is still running';
+        update_option( 'wp_tmq_last_cron', $diag, false );
+        return;
+    }
+    set_transient( $lock_key, current_time( 'mysql', false ), $lock_timeout );
 
     // Total Mails waiting in the Queue?
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
@@ -770,6 +782,9 @@ function wp_tmq_search_mail_from_queue() {
             ) );
         }
     }
+
+    // Release cross-process lock
+    delete_transient( $lock_key );
 
     // Save cron diagnostics
     if ( ! isset( $diag['result'] ) ) {
