@@ -60,14 +60,16 @@ function wp_tmq_render_smtp_page() {
         }
 
         if ( $save_id > 0 ) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->update( $smtpTable, $data, array( 'id' => $save_id ), null, '%d' );
-            echo '<div class="notice notice-success is-dismissible"><p>' . __( 'SMTP account updated.', 'total-mail-queue' ) . '</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account updated.', 'total-mail-queue' ) . '</p></div>';
         } else {
             if ( ! isset( $data['password'] ) ) {
                 $data['password'] = '';
             }
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->insert( $smtpTable, $data );
-            echo '<div class="notice notice-success is-dismissible"><p>' . __( 'SMTP account added.', 'total-mail-queue' ) . '</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account added.', 'total-mail-queue' ) . '</p></div>';
         }
 
         // Reset action so we show the list
@@ -82,8 +84,9 @@ function wp_tmq_render_smtp_page() {
             wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
         }
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->delete( $smtpTable, array( 'id' => $edit_id ), '%d' );
-        echo '<div class="notice notice-success is-dismissible"><p>' . __( 'SMTP account deleted.', 'total-mail-queue' ) . '</p></div>';
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account deleted.', 'total-mail-queue' ) . '</p></div>';
         $action = '';
         $edit_id = 0;
     }
@@ -95,8 +98,9 @@ function wp_tmq_render_smtp_page() {
             wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
         }
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->query( "UPDATE `$smtpTable` SET `daily_sent` = 0, `monthly_sent` = 0" );
-        echo '<div class="notice notice-success is-dismissible"><p>' . __( 'All sending counters have been reset.', 'total-mail-queue' ) . '</p></div>';
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'All sending counters have been reset.', 'total-mail-queue' ) . '</p></div>';
     }
 
     // -------------------------------------------------------
@@ -124,6 +128,7 @@ function wp_tmq_render_smtp_page() {
         );
 
         if ( $action === 'edit' && $edit_id > 0 ) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtpTable` WHERE `id` = %d", $edit_id ), ARRAY_A );
             if ( $row ) {
                 $account = $row;
@@ -149,117 +154,117 @@ function wp_tmq_render_smtp_page() {
 
         // Name
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_name">' . __( 'Name', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_name">' . esc_html__( 'Name', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="text" id="smtp_name" name="smtp_name" value="' . esc_attr( $account['name'] ) . '" class="regular-text" /></td>';
         echo '</tr>';
 
         // Connection lock toggle (only on edit)
         if ( $is_edit ) {
             echo '<tr>';
-            echo '<th scope="row">' . __( 'Connection Settings', 'total-mail-queue' ) . '</th>';
-            echo '<td><label><input type="checkbox" id="tmq-unlock-conn" /> ' . __( 'Unlock connection fields for editing', 'total-mail-queue' ) . '</label>';
-            echo ' <span class="description">' . __( 'Keep locked to safely change only limits and other options.', 'total-mail-queue' ) . '</span></td>';
+            echo '<th scope="row">' . esc_html__( 'Connection Settings', 'total-mail-queue' ) . '</th>';
+            echo '<td><label><input type="checkbox" id="tmq-unlock-conn" /> ' . esc_html__( 'Unlock connection fields for editing', 'total-mail-queue' ) . '</label>';
+            echo ' <span class="description">' . esc_html__( 'Keep locked to safely change only limits and other options.', 'total-mail-queue' ) . '</span></td>';
             echo '</tr>';
         }
 
         // Host
         echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
-        echo '<th scope="row"><label for="smtp_host">' . __( 'Host', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_host">' . esc_html__( 'Host', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="text" id="smtp_host" name="smtp_host" value="' . esc_attr( $account['host'] ) . '" class="regular-text tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
         echo '</tr>';
 
         // Port
         echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
-        echo '<th scope="row"><label for="smtp_port">' . __( 'Port', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_port">' . esc_html__( 'Port', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="number" id="smtp_port" name="smtp_port" value="' . esc_attr( $account['port'] ) . '" min="1" max="65535" class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
         echo '</tr>';
 
         // Encryption
         echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
-        echo '<th scope="row"><label for="smtp_encryption">' . __( 'Encryption', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_encryption">' . esc_html__( 'Encryption', 'total-mail-queue' ) . '</label></th>';
         echo '<td><select id="smtp_encryption" name="smtp_encryption" class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . '>';
-        echo '<option value="none"' . selected( $account['encryption'], 'none', false ) . '>' . __( 'None', 'total-mail-queue' ) . '</option>';
-        echo '<option value="tls"' . selected( $account['encryption'], 'tls', false ) . '>' . __( 'TLS', 'total-mail-queue' ) . '</option>';
-        echo '<option value="ssl"' . selected( $account['encryption'], 'ssl', false ) . '>' . __( 'SSL', 'total-mail-queue' ) . '</option>';
+        echo '<option value="none"' . selected( $account['encryption'], 'none', false ) . '>' . esc_html__( 'None', 'total-mail-queue' ) . '</option>';
+        echo '<option value="tls"' . selected( $account['encryption'], 'tls', false ) . '>' . esc_html__( 'TLS', 'total-mail-queue' ) . '</option>';
+        echo '<option value="ssl"' . selected( $account['encryption'], 'ssl', false ) . '>' . esc_html__( 'SSL', 'total-mail-queue' ) . '</option>';
         echo '</select></td>';
         echo '</tr>';
 
         // Auth
         echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
-        echo '<th scope="row"><label for="smtp_auth">' . __( 'Authentication', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_auth">' . esc_html__( 'Authentication', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="checkbox" id="smtp_auth" name="smtp_auth" value="1"' . checked( $account['auth'], 1, false ) . ' class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
         echo '</tr>';
 
         // Username
         echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
-        echo '<th scope="row"><label for="smtp_username">' . __( 'Username', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_username">' . esc_html__( 'Username', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' ) . ' /></td>';
         echo '</tr>';
 
         // Password
         echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
-        echo '<th scope="row"><label for="smtp_password">' . __( 'Password', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_password">' . esc_html__( 'Password', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="password" id="smtp_password" name="smtp_password" value="" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' );
         if ( $is_edit && ! empty( $account['password'] ) ) {
             echo ' placeholder="' . esc_attr( str_repeat( "\xE2\x80\xA2", 8 ) ) . '"';
         }
         echo ' />';
         if ( $is_edit && ! empty( $account['password'] ) ) {
-            echo ' <span class="description">' . __( 'Leave blank to keep the current password.', 'total-mail-queue' ) . '</span>';
+            echo ' <span class="description">' . esc_html__( 'Leave blank to keep the current password.', 'total-mail-queue' ) . '</span>';
         }
         echo '</td>';
         echo '</tr>';
 
         // From Email
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_from_email">' . __( 'From Email', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_from_email">' . esc_html__( 'From Email', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="email" id="smtp_from_email" name="smtp_from_email" value="' . esc_attr( $account['from_email'] ) . '" class="regular-text" /></td>';
         echo '</tr>';
 
         // From Name
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_from_name">' . __( 'From Name', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_from_name">' . esc_html__( 'From Name', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="text" id="smtp_from_name" name="smtp_from_name" value="' . esc_attr( $account['from_name'] ) . '" class="regular-text" /></td>';
         echo '</tr>';
 
         // Priority
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_priority">' . __( 'Priority', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_priority">' . esc_html__( 'Priority', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="number" id="smtp_priority" name="smtp_priority" value="' . esc_attr( $account['priority'] ) . '" min="0" /> ';
-        echo '<span class="description">' . __( 'Lower number = higher priority.', 'total-mail-queue' ) . '</span></td>';
+        echo '<span class="description">' . esc_html__( 'Lower number = higher priority.', 'total-mail-queue' ) . '</span></td>';
         echo '</tr>';
 
         // Daily Limit
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_daily_limit">' . __( 'Daily Limit', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_daily_limit">' . esc_html__( 'Daily Limit', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="number" id="smtp_daily_limit" name="smtp_daily_limit" value="' . esc_attr( $account['daily_limit'] ) . '" min="0" /> ';
-        echo '<span class="description">' . __( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
+        echo '<span class="description">' . esc_html__( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
         echo '</tr>';
 
         // Monthly Limit
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_monthly_limit">' . __( 'Monthly Limit', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_monthly_limit">' . esc_html__( 'Monthly Limit', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="number" id="smtp_monthly_limit" name="smtp_monthly_limit" value="' . esc_attr( $account['monthly_limit'] ) . '" min="0" /> ';
-        echo '<span class="description">' . __( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
+        echo '<span class="description">' . esc_html__( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
         echo '</tr>';
 
         // Send Interval
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_send_interval">' . __( 'Send Interval (minutes)', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_send_interval">' . esc_html__( 'Send Interval (minutes)', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="number" id="smtp_send_interval" name="smtp_send_interval" value="' . esc_attr( $account['send_interval'] ) . '" min="0" /> ';
-        echo '<span class="description">' . __( 'Minimum minutes between sending cycles for this account. 0 = use global interval.', 'total-mail-queue' ) . '</span></td>';
+        echo '<span class="description">' . esc_html__( 'Minimum minutes between sending cycles for this account. 0 = use global interval.', 'total-mail-queue' ) . '</span></td>';
         echo '</tr>';
 
         // Send Bulk
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_send_bulk">' . __( 'Emails per Cycle', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_send_bulk">' . esc_html__( 'Emails per Cycle', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="number" id="smtp_send_bulk" name="smtp_send_bulk" value="' . esc_attr( $account['send_bulk'] ) . '" min="0" /> ';
-        echo '<span class="description">' . __( 'Maximum emails to send per cycle for this account. 0 = use global limit.', 'total-mail-queue' ) . '</span></td>';
+        echo '<span class="description">' . esc_html__( 'Maximum emails to send per cycle for this account. 0 = use global limit.', 'total-mail-queue' ) . '</span></td>';
         echo '</tr>';
 
         // Enabled
         echo '<tr>';
-        echo '<th scope="row"><label for="smtp_enabled">' . __( 'Enabled', 'total-mail-queue' ) . '</label></th>';
+        echo '<th scope="row"><label for="smtp_enabled">' . esc_html__( 'Enabled', 'total-mail-queue' ) . '</label></th>';
         echo '<td><input type="checkbox" id="smtp_enabled" name="smtp_enabled" value="1"' . checked( $account['enabled'], 1, false ) . ' /></td>';
         echo '</tr>';
 
@@ -267,7 +272,7 @@ function wp_tmq_render_smtp_page() {
         echo '<p class="submit">';
         echo '<input type="submit" name="wp_tmq_smtp_save" class="button button-primary" value="' . esc_attr__( 'Save SMTP Account', 'total-mail-queue' ) . '" /> ';
         echo '<button type="button" id="tmq-test-smtp" class="button" data-smtp-id="' . esc_attr( $account['id'] ) . '">' . esc_html__( 'Test Connection', 'total-mail-queue' ) . '</button> ';
-        echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '" class="button">' . __( 'Cancel', 'total-mail-queue' ) . '</a>';
+        echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '" class="button">' . esc_html__( 'Cancel', 'total-mail-queue' ) . '</a>';
         echo '</p>';
         echo '<div id="tmq-test-smtp-result"></div>';
         echo '</form>';
@@ -280,12 +285,13 @@ function wp_tmq_render_smtp_page() {
     // List SMTP Accounts
     // -------------------------------------------------------
 
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $accounts = $wpdb->get_results( "SELECT * FROM `$smtpTable` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
 
     echo '<div class="tmq-box">';
-    echo '<h3>' . __( 'SMTP Accounts', 'total-mail-queue' ) . '</h3>';
+    echo '<h3>' . esc_html__( 'SMTP Accounts', 'total-mail-queue' ) . '</h3>';
     echo '<p>';
-    echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp&smtp-action=add' ) ) . '" class="button button-primary">' . __( 'Add SMTP Account', 'total-mail-queue' ) . '</a> ';
+    echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp&smtp-action=add' ) ) . '" class="button button-primary">' . esc_html__( 'Add SMTP Account', 'total-mail-queue' ) . '</a> ';
 
     if ( ! empty( $accounts ) ) {
         echo '<form method="post" class="tmq-inline-form">';
@@ -297,22 +303,22 @@ function wp_tmq_render_smtp_page() {
     echo '</p>';
 
     if ( empty( $accounts ) ) {
-        echo '<p>' . __( 'No SMTP accounts configured yet.', 'total-mail-queue' ) . '</p>';
+        echo '<p>' . esc_html__( 'No SMTP accounts configured yet.', 'total-mail-queue' ) . '</p>';
     } else {
         echo '<table class="widefat striped">';
         echo '<thead>';
         echo '<tr>';
-        echo '<th>' . __( 'ID', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Name', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Host:Port', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'From', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Priority', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Daily Limit', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Monthly Limit', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Interval', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Per Cycle', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Enabled', 'total-mail-queue' ) . '</th>';
-        echo '<th>' . __( 'Actions', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'ID', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Name', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Host:Port', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'From', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Priority', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Daily Limit', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Monthly Limit', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Interval', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Per Cycle', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Enabled', 'total-mail-queue' ) . '</th>';
+        echo '<th>' . esc_html__( 'Actions', 'total-mail-queue' ) . '</th>';
         echo '</tr>';
         echo '</thead>';
         echo '<tbody>';
@@ -320,10 +326,10 @@ function wp_tmq_render_smtp_page() {
         foreach ( $accounts as $acct ) {
 
             $daily_display  = esc_html( $acct['daily_sent'] ) . ' / ';
-            $daily_display .= intval( $acct['daily_limit'] ) === 0 ? __( 'unlimited', 'total-mail-queue' ) : esc_html( $acct['daily_limit'] );
+            $daily_display .= intval( $acct['daily_limit'] ) === 0 ? esc_html__( 'unlimited', 'total-mail-queue' ) : esc_html( $acct['daily_limit'] );
 
             $monthly_display  = esc_html( $acct['monthly_sent'] ) . ' / ';
-            $monthly_display .= intval( $acct['monthly_limit'] ) === 0 ? __( 'unlimited', 'total-mail-queue' ) : esc_html( $acct['monthly_limit'] );
+            $monthly_display .= intval( $acct['monthly_limit'] ) === 0 ? esc_html__( 'unlimited', 'total-mail-queue' ) : esc_html( $acct['monthly_limit'] );
 
             $from_display = esc_html( $acct['from_email'] );
             if ( ! empty( $acct['from_name'] ) ) {
@@ -345,15 +351,15 @@ function wp_tmq_render_smtp_page() {
             echo '<td>' . $daily_display . '</td>';
             echo '<td>' . $monthly_display . '</td>';
 
-            $interval_display = intval( $acct['send_interval'] ) === 0 ? __( 'global', 'total-mail-queue' ) : esc_html( $acct['send_interval'] ) . ' min';
-            $bulk_display     = intval( $acct['send_bulk'] ) === 0 ? __( 'global', 'total-mail-queue' ) : esc_html( $acct['send_bulk'] );
+            $interval_display = intval( $acct['send_interval'] ) === 0 ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( $acct['send_interval'] ) . ' min';
+            $bulk_display     = intval( $acct['send_bulk'] ) === 0 ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( $acct['send_bulk'] );
             echo '<td>' . $interval_display . '</td>';
             echo '<td>' . $bulk_display . '</td>';
 
-            echo '<td>' . ( intval( $acct['enabled'] ) ? '<span class="tmq-ok">' . __( 'Yes', 'total-mail-queue' ) . '</span>' : __( 'No', 'total-mail-queue' ) ) . '</td>';
+            echo '<td>' . ( intval( $acct['enabled'] ) ? '<span class="tmq-ok">' . esc_html__( 'Yes', 'total-mail-queue' ) . '</span>' : esc_html__( 'No', 'total-mail-queue' ) ) . '</td>';
             echo '<td>';
-            echo '<a href="' . esc_url( $edit_url ) . '">' . __( 'Edit', 'total-mail-queue' ) . '</a> | ';
-            echo '<a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Are you sure you want to delete this SMTP account?', 'total-mail-queue' ) ) . '\');">' . __( 'Delete', 'total-mail-queue' ) . '</a>';
+            echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Edit', 'total-mail-queue' ) . '</a> | ';
+            echo '<a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Are you sure you want to delete this SMTP account?', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Delete', 'total-mail-queue' ) . '</a>';
             echo '</td>';
             echo '</tr>';
         }

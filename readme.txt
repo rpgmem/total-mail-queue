@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -39,7 +39,7 @@ You can enable the Queue, control how many emails and how often they should be s
 
 You can enable the Alerting feature and control at which point exactly you want to be alerted.
 
-= How does this plugin work?
+= How does this plugin work? =
 
 When enabled, the plugin intercepts wp_mail(). Instead of sending emails immediately, they are stored in the database and released gradually via WP-Cron according to your configured interval.
 
@@ -176,6 +176,16 @@ Upload the the plugin, activate it, and go to the Settings to enable the Queue.
 Please make sure that your WP Cron is running reliably.
 
 == Changelog ==
+
+= 2.2.1 =
+* WordPress Plugin Check compliance: output escaping, ABSPATH guards, safe redirects
+* Cross-process cron lock using MySQL GET_LOCK to prevent overlapping batch sends
+* Configurable SMTP Timeout and Cron Lock Timeout settings in admin panel
+* Memory optimization: lazy-load email bodies per iteration instead of loading all at once
+* Fix: SMTP accounts no longer blocked mid-cycle by send_interval check
+* Fix: removed %i placeholder for compatibility with WordPress < 6.2
+* Fix: replaced file_put_contents with WP_Filesystem API for attachment directory protection
+* Removed error_log/print_r development calls from production code
 
 = 2.2.0 =
 * SMTP test connection button to verify credentials before sending
