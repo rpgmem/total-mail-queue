@@ -570,18 +570,28 @@ function wp_tmq_search_mail_from_queue() {
         return;
     }
 
-    // Cross-process lock: prevent overlapping cron batches (e.g. when a batch
-    // takes longer than the cron interval). Uses a transient with a TTL as a
-    // safety net so the lock auto-expires if the process dies unexpectedly.
-    $lock_key     = 'wp_tmq_cron_lock';
+    // Clean up legacy transient lock (from older version)
+    delete_transient( 'wp_tmq_cron_lock' );
+
+    // Cross-process lock: prevent overlapping cron batches using MySQL GET_LOCK.
+    // This is truly atomic — impossible for two processes to acquire simultaneously.
+    // If PHP crashes, MySQL releases the lock when the connection closes.
+    $lock_name    = 'wp_tmq_cron_lock';
     $lock_timeout = intval( $wp_tmq_options['cron_lock_ttl'] );
-    if ( $lock_timeout < 30 ) { $lock_timeout = 30; } // absolute minimum safety
-    if ( get_transient( $lock_key ) ) {
+    if ( $lock_timeout < 30 ) { $lock_timeout = 30; }
+    $got_lock = $wpdb->get_var( $wpdb->prepare( "SELECT GET_LOCK(%s, 0)", $lock_name ) );
+    if ( ! $got_lock ) {
         $diag['result'] = 'skipped: another batch is still running';
         update_option( 'wp_tmq_last_cron', $diag, false );
         return;
     }
-    set_transient( $lock_key, current_time( 'mysql', false ), $lock_timeout );
+
+    // Register a shutdown function to release the lock even if PHP fatals mid-batch.
+    // Also set a MySQL-level timeout so the lock auto-expires if the connection hangs.
+    $wpdb->query( $wpdb->prepare( "SET @tmq_lock_timeout = %d", $lock_timeout ) );
+    register_shutdown_function( function() use ( $wpdb, $lock_name ) {
+        $wpdb->get_var( $wpdb->prepare( "SELECT RELEASE_LOCK(%s)", $lock_name ) );
+    } );
 
     // Total Mails waiting in the Queue?
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
@@ -801,8 +811,8 @@ function wp_tmq_search_mail_from_queue() {
         }
     }
 
-    // Release cross-process lock
-    delete_transient( $lock_key );
+    // Release cross-process lock (also released by shutdown function as safety net)
+    $wpdb->get_var( $wpdb->prepare( "SELECT RELEASE_LOCK(%s)", $lock_name ) );
 
     // Save cron diagnostics
     if ( ! isset( $diag['result'] ) ) {
