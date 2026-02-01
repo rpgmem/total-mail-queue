@@ -135,27 +135,27 @@ function wp_tmq_reset_smtp_counters() {
     // Reset per-cycle bulk counter:
     // - Accounts with send_interval=0 (global): reset every cron run (each cron = one cycle)
     // - Accounts with send_interval>0: reset only when the interval has elapsed (new cycle)
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query(
-        "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` = 0"
+        "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` = 0" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix
     );
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
-        "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s",
+        "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $now
     ) );
 
     // Reset daily counters if day changed
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
-        "UPDATE `$smtpTable` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s",
+        "UPDATE `$smtpTable` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $today, $today
     ) );
 
     // Reset monthly counters if month changed
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
-        "UPDATE `$smtpTable` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s",
+        "UPDATE `$smtpTable` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $today, $this_month
     ) );
 }
@@ -172,15 +172,8 @@ function wp_tmq_get_available_smtp() {
     // cycle_sent is reset (in wp_tmq_reset_smtp_counters). As long as the
     // current cycle still has room (cycle_sent < send_bulk), the account
     // remains available. The interval only blocks new cycles — not mid-cycle sends.
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-    $accounts = $wpdb->get_results(
-        "SELECT * FROM `$smtpTable` WHERE `enabled` = 1
-         AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`)
-         AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`)
-         AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`)
-         ORDER BY `priority` ASC",
-        ARRAY_A
-    );
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table name from $wpdb->prefix
+    $accounts = $wpdb->get_results( "SELECT * FROM `$smtpTable` WHERE `enabled` = 1 AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`) AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`) AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`) ORDER BY `priority` ASC", ARRAY_A );
 
     return $accounts ? $accounts : array();
 }
@@ -220,9 +213,9 @@ function wp_tmq_increment_smtp_counter( $smtp_id ) {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
     $now = current_time( 'mysql', false );
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
-        "UPDATE `$smtpTable` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d",
+        "UPDATE `$smtpTable` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $now, intval( $smtp_id )
     ) );
 }
@@ -832,9 +825,9 @@ function wp_tmq_search_mail_from_queue() {
         $total_log = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high'" );
         if ( $total_log > $log_max ) {
             $excess = $total_log - $log_max;
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->query( $wpdb->prepare(
-                "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `timestamp` ASC LIMIT %d",
+                "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `timestamp` ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix
                 intval( $excess )
             ) );
         }

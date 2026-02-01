@@ -934,15 +934,15 @@ function wp_tmq_render_option_queue() {
     global $wpdb;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
     $global_amount = intval( $wp_tmq_options['queue_amount'] );
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $exceeding = $wpdb->get_results( $wpdb->prepare(
-        "SELECT `name`, `send_bulk` FROM `$smtpTable` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0",
+        "SELECT `name`, `send_bulk` FROM `$smtpTable` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix
         $global_amount
     ), ARRAY_A );
     if ( ! empty( $exceeding ) ) {
         $names = array_map( function ( $a ) { return '<strong>' . esc_html( $a['name'] ) . '</strong> (' . intval( $a['send_bulk'] ) . ')'; }, $exceeding );
-        /* translators: %1$d: global email limit, %2$s: list of SMTP account names */
         echo '<br /><span class="tmq-warning">' . wp_kses_post( sprintf(
+            /* translators: %1$d: global email limit, %2$s: list of SMTP account names */
             __( 'Warning: The following SMTP account(s) have a per-cycle limit higher than the global limit of %1$d: %2$s. The global limit will be applied as the ceiling.', 'total-mail-queue' ),
             $global_amount,
             implode( ', ', $names )
@@ -1139,15 +1139,14 @@ function wp_tmq_handle_export() {
 
 function wp_tmq_handle_import() {
     // Nonce is verified in the caller wp_tmq_settings_page() before calling this function.
-    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in caller
     global $wpdb, $wp_tmq_options;
 
-    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- checked via isset on next line
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- nonce verified in caller; isset checks are on same line
     if ( ! isset( $_FILES['wp_tmq_import_file'] ) || ! isset( $_FILES['wp_tmq_import_file']['error'] ) || $_FILES['wp_tmq_import_file']['error'] !== UPLOAD_ERR_OK ) {
         return '<div class="notice notice-error"><p>' . esc_html__( 'Error uploading file. Please try again.', 'total-mail-queue' ) . '</p></div>';
     }
 
-    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- reading uploaded tmp file, path from PHP
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- reading uploaded tmp file; nonce verified in caller; validated via isset above
     $file_content = file_get_contents( sanitize_text_field( wp_unslash( $_FILES['wp_tmq_import_file']['tmp_name'] ) ) );
 
     // Suppress XML errors and disable external entities (XXE protection)
