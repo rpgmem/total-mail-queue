@@ -168,21 +168,23 @@ function wp_tmq_reset_smtp_counters() {
 function wp_tmq_get_available_smtp() {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
-    $now = current_time( 'mysql', false );
 
     // Get enabled SMTP accounts ordered by priority, where:
     // - daily/monthly limits not reached
     // - per-account bulk limit not reached (cycle_sent < send_bulk, or send_bulk=0 means unlimited)
-    // - per-account interval cooldown elapsed (last_sent_at + send_interval minutes <= now, or send_interval=0 means no cooldown)
-    $accounts = $wpdb->get_results( $wpdb->prepare(
+    //
+    // Note: send_interval is NOT checked here. The interval controls when
+    // cycle_sent is reset (in wp_tmq_reset_smtp_counters). As long as the
+    // current cycle still has room (cycle_sent < send_bulk), the account
+    // remains available. The interval only blocks new cycles — not mid-cycle sends.
+    $accounts = $wpdb->get_results(
         "SELECT * FROM `$smtpTable` WHERE `enabled` = 1
          AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`)
          AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`)
          AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`)
-         AND (`send_interval` = 0 OR DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s)
          ORDER BY `priority` ASC",
-        $now
-    ), ARRAY_A );
+        ARRAY_A
+    );
 
     return $accounts ? $accounts : array();
 }
