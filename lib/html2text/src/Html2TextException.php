@@ -2,6 +2,8 @@
 
 namespace Soundasleep;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 class Html2TextException extends \Exception {
 
 	/** @var string $more_info */

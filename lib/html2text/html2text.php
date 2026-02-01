@@ -1,4 +1,7 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 /**
  * This file is available if you still want to use functions rather than
  * autoloading classes.

@@ -4,7 +4,7 @@
  * Plugin Name:       Total Mail Queue
  * Plugin URI:
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
- * Version:           2.2.0
+ * Version:           2.2.1
  * Requires at least: 5.9
  * Requires PHP:      7.4
  * Author:
@@ -24,16 +24,18 @@ if (!defined('ABSPATH')) { exit; }
 PLUGIN VERSION
 **************************************************************** */
 
-$wp_tmq_version = '2.2.0';
+$wp_tmq_version = '2.2.1';
 
 
 /* ***************************************************************
 LOAD TEXT DOMAIN FOR i18n
+Note: Since WP 4.6, translations for plugins in the directory are
+loaded automatically. We keep this for custom / local translations.
 **************************************************************** */
 function wp_tmq_load_textdomain() {
     load_plugin_textdomain( 'total-mail-queue', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 }
-add_action( 'plugins_loaded', 'wp_tmq_load_textdomain' );
+add_action( 'init', 'wp_tmq_load_textdomain' );
 
 
 
@@ -144,21 +146,25 @@ function wp_tmq_reset_smtp_counters() {
     // Reset per-cycle bulk counter:
     // - Accounts with send_interval=0 (global): reset every cron run (each cron = one cycle)
     // - Accounts with send_interval>0: reset only when the interval has elapsed (new cycle)
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query(
         "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` = 0"
     );
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
         "UPDATE `$smtpTable` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s",
         $now
     ) );
 
     // Reset daily counters if day changed
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
         "UPDATE `$smtpTable` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s",
         $today, $today
     ) );
 
     // Reset monthly counters if month changed
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
         "UPDATE `$smtpTable` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s",
         $today, $this_month
@@ -177,6 +183,7 @@ function wp_tmq_get_available_smtp() {
     // cycle_sent is reset (in wp_tmq_reset_smtp_counters). As long as the
     // current cycle still has room (cycle_sent < send_bulk), the account
     // remains available. The interval only blocks new cycles — not mid-cycle sends.
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $accounts = $wpdb->get_results(
         "SELECT * FROM `$smtpTable` WHERE `enabled` = 1
          AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`)
@@ -224,6 +231,7 @@ function wp_tmq_increment_smtp_counter( $smtp_id ) {
     global $wpdb, $wp_tmq_options;
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
     $now = current_time( 'mysql', false );
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare(
         "UPDATE `$smtpTable` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d",
         $now, intval( $smtp_id )
@@ -386,13 +394,19 @@ function wp_tmq_prewpmail($return, $atts) {
         // Protect attachments directory from web access
         if ( ! file_exists( $attachments_base . '.htaccess' ) ) {
             wp_mkdir_p( $attachments_base );
-            @file_put_contents( $attachments_base . '.htaccess', "Deny from all\n" );
-            @file_put_contents( $attachments_base . 'index.php', "<?php // Silence is golden.\n" );
+            global $wp_filesystem;
+            if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base' ) ) {
+                include_once ABSPATH . 'wp-admin/includes/file.php';
+                WP_Filesystem();
+            }
+            $wp_filesystem->put_contents( $attachments_base . '.htaccess', "Deny from all\n" );
+            $wp_filesystem->put_contents( $attachments_base . 'index.php', "<?php // Silence is golden.\n" );
         }
         $subfolder = time().'-'.wp_generate_password(12, false);
         $foldercreated = wp_mkdir_p( $attachments_base . $subfolder );
         if (!$foldercreated) {
-            error_log('Could not create Subfolder for Email attachment');
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- intentional diagnostic for server logs
+            error_log( 'Total Mail Queue: Could not create subfolder for email attachment' );
             $data['info'] = __( 'Error: Could not store attachments', 'total-mail-queue' );
         } else {
             if (!is_array($attachments)) { $attachments = array($attachments); }
@@ -410,6 +424,7 @@ function wp_tmq_prewpmail($return, $atts) {
             $data['attachments'] = wp_tmq_encode($newattachments);
         }
     }
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $inserted = $wpdb->insert($tableName,$data);
 
     if ($status === 'instant') {
@@ -477,6 +492,7 @@ function wp_tmq_mail_failed( $wp_error ) {
         $wpMailFailedError = isset( $wp_error->errors ) && isset( $wp_error->errors['wp_mail_failed'][0] ) ? implode( '; ', $wp_error->errors['wp_mail_failed'] ) : '<em>' . __( 'Unknown', 'total-mail-queue' ) . '</em>';
 
         // Get current retry count for this email
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $current = $wpdb->get_row( $wpdb->prepare( "SELECT `retry_count`, `status` FROM `$tableName` WHERE `id` = %d", intval( $wp_tmq_mailid ) ), ARRAY_A );
         $retry_count = $current ? intval( $current['retry_count'] ) : 0;
         $max_retries = intval( $wp_tmq_options['max_retries'] );
@@ -486,6 +502,7 @@ function wp_tmq_mail_failed( $wp_error ) {
             $new_retry = $retry_count + 1;
             /* translators: %1$d: current attempt number, %2$d: max attempts, %3$s: error message */
             $retry_info = sprintf( __( 'Retry %1$d/%2$d — %3$s', 'total-mail-queue' ), $new_retry, $max_retries, $wpMailFailedError );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->update(
                 $tableName,
                 array(
@@ -504,6 +521,7 @@ function wp_tmq_mail_failed( $wp_error ) {
                 /* translators: %1$d: total attempts, %2$s: error message */
                 $wpMailFailedError = sprintf( __( 'Failed after %1$d attempt(s) — %2$s', 'total-mail-queue' ), $retry_count + 1, $wpMailFailedError );
             }
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->update(
                 $tableName,
                 array(
@@ -517,8 +535,8 @@ function wp_tmq_mail_failed( $wp_error ) {
             );
         }
     }
-    return error_log(print_r($wp_error, true));
 }
+
 add_action('wp_mail_failed','wp_tmq_mail_failed',10,1);
 
 // Mark instant emails as sent on success
@@ -526,8 +544,10 @@ function wp_tmq_mail_succeeded( $mail_data ) {
     global $wpdb, $wp_tmq_options, $wp_tmq_mailid;
     if ( isset( $wp_tmq_mailid ) && $wp_tmq_mailid != 0 ) {
         $tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $current = $wpdb->get_row( $wpdb->prepare( "SELECT `status` FROM `$tableName` WHERE `id` = %d", intval( $wp_tmq_mailid ) ), ARRAY_A );
         if ( $current && $current['status'] === 'instant' ) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->update(
                 $tableName,
                 array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '' ),
@@ -594,9 +614,11 @@ function wp_tmq_search_mail_from_queue() {
     } );
 
     // Total Mails waiting in the Queue?
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
 
     // Mails to send — fetch only IDs to keep memory low; full row loaded per-email inside the loop
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $mailjobIds   = $wpdb->get_col("SELECT `id` FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT ".intval($wp_tmq_options['queue_amount']));
     $mailsInQueue = is_array($mailjobIds) ? count($mailjobIds) : 0;
 
@@ -604,6 +626,7 @@ function wp_tmq_search_mail_from_queue() {
     if ($wp_tmq_options['alert_enabled'] === '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
 
         // Last alerts older than 6 hours?
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $alerts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'alert' AND `timestamp` > DATE_SUB(%s, INTERVAL 6 HOUR)", current_time( 'mysql', false ) ), 'ARRAY_A' );
 
         // If no alerts, then send one
@@ -637,6 +660,7 @@ function wp_tmq_search_mail_from_queue() {
                     'queue_interval' => intval($wp_tmq_options['queue_interval']),
                 ]),
             );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->insert($tableName,$data);
             wp_mail($wp_tmq_options['email'],$alertSubject,$alertMessage);
         }
@@ -659,6 +683,7 @@ function wp_tmq_search_mail_from_queue() {
     if ($mailsInQueue > 0) {
         foreach($mailjobIds as $mail_id) {
                 // Load full row on demand (keeps only one email body in memory at a time)
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                 $item = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", $mail_id ), ARRAY_A );
                 if ( ! $item ) { continue; }
                 if ( ! empty( $item['recipient'] ) ) { $to = wp_tmq_decode($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
@@ -689,6 +714,7 @@ function wp_tmq_search_mail_from_queue() {
 
                 // In 'smtp' mode, if no SMTP account is available, skip remaining emails
                 if ( $send_method === 'smtp' && ! $smtp_to_use ) {
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                     $wpdb->update(
                         $tableName,
                         array( 'info' => __( 'Waiting: no SMTP account available (check if accounts are enabled and limits are not exceeded).', 'total-mail-queue' ) ),
@@ -756,6 +782,7 @@ function wp_tmq_search_mail_from_queue() {
 
                 if ($sendstatus) {
                     $sent_smtp_id = $smtp_to_use ? intval( $smtp_to_use['id'] ) : 0;
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                     $wpdb->update(
                         $tableName,
                         array( 'timestamp' => current_time( 'mysql', false ), 'status' => 'sent', 'info' => '', 'smtp_account_id' => $sent_smtp_id ),
@@ -772,8 +799,10 @@ function wp_tmq_search_mail_from_queue() {
                 } else {
                     $diag['errors']++;
                     // If wp_mail_failed hook didn't update info, write a fallback diagnostic
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                     $current_info = $wpdb->get_var( $wpdb->prepare( "SELECT `info` FROM `$tableName` WHERE `id` = %d", $item['id'] ) );
                     if ( empty( $current_info ) ) {
+                        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                         $wpdb->update(
                             $tableName,
                             array( 'info' => __( 'wp_mail() returned false. Check for conflicting email plugins or server mail configuration.', 'total-mail-queue' ) ),
@@ -796,14 +825,17 @@ function wp_tmq_search_mail_from_queue() {
     }
 
     // Delete old logs (by date)
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare( "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < DATE_SUB(%s, INTERVAL %d HOUR)", current_time( 'mysql', false ), intval( $wp_tmq_options['clear_queue'] ) ) );
 
     // Delete excess log entries (by total records limit)
     $log_max = intval( $wp_tmq_options['log_max_records'] );
     if ( $log_max > 0 ) {
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $total_log = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high'" );
         if ( $total_log > $log_max ) {
             $excess = $total_log - $log_max;
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->query( $wpdb->prepare(
                 "DELETE FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `timestamp` ASC LIMIT %d",
                 intval( $excess )
@@ -860,11 +892,13 @@ function wp_tmq_uninstall () {
 
     delete_option( 'wp_tmq_last_cron' );
 
-    $tableName = $wpdb->prefix.'total_mail_queue';
-    $wpdb->query( $wpdb->prepare( "DROP TABLE IF EXISTS %i", $tableName ) );
+    $tableName = $wpdb->prefix . 'total_mail_queue';
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is hardcoded prefix + constant string
+    $wpdb->query( "DROP TABLE IF EXISTS `$tableName`" );
 
-    $smtpTableName = $wpdb->prefix.'total_mail_queue_smtp';
-    $wpdb->query( $wpdb->prepare( "DROP TABLE IF EXISTS %i", $smtpTableName ) );
+    $smtpTableName = $wpdb->prefix . 'total_mail_queue_smtp';
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is hardcoded prefix + constant string
+    $wpdb->query( "DROP TABLE IF EXISTS `$smtpTableName`" );
 
     // Clean up attachments directories (new location in uploads + legacy in plugin dir)
     global $wp_filesystem;
@@ -1008,6 +1042,7 @@ function wp_tmq_ajax_test_smtp_connection() {
     if ( $password === '' && $smtp_id > 0 ) {
         global $wpdb, $wp_tmq_options;
         $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $stored = $wpdb->get_var( $wpdb->prepare( "SELECT `password` FROM `$smtpTable` WHERE `id` = %d", $smtp_id ) );
         if ( $stored ) {
             $password = wp_tmq_decrypt_password( $stored );
@@ -1069,6 +1104,7 @@ function wp_tmq_rest_get_message ($request) {
     global $wpdb, $wp_tmq_options;
     $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
     $id        = intval($request['id']);
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $row       = $wpdb->get_row( $wpdb->prepare("SELECT * FROM `$tableName` WHERE `id` = %d", $id ), ARRAY_A );
     if ($row) {
         // Search for content-type header to detect html emails
