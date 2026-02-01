@@ -7,7 +7,7 @@ Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Take control of emails sent by WordPress. Queue outgoing emails, manage SMTP accounts with daily/monthly limits, and get notified instantly if your website is trying to send too many emails at once!
+Queue outgoing emails, manage SMTP accounts with daily/monthly limits, and get alerts if your site sends too many emails.
 
 == Description ==
 

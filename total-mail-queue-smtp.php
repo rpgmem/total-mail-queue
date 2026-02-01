@@ -25,7 +25,7 @@ function wp_tmq_render_smtp_page() {
     if ( isset( $_POST['wp_tmq_smtp_save'] ) ) {
 
         if ( ! isset( $_POST['wp_tmq_smtp_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_smtp_nonce'] ), 'wp_tmq_smtp_save' ) ) {
-            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+            wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
         }
 
         $save_id = isset( $_POST['smtp_id'] ) ? intval( $_POST['smtp_id'] ) : 0;
@@ -54,6 +54,7 @@ function wp_tmq_render_smtp_page() {
         }
 
         // Only update password if a new value is provided (and connection fields are unlocked)
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
         $raw_password = isset( $_POST['smtp_password'] ) ? wp_unslash( $_POST['smtp_password'] ) : '';
         if ( $raw_password !== '' ) {
             $data['password'] = wp_tmq_encrypt_password( $raw_password );
@@ -81,7 +82,7 @@ function wp_tmq_render_smtp_page() {
     if ( $action === 'delete' && $edit_id > 0 ) {
 
         if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wp_tmq_smtp_delete_' . $edit_id ) ) {
-            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+            wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
         }
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -95,7 +96,7 @@ function wp_tmq_render_smtp_page() {
     if ( isset( $_POST['wp_tmq_smtp_reset_counters'] ) ) {
 
         if ( ! isset( $_POST['wp_tmq_smtp_reset_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_smtp_reset_nonce'] ), 'wp_tmq_smtp_reset_counters' ) ) {
-            wp_die( __( 'Security check failed!', 'total-mail-queue' ) );
+            wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
         }
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -346,14 +347,19 @@ function wp_tmq_render_smtp_page() {
             echo '<td>#' . esc_html( $acct['id'] ) . '</td>';
             echo '<td>' . esc_html( $acct['name'] ) . '</td>';
             echo '<td>' . esc_html( $acct['host'] ) . ':' . esc_html( $acct['port'] ) . '</td>';
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $from_display is pre-escaped with esc_html()
             echo '<td>' . $from_display . '</td>';
             echo '<td>' . esc_html( $acct['priority'] ) . '</td>';
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $daily_display is pre-escaped with esc_html()
             echo '<td>' . $daily_display . '</td>';
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $monthly_display is pre-escaped with esc_html()
             echo '<td>' . $monthly_display . '</td>';
 
             $interval_display = intval( $acct['send_interval'] ) === 0 ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( $acct['send_interval'] ) . ' min';
             $bulk_display     = intval( $acct['send_bulk'] ) === 0 ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( $acct['send_bulk'] );
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $interval_display is pre-escaped with esc_html()
             echo '<td>' . $interval_display . '</td>';
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $bulk_display is pre-escaped with esc_html()
             echo '<td>' . $bulk_display . '</td>';
 
             echo '<td>' . ( intval( $acct['enabled'] ) ? '<span class="tmq-ok">' . esc_html__( 'Yes', 'total-mail-queue' ) . '</span>' : esc_html__( 'No', 'total-mail-queue' ) ) . '</td>';

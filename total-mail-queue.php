@@ -26,16 +26,6 @@ PLUGIN VERSION
 $wp_tmq_version = '2.2.1';
 
 
-/* ***************************************************************
-LOAD TEXT DOMAIN FOR i18n
-Note: Since WP 4.6, translations for plugins in the directory are
-loaded automatically. We keep this for custom / local translations.
-**************************************************************** */
-function wp_tmq_load_textdomain() {
-    load_plugin_textdomain( 'total-mail-queue', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-}
-add_action( 'init', 'wp_tmq_load_textdomain' );
-
 
 
 
@@ -343,9 +333,11 @@ function wp_tmq_prewpmail($return, $atts) {
     // - wp_mail_from_name
     if ($status !== 'instant') {
         if (!$hasContentTypeHeader) {
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter
             $contentType = apply_filters('wp_mail_content_type','text/plain');
             if ( $contentType ) {
                 if (stripos($contentType,'multipart') === false) {
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter
                     $charset = apply_filters('wp_mail_charset',get_bloginfo('charset'));
                 } else {
                     $charset = '';
@@ -354,8 +346,10 @@ function wp_tmq_prewpmail($return, $atts) {
             }
         }
         if (!$hasFromHeader) {
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter
             $from_Email = apply_filters('wp_mail_from','');
             if ($from_Email) {
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter
                 $fromName = apply_filters('wp_mail_from_name','');
                 if ($fromName) {
                     $headers[] = 'From: '.$fromName.' <'.$from_Email.'>';
@@ -463,6 +457,7 @@ function wp_tmq_capture_phpmailer_config() {
     $default_auth = $test_mailer->SMTPAuth;
 
     // Apply phpmailer_init hooks to capture what other plugins configure
+    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core action
     do_action_ref_array( 'phpmailer_init', array( &$test_mailer ) );
 
     // Only store config if something was changed by hooks
@@ -598,6 +593,7 @@ function wp_tmq_search_mail_from_queue() {
     $lock_name    = 'wp_tmq_cron_lock';
     $lock_timeout = intval( $wp_tmq_options['cron_lock_ttl'] );
     if ( $lock_timeout < 30 ) { $lock_timeout = 30; }
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $got_lock = $wpdb->get_var( $wpdb->prepare( "SELECT GET_LOCK(%s, 0)", $lock_name ) );
     if ( ! $got_lock ) {
         $diag['result'] = 'skipped: another batch is still running';
@@ -607,8 +603,10 @@ function wp_tmq_search_mail_from_queue() {
 
     // Register a shutdown function to release the lock even if PHP fatals mid-batch.
     // Also set a MySQL-level timeout so the lock auto-expires if the connection hangs.
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->query( $wpdb->prepare( "SET @tmq_lock_timeout = %d", $lock_timeout ) );
     register_shutdown_function( function() use ( $wpdb, $lock_name ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->get_var( $wpdb->prepare( "SELECT RELEASE_LOCK(%s)", $lock_name ) );
     } );
 
@@ -843,6 +841,7 @@ function wp_tmq_search_mail_from_queue() {
     }
 
     // Release cross-process lock (also released by shutdown function as safety net)
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->get_var( $wpdb->prepare( "SELECT RELEASE_LOCK(%s)", $lock_name ) );
 
     // Save cron diagnostics
@@ -865,10 +864,10 @@ function wp_tmq_cron_interval( $schedules ) {
 add_filter('cron_schedules','wp_tmq_cron_interval');
 
 // Set or Remove Cron (enabled=1 needs cron, enabled=2 block mode doesn't need cron)
-$next_tmq_cron_timestamp = wp_next_scheduled('wp_tmq_mail_queue_hook');
-if ($next_tmq_cron_timestamp && $wp_tmq_options['enabled'] !== '1') {
-    wp_unschedule_event($next_tmq_cron_timestamp,'wp_tmq_mail_queue_hook');
-} else if (!$next_tmq_cron_timestamp && $wp_tmq_options['enabled'] === '1') {
+$wp_tmq_next_cron_timestamp = wp_next_scheduled('wp_tmq_mail_queue_hook');
+if ($wp_tmq_next_cron_timestamp && $wp_tmq_options['enabled'] !== '1') {
+    wp_unschedule_event($wp_tmq_next_cron_timestamp,'wp_tmq_mail_queue_hook');
+} else if (!$wp_tmq_next_cron_timestamp && $wp_tmq_options['enabled'] === '1') {
     wp_schedule_event(time(),'wp_tmq_interval','wp_tmq_mail_queue_hook');
 }
 
@@ -892,11 +891,11 @@ function wp_tmq_uninstall () {
     delete_option( 'wp_tmq_last_cron' );
 
     $tableName = $wpdb->prefix . 'total_mail_queue';
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is hardcoded prefix + constant string
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
     $wpdb->query( "DROP TABLE IF EXISTS `$tableName`" );
 
     $smtpTableName = $wpdb->prefix . 'total_mail_queue_smtp';
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is hardcoded prefix + constant string
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
     $wpdb->query( "DROP TABLE IF EXISTS `$smtpTableName`" );
 
     // Clean up attachments directories (new location in uploads + legacy in plugin dir)
@@ -1030,6 +1029,7 @@ function wp_tmq_ajax_test_smtp_connection() {
     $encryption = sanitize_key( $_POST['encryption'] ?? 'tls' );
     $auth       = intval( $_POST['auth'] ?? 0 );
     $username   = sanitize_text_field( wp_unslash( $_POST['username'] ?? '' ) );
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
     $password   = wp_unslash( $_POST['password'] ?? '' );
     $smtp_id    = intval( $_POST['smtp_id'] ?? 0 );
 

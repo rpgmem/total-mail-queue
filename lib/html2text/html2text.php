@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile -- third-party library (soundasleep/html2text), not modified by this plugin
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
