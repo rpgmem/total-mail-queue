@@ -54,6 +54,8 @@ function wp_tmq_get_settings() {
         'log_max_records'=> '0',   // 0=unlimited, >0=max number of log entries to keep
         'send_method'    => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only
         'max_retries'    => '3',   // 0=no retries, >0=auto-retry failed emails up to N times
+        'cron_lock_ttl'  => '300', // seconds — safety timeout for the cross-process cron lock
+        'smtp_timeout'   => '30',  // seconds — per-connection SMTP timeout during queue sending
         'tableName'      => 'total_mail_queue',
         'smtpTableName'  => 'total_mail_queue_smtp',
         'triggercount'   => 0,
@@ -245,6 +247,12 @@ function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
         $phpmailer->From     = $smtp_account['from_email'];
         $phpmailer->Sender   = $smtp_account['from_email'];
         $phpmailer->FromName = ! empty( $smtp_account['from_name'] ) ? $smtp_account['from_name'] : $phpmailer->FromName;
+    }
+    // Apply configurable SMTP timeout to prevent a stalled connection from blocking the batch
+    global $wp_tmq_options;
+    $smtp_timeout = intval( $wp_tmq_options['smtp_timeout'] );
+    if ( $smtp_timeout > 0 ) {
+        $phpmailer->Timeout = $smtp_timeout;
     }
 }
 
@@ -552,7 +560,7 @@ function wp_tmq_search_mail_from_queue() {
     }
     $tableName = $wpdb->prefix.$wp_tmq_options['tableName'];
 
-    // Triggercount to avoid multiple runs
+    // Triggercount to avoid multiple runs within the same PHP request
     $wp_tmq_options['triggercount']++;
     if ($wp_tmq_options['triggercount'] > 1) {
         $diag['result'] = 'skipped: duplicate trigger';
@@ -560,12 +568,25 @@ function wp_tmq_search_mail_from_queue() {
         return;
     }
 
+    // Cross-process lock: prevent overlapping cron batches (e.g. when a batch
+    // takes longer than the cron interval). Uses a transient with a TTL as a
+    // safety net so the lock auto-expires if the process dies unexpectedly.
+    $lock_key     = 'wp_tmq_cron_lock';
+    $lock_timeout = intval( $wp_tmq_options['cron_lock_ttl'] );
+    if ( $lock_timeout < 30 ) { $lock_timeout = 30; } // absolute minimum safety
+    if ( get_transient( $lock_key ) ) {
+        $diag['result'] = 'skipped: another batch is still running';
+        update_option( 'wp_tmq_last_cron', $diag, false );
+        return;
+    }
+    set_transient( $lock_key, current_time( 'mysql', false ), $lock_timeout );
+
     // Total Mails waiting in the Queue?
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
 
-    // Mails to send
-    $mailjobs     = $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT ".intval($wp_tmq_options['queue_amount']),'ARRAY_A');
-    $mailsInQueue = is_array($mailjobs) ? count($mailjobs) : 0;
+    // Mails to send — fetch only IDs to keep memory low; full row loaded per-email inside the loop
+    $mailjobIds   = $wpdb->get_col("SELECT `id` FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT ".intval($wp_tmq_options['queue_amount']));
+    $mailsInQueue = is_array($mailjobIds) ? count($mailjobIds) : 0;
 
     // Alert Admin, if too many mails in the Queue.
     if ($wp_tmq_options['alert_enabled'] === '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
@@ -624,8 +645,10 @@ function wp_tmq_search_mail_from_queue() {
 
     // Send Mails in Queue
     if ($mailsInQueue > 0) {
-        if ($mailjobs && count($mailjobs) > 0) {
-            foreach($mailjobs as $index => $item) {
+        foreach($mailjobIds as $mail_id) {
+                // Load full row on demand (keeps only one email body in memory at a time)
+                $item = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", $mail_id ), ARRAY_A );
+                if ( ! $item ) { continue; }
                 if ( ! empty( $item['recipient'] ) ) { $to = wp_tmq_decode($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
                 if ( ! empty( $item['headers'] ) ) { $headers = wp_tmq_decode($item['headers']); } else { $headers = ''; }
                 if ( ! empty( $item['attachments'] ) ) { $attachments = wp_tmq_decode($item['attachments']); } else { $attachments = ''; }
@@ -685,6 +708,12 @@ function wp_tmq_search_mail_from_queue() {
                                 }
                                 $phpmailer->$prop = $val;
                             }
+                        }
+                        // Apply configurable SMTP timeout
+                        global $wp_tmq_options;
+                        $smtp_timeout = intval( $wp_tmq_options['smtp_timeout'] );
+                        if ( $smtp_timeout > 0 ) {
+                            $phpmailer->Timeout = $smtp_timeout;
                         }
                     };
                     add_action( 'phpmailer_init', $tmq_phpmailer_hook, 999999 );
@@ -752,7 +781,6 @@ function wp_tmq_search_mail_from_queue() {
                     $wp_filesystem->delete($attachmentfolder['dirname'],true,'d');
                 }
             }
-        }
     }
 
     // Delete old logs (by date)
@@ -770,6 +798,9 @@ function wp_tmq_search_mail_from_queue() {
             ) );
         }
     }
+
+    // Release cross-process lock
+    delete_transient( $lock_key );
 
     // Save cron diagnostics
     if ( ! isset( $diag['result'] ) ) {

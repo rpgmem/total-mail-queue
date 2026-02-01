@@ -828,6 +828,7 @@ function wp_tmq_sanitize_settings( $input ) {
         'enabled', 'alert_enabled', 'email', 'email_amount',
         'queue_amount', 'queue_interval', 'queue_interval_unit',
         'clear_queue', 'log_max_records', 'send_method', 'max_retries',
+        'cron_lock_ttl', 'smtp_timeout',
     );
     $sanitized = array();
     if ( is_array( $input ) ) {
@@ -851,6 +852,8 @@ function wp_tmq_settings_init() {
     add_settings_field('wp_tmq_log', __( 'Log', 'total-mail-queue' ),'wp_tmq_render_option_log','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_send_method', __( 'Send Method', 'total-mail-queue' ),'wp_tmq_render_option_send_method','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_retry', __( 'Auto-Retry', 'total-mail-queue' ),'wp_tmq_render_option_retry','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_smtp_timeout', __( 'SMTP Timeout', 'total-mail-queue' ),'wp_tmq_render_option_smtp_timeout','wp_tmq_settings_page','wp_tmq_settings_section');
+    add_settings_field('wp_tmq_cron_lock_ttl', __( 'Cron Lock Timeout', 'total-mail-queue' ),'wp_tmq_render_option_cron_lock_ttl','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_alert_status', __( 'Alert enabled', 'total-mail-queue' ),'wp_tmq_render_option_alert_status','wp_tmq_settings_page','wp_tmq_settings_section');
     add_settings_field('wp_tmq_sensitivity', __( 'Alert Sensitivity', 'total-mail-queue' ),'wp_tmq_render_option_sensitivity','wp_tmq_settings_page','wp_tmq_settings_section');
 }
@@ -926,6 +929,29 @@ function wp_tmq_render_option_retry() {
     global $wp_tmq_options;
     echo __( 'If sending fails, retry up to', 'total-mail-queue' ) . ' <input name="wp_tmq_settings[max_retries]" type="number" min="0" value="'.esc_attr(intval($wp_tmq_options['max_retries'])).'" /> ' . __( 'time(s) before marking as error.', 'total-mail-queue' );
     echo ' <span class="description">' . __( '0 = no retries, email is immediately marked as error', 'total-mail-queue' ) . '</span>';
+}
+
+function wp_tmq_render_option_smtp_timeout() {
+    global $wp_tmq_options;
+    $timeout = intval( $wp_tmq_options['smtp_timeout'] );
+    echo '<input name="wp_tmq_settings[smtp_timeout]" type="number" min="5" step="1" value="' . esc_attr( $timeout ) . '" /> ' . __( 'seconds', 'total-mail-queue' );
+    echo '<p class="description">';
+    /* translators: %s: recommended value */
+    echo sprintf( __( 'Maximum time to wait for a response from the SMTP server per email. If the server does not respond within this time, the email is marked as failed and the batch continues to the next email. Recommended: %s seconds. Minimum: 5 seconds.', 'total-mail-queue' ), '<strong>30</strong>' );
+    echo '</p>';
+}
+
+function wp_tmq_render_option_cron_lock_ttl() {
+    global $wp_tmq_options;
+    $ttl = intval( $wp_tmq_options['cron_lock_ttl'] );
+    echo '<input name="wp_tmq_settings[cron_lock_ttl]" type="number" min="30" step="1" value="' . esc_attr( $ttl ) . '" /> ' . __( 'seconds', 'total-mail-queue' );
+    echo '<p class="description">';
+    /* translators: %s: recommended value */
+    echo sprintf( __( 'Maximum time a cron batch can hold the processing lock. If the batch finishes normally, the lock is released immediately. This timeout is a safety net: if PHP crashes mid-batch, the lock expires after this period and the queue resumes automatically. Recommended: %s seconds (5 minutes). Minimum: 30 seconds.', 'total-mail-queue' ), '<strong>300</strong>' );
+    echo '</p>';
+    echo '<p class="description tmq-warning-block">';
+    echo __( 'Too low: the lock may expire while a large batch is still sending, allowing overlapping batches (risk of duplicate emails). Too high: if the process crashes, the queue will be blocked until the timeout expires.', 'total-mail-queue' );
+    echo '</p>';
 }
 
 function wp_tmq_render_option_send_method() {
