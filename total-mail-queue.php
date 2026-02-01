@@ -584,9 +584,9 @@ function wp_tmq_search_mail_from_queue() {
     // Total Mails waiting in the Queue?
     $mailjobsTotal = $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
 
-    // Mails to send
-    $mailjobs     = $wpdb->get_results("SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT ".intval($wp_tmq_options['queue_amount']),'ARRAY_A');
-    $mailsInQueue = is_array($mailjobs) ? count($mailjobs) : 0;
+    // Mails to send — fetch only IDs to keep memory low; full row loaded per-email inside the loop
+    $mailjobIds   = $wpdb->get_col("SELECT `id` FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT ".intval($wp_tmq_options['queue_amount']));
+    $mailsInQueue = is_array($mailjobIds) ? count($mailjobIds) : 0;
 
     // Alert Admin, if too many mails in the Queue.
     if ($wp_tmq_options['alert_enabled'] === '1' && $mailjobsTotal > intval($wp_tmq_options['email_amount'])) {
@@ -645,8 +645,10 @@ function wp_tmq_search_mail_from_queue() {
 
     // Send Mails in Queue
     if ($mailsInQueue > 0) {
-        if ($mailjobs && count($mailjobs) > 0) {
-            foreach($mailjobs as $index => $item) {
+        foreach($mailjobIds as $mail_id) {
+                // Load full row on demand (keeps only one email body in memory at a time)
+                $item = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", $mail_id ), ARRAY_A );
+                if ( ! $item ) { continue; }
                 if ( ! empty( $item['recipient'] ) ) { $to = wp_tmq_decode($item['recipient']); } else { $to = $wp_tmq_options['email']; $item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // '.$item['subject']; }
                 if ( ! empty( $item['headers'] ) ) { $headers = wp_tmq_decode($item['headers']); } else { $headers = ''; }
                 if ( ! empty( $item['attachments'] ) ) { $attachments = wp_tmq_decode($item['attachments']); } else { $attachments = ''; }
@@ -779,7 +781,6 @@ function wp_tmq_search_mail_from_queue() {
                     $wp_filesystem->delete($attachmentfolder['dirname'],true,'d');
                 }
             }
-        }
     }
 
     // Delete old logs (by date)
