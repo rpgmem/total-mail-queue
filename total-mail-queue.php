@@ -990,6 +990,12 @@ function wp_tmq_check_update_db () {
 }
 add_action( 'plugins_loaded', 'wp_tmq_check_update_db', 10, 0 );
 
+// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- needed for self-hosted installs and custom language paths
+function wp_tmq_load_textdomain() {
+    load_plugin_textdomain( 'total-mail-queue', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'wp_tmq_load_textdomain' );
+
 
 
 
