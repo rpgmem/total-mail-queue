@@ -26,8 +26,25 @@
 	// (fields start readonly so the browser skips them during autofill,
 	// then we unlock them once autofill has already run)
 	setTimeout( function () {
-		$( ".tmq-no-autofill" ).removeAttr( "readonly" );
+		$( ".tmq-no-autofill:not(:disabled)" ).removeAttr( "readonly" );
 	}, 500 );
+
+	// toggle connection fields lock/unlock on SMTP edit form
+	$doc.on( "change", "#tmq-unlock-conn", function () {
+		const unlock = this.checked;
+		$( ".tmq-conn-field" ).each( function () {
+			if ( unlock ) {
+				$( this ).prop( "disabled", false );
+				// for username/password: remove readonly so user can type
+				if ( $( this ).hasClass( "tmq-no-autofill" ) ) {
+					this.removeAttribute( "readonly" );
+				}
+			} else {
+				$( this ).prop( "disabled", true );
+			}
+		});
+		$( ".tmq-conn-row" ).toggleClass( "tmq-conn-locked", ! unlock );
+	});
 
 	// test SMTP connection
 	$doc.on( "click", "#tmq-test-smtp", function () {

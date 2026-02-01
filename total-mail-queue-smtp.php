@@ -30,13 +30,9 @@ function wp_tmq_render_smtp_page() {
 
         $save_id = isset( $_POST['smtp_id'] ) ? intval( $_POST['smtp_id'] ) : 0;
 
+        // Non-connection fields (always submitted)
         $data = array(
             'name'          => sanitize_text_field( wp_unslash( $_POST['smtp_name'] ?? '' ) ),
-            'host'          => sanitize_text_field( wp_unslash( $_POST['smtp_host'] ?? '' ) ),
-            'port'          => intval( $_POST['smtp_port'] ?? 587 ),
-            'encryption'    => sanitize_key( $_POST['smtp_encryption'] ?? 'tls' ),
-            'auth'          => isset( $_POST['smtp_auth'] ) ? 1 : 0,
-            'username'      => sanitize_text_field( wp_unslash( $_POST['smtp_username'] ?? '' ) ),
             'from_email'    => sanitize_email( wp_unslash( $_POST['smtp_from_email'] ?? '' ) ),
             'from_name'     => sanitize_text_field( wp_unslash( $_POST['smtp_from_name'] ?? '' ) ),
             'priority'      => intval( $_POST['smtp_priority'] ?? 0 ),
@@ -47,7 +43,17 @@ function wp_tmq_render_smtp_page() {
             'enabled'       => isset( $_POST['smtp_enabled'] ) ? 1 : 0,
         );
 
-        // Only update password if a new value is provided
+        // Connection fields — only included when unlocked (not disabled)
+        // When disabled, these keys are absent from $_POST, so existing DB values are preserved
+        if ( isset( $_POST['smtp_host'] ) ) {
+            $data['host']       = sanitize_text_field( wp_unslash( $_POST['smtp_host'] ) );
+            $data['port']       = intval( $_POST['smtp_port'] ?? 587 );
+            $data['encryption'] = sanitize_key( $_POST['smtp_encryption'] ?? 'tls' );
+            $data['auth']       = isset( $_POST['smtp_auth'] ) ? 1 : 0;
+            $data['username']   = sanitize_text_field( wp_unslash( $_POST['smtp_username'] ?? '' ) );
+        }
+
+        // Only update password if a new value is provided (and connection fields are unlocked)
         $raw_password = isset( $_POST['smtp_password'] ) ? wp_unslash( $_POST['smtp_password'] ) : '';
         if ( $raw_password !== '' ) {
             $data['password'] = wp_tmq_encrypt_password( $raw_password );
@@ -147,22 +153,31 @@ function wp_tmq_render_smtp_page() {
         echo '<td><input type="text" id="smtp_name" name="smtp_name" value="' . esc_attr( $account['name'] ) . '" class="regular-text" /></td>';
         echo '</tr>';
 
+        // Connection lock toggle (only on edit)
+        if ( $is_edit ) {
+            echo '<tr>';
+            echo '<th scope="row">' . __( 'Connection Settings', 'total-mail-queue' ) . '</th>';
+            echo '<td><label><input type="checkbox" id="tmq-unlock-conn" /> ' . __( 'Unlock connection fields for editing', 'total-mail-queue' ) . '</label>';
+            echo ' <span class="description">' . __( 'Keep locked to safely change only limits and other options.', 'total-mail-queue' ) . '</span></td>';
+            echo '</tr>';
+        }
+
         // Host
-        echo '<tr>';
+        echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
         echo '<th scope="row"><label for="smtp_host">' . __( 'Host', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="text" id="smtp_host" name="smtp_host" value="' . esc_attr( $account['host'] ) . '" class="regular-text" /></td>';
+        echo '<td><input type="text" id="smtp_host" name="smtp_host" value="' . esc_attr( $account['host'] ) . '" class="regular-text tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
         echo '</tr>';
 
         // Port
-        echo '<tr>';
+        echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
         echo '<th scope="row"><label for="smtp_port">' . __( 'Port', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="number" id="smtp_port" name="smtp_port" value="' . esc_attr( $account['port'] ) . '" min="1" max="65535" /></td>';
+        echo '<td><input type="number" id="smtp_port" name="smtp_port" value="' . esc_attr( $account['port'] ) . '" min="1" max="65535" class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
         echo '</tr>';
 
         // Encryption
-        echo '<tr>';
+        echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
         echo '<th scope="row"><label for="smtp_encryption">' . __( 'Encryption', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><select id="smtp_encryption" name="smtp_encryption">';
+        echo '<td><select id="smtp_encryption" name="smtp_encryption" class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . '>';
         echo '<option value="none"' . selected( $account['encryption'], 'none', false ) . '>' . __( 'None', 'total-mail-queue' ) . '</option>';
         echo '<option value="tls"' . selected( $account['encryption'], 'tls', false ) . '>' . __( 'TLS', 'total-mail-queue' ) . '</option>';
         echo '<option value="ssl"' . selected( $account['encryption'], 'ssl', false ) . '>' . __( 'SSL', 'total-mail-queue' ) . '</option>';
@@ -170,21 +185,21 @@ function wp_tmq_render_smtp_page() {
         echo '</tr>';
 
         // Auth
-        echo '<tr>';
+        echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
         echo '<th scope="row"><label for="smtp_auth">' . __( 'Authentication', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="checkbox" id="smtp_auth" name="smtp_auth" value="1"' . checked( $account['auth'], 1, false ) . ' /></td>';
+        echo '<td><input type="checkbox" id="smtp_auth" name="smtp_auth" value="1"' . checked( $account['auth'], 1, false ) . ' class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
         echo '</tr>';
 
         // Username
-        echo '<tr>';
+        echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
         echo '<th scope="row"><label for="smtp_username">' . __( 'Username', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text tmq-no-autofill" readonly="readonly" autocomplete="off" /></td>';
+        echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' ) . ' /></td>';
         echo '</tr>';
 
         // Password
-        echo '<tr>';
+        echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
         echo '<th scope="row"><label for="smtp_password">' . __( 'Password', 'total-mail-queue' ) . '</label></th>';
-        echo '<td><input type="password" id="smtp_password" name="smtp_password" value="" class="regular-text tmq-no-autofill" readonly="readonly" autocomplete="off"';
+        echo '<td><input type="password" id="smtp_password" name="smtp_password" value="" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' );
         if ( $is_edit && ! empty( $account['password'] ) ) {
             echo ' placeholder="' . esc_attr( str_repeat( "\xE2\x80\xA2", 8 ) ) . '"';
         }
