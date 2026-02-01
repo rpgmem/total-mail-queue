@@ -55,6 +55,7 @@ function wp_tmq_get_settings() {
         'send_method'    => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only
         'max_retries'    => '3',   // 0=no retries, >0=auto-retry failed emails up to N times
         'cron_lock_ttl'  => '300', // seconds — safety timeout for the cross-process cron lock
+        'smtp_timeout'   => '30',  // seconds — per-connection SMTP timeout during queue sending
         'tableName'      => 'total_mail_queue',
         'smtpTableName'  => 'total_mail_queue_smtp',
         'triggercount'   => 0,
@@ -246,6 +247,12 @@ function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
         $phpmailer->From     = $smtp_account['from_email'];
         $phpmailer->Sender   = $smtp_account['from_email'];
         $phpmailer->FromName = ! empty( $smtp_account['from_name'] ) ? $smtp_account['from_name'] : $phpmailer->FromName;
+    }
+    // Apply configurable SMTP timeout to prevent a stalled connection from blocking the batch
+    global $wp_tmq_options;
+    $smtp_timeout = intval( $wp_tmq_options['smtp_timeout'] );
+    if ( $smtp_timeout > 0 ) {
+        $phpmailer->Timeout = $smtp_timeout;
     }
 }
 
@@ -699,6 +706,12 @@ function wp_tmq_search_mail_from_queue() {
                                 }
                                 $phpmailer->$prop = $val;
                             }
+                        }
+                        // Apply configurable SMTP timeout
+                        global $wp_tmq_options;
+                        $smtp_timeout = intval( $wp_tmq_options['smtp_timeout'] );
+                        if ( $smtp_timeout > 0 ) {
+                            $phpmailer->Timeout = $smtp_timeout;
                         }
                     };
                     add_action( 'phpmailer_init', $tmq_phpmailer_hook, 999999 );
