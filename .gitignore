@@ -3,6 +3,9 @@
 /.phpunit.cache/
 /.phpunit.result.cache
 /phpunit.xml
+/.phpcs.cache
+/phpcs.xml
+/phpstan.neon
 /.idea/
 /.vscode/
 .DS_Store

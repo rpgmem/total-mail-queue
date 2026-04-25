@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<ruleset name="Total Mail Queue">
+    <description>
+        Coding standards focused on security and API correctness. Style sniffs
+        from the broader WordPress ruleset are intentionally not enforced — the
+        existing codebase predates them and the team prioritizes catching real
+        bugs over reformatting.
+    </description>
+
+    <!-- What to scan -->
+    <file>total-mail-queue.php</file>
+    <file>total-mail-queue-options.php</file>
+    <file>total-mail-queue-smtp.php</file>
+
+    <!-- What to skip -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/lib/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+
+    <!-- CLI behavior -->
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg name="cache" value=".phpcs.cache"/>
+    <arg value="ps"/>
+
+    <!-- Security: escaping, nonces, input validation -->
+    <rule ref="WordPress.Security"/>
+
+    <!-- Database safety: prepared SQL, table prefixes, no direct SchemaChange -->
+    <rule ref="WordPress.DB.PreparedSQL"/>
+    <rule ref="WordPress.DB.PreparedSQLPlaceholders"/>
+    <rule ref="WordPress.DB.RestrictedFunctions"/>
+    <rule ref="WordPress.DB.SlowDBQuery"/>
+
+    <!-- Internationalization: text domain consistency -->
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="total-mail-queue"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- WP API correctness -->
+    <rule ref="WordPress.WP.AlternativeFunctions"/>
+    <rule ref="WordPress.WP.Capabilities"/>
+    <rule ref="WordPress.WP.DeprecatedFunctions"/>
+    <rule ref="WordPress.WP.DeprecatedClasses"/>
+    <rule ref="WordPress.WP.DeprecatedParameters"/>
+
+    <!-- PHP best practices that WPCS enforces -->
+    <rule ref="WordPress.PHP.NoSilencedErrors"/>
+    <rule ref="WordPress.PHP.DiscouragedPHPFunctions"/>
+    <rule ref="WordPress.PHP.DevelopmentFunctions"/>
+    <rule ref="WordPress.CodeAnalysis.EscapedNotTranslated"/>
+
+    <!-- All public functions / hook callbacks must be prefixed -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="wp_tmq"/>
+                <element value="WP_TMQ"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- PHP version compatibility for the runtime supported by the plugin.
+         Plugin header declares PHP 7.4+ as the minimum. -->
+    <config name="testVersion" value="7.4-"/>
+    <rule ref="PHPCompatibilityWP"/>
+
+    <!-- Minimum supported WP version (matches readme.txt "Requires at least") -->
+    <config name="minimum_wp_version" value="5.9"/>
+</ruleset>
