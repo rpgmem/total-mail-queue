@@ -68,5 +68,14 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      # Explicitly register the installed standards. The
+      # dealerdirect/phpcodesniffer-composer-installer plugin normally handles
+      # this, but registering paths here makes the build resilient if the
+      # plugin is ever blocked or skipped.
+      - name: Register PHPCS standards
+        run: |
+          vendor/bin/phpcs --config-set installed_paths \
+            "vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsutils,vendor/phpcsstandards/phpcsextra,vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat,vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieSodiumCompat,vendor/phpcompatibility/phpcompatibility-wp"
+
       - name: Run PHPCS
         run: vendor/bin/phpcs --report=checkstyle | cs2pr
