@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Full WordPress coding standard adopted.** `phpcs.xml.dist` now references `<rule ref="WordPress"/>` directly. A single `phpcbf` pass auto-corrected 3,395 mechanical violations across the three plugin files (spaces→tabs, parenthesis spacing, control-structure spacing, concatenation padding, array indentation, comma spacing). Authorial fixes (variable naming, docblocks, Yoda, etc.) are scheduled across follow-up phases F2–F4 and excluded with rationale in the ruleset until then. No behavior changes — the suite of 86 tests continues to pass.
+- Added `.git-blame-ignore-revs` listing the F1 reformat commit so `git blame` and the GitHub blame UI continue to surface the real authorship of the surrounding lines.
 - `wp_tmq_prewpmail` queue-alert payload now uses `wp_json_encode()` instead of `json_encode()`, matching WordPress conventions for handling encoding edge cases.
 - `wp_tmq_handle_export()` was split into a pure `wp_tmq_build_export_xml()` helper plus a thin handler that emits headers and exits — the pure helper makes the export logic unit-testable without touching the HTTP layer.
 - Several intentional uses of `base64_encode`/`base64_decode` (binary IV+ciphertext storage for SMTP passwords; transport-encoding of captured PHPMailer config in email headers) are now annotated with explicit `phpcs:ignore` justifications.

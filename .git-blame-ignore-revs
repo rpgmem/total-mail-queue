@@ -1,0 +1,9 @@
+# Commits listed here are skipped by `git blame --ignore-revs-file` and by
+# the GitHub blame UI. Add wholesale formatting / mechanical reformats so the
+# real authorship of the surrounding lines stays visible.
+#
+# Configure locally with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# F1: adopt full WordPress coding standard via phpcbf auto-fix (3,395 fixes).
+abf38c47160e896aec7795775cb076394444d381
