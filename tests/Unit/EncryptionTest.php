@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+namespace TMQ\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * @covers ::wp_tmq_encrypt_password
+ * @covers ::wp_tmq_decrypt_password
+ */
+final class EncryptionTest extends TestCase {
+
+    public function test_encrypt_returns_empty_string_for_empty_input(): void {
+        self::assertSame( '', wp_tmq_encrypt_password( '' ) );
+    }
+
+    public function test_decrypt_returns_empty_string_for_empty_input(): void {
+        self::assertSame( '', wp_tmq_decrypt_password( '' ) );
+    }
+
+    public function test_encrypt_decrypt_round_trip_for_simple_password(): void {
+        $plain = 'sup3r-secret!';
+
+        $encrypted = wp_tmq_encrypt_password( $plain );
+
+        self::assertNotSame( $plain, $encrypted, 'Encrypted output must not equal the plaintext.' );
+        self::assertNotSame( '', $encrypted );
+        self::assertSame( $plain, wp_tmq_decrypt_password( $encrypted ) );
+    }
+
+    public function test_encrypt_decrypt_round_trip_for_unicode_and_special_chars(): void {
+        $plain = "çãõ-π-€-\"'\\\n\t空白";
+
+        $encrypted = wp_tmq_encrypt_password( $plain );
+
+        self::assertSame( $plain, wp_tmq_decrypt_password( $encrypted ) );
+    }
+
+    public function test_encrypt_uses_random_iv_so_same_input_yields_different_ciphertext(): void {
+        $plain = 'identical-password';
+
+        $first  = wp_tmq_encrypt_password( $plain );
+        $second = wp_tmq_encrypt_password( $plain );
+
+        self::assertNotSame( $first, $second, 'A random IV must be applied per encrypt call.' );
+        self::assertSame( $plain, wp_tmq_decrypt_password( $first ) );
+        self::assertSame( $plain, wp_tmq_decrypt_password( $second ) );
+    }
+
+    public function test_decrypt_returns_empty_string_for_malformed_payload(): void {
+        // Missing the "iv::ciphertext" separator after base64 decode.
+        $bogus = base64_encode( 'no-separator-here' );
+
+        self::assertSame( '', wp_tmq_decrypt_password( $bogus ) );
+    }
+
+    public function test_decrypt_returns_false_for_payload_tampered_with_garbage_ciphertext(): void {
+        // Valid structure (iv::ciphertext) but the ciphertext part is not a real openssl_encrypt output.
+        $iv      = str_repeat( 'A', openssl_cipher_iv_length( 'aes-256-cbc' ) );
+        $tampered = base64_encode( $iv . '::not-real-ciphertext' );
+
+        self::assertFalse( wp_tmq_decrypt_password( $tampered ) );
+    }
+}

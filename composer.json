@@ -1,0 +1,24 @@
+{
+    "name": "rpgmem/total-mail-queue",
+    "description": "Queue outgoing emails, manage SMTP accounts with daily/monthly limits, and get alerts if your site sends too many emails.",
+    "type": "wordpress-plugin",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TMQ\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=unit"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
