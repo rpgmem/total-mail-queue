@@ -28,10 +28,10 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --testsuite=unit
+        run: vendor/bin/phpunit --testsuite=unit --testdox --display-warnings --display-deprecations
 
       - name: Run integration tests
-        run: vendor/bin/phpunit --testsuite=integration
+        run: vendor/bin/phpunit --testsuite=integration --testdox --display-warnings --display-deprecations
 
   phpstan:
     name: Static analysis (PHPStan)
