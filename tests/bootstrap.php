@@ -9,7 +9,13 @@
 
 declare(strict_types=1);
 
-// Composer autoloader (PHPUnit + test classes).
+// Patchwork must load before any function definitions it might need to
+// redefine (Brain Monkey relies on it). It also has to come before the
+// Composer autoloader, otherwise autoload.files entries (Mockery, Brain
+// Monkey API, etc.) define functions before Patchwork can instrument them.
+require_once __DIR__ . '/../vendor/antecedent/patchwork/Patchwork.php';
+
+// Composer autoloader (PHPUnit + test classes + Brain Monkey).
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Pretend we are inside WordPress so the plugin's ABSPATH guard passes.
@@ -26,3 +32,9 @@ require_once __DIR__ . '/Stubs/wordpress-stubs.php';
 // (registers hooks, schedules cron). With the stubs above all of those calls
 // become no-ops, leaving the function definitions available for tests.
 require_once __DIR__ . '/../total-mail-queue.php';
+
+// The admin-only files are normally guarded by is_admin(); for testing we
+// load them unconditionally so functions like wp_tmq_sanitize_settings() are
+// available without spinning up the WP admin context.
+require_once __DIR__ . '/../total-mail-queue-options.php';
+require_once __DIR__ . '/../total-mail-queue-smtp.php';

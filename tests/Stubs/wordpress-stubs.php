@@ -9,6 +9,16 @@
 
 declare(strict_types=1);
 
+if ( ! defined( 'ARRAY_A' ) ) {
+    define( 'ARRAY_A', 'ARRAY_A' );
+}
+if ( ! defined( 'ARRAY_N' ) ) {
+    define( 'ARRAY_N', 'ARRAY_N' );
+}
+if ( ! defined( 'OBJECT' ) ) {
+    define( 'OBJECT', 'OBJECT' );
+}
+
 if ( ! function_exists( 'wp_salt' ) ) {
     function wp_salt( $scheme = 'auth' ): string {
         // Deterministic per-scheme salt so encryption round-trips are stable.
@@ -191,5 +201,76 @@ if ( ! function_exists( 'esc_html__' ) ) {
 if ( ! function_exists( 'admin_url' ) ) {
     function admin_url( $path = '' ): string {
         return 'http://example.test/wp-admin/' . ltrim( $path, '/' );
+    }
+}
+
+if ( ! function_exists( 'esc_html' ) ) {
+    function esc_html( $text ): string {
+        return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+    }
+}
+
+if ( ! function_exists( 'esc_attr' ) ) {
+    function esc_attr( $text ): string {
+        return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+    }
+}
+
+if ( ! function_exists( 'esc_url' ) ) {
+    function esc_url( $url ): string {
+        return (string) $url;
+    }
+}
+
+if ( ! function_exists( 'esc_attr__' ) ) {
+    function esc_attr__( $text, $domain = 'default' ): string {
+        return esc_attr( (string) $text );
+    }
+}
+
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+    function sanitize_text_field( $text ): string {
+        return is_string( $text ) ? trim( $text ) : '';
+    }
+}
+
+if ( ! function_exists( 'sanitize_email' ) ) {
+    function sanitize_email( $email ): string {
+        return is_string( $email ) ? filter_var( $email, FILTER_SANITIZE_EMAIL ) ?: '' : '';
+    }
+}
+
+if ( ! function_exists( 'sanitize_key' ) ) {
+    function sanitize_key( $key ): string {
+        return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $key ) );
+    }
+}
+
+if ( ! function_exists( 'register_setting' ) ) {
+    function register_setting( $option_group, $option_name, $args = array() ): void {}
+}
+
+if ( ! function_exists( 'add_settings_section' ) ) {
+    function add_settings_section( ...$args ): void {}
+}
+
+if ( ! function_exists( 'add_settings_field' ) ) {
+    function add_settings_field( ...$args ): void {}
+}
+
+// Minimal WP_List_Table replacement so total-mail-queue-options.php can declare
+// wp_tmq_Log_Table without requiring WordPress's admin includes.
+if ( ! class_exists( 'WP_List_Table' ) ) {
+    class WP_List_Table {
+        protected $_args = array( 'plural' => 'items' );
+        protected $_column_headers = array();
+        public $items = array();
+
+        public function __construct( $args = array() ) {}
+        public function get_pagenum() { return 1; }
+        public function set_pagination_args( $args ) {}
+        public function display() {}
+        public function prepare_items() {}
+        public function current_action() { return false; }
     }
 }
