@@ -63,7 +63,7 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-          tools: composer:v2, cs2pr
+          tools: composer:v2
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
@@ -77,5 +77,10 @@ jobs:
           vendor/bin/phpcs --config-set installed_paths \
             "vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsutils,vendor/phpcsstandards/phpcsextra,vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat,vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieSodiumCompat,vendor/phpcompatibility/phpcompatibility-wp"
 
+      - name: Show PHPCS state
+        run: |
+          vendor/bin/phpcs --version
+          vendor/bin/phpcs -i
+
       - name: Run PHPCS
-        run: vendor/bin/phpcs --report=checkstyle | cs2pr
+        run: vendor/bin/phpcs --report=full --colors
