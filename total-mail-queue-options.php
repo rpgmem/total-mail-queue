@@ -1079,7 +1079,13 @@ add_action('admin_notices', 'wp_tmq_checkLogForErrors');
 Export / Import Settings
 **************************************************************** */
 
-function wp_tmq_handle_export() {
+/**
+ * Build the export XML payload as a formatted string.
+ *
+ * Extracted from wp_tmq_handle_export() so it can be unit-tested without
+ * triggering header()/exit() side effects.
+ */
+function wp_tmq_build_export_xml() {
     global $wpdb, $wp_tmq_options;
 
     $smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
@@ -1122,18 +1128,23 @@ function wp_tmq_handle_export() {
         }
     }
 
+    $dom = new DOMDocument( '1.0', 'UTF-8' );
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput = true;
+    $dom->loadXML( $xml->asXML() );
+    return $dom->saveXML();
+}
+
+function wp_tmq_handle_export() {
+    $xml      = wp_tmq_build_export_xml();
     $filename = 'total-mail-queue-export-' . wp_date( 'Y-m-d-His' ) . '.xml';
 
     header( 'Content-Type: application/xml; charset=utf-8' );
     header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
     header( 'Cache-Control: no-cache, no-store, must-revalidate' );
 
-    $dom = new DOMDocument( '1.0', 'UTF-8' );
-    $dom->preserveWhiteSpace = false;
-    $dom->formatOutput = true;
-    $dom->loadXML( $xml->asXML() );
     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XML file download, not HTML context
-    echo $dom->saveXML();
+    echo $xml;
     exit;
 }
 

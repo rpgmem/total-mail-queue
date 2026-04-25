@@ -52,6 +52,58 @@ jobs:
       - name: Run PHPStan
         run: vendor/bin/phpstan analyze --no-progress --error-format=github
 
+  functional:
+    name: Functional (PHP ${{ matrix.php }}, WP ${{ matrix.wp }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.1'
+            wp: 'latest'
+          - php: '8.3'
+            wp: 'latest'
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp_tmq_tests
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          extensions: mysqli, openssl, mbstring, xml, dom, simplexml
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Bootstrap WP test environment
+        run: |
+          bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1:3306 true
+
+      - name: Run functional tests
+        run: vendor/bin/phpunit -c phpunit.functional.xml.dist
+
   phpcs:
     name: Coding standards (PHPCS)
     runs-on: ubuntu-latest
