@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 #
-# Prepare the MySQL database used by the functional test suite.
+# Prepare the test environment for the functional suite:
+#   - Download WordPress core into vendor/wordpress/ (idempotent)
+#   - Optionally create a fresh MySQL database
+#   - Write a wp-tests-config.php at the project root that wp-phpunit reads
 #
-# WordPress core (roots/wordpress) and the WordPress test framework
-# (wp-phpunit/wp-phpunit) are already installed in vendor/ via composer,
-# so this script only has to create the database and write a
-# wp-tests-config.php that points the test framework at it.
+# WordPress is downloaded directly from wordpress.org rather than via a
+# composer package. The composer route requires the
+# roots/wordpress-core-installer plugin to run, which behaves differently
+# depending on whether composer plugins are allowed; downloading a tarball
+# is reliable across local and CI environments.
 #
 # Usage:
-#   bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [skip-db-create]
+#   bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [skip-db-create] [wp-version]
 
 set -euo pipefail
 
 if [ $# -lt 3 ]; then
-    echo "Usage: $0 <db-name> <db-user> <db-pass> [db-host] [skip-db-create]" >&2
+    echo "Usage: $0 <db-name> <db-user> <db-pass> [db-host] [skip-db-create] [wp-version]" >&2
     exit 1
 fi
 
@@ -22,19 +26,43 @@ DB_USER=$2
 DB_PASS=$3
 DB_HOST=${4-localhost}
 SKIP_DB_CREATE=${5-false}
+WP_VERSION=${6-latest}
 
-# Resolve project root regardless of where the script is invoked from.
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-WP_CORE_DIR="$PROJECT_ROOT/vendor/roots/wordpress-no-content"
+WP_CORE_DIR="$PROJECT_ROOT/vendor/wordpress"
 WP_TESTS_DIR="$PROJECT_ROOT/vendor/wp-phpunit/wp-phpunit"
 
-if [ ! -d "$WP_CORE_DIR" ] || [ ! -d "$WP_TESTS_DIR" ]; then
-    echo "Run 'composer install' first — vendor/ is missing the required packages." >&2
+if [ ! -d "$WP_TESTS_DIR" ]; then
+    echo "Run 'composer install' first — vendor/wp-phpunit/wp-phpunit is missing." >&2
     exit 1
 fi
 
-# Write wp-tests-config.php at the project root. wp-phpunit's bootstrap looks
-# for it via the WP_TESTS_CONFIG_FILE_PATH env var, which we export below.
+# 1. Download WordPress core if not already present.
+if [ ! -f "$WP_CORE_DIR/wp-load.php" ]; then
+    mkdir -p "$WP_CORE_DIR"
+    if [ "$WP_VERSION" = "latest" ]; then
+        ARCHIVE_URL="https://wordpress.org/latest.tar.gz"
+    else
+        ARCHIVE_URL="https://wordpress.org/wordpress-${WP_VERSION}.tar.gz"
+    fi
+    echo "Downloading WordPress from $ARCHIVE_URL"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$ARCHIVE_URL" -o "$PROJECT_ROOT/vendor/wordpress.tar.gz"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q -O "$PROJECT_ROOT/vendor/wordpress.tar.gz" "$ARCHIVE_URL"
+    else
+        echo "Neither curl nor wget is available." >&2
+        exit 1
+    fi
+    tar --strip-components=1 -xzf "$PROJECT_ROOT/vendor/wordpress.tar.gz" -C "$WP_CORE_DIR"
+    rm -f "$PROJECT_ROOT/vendor/wordpress.tar.gz"
+    echo "WordPress installed at $WP_CORE_DIR"
+else
+    echo "WordPress already present at $WP_CORE_DIR — skipping download."
+fi
+
+# 2. Write wp-tests-config.php at the project root. The functional bootstrap
+#    loads this via the WP_TESTS_CONFIG_FILE_PATH constant.
 CONFIG_FILE="$PROJECT_ROOT/wp-tests-config.php"
 cat > "$CONFIG_FILE" <<PHP
 <?php
@@ -67,11 +95,13 @@ define( 'LOGGED_IN_SALT',   'test-logged-in-salt' );
 define( 'NONCE_SALT',       'test-nonce-salt' );
 PHP
 
+# 3. Database creation (optional — typically the CI service container
+#    already provisioned the DB via MYSQL_DATABASE).
 if [ "$SKIP_DB_CREATE" = "true" ]; then
+    echo "Skipping database creation. wp-tests-config.php written to $CONFIG_FILE."
     exit 0
 fi
 
-# Drop+create makes the script safe to run repeatedly.
 PARTS=(${DB_HOST//\:/ })
 DB_HOSTNAME=${PARTS[0]}
 DB_SOCK_OR_PORT=${PARTS[1]-}
