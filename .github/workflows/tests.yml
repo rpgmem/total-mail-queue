@@ -28,10 +28,10 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --testsuite=unit --testdox --display-warnings --display-deprecations
+        run: vendor/bin/phpunit --testsuite=unit --testdox
 
       - name: Run integration tests
-        run: vendor/bin/phpunit --testsuite=integration --testdox --display-warnings --display-deprecations
+        run: vendor/bin/phpunit --testsuite=integration --testdox
 
   phpstan:
     name: Static analysis (PHPStan)
@@ -92,17 +92,26 @@ jobs:
 
       - name: Wait for MySQL
         run: |
-          until mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent; do
-            echo "Waiting for MySQL..."
+          for i in $(seq 1 30); do
+            if mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent 2>/dev/null; then
+              echo "MySQL is up."
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i/30)"
             sleep 2
           done
+          echo "MySQL did not become reachable in time." >&2
+          exit 1
 
       - name: Bootstrap WP test environment
         run: |
+          set -x
           bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1:3306 true
+          ls -la wp-tests-config.php
+          head -20 wp-tests-config.php
 
       - name: Run functional tests
-        run: vendor/bin/phpunit -c phpunit.functional.xml.dist
+        run: vendor/bin/phpunit -c phpunit.functional.xml.dist --testdox
 
   phpcs:
     name: Coding standards (PHPCS)
