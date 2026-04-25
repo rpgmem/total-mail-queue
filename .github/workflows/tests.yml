@@ -90,11 +90,19 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Verify environment
+        run: |
+          php -v
+          php -m | grep -iE 'mysqli|openssl|simplexml|dom|mbstring' || true
+          ls -d vendor/roots/wordpress-no-content/ vendor/wp-phpunit/wp-phpunit/ || true
+          ls -la bin/install-wp-tests.sh
+
       - name: Wait for MySQL
         run: |
           for i in $(seq 1 30); do
             if mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent 2>/dev/null; then
               echo "MySQL is up."
+              mysql -h127.0.0.1 -P3306 -uroot -proot -e "SELECT VERSION()"
               exit 0
             fi
             echo "Waiting for MySQL... ($i/30)"
@@ -106,12 +114,12 @@ jobs:
       - name: Bootstrap WP test environment
         run: |
           set -x
-          bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1:3306 true
+          bash -x bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1:3306 true
           ls -la wp-tests-config.php
-          head -20 wp-tests-config.php
+          cat wp-tests-config.php
 
       - name: Run functional tests
-        run: vendor/bin/phpunit -c phpunit.functional.xml.dist --testdox
+        run: vendor/bin/phpunit -c phpunit.functional.xml.dist --testdox --verbose
 
   phpcs:
     name: Coding standards (PHPCS)
