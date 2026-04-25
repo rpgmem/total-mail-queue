@@ -11,19 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Automated test suite (PHPUnit 10).**
-  - Unit tests covering pure-PHP helpers without booting WordPress: AES-256-CBC password round-trip and tamper detection, JSON encode/decode with backwards-compatible unserialize fallback (object instantiation blocked via `allowed_classes => false`), SMTP account picker (`cycle_sent` vs `send_bulk`), in-memory SMTP counter increment, and base64 redaction of inline image data in HTML preview.
-  - Integration tests using Brain Monkey + Mockery for hook-and-database interactions, covering `wp_tmq_get_settings` (defaults, queue interval unit conversion, 10s minimum clamp), `wp_tmq_sanitize_settings` (whitelist of admin-settable keys, blocks `tableName`/`smtpTableName`/`triggercount` injection), `wp_tmq_prewpmail` (filter pass-through, `X-Mail-Queue-Prio: High`/`Instant`, block-mode behavior, `wp_mail_content_type` header, instant-email filter skip), `wp_tmq_capture_phpmailer_config` (no-op when nothing changed, capture path with encrypted password), and `wp_tmq_mail_failed` (auto-retry counter, error finalization, unknown-message fallback).
+- **Automated test suite (PHPUnit 9).**
+  - Unit tests (25) covering pure-PHP helpers without booting WordPress: AES-256-CBC password round-trip and tamper detection, JSON encode/decode with backwards-compatible unserialize fallback (object instantiation blocked via `allowed_classes => false`), SMTP account picker (`cycle_sent` vs `send_bulk`), in-memory SMTP counter increment, and base64 redaction of inline image data in HTML preview.
+  - Integration tests (27) using Brain Monkey + Mockery for hook-and-database interactions, covering `wp_tmq_get_settings` (defaults, queue interval unit conversion, 10s minimum clamp), `wp_tmq_sanitize_settings` (whitelist of admin-settable keys, blocks `tableName`/`smtpTableName`/`triggercount` injection), `wp_tmq_prewpmail` (filter pass-through, `X-Mail-Queue-Prio: High`/`Instant`, block-mode behavior, `wp_mail_content_type` header, instant-email filter skip), `wp_tmq_capture_phpmailer_config` (no-op when nothing changed, capture path with encrypted password), and `wp_tmq_mail_failed` (auto-retry counter, error finalization, unknown-message fallback).
+  - Functional tests (34) running against a real WordPress + MySQL via `wp-phpunit/wp-phpunit`, covering activation/`dbDelta` schema and indexes, retention cleanup (`clear_queue` age-based + `log_max_records` cap), REST endpoint `/tmq/v1/message/{id}` (capability + 404), bulk actions delete/resend/force_resend, full cron flow (`wp_tmq_search_mail_from_queue` with priority ordering, batch limit, disabled/block modes, smtp-only fallback, diagnostics), AJAX `wp_tmq_test_smtp` (permission, nonce, validation, connection failure), and XML export/import round-trip with whitelist enforcement and XXE protection (`LIBXML_NONET`).
   - In-memory `MockWpdb` test double that records every call and lets tests pre-load read responses.
 - **Static analysis with PHPStan (level 5)** using `szepeviktor/phpstan-wordpress`. Existing issues captured in a baseline so CI fails only on new violations.
 - **Coding standards with PHP_CodeSniffer + WordPress Coding Standards 3.x**, configured to enforce security and API correctness (escaping, prepared SQL, text-domain consistency, hook prefixing, deprecated functions) — style sniffs are intentionally not enforced because the existing codebase predates them.
 - **PHP compatibility checks** via `phpcompatibility/phpcompatibility-wp` against the declared minimum PHP 7.4.
-- **GitHub Actions workflow** running PHPUnit (PHP 8.1, 8.2, 8.3), PHPStan and PHPCS on every push/pull request.
+- **GitHub Actions workflow** running PHPUnit (PHP 8.1, 8.2, 8.3), functional tests against MySQL 8 (PHP 8.1 + 8.3), PHPStan and PHPCS on every push/pull request.
+- **`bin/install-wp-tests.sh`** helper that bootstraps the WordPress test database for local development.
 - **CHANGELOG.md** following the Keep a Changelog format.
 
 ### Changed
 
 - `wp_tmq_prewpmail` queue-alert payload now uses `wp_json_encode()` instead of `json_encode()`, matching WordPress conventions for handling encoding edge cases.
+- `wp_tmq_handle_export()` was split into a pure `wp_tmq_build_export_xml()` helper plus a thin handler that emits headers and exits — the pure helper makes the export logic unit-testable without touching the HTTP layer.
 - Several intentional uses of `base64_encode`/`base64_decode` (binary IV+ciphertext storage for SMTP passwords; transport-encoding of captured PHPMailer config in email headers) are now annotated with explicit `phpcs:ignore` justifications.
 - Legacy fallback `unserialize()` call (used only when reading data written by older plugin versions) is annotated to make the `allowed_classes => false` safety guarantee visible at the call site.
 
