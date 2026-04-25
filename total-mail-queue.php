@@ -75,12 +75,14 @@ function wp_tmq_encrypt_password( $plain_text ) {
     $iv_length = openssl_cipher_iv_length( 'aes-256-cbc' );
     $iv = openssl_random_pseudo_bytes( $iv_length );
     $encrypted = openssl_encrypt( $plain_text, 'aes-256-cbc', $key, 0, $iv );
+    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- safe storage of binary IV+ciphertext
     return base64_encode( $iv . '::' . $encrypted );
 }
 
 function wp_tmq_decrypt_password( $encrypted_text ) {
     if ( empty( $encrypted_text ) ) return '';
     $key = wp_salt( 'auth' );
+    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- decoding stored IV+ciphertext from wp_tmq_encrypt_password
     $data = base64_decode( $encrypted_text );
     $parts = explode( '::', $data, 2 );
     if ( count( $parts ) !== 2 ) return '';
@@ -116,6 +118,7 @@ function wp_tmq_decode( $raw ) {
     }
     // Fall back to PHP unserialize for legacy data (read-only, safe with allowed_classes)
     if ( is_serialized( $raw ) ) {
+        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- safe: allowed_classes => false blocks object injection
         return @unserialize( $raw, array( 'allowed_classes' => false ) );
     }
     return $raw;
@@ -357,6 +360,7 @@ function wp_tmq_prewpmail($return, $atts) {
     // We store them so when sending from queue we can replay them
     $phpmailer_config = wp_tmq_capture_phpmailer_config();
     if ( $phpmailer_config ) {
+        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- transport-encoding the captured config so it survives as an email header
         $headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( wp_tmq_encode( $phpmailer_config ) );
     }
 
@@ -643,7 +647,7 @@ function wp_tmq_search_mail_from_queue() {
                 'subject'  => $alertSubject,
                 'message'  => $alertMessage,
                 'status'   => 'alert',
-                'info'     => json_encode([
+                'info'     => wp_json_encode([
                     'in_queue'       => strval( $mailsInQueue ),
                     'email_amount'   => intval($wp_tmq_options['email_amount']),
                     'queue_amount'   => intval($wp_tmq_options['queue_amount']),
@@ -686,6 +690,7 @@ function wp_tmq_search_mail_from_queue() {
                 if ( is_array( $headers ) ) {
                     foreach ( $headers as $hindex => $hval ) {
                         if ( preg_match( '/^X-TMQ-PHPMailer-Config: (.+)$/i', $hval, $matches ) ) {
+                            // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- reading the encoded payload our own wp_tmq_prewpmail() wrote
                             $captured_phpmailer_config = wp_tmq_decode( base64_decode( trim( $matches[1] ) ) );
                             array_splice( $headers, $hindex, 1 );
                             break;

@@ -1,0 +1,41 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_attr expects string, \\(float\\|int\\) given\\.$#"
+			count: 2
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_attr expects string, int given\\.$#"
+			count: 5
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_attr expects string, int\\<min, \\-1\\>\\|int\\<1, max\\> given\\.$#"
+			count: 1
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_html expects string, int\\<0, max\\> given\\.$#"
+			count: 1
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Parameter \\#1 \\$text of function esc_html expects string, int\\<min, \\-1\\>\\|int\\<1, max\\> given\\.$#"
+			count: 1
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Parameter \\#3 \\$callback of function add_settings_section expects callable\\(\\)\\: mixed, null given\\.$#"
+			count: 1
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 7
+			path: total-mail-queue-options.php
+
+		-
+			message: "#^Variable \\$headers in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: total-mail-queue.php

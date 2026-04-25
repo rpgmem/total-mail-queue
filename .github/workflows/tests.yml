@@ -28,4 +28,59 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --testsuite=unit
+        run: vendor/bin/phpunit --testsuite=unit --testdox --display-warnings --display-deprecations
+
+      - name: Run integration tests
+        run: vendor/bin/phpunit --testsuite=integration --testdox --display-warnings --display-deprecations
+
+  phpstan:
+    name: Static analysis (PHPStan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyze --no-progress --error-format=github
+
+  phpcs:
+    name: Coding standards (PHPCS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # Explicitly register the installed standards. The
+      # dealerdirect/phpcodesniffer-composer-installer plugin normally handles
+      # this, but registering paths here makes the build resilient if the
+      # plugin is ever blocked or skipped.
+      - name: Register PHPCS standards
+        run: |
+          vendor/bin/phpcs --config-set installed_paths \
+            "vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsutils,vendor/phpcsstandards/phpcsextra,vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat,vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieSodiumCompat,vendor/phpcompatibility/phpcompatibility-wp"
+
+      - name: Show PHPCS state
+        run: |
+          vendor/bin/phpcs --version
+          vendor/bin/phpcs -i
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs --report=full --colors
