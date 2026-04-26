@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -176,6 +176,23 @@ Upload the the plugin, activate it, and go to the Settings to enable the Queue.
 Please make sure that your WP Cron is running reliably.
 
 == Changelog ==
+
+= 2.4.1 =
+* Sources tab: labels are now translatable via `__()` (Loco Translate / `.po` / `.pot` files pick them up).
+* Sources tab: per-row "Edit" action lets the admin override label and group; "Reset" clears the override and falls back to the translated default.
+* Sources tab: new "Filter by group" dropdown above the table.
+* Sources tab: warning notice when the plugin's Operation Mode is Block or Disabled (per-source toggles can't take effect in those modes).
+* Schema: new `label_override` + `group_override` columns on `{$prefix}total_mail_queue_sources` (added automatically via dbDelta on next page load).
+
+= 2.4.0 =
+* New "individual control of emails by source" feature: each `wp_mail()` is tagged with a stable `source_key` and the admin can toggle delivery per-source from a new "Sources" admin tab.
+* Auto-detection of WordPress core emails (15 types: password reset, new user welcome + admin notification, password change + admin notification, email change, admin email change confirm, auto core update, auto plugin/theme update report, comment notification + moderation, personal-data request confirm + export ready + erasure complete, recovery mode) plus a `debug_backtrace` fallback that classifies unknown calls as `plugin:<slug>` / `theme:<slug>` / `mu_plugin:<slug>` / `wp_core:admin` / `wp_core:unknown`.
+* Per-source enforcement: disabled sources are stored with the new `blocked_by_source` status (overrides Instant priority).
+* "System sources" hardcoded as always-enabled so the admin cannot silence the plugin's own monitoring email.
+* Catalog pre-seeded with WooCommerce, Contact Form 7, WPForms, plus the 15 WP-core entries.
+* New "Source" column on the Log table with click-to-filter shortcut.
+* Schema: new `{$prefix}total_mail_queue_sources` table + `source_key` column on `{$prefix}total_mail_queue` (both added automatically via dbDelta on activation/upgrade).
+* Admin UI cleanup: compact header (~60px less vertical space above the tab nav), block-mode banner contrast fix (WCAG AA), `.tmq-warning-block` renamed to `.tmq-text-danger`, dead CSS removed, inline style on the SMTP autofill decoy moved to a CSS class.
 
 = 2.3.0 =
 * Full namespaced rebuild — every responsibility moved into a class under the `TotalMailQueue\` namespace; the legacy procedural admin files (`total-mail-queue-options.php` / `total-mail-queue-smtp.php`) and the `wp_tmq_*` globals are gone.

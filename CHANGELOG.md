@@ -5,6 +5,29 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2026-04-26
+
+> UX patch on top of the 2.4.0 Sources tab: the labels are now translatable via Loco / `.po` files, the admin can override label and group per-row, the table has a "Filter by group" dropdown, and the page warns when the global Operation Mode (Block / Disabled) means per-source toggles can't take effect.
+
+### Added
+
+- **Translatable Source labels.** `Sources\KnownSources::translatedLabel()` / `translatedGroup()` / `translateRawGroup()` route every known `source_key` through a literal `__('Password reset', 'total-mail-queue')` (and equivalents) so Loco Translate, Poedit, `wp i18n make-pot`, etc. pick the strings up. Display order at render time: admin override → translated default → raw stored value.
+- **Per-row Edit / Reset of label and group.** New "Edit" action per row in `Admin\Tables\SourcesTable` opens an inline form; saving updates the new `label_override` + `group_override` columns. A "Reset" action drops the overrides and falls back to the translated default. Each table row that carries an override gets a small "(custom)" badge so the admin can spot manual overrides at a glance.
+- **Filter the catalog by group.** New `?group_filter=<canonical>` dropdown in the Sources table's `extra_tablenav` lists every distinct group (translated for display, canonical as the option value). Filter narrowing matches against either `group_label` or `group_override` so admin-set "VIP" rows still appear when the admin filters by "VIP".
+- **Operation-Mode warning on the Sources tab.** When the global plugin mode is **Block** (`enabled = 2`) or **Disabled** (`enabled = 0`), a notice now appears at the top of the Sources tab explaining that per-source toggles are inert in that mode and linking to Settings to switch back to Queue mode.
+
+### Changed
+
+- **Schema** `{$prefix}total_mail_queue_sources` gains two columns: `label_override VARCHAR(255) NOT NULL DEFAULT ''` and `group_override VARCHAR(120) NOT NULL DEFAULT ''`. `Database\Migrator::install()` (triggered automatically by the version bump) calls `dbDelta()` to add them on existing installs without disturbing any other column.
+- **`Sources\Repository`** gains `updateOverrides( id, label_override, group_override )` (silently drops the group override for system sources) and `distinctGroups()` (canonical, deduplicated, includes both `group_label` and any non-empty `group_override`).
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.4.1**.
+
+### Tests
+
+11 new functional tests in `SourcesOverridesTest`: schema columns exist, override persistence, system-source group override is dropped, display priority (override > translated > raw), `distinctGroups` includes overrides, table filter matches against either column, edit POST persists, reset action clears overrides, mode warning notice on Block, on Disabled, and the absence of the notice on Queue mode.
+
+---
+
 ## [2.4.0] - 2026-04-26
 
 > A new **"individual control of emails by source"** feature plus a small admin/UI cleanup pass. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. The roll-out was split across phases S1 → S5; the cleanup shipped alongside.
