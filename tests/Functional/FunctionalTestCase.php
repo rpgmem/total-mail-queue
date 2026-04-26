@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace TMQ\Tests\Functional;
 
+use TotalMailQueue\Cron\BatchProcessor;
+use TotalMailQueue\Database\Migrator;
+use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Queue\Tracker;
+use TotalMailQueue\Support\Encryption;
 use WP_UnitTestCase;
 
 /**
@@ -19,51 +24,41 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
 
         // Each test case is its own scenario; reset the namespaced singletons
         // (BatchProcessor's invocation guard, Tracker's in-flight mail id).
-        \TotalMailQueue\Cron\BatchProcessor::reset();
-        \TotalMailQueue\Queue\Tracker::reset();
-
-        global $wpdb, $wp_tmq_options;
+        BatchProcessor::reset();
+        Tracker::reset();
 
         // Refresh schema in case a previous test dropped tables.
-        \TotalMailQueue\Database\Migrator::install();
+        Migrator::install();
 
         // Reset options to a known baseline so tests can reason about state.
         delete_option( 'wp_tmq_settings' );
         delete_option( 'wp_tmq_last_cron' );
-        $wp_tmq_options = \TotalMailQueue\Settings\Options::get();
 
         // Clear plugin tables.
-        $main = $wpdb->prefix . $wp_tmq_options['tableName'];
-        $smtp = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
-        $wpdb->query( "TRUNCATE TABLE `$main`" );
-        $wpdb->query( "TRUNCATE TABLE `$smtp`" );
-
-        $GLOBALS['wp_tmq_mailid'] = 0;
+        global $wpdb;
+        $wpdb->query( "TRUNCATE TABLE `{$this->queueTable()}`" );
+        $wpdb->query( "TRUNCATE TABLE `{$this->smtpTable()}`" );
     }
 
     /**
-     * Persist new plugin settings, then reload the in-memory cache.
+     * Persist new plugin settings.
      *
      * @param array<string,mixed> $overrides
      */
     protected function setPluginOptions( array $overrides ): void {
-        global $wp_tmq_options;
         $current = get_option( 'wp_tmq_settings', array() );
         if ( ! is_array( $current ) ) {
             $current = array();
         }
         update_option( 'wp_tmq_settings', array_merge( $current, $overrides ) );
-        $wp_tmq_options = \TotalMailQueue\Settings\Options::get();
     }
 
     protected function queueTable(): string {
-        global $wpdb, $wp_tmq_options;
-        return $wpdb->prefix . $wp_tmq_options['tableName'];
+        return Schema::queueTable();
     }
 
     protected function smtpTable(): string {
-        global $wpdb, $wp_tmq_options;
-        return $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+        return Schema::smtpTable();
     }
 
     /**
@@ -97,7 +92,7 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
             'encryption'    => 'tls',
             'auth'          => 1,
             'username'      => 'user',
-            'password'      => \TotalMailQueue\Support\Encryption::encrypt( 'pass' ),
+            'password'      => Encryption::encrypt( 'pass' ),
             'from_email'    => 'noreply@example.test',
             'from_name'     => 'Example',
             'priority'      => 0,

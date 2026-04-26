@@ -37,7 +37,7 @@ if ( ! function_exists( 'is_serialized' ) ) {
      * Simplified port of WordPress core's is_serialized().
      *
      * Detects the standard PHP serialization prefixes (s:, i:, d:, b:, a:, O:, C:, N;).
-     * Sufficient for wp_tmq_decode() to correctly route legacy data to unserialize().
+     * Sufficient for Support\Serializer::decode() to correctly route legacy data to unserialize().
      */
     function is_serialized( $data, $strict = true ): bool {
         if ( ! is_string( $data ) ) {
