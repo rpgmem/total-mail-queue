@@ -5,25 +5,25 @@ declare(strict_types=1);
 namespace TMQ\Tests\Integration;
 
 /**
- * @covers ::wp_tmq_mail_failed
+ * @covers \TotalMailQueue\Queue\MailFailedHandler::handle
  */
 final class MailFailedTest extends IntegrationTestCase {
 
     public function test_does_nothing_when_mail_id_is_zero(): void {
-        $GLOBALS['wp_tmq_mailid'] = 0;
+        \TotalMailQueue\Queue\Tracker::set( 0 );
 
-        wp_tmq_mail_failed( $this->makeError( 'unused' ) );
+        \TotalMailQueue\Queue\MailFailedHandler::handle( $this->makeError( 'unused' ) );
 
         self::assertSame( array(), $this->wpdb->calls );
     }
 
     public function test_marks_email_as_error_immediately_when_retries_disabled(): void {
-        $GLOBALS['wp_tmq_mailid'] = 17;
-        $GLOBALS['wp_tmq_options']['max_retries'] = '0';
+        \TotalMailQueue\Queue\Tracker::set( 17 );
+        $this->options['max_retries'] = '0';
         $this->wpdb->will_return( 'get_row', array( 'retry_count' => 0, 'status' => 'queue' ) );
         $this->wpdb->will_return( 'update', 1 );
 
-        wp_tmq_mail_failed( $this->makeError( 'SMTP connect failed' ) );
+        \TotalMailQueue\Queue\MailFailedHandler::handle( $this->makeError( 'SMTP connect failed' ) );
 
         $update = $this->wpdb->call( 'update' );
         self::assertNotNull( $update );
@@ -34,12 +34,12 @@ final class MailFailedTest extends IntegrationTestCase {
     }
 
     public function test_increments_retry_counter_and_keeps_status_queue_below_limit(): void {
-        $GLOBALS['wp_tmq_mailid'] = 17;
-        $GLOBALS['wp_tmq_options']['max_retries'] = '3';
+        \TotalMailQueue\Queue\Tracker::set( 17 );
+        $this->options['max_retries'] = '3';
         $this->wpdb->will_return( 'get_row', array( 'retry_count' => 1, 'status' => 'queue' ) );
         $this->wpdb->will_return( 'update', 1 );
 
-        wp_tmq_mail_failed( $this->makeError( 'transient error' ) );
+        \TotalMailQueue\Queue\MailFailedHandler::handle( $this->makeError( 'transient error' ) );
 
         $update = $this->wpdb->call( 'update' );
         self::assertSame( 'queue', $update['args'][1]['status'], 'Status must return to queue so the email is retried.' );
@@ -49,12 +49,12 @@ final class MailFailedTest extends IntegrationTestCase {
     }
 
     public function test_marks_email_as_error_after_exceeding_retry_limit(): void {
-        $GLOBALS['wp_tmq_mailid'] = 17;
-        $GLOBALS['wp_tmq_options']['max_retries'] = '3';
+        \TotalMailQueue\Queue\Tracker::set( 17 );
+        $this->options['max_retries'] = '3';
         $this->wpdb->will_return( 'get_row', array( 'retry_count' => 3, 'status' => 'queue' ) );
         $this->wpdb->will_return( 'update', 1 );
 
-        wp_tmq_mail_failed( $this->makeError( 'final error' ) );
+        \TotalMailQueue\Queue\MailFailedHandler::handle( $this->makeError( 'final error' ) );
 
         $update = $this->wpdb->call( 'update' );
         self::assertSame( 'error', $update['args'][1]['status'] );
@@ -63,15 +63,15 @@ final class MailFailedTest extends IntegrationTestCase {
     }
 
     public function test_uses_unknown_label_when_wp_error_has_no_message(): void {
-        $GLOBALS['wp_tmq_mailid'] = 5;
-        $GLOBALS['wp_tmq_options']['max_retries'] = '0';
+        \TotalMailQueue\Queue\Tracker::set( 5 );
+        $this->options['max_retries'] = '0';
         $this->wpdb->will_return( 'get_row', array( 'retry_count' => 0, 'status' => 'queue' ) );
         $this->wpdb->will_return( 'update', 1 );
 
         $error = new \stdClass();
         $error->errors = array(); // No wp_mail_failed entry
 
-        wp_tmq_mail_failed( $error );
+        \TotalMailQueue\Queue\MailFailedHandler::handle( $error );
 
         $update = $this->wpdb->call( 'update' );
         self::assertSame( 'error', $update['args'][1]['status'] );
@@ -79,7 +79,7 @@ final class MailFailedTest extends IntegrationTestCase {
     }
 
     /**
-     * Build the WP_Error-shaped object that wp_tmq_mail_failed() inspects.
+     * Build the WP_Error-shaped object that \TotalMailQueue\Queue\MailFailedHandler::handle() inspects.
      */
     private function makeError( string $message ): object {
         $err = new \stdClass();

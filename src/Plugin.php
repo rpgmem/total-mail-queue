@@ -69,6 +69,14 @@ final class Plugin {
 		// Run pending schema migrations on every load (cheap when up-to-date).
 		add_action( 'plugins_loaded', array( Database\Migrator::class, 'maybeMigrate' ), 10, 0 );
 
+		// Mail interception (queue/block modes only, never during WP cron).
+		Queue\MailInterceptor::register();
+		Queue\MailFailedHandler::register();
+		Queue\MailSucceededHandler::register();
+
+		// Cron worker — schedule + the actual queue-draining action.
+		Cron\Scheduler::register();
+
 		// Admin AJAX endpoints.
 		Smtp\ConnectionTester::register();
 

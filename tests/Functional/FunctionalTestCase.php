@@ -17,6 +17,11 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
     protected function setUp(): void {
         parent::setUp();
 
+        // Each test case is its own scenario; reset the namespaced singletons
+        // (BatchProcessor's invocation guard, Tracker's in-flight mail id).
+        \TotalMailQueue\Cron\BatchProcessor::reset();
+        \TotalMailQueue\Queue\Tracker::reset();
+
         global $wpdb, $wp_tmq_options;
 
         // Refresh schema in case a previous test dropped tables.

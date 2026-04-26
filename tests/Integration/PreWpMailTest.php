@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers ::wp_tmq_prewpmail
+ * @covers \TotalMailQueue\Queue\MailInterceptor::handle
  */
 final class PreWpMailTest extends IntegrationTestCase {
 
@@ -22,7 +22,7 @@ final class PreWpMailTest extends IntegrationTestCase {
     }
 
     public function test_passes_through_when_another_filter_already_returned_a_value(): void {
-        $result = wp_tmq_prewpmail( true, $this->basicAtts() );
+        $result = \TotalMailQueue\Queue\MailInterceptor::handle( true, $this->basicAtts() );
 
         self::assertTrue( $result );
         self::assertSame( array(), $this->wpdb->calls, 'No DB activity should happen when another filter handled the mail.' );
@@ -31,7 +31,7 @@ final class PreWpMailTest extends IntegrationTestCase {
     public function test_inserts_mail_into_queue_table_with_default_status(): void {
         $this->wpdb->will_return( 'insert', 1 );
 
-        $result = wp_tmq_prewpmail( null, $this->basicAtts() );
+        $result = \TotalMailQueue\Queue\MailInterceptor::handle( null, $this->basicAtts() );
 
         self::assertTrue( $result );
         $insert = $this->wpdb->call( 'insert' );
@@ -46,7 +46,7 @@ final class PreWpMailTest extends IntegrationTestCase {
     public function test_returns_false_when_wpdb_insert_fails(): void {
         $this->wpdb->will_return( 'insert', false );
 
-        $result = wp_tmq_prewpmail( null, $this->basicAtts() );
+        $result = \TotalMailQueue\Queue\MailInterceptor::handle( null, $this->basicAtts() );
 
         self::assertFalse( $result );
     }
@@ -57,7 +57,7 @@ final class PreWpMailTest extends IntegrationTestCase {
         $atts = $this->basicAtts();
         $atts['headers'] = array( 'X-Mail-Queue-Prio: High' );
 
-        wp_tmq_prewpmail( null, $atts );
+        \TotalMailQueue\Queue\MailInterceptor::handle( null, $atts );
 
         $data = $this->wpdb->call( 'insert' )['args'][1];
         self::assertSame( 'high', $data['status'] );
@@ -70,22 +70,22 @@ final class PreWpMailTest extends IntegrationTestCase {
         $atts = $this->basicAtts();
         $atts['headers'] = array( 'X-Mail-Queue-Prio: Instant' );
 
-        $result = wp_tmq_prewpmail( null, $atts );
+        $result = \TotalMailQueue\Queue\MailInterceptor::handle( null, $atts );
 
         self::assertNull( $result, 'Instant emails must let wp_mail() continue with the actual send.' );
         $data = $this->wpdb->call( 'insert' )['args'][1];
         self::assertSame( 'instant', $data['status'] );
-        self::assertSame( $this->wpdb->insert_id, $GLOBALS['wp_tmq_mailid'] );
+        self::assertSame( $this->wpdb->insert_id, \TotalMailQueue\Queue\Tracker::get() );
     }
 
     public function test_block_mode_keeps_instant_emails_in_queue_instead_of_sending(): void {
-        $GLOBALS['wp_tmq_options']['enabled'] = '2';
+        $this->options['enabled'] = '2';
         $this->wpdb->will_return( 'insert', 1 );
 
         $atts = $this->basicAtts();
         $atts['headers'] = array( 'X-Mail-Queue-Prio: Instant' );
 
-        $result = wp_tmq_prewpmail( null, $atts );
+        $result = \TotalMailQueue\Queue\MailInterceptor::handle( null, $atts );
 
         self::assertTrue( $result, 'Block mode must absorb the email — return true so the caller sees a "successful" enqueue.' );
         $data = $this->wpdb->call( 'insert' )['args'][1];
@@ -98,7 +98,7 @@ final class PreWpMailTest extends IntegrationTestCase {
         $atts = $this->basicAtts();
         $atts['headers'] = "X-Custom: one\r\nX-Custom: two";
 
-        wp_tmq_prewpmail( null, $atts );
+        \TotalMailQueue\Queue\MailInterceptor::handle( null, $atts );
 
         $stored_headers = json_decode( $this->wpdb->call( 'insert' )['args'][1]['headers'], true );
         self::assertContains( 'X-Custom: one', $stored_headers );
@@ -115,7 +115,7 @@ final class PreWpMailTest extends IntegrationTestCase {
             return $value;
         } );
 
-        wp_tmq_prewpmail( null, $this->basicAtts() );
+        \TotalMailQueue\Queue\MailInterceptor::handle( null, $this->basicAtts() );
 
         $stored_headers = json_decode( $this->wpdb->call( 'insert' )['args'][1]['headers'], true );
         $found = false;
@@ -144,7 +144,7 @@ final class PreWpMailTest extends IntegrationTestCase {
 
         $atts = $this->basicAtts();
         $atts['headers'] = array( 'X-Mail-Queue-Prio: Instant' );
-        wp_tmq_prewpmail( null, $atts );
+        \TotalMailQueue\Queue\MailInterceptor::handle( null, $atts );
 
         $insert_data = $this->wpdb->call( 'insert' )['args'][1];
         // After stripping the Instant header the headers array is empty, so the

@@ -19,26 +19,41 @@ abstract class IntegrationTestCase extends TestCase {
 
     protected MockWpdb $wpdb;
 
+    /** @var array<string,mixed> */
+    protected array $options;
+
     protected function setUp(): void {
         parent::setUp();
         Monkey\setUp();
 
-        $this->wpdb = new MockWpdb();
+        $this->wpdb    = new MockWpdb();
+        $this->options = $this->defaultOptions();
         $GLOBALS['wpdb'] = $this->wpdb;
 
-        // Reset module-level globals so each test starts clean.
-        $GLOBALS['wp_tmq_mailid']   = 0;
-        $GLOBALS['wp_tmq_options']  = $this->defaultOptions();
+        // Stub get_option so the namespaced Settings\Options::get() (which
+        // every queue/cron/smtp class reads) sees the test's option values.
+        \Brain\Monkey\Functions\when( 'get_option' )->alias( function ( $key, $default = false ) {
+            if ( 'wp_tmq_settings' === $key ) {
+                return $this->options;
+            }
+            return $default;
+        } );
+
+        // Reset the in-process tracker between tests.
+        \TotalMailQueue\Queue\Tracker::reset();
     }
 
     protected function tearDown(): void {
+        \TotalMailQueue\Queue\Tracker::reset();
         Monkey\tearDown();
-        unset( $GLOBALS['wpdb'], $GLOBALS['wp_tmq_options'], $GLOBALS['wp_tmq_mailid'] );
+        unset( $GLOBALS['wpdb'] );
         parent::tearDown();
     }
 
     /**
-     * Mirrors the values wp_tmq_get_settings() would produce on a fresh install.
+     * The user-facing (pre-conversion) settings as a fresh install would store
+     * them. {@see \TotalMailQueue\Settings\Options::get()} converts queue_interval
+     * (minutes → seconds) and clear_queue (days → hours) on the way out.
      */
     protected function defaultOptions(): array {
         return array(
@@ -47,9 +62,9 @@ abstract class IntegrationTestCase extends TestCase {
             'email'               => 'admin@example.test',
             'email_amount'        => '10',
             'queue_amount'        => '1',
-            'queue_interval'      => 300,
+            'queue_interval'      => '5',
             'queue_interval_unit' => 'minutes',
-            'clear_queue'         => 14 * 24,
+            'clear_queue'         => '14',
             'log_max_records'     => '0',
             'send_method'         => 'auto',
             'max_retries'         => '3',
