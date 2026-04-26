@@ -80,12 +80,11 @@ final class Plugin {
 		// Admin AJAX endpoints.
 		Smtp\ConnectionTester::register();
 
-		// Admin UI scaffolding (text domain, action links, asset pipeline,
-		// Settings API + admin notices, XML export/import). The settings
-		// page renderer + SMTP CRUD page + WP_List_Table wiring still live
-		// in the legacy procedural files until N7b ports them.
+		// Admin UI scaffolding — text domain, action links, asset pipeline,
+		// menu + page renderer, Settings API, admin notices, export/import.
 		Admin\TextDomain::register();
 		Admin\PluginRowLinks::register();
+		Admin\Menu::register();
 		Admin\Assets::register();
 		Admin\SettingsApi::register();
 		Admin\Notices::register();

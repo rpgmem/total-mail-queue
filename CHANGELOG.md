@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Namespaced rebuild — phase N7b (admin pages + Menu wiring; legacy procedural files removed).** Closes the N7 cycle.
+    - `TotalMailQueue\Admin\PluginPage` — the single page callback dispatched by every submenu. Routes by `page` slug to the per-tab renderers (Settings / Log / Retention / SMTP / FAQ / Cron Information), runs the Settings API, drives the export/import section, surfaces the mode/cron/conflict notices on the Retention tab, and handles the `addtestmail` queue insert.
+    - `TotalMailQueue\Admin\FaqRenderer` — long-form static FAQ content (works alongside `PluginPage`). Split into focused private renderers per question so `PluginPage` stays skimmable.
+    - `TotalMailQueue\Admin\Pages\SmtpPage` — full port of the SMTP CRUD admin (`wp_tmq_render_smtp_page`). List, Add, Edit (with the connection-lock toggle protecting host + credential fields), Delete, and Reset Counters. Writes use prepared/whitelisted columns; the password is encrypted via `Support\Encryption` before persistence.
+    - `Plugin::boot()` now wires `Admin\Menu` (top-level + submenu registration) and `Admin\Tables\LogTable` is consumed by `PluginPage` for the Log + Retention tabs.
+    - **Removed:** `total-mail-queue-options.php` and `total-mail-queue-smtp.php` (the procedural admin files) along with the `is_admin()` includes, the `$wp_tmq_version` / `$wp_tmq_options` global bridge, and the empty PHPStan baseline.
+    - **Test bootstraps** (`tests/bootstrap.php`, `tests/Functional/bootstrap.php`) no longer load the deleted files. `tests/Functional/BulkActionsTest.php` switched to `\TotalMailQueue\Admin\Tables\LogTable`. `phpcs.xml.dist` / `phpunit.xml.dist` / `phpstan.neon.dist` were updated to scan `src/` instead of the removed legacy files.
 - **Namespaced rebuild — phase N7a (admin + REST scaffolding).** The "clean" admin services moved into namespaced classes; the legacy procedural counterparts were deleted. The Settings tab renderer + SMTP CRUD page + WP_List_Table wiring continue to live in the procedural files until N7b.
     - `TotalMailQueue\Admin\TextDomain` — loads the plugin text domain on `init`.
     - `TotalMailQueue\Admin\PluginRowLinks` — appends Settings/Log/Retention/SMTP/FAQ links to the row on the Plugins screen.

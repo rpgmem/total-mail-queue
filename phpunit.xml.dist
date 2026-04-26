@@ -20,8 +20,7 @@
     <coverage processUncoveredFiles="true">
         <include>
             <file>total-mail-queue.php</file>
-            <file>total-mail-queue-options.php</file>
-            <file>total-mail-queue-smtp.php</file>
+            <directory suffix=".php">src</directory>
         </include>
     </coverage>
 </phpunit>

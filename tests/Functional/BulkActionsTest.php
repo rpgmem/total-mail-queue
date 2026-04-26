@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace TMQ\Tests\Functional;
 
-use wp_tmq_Log_Table;
+use TotalMailQueue\Admin\Tables\LogTable;
 
 class BulkRedirectIntercepted extends \RuntimeException {}
 
 /**
- * @covers wp_tmq_Log_Table::process_bulk_action
+ * @covers \TotalMailQueue\Admin\Tables\LogTable::process_bulk_action
  */
 final class BulkActionsTest extends FunctionalTestCase {
 
@@ -78,7 +78,7 @@ final class BulkActionsTest extends FunctionalTestCase {
     }
 
     /**
-     * Build a wp_tmq_Log_Table, configure $_POST/$_REQUEST as if the admin
+     * Build a LogTable, configure $_POST/$_REQUEST as if the admin
      * UI had submitted the bulk form, and trigger process_bulk_action().
      *
      * The handler issues wp_safe_redirect() + exit on the success path. We
@@ -88,7 +88,7 @@ final class BulkActionsTest extends FunctionalTestCase {
      * @param array<int,int> $ids
      */
     private function dispatchBulkAction( string $action, array $ids ): void {
-        $logtable = new wp_tmq_Log_Table( array( 'plural' => 'tmq_items' ) );
+        $logtable = new LogTable( array( 'plural' => 'tmq_items' ) );
 
         $_POST['_wpnonce']     = wp_create_nonce( 'bulk-tmq_items' );
         $_REQUEST['_wpnonce']  = $_POST['_wpnonce'];
