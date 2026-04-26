@@ -109,7 +109,13 @@ span.tmq-status.tmq-status-blocked-by-source {
 	margin-top: .125rem; }
 .tmq-email-plain-text {
 	white-space: break-spaces; }
-.tmq-warning-block {
+/*
+ * Inline danger text (no background — for short caution paragraphs).
+ * Deliberately NOT named .tmq-warning-block to avoid colliding with
+ * .tmq-warning (red banner with white text); putting both on the same
+ * element used to win this rule on cascade and produced red-on-red.
+ */
+.tmq-text-danger {
 	color: #d63638; }
 .tmq-inline-form {
 	display: inline; }
