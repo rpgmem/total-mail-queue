@@ -231,7 +231,7 @@ final class LogTable extends WP_List_Table {
 	/**
 	 * "Info" cell with retry count + message.
 	 *
-	 * @param array<string,mixed> $item
+	 * @param array<string,mixed> $item Row data.
 	 */
 	private static function renderInfoColumn( array $item ): string {
 		$info        = isset( $item['info'] ) && $item['info'] ? $item['info'] : '';
@@ -250,7 +250,7 @@ final class LogTable extends WP_List_Table {
 	/**
 	 * "Status" cell with translated label.
 	 *
-	 * @param array<string,mixed> $item
+	 * @param array<string,mixed> $item Row data.
 	 */
 	private static function renderStatusColumn( array $item ): string {
 		$labels = array(
@@ -268,7 +268,7 @@ final class LogTable extends WP_List_Table {
 	/**
 	 * "SMTP" cell — caches account names per request.
 	 *
-	 * @param array<string,mixed> $item
+	 * @param array<string,mixed> $item Row data.
 	 */
 	private static function renderSmtpAccountColumn( array $item ): string {
 		$acct_id = intval( $item['smtp_account_id'] ?? 0 );
@@ -293,7 +293,7 @@ final class LogTable extends WP_List_Table {
 	/**
 	 * "Message" cell — collapsible preview, body lazy-loaded via REST.
 	 *
-	 * @param array<string,mixed> $item
+	 * @param array<string,mixed> $item Row data.
 	 */
 	private static function renderMessageColumn( array $item ): string {
 		$message = $item['message'];
@@ -387,9 +387,9 @@ final class LogTable extends WP_List_Table {
 	 */
 	private function bulk_resend( array $ids ): void {
 		global $wpdb;
-		$table  = Schema::queueTable();
-		$resend = 0;
-		$errors = 0;
+		$table      = Schema::queueTable();
+		$resend     = 0;
+		$errors     = 0;
 		$skip_sent  = 0;
 		$skip_queue = 0;
 		foreach ( $ids as $id ) {
@@ -433,7 +433,7 @@ final class LogTable extends WP_List_Table {
 			exit;
 		}
 		if ( $resend > 0 ) {
-			$notice  = '<div class="notice notice-success is-dismissible">';
+			$notice = '<div class="notice notice-success is-dismissible">';
 			/* translators: %1$d: count, %2$s: link open, %3$s: link close */
 			$notice .= '<p>' . sprintf( __( '%1$d email(s) have been put again into the %2$sQueue%3$s.', 'total-mail-queue' ), $resend, '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' ) . '</p>';
 			$notice .= '</div>';
@@ -448,9 +448,9 @@ final class LogTable extends WP_List_Table {
 	 */
 	private function bulk_force_resend( array $ids ): void {
 		global $wpdb;
-		$table = Schema::queueTable();
-		$count = 0;
-		$errors = 0;
+		$table      = Schema::queueTable();
+		$count      = 0;
+		$errors     = 0;
 		$skip_sent  = 0;
 		$skip_queue = 0;
 		foreach ( $ids as $id ) {
@@ -501,7 +501,7 @@ final class LogTable extends WP_List_Table {
 			exit;
 		}
 		if ( $count > 0 ) {
-			$notice  = '<div class="notice notice-success is-dismissible">';
+			$notice = '<div class="notice notice-success is-dismissible">';
 			/* translators: %1$d: number of emails resent, %2$s: link open, %3$s: link close */
 			$notice .= '<p>' . sprintf( __( '%1$d email(s) have been force-resent to the %2$sRetention%3$s queue.', 'total-mail-queue' ), $count, '<a href="admin.php?page=wp_tmq_mail_queue-tab-queue">', '</a>' ) . '</p>';
 			$notice .= '</div>';
@@ -515,7 +515,7 @@ final class LogTable extends WP_List_Table {
 	 * @param string $recipient Encoded recipient.
 	 */
 	private static function attachmentMissingNotice( string $recipient ): string {
-		$notice  = '<div class="notice notice-error is-dismissible">';
+		$notice = '<div class="notice notice-error is-dismissible">';
 		/* translators: %s: recipient email address */
 		$notice .= '<p><b>' . sprintf( __( 'Sorry, your email to %s can\'t be sent again.', 'total-mail-queue' ), esc_html( $recipient ) ) . '</b></p>';
 		$notice .= '<p>' . esc_html__( 'The email used to have attachments, which are not available anymore. Only emails without attachments can be resent.', 'total-mail-queue' ) . '</p>';
@@ -532,14 +532,14 @@ final class LogTable extends WP_List_Table {
 	 */
 	private static function renderSkipNotices( int $skip_sent, int $skip_queue ): void {
 		if ( $skip_sent > 0 ) {
-			$notice  = '<div class="notice notice-warning is-dismissible">';
+			$notice = '<div class="notice notice-warning is-dismissible">';
 			/* translators: %d: number of skipped emails */
 			$notice .= '<p>' . sprintf( __( '%d email(s) were skipped because they have already been sent successfully. Sent emails cannot be re-queued.', 'total-mail-queue' ), $skip_sent ) . '</p>';
 			$notice .= '</div>';
 			echo wp_kses_post( $notice );
 		}
 		if ( $skip_queue > 0 ) {
-			$notice  = '<div class="notice notice-warning is-dismissible">';
+			$notice = '<div class="notice notice-warning is-dismissible">';
 			/* translators: %d: number of skipped emails */
 			$notice .= '<p>' . sprintf( __( '%d email(s) were skipped because they are already in the queue waiting to be sent.', 'total-mail-queue' ), $skip_queue ) . '</p>';
 			$notice .= '</div>';

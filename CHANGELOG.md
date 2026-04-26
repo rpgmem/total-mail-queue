@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Namespaced rebuild — phase N7a (admin + REST scaffolding).** The "clean" admin services moved into namespaced classes; the legacy procedural counterparts were deleted. The Settings tab renderer + SMTP CRUD page + WP_List_Table wiring continue to live in the procedural files until N7b.
+    - `TotalMailQueue\Admin\TextDomain` — loads the plugin text domain on `init`.
+    - `TotalMailQueue\Admin\PluginRowLinks` — appends Settings/Log/Retention/SMTP/FAQ links to the row on the Plugins screen.
+    - `TotalMailQueue\Admin\Menu` — registers the top-level menu + every submenu (class committed but not yet wired; awaits `PluginPage::render` in N7b).
+    - `TotalMailQueue\Admin\Assets` — `admin_enqueue_scripts` callback. Loads `assets/css/admin.css` + `assets/js/tmq-admin.js` only on the plugin's pages and inlines the `window.tmq` config blob (`restNonce`, `testSmtpNonce`, i18n strings).
+    - `TotalMailQueue\Admin\Tables\LogTable` — `WP_List_Table` subclass powering the Log + Retention tabs (full port of the legacy `wp_tmq_Log_Table`: status filter, bulk delete/resend/force-resend, lazy-loaded message preview, SMTP-account name caching). Class committed but consumed by `PluginPage` in N7b.
+    - `TotalMailQueue\Admin\SettingsApi` — `register_setting()` + every field renderer (status, alert status, queue, log, send method, retry, smtp timeout, cron lock TTL, sensitivity).
+    - `TotalMailQueue\Admin\Notices` — `admin_notices` callback. Surfaces the last-error notice on every admin page and warns about active wp_mail-bypassing plugins (currently MailPoet) on the plugin's main settings screen.
+    - `TotalMailQueue\Admin\ExportImport` — XML export/import flow. `register()` hooks the early `admin_init` export-handler (moved from `wp_tmq_maybe_handle_export`); `buildExportXml()` and `handleImport()` are unit-testable static methods.
+    - `TotalMailQueue\Rest\MessageController` — `GET /tmq/v1/message/{id}` endpoint. Reads from `Schema::queueTable()`, decodes serialised columns through `Support\Serializer`, and returns the rendered HTML preview via `Support\HtmlPreview::renderListMessage()`.
+    - The procedural counterparts (`wp_tmq_load_textdomain`, `wp_tmq_actionlinks`, `wp_tmq_settings_page_assets`, `wp_tmq_settings_page_inline_script`, `wp_tmq_settings_init`, every `wp_tmq_render_option_*`, `wp_tmq_checkLogForErrors`, `wp_tmq_maybe_handle_export`, `wp_tmq_handle_export`, `wp_tmq_build_export_xml`, `wp_tmq_handle_import`, `wp_tmq_add_rest_endpoints`, `wp_tmq_rest_get_message`) and their `add_action`/`add_filter` calls were removed. The `wp_tmq_settings_page` renderer + tab nav + legacy menu/assets registration stay until N7b ports `PluginPage` + `SmtpPage`.
 - **Namespaced rebuild — phase N6 (queue + cron + retention).** The heart of the plugin moved into namespaced classes:
     - **Queue:**
         - `Queue\QueueRepository` — every read/write against `{$prefix}total_mail_queue` (insert, update by id, find by id, pending count/ids, status/info/retry-state lookups, recent-alert check).

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace TMQ\Tests\Functional;
 
+use TotalMailQueue\Admin\ExportImport;
+
 /**
  * Exercises the XML export/import round-trip and the XXE protection on import.
  *
- * @covers ::wp_tmq_build_export_xml
- * @covers ::wp_tmq_handle_import
+ * @covers \TotalMailQueue\Admin\ExportImport::buildExportXml
+ * @covers \TotalMailQueue\Admin\ExportImport::handleImport
  */
 final class ExportImportXmlTest extends FunctionalTestCase {
 
@@ -26,7 +28,7 @@ final class ExportImportXmlTest extends FunctionalTestCase {
         ) );
         $this->insertSmtpAccount( array( 'name' => 'Mailgun', 'host' => 'smtp.mailgun.org' ) );
 
-        $xml_string = wp_tmq_build_export_xml();
+        $xml_string = ExportImport::buildExportXml();
 
         self::assertStringContainsString( '<total-mail-queue', $xml_string );
         self::assertStringContainsString( '<enabled>1</enabled>', $xml_string );
@@ -38,7 +40,7 @@ final class ExportImportXmlTest extends FunctionalTestCase {
     public function test_export_strips_auto_increment_id_and_resets_counters(): void {
         $this->insertSmtpAccount( array( 'daily_sent' => 50, 'monthly_sent' => 1000 ) );
 
-        $xml = simplexml_load_string( wp_tmq_build_export_xml() );
+        $xml = simplexml_load_string( ExportImport::buildExportXml() );
 
         self::assertNotFalse( $xml );
         $account = $xml->smtp_accounts->account[0];
@@ -57,7 +59,7 @@ final class ExportImportXmlTest extends FunctionalTestCase {
         $this->insertSmtpAccount( array( 'name' => 'Primary', 'host' => 'smtp.primary.test' ) );
         $this->insertSmtpAccount( array( 'name' => 'Fallback', 'host' => 'smtp.fallback.test', 'priority' => 10 ) );
 
-        $exported = wp_tmq_build_export_xml();
+        $exported = ExportImport::buildExportXml();
 
         // Wipe the DB so the import has to recreate state from the XML alone.
         global $wpdb;
@@ -130,7 +132,7 @@ final class ExportImportXmlTest extends FunctionalTestCase {
     }
 
     /**
-     * Stage an uploaded XML file and run wp_tmq_handle_import().
+     * Stage an uploaded XML file and run ExportImport::handleImport().
      *
      * Returns the notice HTML the function emits.
      */
@@ -148,7 +150,7 @@ final class ExportImportXmlTest extends FunctionalTestCase {
             'size'     => filesize( $tmp ),
         );
 
-        $notice = wp_tmq_handle_import();
+        $notice = ExportImport::handleImport();
 
         unset( $_POST['wp_tmq_import'], $_POST['wp_tmq_import_nonce'], $_FILES['wp_tmq_import_file'] );
         @unlink( $tmp );

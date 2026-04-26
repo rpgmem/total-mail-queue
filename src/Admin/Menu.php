@@ -1,6 +1,6 @@
 <?php
 /**
- * wp-admin top-level menu and submenus.
+ * Admin top-level menu and submenus.
  *
  * @package TotalMailQueue
  */

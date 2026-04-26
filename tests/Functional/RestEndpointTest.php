@@ -7,8 +7,8 @@ namespace TMQ\Tests\Functional;
 use WP_REST_Request;
 
 /**
- * @covers ::wp_tmq_rest_get_message
- * @covers ::wp_tmq_add_rest_endpoints
+ * @covers \TotalMailQueue\Rest\MessageController::getMessage
+ * @covers \TotalMailQueue\Rest\MessageController::registerRoutes
  */
 final class RestEndpointTest extends FunctionalTestCase {
 

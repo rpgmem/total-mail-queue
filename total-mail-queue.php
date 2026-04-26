@@ -61,21 +61,8 @@ Install/Uninstall/Upgrade
 // - Uninstall:    \TotalMailQueue\Lifecycle\Uninstaller::uninstall (driven by uninstall.php at the plugin root).
 // - Upgrades:     \TotalMailQueue\Database\Migrator::maybeMigrate on every plugins_loaded.
 
-// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- needed for self-hosted installs and custom language paths
-/**
- * Load textdomain.
- *
- * @since 2.3.0
- *
- * @return void
- */
-function wp_tmq_load_textdomain() {
-	load_plugin_textdomain( 'total-mail-queue', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-add_action( 'init', 'wp_tmq_load_textdomain' );
-
-
-
+// Text domain loading is handled by \TotalMailQueue\Admin\TextDomain (registered
+// in Plugin::boot()).
 
 /*
  ***************************************************************
@@ -92,63 +79,5 @@ if ( is_admin() ) {
 
 
 
-/**
- * **************************************************************
-REST API
- * ***************************************************************
- */
-function wp_tmq_add_rest_endpoints() {
-	register_rest_route(
-		'tmq/v1',
-		'/message/(?P<id>[\d]+)',
-		array(
-			'methods'             => 'GET',
-			'callback'            => 'wp_tmq_rest_get_message',
-			'permission_callback' => function () {
-				return current_user_can( 'manage_options' );
-			},
-		)
-	);
-}
-add_action( 'rest_api_init', 'wp_tmq_add_rest_endpoints', 10, 0 );
-/**
- * Rest get message.
- *
- * @since 2.3.0
- *
- * @param mixed $request Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_rest_get_message( $request ) {
-	global $wpdb, $wp_tmq_options;
-	$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
-	$id         = intval( $request['id'] );
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table_name` WHERE `id` = %d", $id ), ARRAY_A );
-	if ( $row ) {
-		// Search for content-type header to detect html emails.
-		$is_content_type_html = false;
-		$headers              = \TotalMailQueue\Support\Serializer::decode( $row['headers'] );
-		if ( is_string( $headers ) ) {
-			$headers = array( $headers );
-		} elseif ( ! is_array( $headers ) ) {
-			$headers = array();
-		}
-		foreach ( $headers as $header ) {
-			if ( preg_match( '/content-type: ?text\/html/i', $header ) ) {
-				$is_content_type_html = true;
-				break;
-			}
-		}
-		return array(
-			'status' => 'ok',
-			'data'   => array(
-				'html' => \TotalMailQueue\Support\HtmlPreview::renderListMessage( \TotalMailQueue\Support\Serializer::decode( $row['message'] ), $is_content_type_html ),
-			),
-		);
-	} else {
-		return new WP_Error( 'no_message', __( 'Message not found', 'total-mail-queue' ), array( 'status' => 404 ) );
-	}
-}
-// HTML preview helpers moved to \TotalMailQueue\Support\HtmlPreview.
+// REST endpoints are registered by \TotalMailQueue\Rest\MessageController
+// (wired in Plugin::boot()).
