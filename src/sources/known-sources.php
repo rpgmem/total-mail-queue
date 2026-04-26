@@ -40,6 +40,28 @@ final class KnownSources {
 			// in the Sources tab).
 			array( AlertSender::SOURCE_KEY, 'Total Mail Queue alert', 'Total Mail Queue' ),
 
+			// WordPress core emails — every default outgoing email a stock
+			// single-site WordPress install can produce. Each entry matches
+			// a primary listener in Sources\Detector. Pre-seeding these
+			// means the admin can disable any of them BEFORE the first
+			// send (especially useful for things like the new-user welcome
+			// email that you may want off from day one).
+			array( 'wp_core:password_reset', 'Password reset', 'WordPress Core' ),
+			array( 'wp_core:new_user', 'New user — welcome', 'WordPress Core' ),
+			array( 'wp_core:new_user_admin', 'New user — admin notification', 'WordPress Core' ),
+			array( 'wp_core:password_change', 'Password changed — user notification', 'WordPress Core' ),
+			array( 'wp_core:password_change_admin_notify', 'Password change — admin notification', 'WordPress Core' ),
+			array( 'wp_core:email_change', 'Email changed — user notification', 'WordPress Core' ),
+			array( 'wp_core:admin_email_change_confirm', 'Admin email change — confirmation', 'WordPress Core' ),
+			array( 'wp_core:auto_update', 'Automatic core update', 'WordPress Core' ),
+			array( 'wp_core:auto_update_plugins_themes', 'Plugin/theme auto-update report', 'WordPress Core' ),
+			array( 'wp_core:comment_notification', 'Comment notification', 'WordPress Core' ),
+			array( 'wp_core:comment_moderation', 'Comment moderation', 'WordPress Core' ),
+			array( 'wp_core:user_action_confirm', 'Personal data — request confirmation', 'WordPress Core' ),
+			array( 'wp_core:privacy_export_ready', 'Personal data — export ready', 'WordPress Core' ),
+			array( 'wp_core:privacy_erasure_done', 'Personal data — erasure complete', 'WordPress Core' ),
+			array( 'wp_core:recovery_mode', 'Recovery mode', 'WordPress Core' ),
+
 			// Popular third-party plugins. Backtrace detection would also
 			// produce these keys the first time each plugin sends, but
 			// pre-seeding lets the admin disable them up front.

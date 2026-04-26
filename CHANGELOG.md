@@ -11,9 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Phase S5 — pre-populated catalog.** Purely additive: the Sources tab now shows a small set of well-known integrations on a fresh install (and on every version bump) so the admin can preview the toggles before the first email of each kind arrives. Detection still happens organically for everything else via the S2 backtrace fallback.
+- **Phase S5 — pre-populated catalog (full WP-core coverage).** The Sources tab now shows every default outgoing email a stock single-site WordPress install can produce — plus a small set of well-known integrations — on a fresh install (and on every version bump). Admins can toggle any of them off without having to wait for the first email to fire and auto-register the source. Detection still happens organically for everything else via the S2 backtrace fallback.
     - `Sources\KnownSources` (new `src/sources/known-sources.php`) holds the `(source_key, label, group)` tuples and exposes a `seed()` method.
-    - Seed entries: `total_mail_queue:alert` (system), `plugin:woocommerce`, `plugin:contact-form-7`, `plugin:wpforms`, `plugin:wpforms-lite`.
+    - Seed entries (21 total):
+      - **Plugin internals:** `total_mail_queue:alert` (system, un-toggleable).
+      - **WordPress Core (15):** `wp_core:password_reset`, `wp_core:new_user`, `wp_core:new_user_admin`, `wp_core:password_change`, `wp_core:password_change_admin_notify`, `wp_core:email_change`, `wp_core:admin_email_change_confirm`, `wp_core:auto_update`, `wp_core:auto_update_plugins_themes`, `wp_core:comment_notification`, `wp_core:comment_moderation`, `wp_core:user_action_confirm`, `wp_core:privacy_export_ready`, `wp_core:privacy_erasure_done`, `wp_core:recovery_mode`.
+      - **Popular third-party plugins (4):** `plugin:woocommerce`, `plugin:contact-form-7`, `plugin:wpforms`, `plugin:wpforms-lite`.
+    - **7 new `Sources\Detector` listeners** matching the new WP-core seeds: `wp_password_change_notification_email` (password change → admin), `new_admin_email_content` (admin-email change confirm), `auto_plugin_theme_update_email` (plugin/theme auto-update report), `user_confirmed_action_email_content` (privacy request confirm), `wp_privacy_personal_data_email_content` (privacy export ready), `user_erasure_complete_email_content` (privacy erasure done), `recovery_mode_email` (recovery-mode notification). Same passthrough pattern as the existing 8 listeners.
     - `Database\Migrator::install()` calls `KnownSources::seed()` after the schema install — so activation and version bumps both pre-populate. Idempotent: existing rows are left untouched (admin-toggled `enabled` values survive re-installs).
 - **4 new functional tests** (`SourcesKnownCatalogTest`): every entry exists after `Migrator::install()`; repeated `seed()` calls don't duplicate rows; a re-install doesn't flip an admin-disabled row back to enabled; the alert system source is included in the seed.
 - **Phase S4 — enforcement.** Disabled sources now actually block delivery (the previous phases only persisted the catalog and previewed the toggle).
