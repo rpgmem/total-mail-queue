@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="Total Mail Queue">
     <description>
-        Coding standards focused on security and API correctness. Style sniffs
-        from the broader WordPress ruleset are intentionally not enforced — the
-        existing codebase predates them and the team prioritizes catching real
-        bugs over reformatting.
+        Adopts the full WordPress coding standard. Sniffs that need authorial
+        work or that are scheduled for follow-up phases are explicitly excluded
+        below — they will be re-enabled as the corresponding phase lands.
     </description>
 
     <!-- What to scan -->
@@ -24,16 +23,89 @@
     <arg name="cache" value=".phpcs.cache"/>
     <arg value="ps"/>
 
-    <!-- Security: escaping, nonces, input validation -->
-    <rule ref="WordPress.Security"/>
+    <!-- Full WordPress ruleset, then strategically exclude what later phases
+         will address so phpcbf-driven F1 can pass clean. -->
+    <rule ref="WordPress">
 
-    <!-- Database safety: prepared SQL, table prefixes, no direct SchemaChange -->
-    <rule ref="WordPress.DB.PreparedSQL"/>
-    <rule ref="WordPress.DB.PreparedSQLPlaceholders"/>
-    <rule ref="WordPress.DB.RestrictedFunctions"/>
-    <rule ref="WordPress.DB.SlowDBQuery"/>
+        <!-- ============================================================
+             Phase F2 — Manual fix-ups not auto-correctable by phpcbf
+             ============================================================ -->
+        <!-- 137 inline comments missing trailing punctuation (.!?). -->
+        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+        <!-- Block comment that doesn't start with a newline (auto-fixable but
+             touches comment formatting we want to address alongside the
+             other comment work in F2). -->
+        <exclude name="Squiz.Commenting.BlockComment.NoNewLine"/>
+        <!-- Loose comparison cleanup: `==`/`!=` → `===`/`!==`. Auto-fix is
+             technically possible but is a semantic change, not a stylistic
+             one — kept manual so each call site can be reviewed. -->
+        <exclude name="Universal.Operators.StrictComparisons.LooseEqual"/>
+        <exclude name="Universal.Operators.StrictComparisons.LooseNotEqual"/>
+        <!-- in_array() without the strict flag — same rationale, manual. -->
+        <exclude name="WordPress.PHP.StrictInArray.MissingTrueStrict"/>
+        <!-- @-suppressed errors. The one remaining call (legacy unserialize
+             fallback) already has a phpcs:ignore comment but the WPCS sniff
+             still flags it; addressed alongside the other manual cleanup. -->
+        <exclude name="WordPress.PHP.NoSilencedErrors.Discouraged"/>
+        <!-- Visibility on WP_List_Table subclass methods. -->
+        <exclude name="Squiz.Scope.MethodScope.Missing"/>
+        <!-- `break;` after `return` and stray empty `return;` statements. -->
+        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable"/>
+        <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired"/>
+        <!-- Unused parameter on a hook signature kept for API compatibility. -->
+        <exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.Found"/>
 
-    <!-- Internationalization: text domain consistency -->
+        <!-- ============================================================
+             Phase F3 — Variable naming ($camelCase → $snake_case)
+             ============================================================ -->
+        <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+
+        <!-- ============================================================
+             Phase F4 — Authorial work
+             ============================================================ -->
+        <exclude name="Squiz.Commenting.FileComment"/>
+        <exclude name="Squiz.Commenting.ClassComment"/>
+        <exclude name="Squiz.Commenting.FunctionComment"/>
+        <exclude name="Squiz.Commenting.VariableComment"/>
+        <exclude name="Generic.Commenting.DocComment"/>
+        <!-- Yoda conditions — adopting the WP convention requires touching
+             every comparison; reserved for the documentation/style finalization
+             phase since it's a stylistic rewrite, not auto-fixable. -->
+        <exclude name="WordPress.PHP.YodaConditions.NotYoda"/>
+
+        <!-- ============================================================
+             Won't fix — codebase decisions
+             ============================================================ -->
+        <!-- The plugin's main entry file is named after the slug, not the
+             class it loosely contains. -->
+        <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+        <!-- WP_TMQ_PHPMailer-Config and friends in queue headers don't follow
+             WP hook naming because they're not WP hooks. -->
+        <exclude name="WordPress.NamingConventions.ValidHookName"/>
+        <!-- The file is structured as procedural functions plus one helper
+             class (wp_tmq_Log_Table extends WP_List_Table); separating them
+             is out of scope. -->
+        <exclude name="Universal.Files.SeparateFunctionsFromOO"/>
+        <!-- Long lines in inline notice / FAQ HTML are intentional. -->
+        <exclude name="Generic.Files.LineLength"/>
+        <!-- The wp_tmq_Log_Table class is intentionally lower-case to match
+             the plugin's wp_tmq_ function prefix; renaming is a public-API
+             break we're not taking. -->
+        <exclude name="WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid"/>
+        <exclude name="PEAR.NamingConventions.ValidClassName.Invalid"/>
+        <exclude name="PEAR.NamingConventions.ValidClassName.StartWithCapital"/>
+        <!-- Reserved-keyword param names on legacy callbacks. -->
+        <exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
+        <!-- The plugin intentionally registers a custom cron interval; the
+             sniff flags any code that touches `cron_schedules`. -->
+        <exclude name="WordPress.WP.CronInterval.ChangeDetected"/>
+        <!-- We assign to `$wp_filter['pre_wp_mail']` to clone-and-restore the
+             filter chain inside the cron loop; that's the documented technique
+             for safely calling wp_mail() while owning a pre_wp_mail filter. -->
+        <exclude name="WordPress.WP.GlobalVariablesOverride.Prohibited"/>
+    </rule>
+
+    <!-- Text domain consistency -->
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
@@ -41,19 +113,6 @@
             </property>
         </properties>
     </rule>
-
-    <!-- WP API correctness -->
-    <rule ref="WordPress.WP.AlternativeFunctions"/>
-    <rule ref="WordPress.WP.Capabilities"/>
-    <rule ref="WordPress.WP.DeprecatedFunctions"/>
-    <rule ref="WordPress.WP.DeprecatedClasses"/>
-    <rule ref="WordPress.WP.DeprecatedParameters"/>
-
-    <!-- PHP best practices that WPCS enforces -->
-    <rule ref="WordPress.PHP.NoSilencedErrors"/>
-    <rule ref="WordPress.PHP.DiscouragedPHPFunctions"/>
-    <rule ref="WordPress.PHP.DevelopmentFunctions"/>
-    <rule ref="WordPress.CodeAnalysis.EscapedNotTranslated"/>
 
     <!-- All public functions / hook callbacks must be prefixed -->
     <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
