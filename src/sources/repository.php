@@ -235,4 +235,71 @@ final class Repository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table`" );
 	}
+
+	/**
+	 * Set / clear the per-row label and group overrides. An empty string
+	 * for either argument clears that override (so the display falls back
+	 * to the translated canonical, then the raw stored value).
+	 *
+	 * Group overrides on system sources (`total_mail_queue:*`) are
+	 * silently dropped — the system group must remain stable so the
+	 * "always on" badge keeps working.
+	 *
+	 * @param int    $id              Row id.
+	 * @param string $label_override  Custom label (empty string = clear).
+	 * @param string $group_override  Custom group label (empty = clear).
+	 */
+	public static function updateOverrides( int $id, string $label_override, string $group_override ): void {
+		if ( $id <= 0 ) {
+			return;
+		}
+		$row = self::findById( $id );
+		if ( null === $row ) {
+			return;
+		}
+		if ( self::isSystem( (string) $row['source_key'] ) ) {
+			// Don't let the admin reclassify the alert system source out of
+			// its system group; the label override is still useful, group
+			// override is dropped.
+			$group_override = '';
+		}
+		global $wpdb;
+		$table = Schema::sourcesTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$table,
+			array(
+				'label_override' => $label_override,
+				'group_override' => $group_override,
+			),
+			array( 'id' => $id ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+	}
+
+	/**
+	 * Distinct **canonical** group labels currently used by the catalog —
+	 * union of `group_label` and any non-empty `group_override`. The
+	 * dropdown that consumes this list translates each entry for display
+	 * via {@see KnownSources::translateRawGroup()} but keeps the canonical
+	 * value as the option value so SQL queries (`setEnabledByGroup` /
+	 * the prepare_items filter) match the stored row.
+	 *
+	 * @return list<string>
+	 */
+	public static function distinctGroups(): array {
+		$groups = array();
+		foreach ( self::all() as $row ) {
+			$base     = (string) ( $row['group_label'] ?? '' );
+			$override = (string) ( $row['group_override'] ?? '' );
+			foreach ( array( $base, $override ) as $candidate ) {
+				if ( '' !== $candidate && ! in_array( $candidate, $groups, true ) ) {
+					$groups[] = $candidate;
+				}
+			}
+		}
+		sort( $groups );
+		return $groups;
+	}
 }

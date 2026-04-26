@@ -105,6 +105,8 @@ final class Schema {
 		source_key varchar(120) DEFAULT '' NOT NULL,
 		label varchar(255) DEFAULT '' NOT NULL,
 		group_label varchar(120) DEFAULT '' NOT NULL,
+		label_override varchar(255) DEFAULT '' NOT NULL,
+		group_override varchar(120) DEFAULT '' NOT NULL,
 		enabled tinyint(1) DEFAULT 1 NOT NULL,
 		detected_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		last_seen_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
