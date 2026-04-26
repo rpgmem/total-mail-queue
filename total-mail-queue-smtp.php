@@ -1,14 +1,22 @@
 <?php
+/**
+ * SMTP Accounts admin tab for Total Mail Queue.
+ *
+ * Provides the CRUD UI for SMTP accounts (add / edit / delete / reset
+ * counters), including the connection-lock toggle that protects host
+ * and credential fields when editing an existing account.
+ *
+ * @package TotalMailQueue
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; }
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 SMTP Accounts Page
-****************************************************************
-*/
-
+ * ***************************************************************
+ */
 function wp_tmq_render_smtp_page() {
 
 	// Only Admins.
@@ -60,7 +68,7 @@ function wp_tmq_render_smtp_page() {
 		// Only update password if a new value is provided (and connection fields are unlocked).
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
 		$raw_password = isset( $_POST['smtp_password'] ) ? wp_unslash( $_POST['smtp_password'] ) : '';
-		if ( $raw_password !== '' ) {
+		if ( '' !== $raw_password ) {
 			$data['password'] = wp_tmq_encrypt_password( $raw_password );
 		}
 
@@ -83,7 +91,7 @@ function wp_tmq_render_smtp_page() {
 	}
 
 	// Delete.
-	if ( $action === 'delete' && $edit_id > 0 ) {
+	if ( 'delete' === $action && 0 < $edit_id ) {
 
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wp_tmq_smtp_delete_' . $edit_id ) ) {
 			wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
@@ -111,7 +119,7 @@ function wp_tmq_render_smtp_page() {
 	// -------------------------------------------------------.
 	// Show Add/Edit Form.
 	// -------------------------------------------------------.
-	if ( $action === 'add' || $action === 'edit' ) {
+	if ( 'add' === $action || 'edit' === $action ) {
 
 		$account = array(
 			'id'            => 0,
@@ -132,7 +140,7 @@ function wp_tmq_render_smtp_page() {
 			'enabled'       => 1,
 		);
 
-		if ( $action === 'edit' && $edit_id > 0 ) {
+		if ( 'edit' === $action && 0 < $edit_id ) {
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtp_table` WHERE `id` = %d", $edit_id ), ARRAY_A );
 			if ( $row ) {
@@ -140,7 +148,7 @@ function wp_tmq_render_smtp_page() {
 			}
 		}
 
-		$is_edit    = ( $action === 'edit' && $edit_id > 0 );
+		$is_edit    = ( 'edit' === $action && 0 < $edit_id );
 		$form_title = $is_edit ? __( 'Edit SMTP Account', 'total-mail-queue' ) : __( 'Add SMTP Account', 'total-mail-queue' );
 
 		echo '<div class="tmq-box">';

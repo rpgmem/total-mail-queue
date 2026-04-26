@@ -33,19 +33,6 @@
         <exclude name="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase"/>
 
         <!-- ============================================================
-             Phase F4 — Authorial work
-             ============================================================ -->
-        <exclude name="Squiz.Commenting.FileComment"/>
-        <exclude name="Squiz.Commenting.ClassComment"/>
-        <exclude name="Squiz.Commenting.FunctionComment"/>
-        <exclude name="Squiz.Commenting.VariableComment"/>
-        <exclude name="Generic.Commenting.DocComment"/>
-        <!-- Yoda conditions — adopting the WP convention requires touching
-             every comparison; reserved for the documentation/style finalization
-             phase since it's a stylistic rewrite, not auto-fixable. -->
-        <exclude name="WordPress.PHP.YodaConditions.NotYoda"/>
-
-        <!-- ============================================================
              Won't fix — codebase decisions
              ============================================================ -->
         <!-- The plugin's main entry file is named after the slug, not the
