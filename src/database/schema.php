@@ -12,10 +12,17 @@ namespace TotalMailQueue\Database;
 /**
  * Authoritative definition of the plugin's database tables.
  *
- * Two tables are managed: `{$prefix}total_mail_queue` (the queue + log) and
- * `{$prefix}total_mail_queue_smtp` (configured SMTP accounts). The schema is
- * applied via WordPress's `dbDelta()` so it's safe to run on every upgrade —
- * existing columns and indexes are preserved, additions are rolled forward.
+ * Three tables are managed:
+ * - `{$prefix}total_mail_queue` — the queue + log.
+ * - `{$prefix}total_mail_queue_smtp` — configured SMTP accounts.
+ * - `{$prefix}total_mail_queue_sources` — registered "origins" (e.g. WP
+ *   core password reset, WooCommerce new order). Each enqueued message
+ *   references one of these via the `source_key` column on the queue
+ *   table, and the admin can toggle delivery per-source.
+ *
+ * The schema is applied via WordPress's `dbDelta()` so it's safe to run on
+ * every upgrade — existing columns and indexes are preserved, additions are
+ * rolled forward.
  */
 final class Schema {
 
@@ -30,6 +37,11 @@ final class Schema {
 	public const SMTP_TABLE = 'total_mail_queue_smtp';
 
 	/**
+	 * Unprefixed name of the message-sources catalog table.
+	 */
+	public const SOURCES_TABLE = 'total_mail_queue_sources';
+
+	/**
 	 * Apply the schema via `dbDelta()`.
 	 *
 	 * Idempotent: running twice in a row is a no-op against an up-to-date
@@ -41,6 +53,7 @@ final class Schema {
 		$charset_collate = $wpdb->get_charset_collate();
 		$queue_table     = self::queueTable();
 		$smtp_table      = self::smtpTable();
+		$sources_table   = self::sourcesTable();
 
 		$sql = "CREATE TABLE $queue_table (
 		id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -54,9 +67,11 @@ final class Schema {
 		info varchar(255) DEFAULT '' NOT NULL,
 		retry_count smallint(5) DEFAULT 0 NOT NULL,
 		smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
+		source_key varchar(120) DEFAULT '' NOT NULL,
 		PRIMARY KEY  (id),
 		KEY idx_status_retry (status, retry_count, id),
-		KEY idx_status_timestamp (status, timestamp)
+		KEY idx_status_timestamp (status, timestamp),
+		KEY idx_source_key (source_key)
 		) $charset_collate;";
 
 		$sql .= "CREATE TABLE $smtp_table (
@@ -85,23 +100,39 @@ final class Schema {
 		PRIMARY KEY  (id)
 		) $charset_collate;";
 
+		$sql .= "CREATE TABLE $sources_table (
+		id mediumint(9) NOT NULL AUTO_INCREMENT,
+		source_key varchar(120) DEFAULT '' NOT NULL,
+		label varchar(255) DEFAULT '' NOT NULL,
+		group_label varchar(120) DEFAULT '' NOT NULL,
+		enabled tinyint(1) DEFAULT 1 NOT NULL,
+		detected_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
+		last_seen_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
+		total_count int(11) DEFAULT 0 NOT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY source_key (source_key)
+		) $charset_collate;";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 	}
 
 	/**
-	 * Drop both tables. Called by the uninstaller.
+	 * Drop every plugin table. Called by the uninstaller.
 	 */
 	public static function drop(): void {
 		global $wpdb;
 
-		$queue_table = self::queueTable();
-		$smtp_table  = self::smtpTable();
+		$queue_table   = self::queueTable();
+		$smtp_table    = self::smtpTable();
+		$sources_table = self::sourcesTable();
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( "DROP TABLE IF EXISTS `$queue_table`" );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( "DROP TABLE IF EXISTS `$smtp_table`" );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query( "DROP TABLE IF EXISTS `$sources_table`" );
 	}
 
 	/**
@@ -122,5 +153,15 @@ final class Schema {
 	public static function smtpTable(): string {
 		global $wpdb;
 		return $wpdb->prefix . self::SMTP_TABLE;
+	}
+
+	/**
+	 * Return the prefixed message-sources catalog table name.
+	 *
+	 * @return string e.g. `wp_total_mail_queue_sources`.
+	 */
+	public static function sourcesTable(): string {
+		global $wpdb;
+		return $wpdb->prefix . self::SOURCES_TABLE;
 	}
 }
