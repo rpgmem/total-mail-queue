@@ -43,7 +43,8 @@ final class Plugin {
 	private static ?Container $container = null;
 
 	/**
-	 * Bootstrap the plugin: build the container and register its services.
+	 * Bootstrap the plugin: build the container, register lifecycle hooks,
+	 * and wire upcoming services.
 	 *
 	 * Called once from total-mail-queue.php after the Composer autoloader
 	 * has been required.
@@ -58,6 +59,15 @@ final class Plugin {
 		self::$container = new Container();
 		self::$container->set( 'plugin.file', static fn (): string => $main_file );
 		self::$container->set( 'plugin.dir', static fn (): string => trailingslashit( dirname( $main_file ) ) );
+
+		// Lifecycle hooks. Uninstall is wired via the dedicated uninstall.php
+		// file at the plugin root (WP convention) since register_uninstall_hook
+		// cannot serialize closures, and our handler needs the main file path.
+		register_activation_hook( $main_file, array( Lifecycle\Activator::class, 'activate' ) );
+		register_deactivation_hook( $main_file, array( Lifecycle\Deactivator::class, 'deactivate' ) );
+
+		// Run pending schema migrations on every load (cheap when up-to-date).
+		add_action( 'plugins_loaded', array( Database\Migrator::class, 'maybeMigrate' ), 10, 0 );
 
 		// Service registrations are added by later rebuild phases.
 	}

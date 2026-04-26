@@ -20,7 +20,7 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
         global $wpdb, $wp_tmq_options;
 
         // Refresh schema in case a previous test dropped tables.
-        wp_tmq_updateDatabaseTables();
+        \TotalMailQueue\Database\Migrator::install();
 
         // Reset options to a known baseline so tests can reason about state.
         delete_option( 'wp_tmq_settings' );

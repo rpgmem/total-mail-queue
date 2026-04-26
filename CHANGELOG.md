@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Namespaced rebuild — phase N3 (database + lifecycle).** Plugin install/upgrade/uninstall is now driven by dedicated classes:
+    - `TotalMailQueue\Database\Schema` — authoritative table definitions, exposes `install()` (idempotent `dbDelta()`), `drop()`, plus the `queueTable()` / `smtpTable()` helpers every consumer can use to read the prefixed table names.
+    - `TotalMailQueue\Database\Migrator` — version detection. `install()` is called eagerly by the activation hook; `maybeMigrate()` runs on `plugins_loaded` and applies the schema only when the persisted version differs from `Plugin::VERSION`.
+    - `TotalMailQueue\Lifecycle\Activator` — activation hook callback that delegates to `Migrator::install()`.
+    - `TotalMailQueue\Lifecycle\Deactivator` — deactivation hook callback that clears the queue cron event.
+    - `TotalMailQueue\Lifecycle\Uninstaller` — uninstall handler driven by a new `uninstall.php` at the plugin root (WP convention; `register_uninstall_hook` cannot serialize closures and our handler needs the main file path). Removes options, drops the tables via `Schema::drop()`, and cleans up the attachments directories via `Paths`.
 - **Namespaced rebuild — phase N1 (foundation).** PSR-4 autoload root `TotalMailQueue\` mapping to `src/`, plus the orchestration scaffolding subsequent phases will populate:
     - `TotalMailQueue\Plugin` — singleton orchestrator with `VERSION`, `REQUIRES_PHP`, `REQUIRES_WP` constants and a `boot()` / `container()` API.
     - `TotalMailQueue\Container` — minimal lazy service locator (`set` / `get` / `has`).
@@ -25,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Plugin version bumped to 2.3.0** (header in `total-mail-queue.php`, `Stable tag` in `readme.txt`, `Plugin::VERSION`).
 - The bootstrap file `total-mail-queue.php` now loads `vendor/autoload.php` and calls `\TotalMailQueue\Plugin::boot( __FILE__ )` immediately after the `ABSPATH` guard. The legacy `$wp_tmq_version` global is now sourced from `Plugin::VERSION`.
 - All 7 procedural support functions (`wp_tmq_encrypt_password`, `wp_tmq_decrypt_password`, `wp_tmq_encode`, `wp_tmq_decode`, `wp_tmq_attachments_dir`, `wp_tmq_render_list_message`, `wp_tmq_render_html_for_display`) **removed**. Every call site — including the test suite — was migrated to the namespaced equivalents.
+- The 5 procedural lifecycle/upgrade functions (`wp_tmq_activate`, `wp_tmq_deactivate`, `wp_tmq_uninstall`, `wp_tmq_updateDatabaseTables`, `wp_tmq_check_update_db`) **removed**. Their hook registrations (`register_activation_hook`, `register_deactivation_hook`, `register_uninstall_hook`, `add_action('plugins_loaded', …)`) now live in `Plugin::boot()` and target the new namespaced handlers.
 - `phpcs.xml.dist` extended to scan `src/` with PSR-4-compatible overrides: WP-procedural conventions (`NotHyphenatedLowercase`, `MethodNameInvalid`, `NonPrefixedNamespaceFound`, `ExceptionNotEscaped`) are scoped out of `src/*` because they conflict with PSR-12 / PSR-4 by design.
 - **Automated test suite (PHPUnit 9).**
   - Unit tests (25) covering pure-PHP helpers without booting WordPress: AES-256-CBC password round-trip and tamper detection, JSON encode/decode with backwards-compatible unserialize fallback (object instantiation blocked via `allowed_classes => false`), SMTP account picker (`cycle_sent` vs `send_bulk`), in-memory SMTP counter increment, and base64 redaction of inline image data in HTML preview.
