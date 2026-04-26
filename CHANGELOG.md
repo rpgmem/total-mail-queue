@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Phase S3 — admin UI.** The "Sources" tab is the place admins go to inspect what their site sends and toggle delivery per-source. Toggle UI is live; the actual blocking still lands in S4 (until then, disabling a source previews the change but the queue keeps delivering).
+    - New tab **"Sources"** (slug `wp_tmq_mail_queue-tab-sources`), wired in `Admin\Menu` and `Admin\PluginPage`. Routes to the new `Admin\Pages\SourcesPage` renderer.
+    - `Admin\Tables\SourcesTable` (new `WP_List_Table` under `src/admin/tables/`) — columns: status badge / label / source_key (as code chip) / group / total emails / last seen ("X ago" with full timestamp on hover) / per-row Actions (Enable-or-Disable + "Filter log" shortcut).
+    - `Admin\Pages\SourcesPage`:
+      - **Per-row Enable/Disable** (GET link, nonce-protected per row).
+      - **Bulk Enable / Disable** (WP_List_Table's standard dropdown, applied to selected ids).
+      - **Per-group Enable / Disable** toolbar above the table (select a group → "Enable group" / "Disable group" button).
+      - Inline notices summarise how many rows changed.
+    - `Admin\Tables\LogTable` gains a new **"Source"** column (just after "Status") that shows the `source_key` as a clickable code chip — clicking adds `?source_filter=<key>` to the URL and the LogTable narrows to that source.
+      - The status filter form preserves the active `source_filter` so combining a status + a source narrowing works.
+      - When a source filter is active, a small badge + "Clear source filter" link appears next to the status dropdown.
+    - 6 functional tests (`SourcesAdminTest`) cover: per-row toggle (happy path + nonce rejection), bulk POST (only selected ids change), group POST (only members of the named group change), LogTable source-filter narrows the visible rows, SourcesTable lists every row ordered by group then key.
 - **Phase S2 — detection + MailInterceptor wiring.** Sources are now resolved and persisted on every queued message; the catalog populates itself organically. No UI yet (S3); no enforcement yet (S4).
     - `Sources\Detector` (new `src/sources/detector.php`):
       - **Primary listeners** wired on the WP-core filters that fire just before `wp_mail()` is called: `retrieve_password_notification_email` → `wp_core:password_reset`, `wp_new_user_notification_email` / `wp_new_user_notification_email_admin` → `wp_core:new_user(_admin)`, `password_change_email` → `wp_core:password_change`, `email_change_email` → `wp_core:email_change`, `auto_core_update_email` → `wp_core:auto_update`, `comment_notification_text` / `comment_moderation_text` → `wp_core:comment_(notification|moderation)`. Each listener is a passthrough that records the source and returns the filter argument unchanged.

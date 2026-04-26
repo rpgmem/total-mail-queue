@@ -32,24 +32,31 @@ final class LogTable extends WP_List_Table {
 	 * Build the WHERE clause used by the log queries.
 	 *
 	 * @param string $status_filter Optional `sent`/`error`/`alert` filter.
+	 * @param string $source_filter Optional `source_key` filter.
 	 */
-	protected function get_log_where( string $status_filter = '' ): string {
+	protected function get_log_where( string $status_filter = '', string $source_filter = '' ): string {
 		global $wpdb;
 		if ( $status_filter && in_array( $status_filter, array( 'sent', 'error', 'alert' ), true ) ) {
-			return $wpdb->prepare( '`status` = %s', $status_filter );
+			$base = $wpdb->prepare( '`status` = %s', $status_filter );
+		} else {
+			$base = "`status` != 'queue' AND `status` != 'high'";
 		}
-		return "`status` != 'queue' AND `status` != 'high'";
+		if ( '' !== $source_filter ) {
+			$base .= ' AND ' . $wpdb->prepare( '`source_key` = %s', $source_filter );
+		}
+		return $base;
 	}
 
 	/**
 	 * Count rows matching the log filter.
 	 *
 	 * @param string $status_filter Status filter.
+	 * @param string $source_filter Source filter.
 	 */
-	protected function get_log_count( string $status_filter = '' ): int {
+	protected function get_log_count( string $status_filter = '', string $source_filter = '' ): int {
 		global $wpdb;
 		$table = Schema::queueTable();
-		$where = $this->get_log_where( $status_filter );
+		$where = $this->get_log_where( $status_filter, $source_filter );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
 	}
@@ -58,14 +65,15 @@ final class LogTable extends WP_List_Table {
 	 * Fetch a page of log rows.
 	 *
 	 * @param string $status_filter Status filter.
+	 * @param string $source_filter Source filter.
 	 * @param int    $per_page      Page size.
 	 * @param int    $offset        Row offset.
 	 * @return array<int,array<string,mixed>>
 	 */
-	protected function get_log( string $status_filter = '', int $per_page = 50, int $offset = 0 ): array {
+	protected function get_log( string $status_filter = '', string $source_filter = '', int $per_page = 50, int $offset = 0 ): array {
 		global $wpdb;
 		$table = Schema::queueTable();
-		$where = $this->get_log_where( $status_filter );
+		$where = $this->get_log_where( $status_filter, $source_filter );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
@@ -106,6 +114,7 @@ final class LogTable extends WP_List_Table {
 			'cb'              => '<label><span class="screen-reader-text">' . esc_html__( 'Select all', 'total-mail-queue' ) . '</span><input class="tmq-select-all" type="checkbox"></label>',
 			'timestamp'       => __( 'Time', 'total-mail-queue' ),
 			'status'          => __( 'Status', 'total-mail-queue' ),
+			'source_key'      => __( 'Source', 'total-mail-queue' ),
 			'smtp_account_id' => __( 'SMTP', 'total-mail-queue' ),
 			'info'            => __( 'Info', 'total-mail-queue' ),
 			'recipient'       => __( 'Recipient', 'total-mail-queue' ),
@@ -152,7 +161,24 @@ final class LogTable extends WP_List_Table {
 			);
 		}
 		echo '</select>';
+		// Carry the active source_filter through the status-filter form so
+		// submitting "Filter" doesn't drop the source narrowing.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
+		$source_filter = isset( $_REQUEST['source_filter'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['source_filter'] ) ) : '';
+		if ( '' !== $source_filter ) {
+			echo '<input type="hidden" name="source_filter" value="' . esc_attr( $source_filter ) . '" />';
+		}
 		submit_button( __( 'Filter', 'total-mail-queue' ), '', 'filter_action', false );
+		if ( '' !== $source_filter ) {
+			$clear_url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log' . ( $current ? '&status_filter=' . rawurlencode( $current ) : '' ) );
+			echo ' <span class="tmq-status tmq-status-alert" style="margin-left:.5em;">' . esc_html(
+				sprintf(
+					/* translators: %s: source key */
+					__( 'Source: %s', 'total-mail-queue' ),
+					$source_filter
+				)
+			) . '</span> <a href="' . esc_url( $clear_url ) . '">' . esc_html__( 'Clear source filter', 'total-mail-queue' ) . '</a>';
+		}
 		echo '</div>';
 	}
 
@@ -176,8 +202,10 @@ final class LogTable extends WP_List_Table {
 		if ( 'wp_tmq_mail_queue-tab-log' === $type ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
 			$status_filter = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
-			$total_items   = $this->get_log_count( $status_filter );
-			$data          = $this->get_log( $status_filter, $per_page, $offset );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
+			$source_filter = isset( $_REQUEST['source_filter'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['source_filter'] ) ) : '';
+			$total_items   = $this->get_log_count( $status_filter, $source_filter );
+			$data          = $this->get_log( $status_filter, $source_filter, $per_page, $offset );
 		} elseif ( 'wp_tmq_mail_queue-tab-queue' === $type ) {
 			$total_items = $this->get_queue_count();
 			$data        = $this->get_queue( $per_page, $offset );
@@ -221,6 +249,8 @@ final class LogTable extends WP_List_Table {
 				return self::renderStatusColumn( $item );
 			case 'smtp_account_id':
 				return self::renderSmtpAccountColumn( $item );
+			case 'source_key':
+				return self::renderSourceColumn( $item );
 			case 'message':
 				return self::renderMessageColumn( $item );
 			default:
@@ -288,6 +318,21 @@ final class LogTable extends WP_List_Table {
 		}
 		$name = $smtp_names[ $acct_id ] ?? __( 'Deleted', 'total-mail-queue' );
 		return '<span title="#' . esc_attr( (string) $acct_id ) . '">#' . esc_html( (string) $acct_id ) . ' ' . esc_html( (string) $name ) . '</span>';
+	}
+
+	/**
+	 * "Source" cell — shows the source_key as a code chip with a link
+	 * that filters the log by the same source.
+	 *
+	 * @param array<string,mixed> $item Row data.
+	 */
+	private static function renderSourceColumn( array $item ): string {
+		$key = (string) ( $item['source_key'] ?? '' );
+		if ( '' === $key ) {
+			return '<span class="description">—</span>';
+		}
+		$url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log&source_filter=' . rawurlencode( $key ) );
+		return '<a href="' . esc_url( $url ) . '" title="' . esc_attr__( 'Filter the log by this source', 'total-mail-queue' ) . '"><code>' . esc_html( $key ) . '</code></a>';
 	}
 
 	/**
