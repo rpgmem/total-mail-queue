@@ -10,6 +10,7 @@
     <file>total-mail-queue.php</file>
     <file>total-mail-queue-options.php</file>
     <file>total-mail-queue-smtp.php</file>
+    <file>src/</file>
 
     <!-- What to skip -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
@@ -90,4 +91,27 @@
 
     <!-- Minimum supported WP version (matches readme.txt "Requires at least") -->
     <config name="minimum_wp_version" value="5.9"/>
+
+    <!-- ================================================================
+         src/ overrides
+         ================================================================
+         The procedural plugin files at the repository root follow WP's
+         snake_case + hyphenated-filename conventions. The new namespaced
+         classes under src/ follow PSR-12 / PSR-4 conventions instead.
+         These conventions intentionally conflict, so the WP-style sniffs
+         that enforce snake_case / class-prefix-files / global prefix don't
+         apply inside src/. -->
+    <rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+        <exclude-pattern>src/*</exclude-pattern>
+    </rule>
+    <rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
+        <exclude-pattern>src/*</exclude-pattern>
+    </rule>
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound">
+        <exclude-pattern>src/*</exclude-pattern>
+    </rule>
+    <!-- Throwing exceptions is not user-facing output; the sniff misfires here. -->
+    <rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+        <exclude-pattern>src/*</exclude-pattern>
+    </rule>
 </ruleset>

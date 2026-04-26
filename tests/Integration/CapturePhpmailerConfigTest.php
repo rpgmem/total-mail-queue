@@ -71,6 +71,6 @@ final class CapturePhpmailerConfigTest extends IntegrationTestCase {
 
         self::assertIsArray( $config );
         self::assertNotSame( $plain, $config['Password'], 'Password must not be persisted in plaintext.' );
-        self::assertSame( $plain, wp_tmq_decrypt_password( $config['Password'] ), 'Encrypted password must round-trip through wp_tmq_decrypt_password.' );
+        self::assertSame( $plain, \TotalMailQueue\Support\Encryption::decrypt( $config['Password'] ), 'Encrypted password must round-trip through wp_tmq_decrypt_password.' );
     }
 }

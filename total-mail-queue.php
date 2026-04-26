@@ -3,7 +3,7 @@
  * Plugin Name:       Total Mail Queue
  * Plugin URI:        https://github.com/rpgmem/total-mail-queue
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
- * Version:           2.2.1
+ * Version:           2.3.0
  * Requires at least: 5.9
  * Requires PHP:      7.4
  * Author:            Alex Meusburger
@@ -21,6 +21,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; }
 
+// Composer autoloader (provides the TotalMailQueue\* namespace + dev-mode test classes).
+require_once __DIR__ . '/vendor/autoload.php';
+
+\TotalMailQueue\Plugin::boot( __FILE__ );
 
 /*
  ***************************************************************
@@ -28,7 +32,7 @@ PLUGIN VERSION
 ****************************************************************
 */
 
-$wp_tmq_version = '2.2.1';
+$wp_tmq_version = \TotalMailQueue\Plugin::VERSION;
 
 
 
@@ -74,106 +78,8 @@ function wp_tmq_get_settings() {
 }
 
 
-/**
- * Encrypt an SMTP account password for at-rest storage.
- *
- * Uses AES-256-CBC with a per-call random IV. The wp_salt('auth') is the
- * key, so the ciphertext is bound to this WordPress installation.
- *
- * @since 2.1.0
- *
- * @param string $plain_text Password in plaintext (empty string allowed).
- * @return string Base64-encoded "iv::ciphertext" payload, or '' for empty input.
- */
-function wp_tmq_encrypt_password( $plain_text ) {
-	if ( empty( $plain_text ) ) {
-		return '';
-	}
-	$key       = wp_salt( 'auth' );
-	$iv_length = openssl_cipher_iv_length( 'aes-256-cbc' );
-	$iv        = openssl_random_pseudo_bytes( $iv_length );
-	$encrypted = openssl_encrypt( $plain_text, 'aes-256-cbc', $key, 0, $iv );
-    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- safe storage of binary IV+ciphertext
-	return base64_encode( $iv . '::' . $encrypted );
-}
-/**
- * Decrypt password.
- *
- * @since 2.3.0
- *
- * @param mixed $encrypted_text Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_decrypt_password( $encrypted_text ) {
-	if ( empty( $encrypted_text ) ) {
-		return '';
-	}
-	$key = wp_salt( 'auth' );
-    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- decoding stored IV+ciphertext from wp_tmq_encrypt_password
-	$data  = base64_decode( $encrypted_text );
-	$parts = explode( '::', $data, 2 );
-	if ( count( $parts ) !== 2 ) {
-		return '';
-	}
-	$iv        = $parts[0];
-	$encrypted = $parts[1];
-	return openssl_decrypt( $encrypted, 'aes-256-cbc', $key, 0, $iv );
-}
-
-
-/**
- * **************************************************************
-Attachments directory helper
- * ***************************************************************
- */
-function wp_tmq_attachments_dir() {
-	$upload_dir = wp_upload_dir();
-	return trailingslashit( $upload_dir['basedir'] ) . 'tmq-attachments/';
-}
-
-/**
- * Encode a value for storage in the queue table.
- *
- * JSON is used for new writes; wp_tmq_decode() understands both this format
- * and the legacy PHP-serialize payloads that older versions wrote.
- *
- * @since 2.2.0
- *
- * @param mixed $value Anything wp_json_encode() accepts.
- * @return string|false JSON string, or false when encoding fails.
- */
-function wp_tmq_encode( $value ) {
-	return wp_json_encode( $value );
-}
-/**
- * Decode.
- *
- * @since 2.3.0
- *
- * @param mixed $raw Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_decode( $raw ) {
-	if ( empty( $raw ) || ! is_string( $raw ) ) {
-		return $raw;
-	}
-	// Try JSON first (new format).
-	$json = json_decode( $raw, true );
-	if ( json_last_error() === JSON_ERROR_NONE ) {
-		return $json;
-	}
-	// Fall back to PHP unserialize for legacy data (read-only, safe with allowed_classes).
-	if ( is_serialized( $raw ) ) {
-		// The @ swallows the notice unserialize emits when fed truncated/corrupt.
-		// legacy payloads — we treat the corrupt value as "no data" by returning false.
-		// Object instantiation is blocked via allowed_classes => false (no object injection).
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, WordPress.PHP.NoSilencedErrors.Discouraged
-		return @unserialize( $raw, array( 'allowed_classes' => false ) );
-	}
-	return $raw;
-}
+// Support helpers (Encryption, Serializer, Paths, HtmlPreview) are now provided
+// by the namespaced classes under TotalMailQueue\Support\, autoloaded via Composer.
 
 /**
  * **************************************************************
@@ -333,7 +239,7 @@ function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
 	$phpmailer->SMTPAuth   = (bool) $smtp_account['auth'];
 	if ( $smtp_account['auth'] ) {
 		$phpmailer->Username = $smtp_account['username'];
-		$phpmailer->Password = wp_tmq_decrypt_password( $smtp_account['password'] );
+		$phpmailer->Password = \TotalMailQueue\Support\Encryption::decrypt( $smtp_account['password'] );
 	}
 	if ( ! empty( $smtp_account['from_email'] ) ) {
 		$phpmailer->From     = $smtp_account['from_email'];
@@ -470,26 +376,26 @@ function wp_tmq_prewpmail( $return, $atts ) {
 	$phpmailer_config = wp_tmq_capture_phpmailer_config();
 	if ( $phpmailer_config ) {
         // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- transport-encoding the captured config so it survives as an email header
-		$headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( wp_tmq_encode( $phpmailer_config ) );
+		$headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( \TotalMailQueue\Support\Serializer::encode( $phpmailer_config ) );
 	}
 
 	// Write email in Queue.
 	$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
 	$data       = array(
 		'timestamp'   => current_time( 'mysql', false ),
-		'recipient'   => wp_tmq_encode( $to ),
+		'recipient'   => \TotalMailQueue\Support\Serializer::encode( $to ),
 		'subject'     => $subject,
 		'message'     => $message,
 		'status'      => $status,
 		'attachments' => '',
 	);
 	if ( isset( $headers ) && $headers ) {
-		$data['headers'] = wp_tmq_encode( $headers ); }
+		$data['headers'] = \TotalMailQueue\Support\Serializer::encode( $headers ); }
 
 	// store attachments in /attachments/ Folder, to address them later.
 	if ( ! empty( $attachments ) ) {
 
-		$attachments_base = wp_tmq_attachments_dir();
+		$attachments_base = \TotalMailQueue\Support\Paths::attachmentsDir();
 		// Protect attachments directory from web access.
 		if ( ! file_exists( $attachments_base . '.htaccess' ) ) {
 			wp_mkdir_p( $attachments_base );
@@ -521,7 +427,7 @@ function wp_tmq_prewpmail( $return, $atts ) {
 				$wp_filesystem->copy( $item, $newfile );
 				array_push( $newattachments, $newfile );
 			}
-			$data['attachments'] = wp_tmq_encode( $newattachments );
+			$data['attachments'] = \TotalMailQueue\Support\Serializer::encode( $newattachments );
 		}
 	}
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -576,7 +482,7 @@ function wp_tmq_capture_phpmailer_config() {
 		$config['SMTPSecure'] = $test_mailer->SMTPSecure;
 		$config['SMTPAuth']   = $test_mailer->SMTPAuth;
 		$config['Username']   = $test_mailer->Username;
-		$config['Password']   = wp_tmq_encrypt_password( $test_mailer->Password );
+		$config['Password']   = \TotalMailQueue\Support\Encryption::encrypt( $test_mailer->Password );
 		$config['From']       = $test_mailer->From;
 		$config['FromName']   = $test_mailer->FromName;
 	}
@@ -822,16 +728,16 @@ function wp_tmq_search_mail_from_queue() {
 			if ( ! $item ) {
 				continue; }
 			if ( ! empty( $item['recipient'] ) ) {
-				$to = wp_tmq_decode( $item['recipient'] );
+				$to = \TotalMailQueue\Support\Serializer::decode( $item['recipient'] );
 			} else {
 				$to              = $wp_tmq_options['email'];
 				$item['subject'] = __( 'ERROR', 'total-mail-queue' ) . ' // ' . $item['subject']; }
 			if ( ! empty( $item['headers'] ) ) {
-				$headers = wp_tmq_decode( $item['headers'] );
+				$headers = \TotalMailQueue\Support\Serializer::decode( $item['headers'] );
 			} else {
 				$headers = ''; }
 			if ( ! empty( $item['attachments'] ) ) {
-				$attachments = wp_tmq_decode( $item['attachments'] );
+				$attachments = \TotalMailQueue\Support\Serializer::decode( $item['attachments'] );
 			} else {
 				$attachments = ''; }
 				$wp_tmq_mailid = $item['id'];
@@ -842,7 +748,7 @@ function wp_tmq_search_mail_from_queue() {
 				foreach ( $headers as $hindex => $hval ) {
 					if ( preg_match( '/^X-TMQ-PHPMailer-Config: (.+)$/i', $hval, $matches ) ) {
 						// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- reading the encoded payload our own wp_tmq_prewpmail() wrote
-						$captured_phpmailer_config = wp_tmq_decode( base64_decode( trim( $matches[1] ) ) );
+						$captured_phpmailer_config = \TotalMailQueue\Support\Serializer::decode( base64_decode( trim( $matches[1] ) ) );
 						array_splice( $headers, $hindex, 1 );
 						break;
 					}
@@ -888,7 +794,7 @@ function wp_tmq_search_mail_from_queue() {
 					foreach ( $captured_phpmailer_config as $prop => $val ) {
 						if ( property_exists( $phpmailer, $prop ) ) {
 							if ( 'Password' === $prop ) {
-								$val = wp_tmq_decrypt_password( $val );
+								$val = \TotalMailQueue\Support\Encryption::decrypt( $val );
 							}
 							$phpmailer->$prop = $val;
 						}
@@ -1071,12 +977,11 @@ function wp_tmq_uninstall() {
 		include_once ABSPATH . 'wp-admin/includes/file.php';
 		WP_Filesystem();
 	}
-	$upload_dir = wp_upload_dir();
-	$new_path   = trailingslashit( $upload_dir['basedir'] ) . 'tmq-attachments/';
+	$new_path = \TotalMailQueue\Support\Paths::attachmentsDir();
 	if ( is_dir( $new_path ) ) {
 		$wp_filesystem->delete( $new_path, true, 'd' );
 	}
-	$legacy_path = plugin_dir_path( __FILE__ ) . 'attachments/';
+	$legacy_path = \TotalMailQueue\Support\Paths::legacyAttachmentsDir( __FILE__ );
 	if ( is_dir( $legacy_path ) ) {
 		$wp_filesystem->delete( $legacy_path, true, 'd' );
 	}
@@ -1227,7 +1132,7 @@ function wp_tmq_ajax_test_smtp_connection() {
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT `password` FROM `$smtp_table` WHERE `id` = %d", $smtp_id ) );
 		if ( $stored ) {
-			$password = wp_tmq_decrypt_password( $stored );
+			$password = \TotalMailQueue\Support\Encryption::decrypt( $stored );
 		}
 	}
 
@@ -1302,7 +1207,7 @@ function wp_tmq_rest_get_message( $request ) {
 	if ( $row ) {
 		// Search for content-type header to detect html emails.
 		$is_content_type_html = false;
-		$headers              = wp_tmq_decode( $row['headers'] );
+		$headers              = \TotalMailQueue\Support\Serializer::decode( $row['headers'] );
 		if ( is_string( $headers ) ) {
 			$headers = array( $headers );
 		} elseif ( ! is_array( $headers ) ) {
@@ -1317,73 +1222,11 @@ function wp_tmq_rest_get_message( $request ) {
 		return array(
 			'status' => 'ok',
 			'data'   => array(
-				'html' => wp_tmq_render_list_message( wp_tmq_decode( $row['message'] ), $is_content_type_html ),
+				'html' => \TotalMailQueue\Support\HtmlPreview::renderListMessage( \TotalMailQueue\Support\Serializer::decode( $row['message'] ), $is_content_type_html ),
 			),
 		);
 	} else {
 		return new WP_Error( 'no_message', __( 'Message not found', 'total-mail-queue' ), array( 'status' => 404 ) );
 	}
 }
-/**
- * Render list message.
- *
- * @since 2.3.0
- *
- * @param mixed $message Parameter description.
- * @param mixed $is_content_type_html Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_render_list_message( $message, $is_content_type_html ) {
-	// Split html emails into parts and extract plain text preview.
-	$parts   = explode( '<body', $message );
-	$is_html = $is_content_type_html || count( $parts ) > 1;
-	if ( $is_html ) {
-		if ( count( $parts ) > 1 ) {
-			$header = $parts[0];
-			$body   = '<body' . $parts[1];
-		} else {
-			$header = '';
-			$body   = $parts[0];
-		}
-		$parts = explode( '</body>', $body );
-		if ( count( $parts ) > 1 ) {
-			$body   = $parts[0] . '</body>';
-			$footer = $parts[1];
-		} else {
-			$body   = $parts[0];
-			$footer = '';
-		}
-		if ( ! function_exists( 'convert_html_to_text' ) ) {
-			require_once __DIR__ . '/lib/html2text/html2text.php';
-		}
-		// ignore warnings when converting html containing non-converted HTML entities.
-		$internal_errors = libxml_use_internal_errors( true );
-		$text            = convert_html_to_text( $body );
-		libxml_use_internal_errors( $internal_errors );
-	} else {
-		$text   = $message;
-		$header = '';
-		$body   = '';
-		$footer = '';
-	}
-	$html  = '';
-	$html .= '<details class="tmq-email-source-meta" open><summary>' . esc_html__( 'Text', 'total-mail-queue' ) . '</summary><pre class="tmq-email-plain-text">' . esc_html( $text ) . '</pre></details>';
-	$html .= $header ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Header', 'total-mail-queue' ) . '</summary><pre>' . esc_html( wp_tmq_render_html_for_display( $header ) ) . '</pre></details>' : '';
-	$html .= $body ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Body', 'total-mail-queue' ) . '</summary><pre>' . esc_html( wp_tmq_render_html_for_display( $body ) ) . '</pre></details>' : '';
-	$html .= $footer ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Footer', 'total-mail-queue' ) . '</summary><pre>' . esc_html( wp_tmq_render_html_for_display( $footer ) ) . '</pre></details>' : '';
-	return $html;
-}
-/**
- * Render html for display.
- *
- * @since 2.3.0
- *
- * @param mixed $html Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_render_html_for_display( $html ) {
-	$html = preg_replace( '/;base64,[^"\']+("|\')+/', ';base64, [...] $1', $html );
-	return $html;
-}
+// HTML preview helpers moved to \TotalMailQueue\Support\HtmlPreview.

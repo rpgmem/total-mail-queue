@@ -69,7 +69,7 @@ function wp_tmq_render_smtp_page() {
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
 		$raw_password = isset( $_POST['smtp_password'] ) ? wp_unslash( $_POST['smtp_password'] ) : '';
 		if ( '' !== $raw_password ) {
-			$data['password'] = wp_tmq_encrypt_password( $raw_password );
+			$data['password'] = \TotalMailQueue\Support\Encryption::encrypt( $raw_password );
 		}
 
 		if ( $save_id > 0 ) {

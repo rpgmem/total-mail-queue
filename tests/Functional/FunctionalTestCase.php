@@ -92,7 +92,7 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
             'encryption'    => 'tls',
             'auth'          => 1,
             'username'      => 'user',
-            'password'      => wp_tmq_encrypt_password( 'pass' ),
+            'password'      => \TotalMailQueue\Support\Encryption::encrypt( 'pass' ),
             'from_email'    => 'noreply@example.test',
             'from_name'     => 'Example',
             'priority'      => 0,
