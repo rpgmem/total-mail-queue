@@ -59,10 +59,17 @@ final class Detector {
 		add_filter( 'wp_new_user_notification_email', array( self::class, 'markNewUser' ), 1, 1 );
 		add_filter( 'wp_new_user_notification_email_admin', array( self::class, 'markNewUserAdmin' ), 1, 1 );
 		add_filter( 'password_change_email', array( self::class, 'markPasswordChange' ), 1, 1 );
+		add_filter( 'wp_password_change_notification_email', array( self::class, 'markPasswordChangeAdminNotify' ), 1, 1 );
 		add_filter( 'email_change_email', array( self::class, 'markEmailChange' ), 1, 1 );
+		add_filter( 'new_admin_email_content', array( self::class, 'markAdminEmailChangeConfirm' ), 1, 1 );
 		add_filter( 'auto_core_update_email', array( self::class, 'markAutoUpdate' ), 1, 1 );
+		add_filter( 'auto_plugin_theme_update_email', array( self::class, 'markAutoUpdatePluginsThemes' ), 1, 1 );
 		add_filter( 'comment_notification_text', array( self::class, 'markCommentNotification' ), 1, 1 );
 		add_filter( 'comment_moderation_text', array( self::class, 'markCommentModeration' ), 1, 1 );
+		add_filter( 'user_confirmed_action_email_content', array( self::class, 'markUserActionConfirm' ), 1, 1 );
+		add_filter( 'wp_privacy_personal_data_email_content', array( self::class, 'markPrivacyExportReady' ), 1, 1 );
+		add_filter( 'user_erasure_complete_email_content', array( self::class, 'markPrivacyErasureDone' ), 1, 1 );
+		add_filter( 'recovery_mode_email', array( self::class, 'markRecoveryMode' ), 1, 1 );
 	}
 
 	/**
@@ -297,5 +304,93 @@ final class Detector {
 	public static function markCommentModeration( $text ) {
 		self::setCurrent( 'wp_core:comment_moderation', 'Comment moderation', 'WordPress Core' );
 		return $text;
+	}
+
+	/**
+	 * Listener for `wp_password_change_notification_email` (WP 5.3+).
+	 * Sent to the site admin whenever ANY user resets their password.
+	 *
+	 * @param mixed $email Filter payload.
+	 * @return mixed
+	 */
+	public static function markPasswordChangeAdminNotify( $email ) {
+		self::setCurrent( 'wp_core:password_change_admin_notify', 'Password change — admin notification', 'WordPress Core' );
+		return $email;
+	}
+
+	/**
+	 * Listener for `new_admin_email_content` (WP 4.9+). Sent to the new
+	 * site-admin address when the admin email is changed in Settings →
+	 * General, asking the recipient to confirm.
+	 *
+	 * @param mixed $content Filter payload.
+	 * @return mixed
+	 */
+	public static function markAdminEmailChangeConfirm( $content ) {
+		self::setCurrent( 'wp_core:admin_email_change_confirm', 'Admin email change — confirmation', 'WordPress Core' );
+		return $content;
+	}
+
+	/**
+	 * Listener for `auto_plugin_theme_update_email` (WP 5.5+). Summary
+	 * email after WP runs plugin/theme auto-updates.
+	 *
+	 * @param mixed $email Filter payload.
+	 * @return mixed
+	 */
+	public static function markAutoUpdatePluginsThemes( $email ) {
+		self::setCurrent( 'wp_core:auto_update_plugins_themes', 'Plugin/theme auto-update report', 'WordPress Core' );
+		return $email;
+	}
+
+	/**
+	 * Listener for `user_confirmed_action_email_content` (WP 4.9.6+).
+	 * The "click to confirm" email sent before personal-data export or
+	 * erasure requests are processed.
+	 *
+	 * @param mixed $content Filter payload.
+	 * @return mixed
+	 */
+	public static function markUserActionConfirm( $content ) {
+		self::setCurrent( 'wp_core:user_action_confirm', 'Personal data — request confirmation', 'WordPress Core' );
+		return $content;
+	}
+
+	/**
+	 * Listener for `wp_privacy_personal_data_email_content` (WP 4.9.6+).
+	 * Notifies the user that their personal-data export is ready for
+	 * download.
+	 *
+	 * @param mixed $content Filter payload.
+	 * @return mixed
+	 */
+	public static function markPrivacyExportReady( $content ) {
+		self::setCurrent( 'wp_core:privacy_export_ready', 'Personal data — export ready', 'WordPress Core' );
+		return $content;
+	}
+
+	/**
+	 * Listener for `user_erasure_complete_email_content` (WP 5.1+).
+	 * Notifies the user that their personal-data erasure request was
+	 * fulfilled.
+	 *
+	 * @param mixed $content Filter payload.
+	 * @return mixed
+	 */
+	public static function markPrivacyErasureDone( $content ) {
+		self::setCurrent( 'wp_core:privacy_erasure_done', 'Personal data — erasure complete', 'WordPress Core' );
+		return $content;
+	}
+
+	/**
+	 * Listener for `recovery_mode_email` (WP 5.2+). Sent to the site
+	 * admin when a fatal error triggers the recovery-mode link.
+	 *
+	 * @param mixed $email Filter payload.
+	 * @return mixed
+	 */
+	public static function markRecoveryMode( $email ) {
+		self::setCurrent( 'wp_core:recovery_mode', 'Recovery mode', 'WordPress Core' );
+		return $email;
 	}
 }
