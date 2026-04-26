@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Phase S5 — pre-populated catalog.** Purely additive: the Sources tab now shows a small set of well-known integrations on a fresh install (and on every version bump) so the admin can preview the toggles before the first email of each kind arrives. Detection still happens organically for everything else via the S2 backtrace fallback.
+    - `Sources\KnownSources` (new `src/sources/known-sources.php`) holds the `(source_key, label, group)` tuples and exposes a `seed()` method.
+    - Seed entries: `total_mail_queue:alert` (system), `plugin:woocommerce`, `plugin:contact-form-7`, `plugin:wpforms`, `plugin:wpforms-lite`.
+    - `Database\Migrator::install()` calls `KnownSources::seed()` after the schema install — so activation and version bumps both pre-populate. Idempotent: existing rows are left untouched (admin-toggled `enabled` values survive re-installs).
+- **4 new functional tests** (`SourcesKnownCatalogTest`): every entry exists after `Migrator::install()`; repeated `seed()` calls don't duplicate rows; a re-install doesn't flip an admin-disabled row back to enabled; the alert system source is included in the seed.
 - **Phase S4 — enforcement.** Disabled sources now actually block delivery (the previous phases only persisted the catalog and previewed the toggle).
     - `Queue\MailInterceptor::handle()` calls `Sources\Repository::isEnabled()` after detecting the source. When the source is disabled the message is stored with the new `blocked_by_source` status instead of being scheduled for sending. The wp_mail() return value is still `true` so callers can't tell their message was suppressed (same swallow as block-mode).
     - **`blocked_by_source` overrides `Instant` priority.** A third-party plugin cannot set `X-Mail-Queue-Prio: Instant` to bypass an admin-imposed source block.

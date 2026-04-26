@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Database;
 
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Sources\KnownSources;
 
 /**
  * Detects schema bumps between the persisted plugin version and the running
@@ -30,12 +31,17 @@ final class Migrator {
 	public const VERSION_OPTION = 'wp_tmq_version';
 
 	/**
-	 * Apply the schema unconditionally and stamp the version.
+	 * Apply the schema unconditionally, seed the known-sources catalog, and
+	 * stamp the version.
 	 *
-	 * Used by the activation hook.
+	 * Used by the activation hook. Seeding happens after the schema install
+	 * so the sources table is guaranteed to exist; it's idempotent so a
+	 * version-bump-driven re-run is a no-op against rows the admin may
+	 * have already toggled.
 	 */
 	public static function install(): void {
 		Schema::install();
+		KnownSources::seed();
 		update_option( self::VERSION_OPTION, Plugin::VERSION, true );
 	}
 
