@@ -16,7 +16,7 @@ final class AjaxTestSmtpConnectionTest extends WP_Ajax_UnitTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Re-run activation in case a previous test dropped the tables.
-        wp_tmq_updateDatabaseTables();
+        \TotalMailQueue\Database\Migrator::install();
         delete_option( 'wp_tmq_settings' );
         $GLOBALS['wp_tmq_options'] = wp_tmq_get_settings();
     }

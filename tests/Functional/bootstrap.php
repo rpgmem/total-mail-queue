@@ -52,9 +52,7 @@ tests_add_filter( 'muplugins_loaded', static function () use ( $project_root ) :
     require_once $project_root . '/total-mail-queue-smtp.php';
 
     // Run the activation hook so the plugin's tables exist.
-    if ( function_exists( 'wp_tmq_activate' ) ) {
-        wp_tmq_activate();
-    }
+    \TotalMailQueue\Lifecycle\Activator::activate();
 } );
 
 require $tests_dir . '/includes/bootstrap.php';

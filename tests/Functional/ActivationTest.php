@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace TMQ\Tests\Functional;
 
 /**
- * Verifies that wp_tmq_updateDatabaseTables() (run via the activation hook)
+ * Verifies that \TotalMailQueue\Database\Migrator::install() (run via the activation hook)
  * creates both plugin tables with the columns and indexes the rest of the
  * code relies on.
  *
- * @covers ::wp_tmq_updateDatabaseTables
+ * @covers \TotalMailQueue\Database\Migrator::install
  */
 final class ActivationTest extends FunctionalTestCase {
 
@@ -69,8 +69,8 @@ final class ActivationTest extends FunctionalTestCase {
 
     public function test_activation_is_idempotent(): void {
         // Running the activation twice must not corrupt the schema.
-        wp_tmq_updateDatabaseTables();
-        wp_tmq_updateDatabaseTables();
+        \TotalMailQueue\Database\Migrator::install();
+        \TotalMailQueue\Database\Migrator::install();
 
         global $wpdb;
         $table  = $this->queueTable();
