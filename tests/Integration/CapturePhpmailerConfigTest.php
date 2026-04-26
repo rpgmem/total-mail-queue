@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers ::wp_tmq_capture_phpmailer_config
+ * @covers \TotalMailQueue\Smtp\PhpMailerCapturer::capture
  */
 final class CapturePhpmailerConfigTest extends IntegrationTestCase {
 
@@ -16,7 +16,7 @@ final class CapturePhpmailerConfigTest extends IntegrationTestCase {
         // keeps its defaults and there is nothing for the plugin to capture.
         Functions\when( 'do_action_ref_array' )->justReturn();
 
-        $config = wp_tmq_capture_phpmailer_config();
+        $config = \TotalMailQueue\Smtp\PhpMailerCapturer::capture();
 
         self::assertNull( $config );
     }
@@ -39,7 +39,7 @@ final class CapturePhpmailerConfigTest extends IntegrationTestCase {
             $mailer->Mailer     = 'smtp';
         } );
 
-        $config = wp_tmq_capture_phpmailer_config();
+        $config = \TotalMailQueue\Smtp\PhpMailerCapturer::capture();
 
         self::assertIsArray( $config );
         self::assertSame( 'smtp.example.test', $config['Host'] );
@@ -67,7 +67,7 @@ final class CapturePhpmailerConfigTest extends IntegrationTestCase {
             $mailer->Password = $plain;
         } );
 
-        $config = wp_tmq_capture_phpmailer_config();
+        $config = \TotalMailQueue\Smtp\PhpMailerCapturer::capture();
 
         self::assertIsArray( $config );
         self::assertNotSame( $plain, $config['Password'], 'Password must not be persisted in plaintext.' );
