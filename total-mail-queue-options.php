@@ -175,8 +175,8 @@ function wp_tmq_settings_page() {
 
 		if ( isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wp_tmq_addtestmail' ) ) {
 			global $wpdb;
-			$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
-			$data      = array(
+			$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
+			$data       = array(
 				'timestamp' => current_time( 'mysql', false ),
 				'recipient' => $wp_tmq_options['email'],
 				/* translators: %s: timestamp */
@@ -185,7 +185,7 @@ function wp_tmq_settings_page() {
 				'status'    => 'queue',
 			);
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( $tableName, $data );
+			$wpdb->insert( $table_name, $data );
 		}
 
 		// Show mode-specific notices.
@@ -450,32 +450,32 @@ class wp_tmq_Log_Table extends WP_List_Table {
 
 	protected function get_log_count( $status_filter = '' ) {
 		global $wpdb, $wp_tmq_options;
-		$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
-		$where     = $this->get_log_where( $status_filter );
+		$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
+		$where      = $this->get_log_where( $status_filter );
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE $where" );
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table_name` WHERE $where" );
 	}
 
 	protected function get_log( $status_filter = '', $per_page = 50, $offset = 0 ) {
 		global $wpdb, $wp_tmq_options;
-		$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
-		$where     = $this->get_log_where( $status_filter );
+		$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
+		$where      = $this->get_log_where( $status_filter );
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), 'ARRAY_A' );
+		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table_name` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), 'ARRAY_A' );
 	}
 
 	protected function get_queue_count() {
 		global $wpdb, $wp_tmq_options;
-		$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
+		$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high'" );
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table_name` WHERE `status` = 'queue' OR `status` = 'high'" );
 	}
 
 	protected function get_queue( $per_page = 50, $offset = 0 ) {
 		global $wpdb, $wp_tmq_options;
-		$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
+		$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), 'ARRAY_A' );
+		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table_name` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), 'ARRAY_A' );
 	}
 
 	public function get_columns() {
@@ -538,26 +538,26 @@ class wp_tmq_Log_Table extends WP_List_Table {
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 		$this->process_bulk_action();
 
-		$perPage     = 50;
-		$currentPage = $this->get_pagenum();
-		$offset      = ( $currentPage - 1 ) * $perPage;
-		$totalItems  = 0;
-		$data        = array();
+		$per_page     = 50;
+		$current_page = $this->get_pagenum();
+		$offset       = ( $current_page - 1 ) * $per_page;
+		$total_items  = 0;
+		$data         = array();
 
 		if ( $type === 'wp_tmq_mail_queue-tab-log' ) {
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
 			$status_filter = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
-			$totalItems    = $this->get_log_count( $status_filter );
-			$data          = $this->get_log( $status_filter, $perPage, $offset );
+			$total_items   = $this->get_log_count( $status_filter );
+			$data          = $this->get_log( $status_filter, $per_page, $offset );
 		} elseif ( $type === 'wp_tmq_mail_queue-tab-queue' ) {
-			$totalItems = $this->get_queue_count();
-			$data       = $this->get_queue( $perPage, $offset );
+			$total_items = $this->get_queue_count();
+			$data        = $this->get_queue( $per_page, $offset );
 		}
 
 		$this->set_pagination_args(
 			array(
-				'total_items' => $totalItems,
-				'per_page'    => $perPage,
+				'total_items' => $total_items,
+				'per_page'    => $per_page,
 			)
 		);
 		$this->items = $data;
@@ -621,9 +621,9 @@ class wp_tmq_Log_Table extends WP_List_Table {
 				static $smtp_names = null;
 				if ( $smtp_names === null ) {
 					global $wpdb, $wp_tmq_options;
-					$smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+					$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
                     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$rows       = $wpdb->get_results( "SELECT `id`, `name` FROM `$smtpTable`", ARRAY_A );
+					$rows       = $wpdb->get_results( "SELECT `id`, `name` FROM `$smtp_table`", ARRAY_A );
 					$smtp_names = array();
 					foreach ( $rows as $r ) {
 						$smtp_names[ intval( $r['id'] ) ] = $r['name'];
@@ -634,10 +634,10 @@ class wp_tmq_Log_Table extends WP_List_Table {
 			case 'message':
 				$message = $item[ $column_name ];
 				if ( $message ) {
-					$messageLen = strlen( $message );
-					$return     = '<details>';
+					$message_len = strlen( $message );
+					$return      = '<details>';
 					/* translators: %s: message size in bytes */
-					$return .= '<summary class="tmq-view-source" data-tmq-list-message-toggle="' . esc_attr( $item['id'] ) . '">' . wp_kses_post( sprintf( __( 'View message %s', 'total-mail-queue' ), '<i>(' . esc_html( $messageLen ) . ' bytes)</i>' ) ) . '</summary>';
+					$return .= '<summary class="tmq-view-source" data-tmq-list-message-toggle="' . esc_attr( $item['id'] ) . '">' . wp_kses_post( sprintf( __( 'View message %s', 'total-mail-queue' ), '<i>(' . esc_html( $message_len ) . ' bytes)</i>' ) ) . '</summary>';
 					$return .= '<div class="tmq-email-source" data-tmq-list-message-content>' . esc_html__( 'Loading...', 'total-mail-queue' ) . '</div>';
 					$return .= '</details>';
 				} else {
@@ -688,13 +688,13 @@ class wp_tmq_Log_Table extends WP_List_Table {
 			return; }
 
 		global $wpdb, $wp_tmq_options;
-		$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
+		$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
 
 		switch ( $this->current_action() ) {
 			case 'delete':
 				foreach ( $request_ids as $id ) {
                     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->delete( $tableName, array( 'id' => intval( $id ) ), '%d' );
+					$wpdb->delete( $table_name, array( 'id' => intval( $id ) ), '%d' );
 				}
 				break;
 			case 'resend':
@@ -704,7 +704,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
 				$count_skipped_queue = 0;
 				foreach ( $request_ids as $id ) {
                     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
+					$maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table_name` WHERE `id` = %d", intval( $id ) ) );
 					if ( ! $maildata ) {
 						continue; }
 					// Block emails that were already sent successfully.
@@ -727,10 +727,10 @@ class wp_tmq_Log_Table extends WP_List_Table {
 							'headers'     => $maildata->headers,
 						);
                         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-						$wpdb->insert( $tableName, $data );
+						$wpdb->insert( $table_name, $data );
 						// Remove original log entry to prevent duplicate resends.
                         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-						$wpdb->delete( $tableName, array( 'id' => intval( $id ) ), '%d' );
+						$wpdb->delete( $table_name, array( 'id' => intval( $id ) ), '%d' );
 					} else {
 						++$count_error;
 						$notice = '<div class="notice notice-error is-dismissible">';
@@ -775,7 +775,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
 				$count_force_skipped_queue = 0;
 				foreach ( $request_ids as $id ) {
                     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$tableName` WHERE `id` = %d", intval( $id ) ) );
+					$maildata = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table_name` WHERE `id` = %d", intval( $id ) ) );
 					if ( ! $maildata ) {
 						continue; }
 					// Block emails that were already sent successfully.
@@ -805,10 +805,10 @@ class wp_tmq_Log_Table extends WP_List_Table {
 							'info'        => sprintf( __( 'Force resent — Original: %s', 'total-mail-queue' ), $maildata->info ),
 						);
                         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-						$wpdb->insert( $tableName, $data );
+						$wpdb->insert( $table_name, $data );
 						// Remove original log entry to prevent duplicate resends.
                         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-						$wpdb->delete( $tableName, array( 'id' => intval( $id ) ), '%d' );
+						$wpdb->delete( $table_name, array( 'id' => intval( $id ) ), '%d' );
 					} else {
 						++$count_force_error;
 						$notice = '<div class="notice notice-error is-dismissible">';
@@ -974,12 +974,12 @@ function wp_tmq_render_option_queue() {
 
 	// Warn if any SMTP account has per-cycle bulk higher than global queue_amount.
 	global $wpdb;
-	$smtpTable     = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+	$smtp_table    = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
 	$global_amount = intval( $wp_tmq_options['queue_amount'] );
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$exceeding = $wpdb->get_results(
 		$wpdb->prepare(
-			"SELECT `name`, `send_bulk` FROM `$smtpTable` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix
+			"SELECT `name`, `send_bulk` FROM `$smtp_table` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix
 			$global_amount
 		),
 		ARRAY_A
@@ -1073,9 +1073,9 @@ function wp_tmq_checkLogForErrors() {
 	if ( ! in_array( $wp_tmq_options['enabled'], array( '1', '2' ), true ) ) {
 		return; }
 
-	$tableName = $wpdb->prefix . $wp_tmq_options['tableName'];
+	$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$last_mail = $wpdb->get_row( "SELECT * FROM `$tableName` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `id` DESC", 'ARRAY_A' );
+	$last_mail = $wpdb->get_row( "SELECT * FROM `$table_name` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `id` DESC", 'ARRAY_A' );
 	if ( ! $last_mail ) {
 		return; }
 
@@ -1101,18 +1101,18 @@ function wp_tmq_checkLogForErrors() {
 	}
 
 	// notices for the plugin options page.
-	$currentScreen = get_current_screen();
-	if ( $currentScreen->base === 'toplevel_page_wp_tmq_mail_queue' ) {
-		$wpMailOmittingPlugins          = array(
+	$current_screen = get_current_screen();
+	if ( $current_screen->base === 'toplevel_page_wp_tmq_mail_queue' ) {
+		$wp_mail_omitting_plugins           = array(
 			'mailpoet/mailpoet.php' => 'MailPoet',
 		);
-		$wpMailOmittingPluginsInstalled = array();
-		foreach ( array_keys( $wpMailOmittingPlugins ) as $plugin ) {
+		$wp_mail_omitting_plugins_installed = array();
+		foreach ( array_keys( $wp_mail_omitting_plugins ) as $plugin ) {
 			if ( is_plugin_active( $plugin ) ) {
-				$wpMailOmittingPluginsInstalled[] = $plugin;
+				$wp_mail_omitting_plugins_installed[] = $plugin;
 			}
 		}
-		if ( count( $wpMailOmittingPluginsInstalled ) > 0 ) {
+		if ( count( $wp_mail_omitting_plugins_installed ) > 0 ) {
 			$notice  = '<div class="notice notice-warning is-dismissible">';
 			$notice .= '<p>';
 			$notice .= '<strong>' . esc_html__( 'Please note:', 'total-mail-queue' ) . '</strong>';
@@ -1123,10 +1123,10 @@ function wp_tmq_checkLogForErrors() {
 			$notice .= '<br />' . implode(
 				', ',
 				array_map(
-					function ( $plugin ) use ( $wpMailOmittingPlugins ) {
-						return esc_html( $wpMailOmittingPlugins[ $plugin ] );
+					function ( $plugin ) use ( $wp_mail_omitting_plugins ) {
+						return esc_html( $wp_mail_omitting_plugins[ $plugin ] );
 					},
-					$wpMailOmittingPluginsInstalled
+					$wp_mail_omitting_plugins_installed
 				)
 			);
 			$notice .= '</p>';
@@ -1154,9 +1154,9 @@ Export / Import Settings
 function wp_tmq_build_export_xml() {
 	global $wpdb, $wp_tmq_options;
 
-	$smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$smtp_accounts = $wpdb->get_results( "SELECT * FROM `$smtpTable`", ARRAY_A );
+	$smtp_accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table`", ARRAY_A );
 
 	// Remove auto-increment IDs and transient counters from SMTP accounts.
 	if ( $smtp_accounts ) {
@@ -1270,12 +1270,12 @@ function wp_tmq_handle_import() {
 
 	// Import SMTP accounts.
 	if ( isset( $xml->smtp_accounts ) ) {
-		$smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+		$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$columns = $wpdb->get_col( "DESCRIBE `$smtpTable`", 0 );
+		$columns = $wpdb->get_col( "DESCRIBE `$smtp_table`", 0 );
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( "TRUNCATE TABLE `$smtpTable`" );
+		$wpdb->query( "TRUNCATE TABLE `$smtp_table`" );
 
 		foreach ( $xml->smtp_accounts->account as $account_node ) {
 			$account = array();
@@ -1286,7 +1286,7 @@ function wp_tmq_handle_import() {
 			$account = array_intersect_key( $account, array_flip( $columns ) );
 			if ( ! empty( $account ) ) {
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->insert( $smtpTable, $account );
+				$wpdb->insert( $smtp_table, $account );
 			}
 		}
 	}
