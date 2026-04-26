@@ -39,12 +39,14 @@ abstract class IntegrationTestCase extends TestCase {
             return $default;
         } );
 
-        // Reset the in-process tracker between tests.
+        // Reset the in-process trackers between tests.
         \TotalMailQueue\Queue\Tracker::reset();
+        \TotalMailQueue\Sources\Detector::reset();
     }
 
     protected function tearDown(): void {
         \TotalMailQueue\Queue\Tracker::reset();
+        \TotalMailQueue\Sources\Detector::reset();
         Monkey\tearDown();
         unset( $GLOBALS['wpdb'] );
         parent::tearDown();

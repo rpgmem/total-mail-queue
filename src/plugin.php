@@ -69,6 +69,11 @@ final class Plugin {
 		// Run pending schema migrations on every load (cheap when up-to-date).
 		add_action( 'plugins_loaded', array( Database\Migrator::class, 'maybeMigrate' ), 10, 0 );
 
+		// Source-tracking listeners on WP-core filters that fire just before
+		// wp_mail(). Wired regardless of mode/cron so the catalog stays in
+		// sync; only the interceptor below cares about consuming the marker.
+		Sources\Detector::register();
+
 		// Mail interception (queue/block modes only, never during WP cron).
 		Queue\MailInterceptor::register();
 		Queue\MailFailedHandler::register();

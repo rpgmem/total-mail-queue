@@ -11,6 +11,7 @@ namespace TotalMailQueue\Cron;
 
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Sources\Repository as SourcesRepository;
 
 /**
  * If the queue has more pending rows than the configured threshold AND
@@ -19,6 +20,13 @@ use TotalMailQueue\Settings\Options;
  * to the admin via `wp_mail()`.
  */
 final class AlertSender {
+
+	/**
+	 * Canonical `source_key` for the alert email. Stored on every alert log
+	 * row + registered in the sources catalog so the admin sees the source
+	 * grouped under "Total Mail Queue".
+	 */
+	public const SOURCE_KEY = 'total_mail_queue:alert';
 
 	/**
 	 * Send the alert when the configured conditions are met.
@@ -50,14 +58,24 @@ final class AlertSender {
 			)
 		);
 
+		// Make sure the alert source exists in the catalog, then attribute
+		// both the log row and the wp_mail() call to it. (S4 will hardcode
+		// `total_mail_queue:alert` as un-toggleable so the admin cannot
+		// silence their own monitoring).
+		$source_id = SourcesRepository::register( self::SOURCE_KEY, 'Total Mail Queue alert', 'Total Mail Queue' );
+		if ( $source_id > 0 ) {
+			SourcesRepository::markSeen( $source_id );
+		}
+
 		QueueRepository::insert(
 			array(
-				'timestamp' => current_time( 'mysql', false ),
-				'recipient' => sanitize_email( $options['email'] ),
-				'subject'   => $alert_subject,
-				'message'   => $alert_message,
-				'status'    => 'alert',
-				'info'      => $info_payload,
+				'timestamp'  => current_time( 'mysql', false ),
+				'recipient'  => sanitize_email( $options['email'] ),
+				'subject'    => $alert_subject,
+				'message'    => $alert_message,
+				'status'     => 'alert',
+				'info'       => $info_payload,
+				'source_key' => self::SOURCE_KEY,
 			)
 		);
 		wp_mail( $options['email'], $alert_subject, $alert_message );
