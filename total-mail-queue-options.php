@@ -1036,41 +1036,8 @@ function wp_tmq_settings_page_navi( $tab ) {
 	} echo '">' . esc_html__( 'FAQ', 'total-mail-queue' ) . '</a>';
 	echo '</nav>';
 }
-/**
- * Sanitize settings.
- *
- * @since 2.3.0
- *
- * @param mixed $input Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_sanitize_settings( $input ) {
-	$allowed_keys = array(
-		'enabled',
-		'alert_enabled',
-		'email',
-		'email_amount',
-		'queue_amount',
-		'queue_interval',
-		'queue_interval_unit',
-		'clear_queue',
-		'log_max_records',
-		'send_method',
-		'max_retries',
-		'cron_lock_ttl',
-		'smtp_timeout',
-	);
-	$sanitized    = array();
-	if ( is_array( $input ) ) {
-		foreach ( $input as $key => $value ) {
-			if ( in_array( $key, $allowed_keys, true ) ) {
-				$sanitized[ $key ] = sanitize_text_field( $value );
-			}
-		}
-	}
-	return $sanitized;
-}
+// Settings sanitization moved to \TotalMailQueue\Settings\Sanitizer::sanitize()
+// (registered as the sanitize_callback in wp_tmq_settings_init below).
 /**
  * Settings init.
  *
@@ -1084,7 +1051,7 @@ function wp_tmq_settings_init() {
 		'wp_tmq_settings',
 		'wp_tmq_settings',
 		array(
-			'sanitize_callback' => 'wp_tmq_sanitize_settings',
+			'sanitize_callback' => array( \TotalMailQueue\Settings\Sanitizer::class, 'sanitize' ),
 		)
 	);
 	add_settings_section( 'wp_tmq_settings_section', '', null, 'wp_tmq_settings_page' );
@@ -1528,7 +1495,7 @@ function wp_tmq_handle_import() {
 	}
 
 	// Reload settings.
-	$wp_tmq_options = wp_tmq_get_settings();
+	$wp_tmq_options = \TotalMailQueue\Settings\Options::get();
 
 	$exported_at = (string) ( $xml['exported_at'] ?? '' );
 	/* translators: %s: export date */

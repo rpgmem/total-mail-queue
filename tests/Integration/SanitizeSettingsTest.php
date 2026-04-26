@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers ::wp_tmq_sanitize_settings
+ * @covers \TotalMailQueue\Settings\Sanitizer::sanitize
  */
 final class SanitizeSettingsTest extends IntegrationTestCase {
 
@@ -17,9 +17,9 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
     }
 
     public function test_returns_empty_array_when_input_is_not_an_array(): void {
-        self::assertSame( array(), wp_tmq_sanitize_settings( 'malicious string' ) );
-        self::assertSame( array(), wp_tmq_sanitize_settings( null ) );
-        self::assertSame( array(), wp_tmq_sanitize_settings( 42 ) );
+        self::assertSame( array(), \TotalMailQueue\Settings\Sanitizer::sanitize( 'malicious string' ) );
+        self::assertSame( array(), \TotalMailQueue\Settings\Sanitizer::sanitize( null ) );
+        self::assertSame( array(), \TotalMailQueue\Settings\Sanitizer::sanitize( 42 ) );
     }
 
     public function test_keeps_whitelisted_keys(): void {
@@ -32,7 +32,7 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
             'smtp_timeout'  => '45',
         );
 
-        self::assertSame( $input, wp_tmq_sanitize_settings( $input ) );
+        self::assertSame( $input, \TotalMailQueue\Settings\Sanitizer::sanitize( $input ) );
     }
 
     public function test_strips_unknown_keys_to_block_settings_injection(): void {
@@ -45,7 +45,7 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
             'triggercount'  => 999,
         );
 
-        $sanitized = wp_tmq_sanitize_settings( $input );
+        $sanitized = \TotalMailQueue\Settings\Sanitizer::sanitize( $input );
 
         self::assertSame( array( 'enabled' => '1' ), $sanitized );
         self::assertArrayNotHasKey( 'tableName', $sanitized );
@@ -60,7 +60,7 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
             return strtoupper( (string) $value );
         } );
 
-        $result = wp_tmq_sanitize_settings( array(
+        $result = \TotalMailQueue\Settings\Sanitizer::sanitize( array(
             'enabled' => 'yes',
             'email'   => 'me@example.test',
             'unknown' => 'should be skipped before sanitize is called',
