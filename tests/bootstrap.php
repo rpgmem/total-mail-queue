@@ -30,11 +30,5 @@ require_once __DIR__ . '/Stubs/wordpress-stubs.php';
 
 // Loading the plugin file at bootstrap time runs code in the global scope
 // (registers hooks, schedules cron). With the stubs above all of those calls
-// become no-ops, leaving the function definitions available for tests.
+// become no-ops, leaving the namespaced classes loaded for tests.
 require_once __DIR__ . '/../total-mail-queue.php';
-
-// The admin-only files are normally guarded by is_admin(); for testing we
-// load them unconditionally so functions like wp_tmq_sanitize_settings() are
-// available without spinning up the WP admin context.
-require_once __DIR__ . '/../total-mail-queue-options.php';
-require_once __DIR__ . '/../total-mail-queue-smtp.php';

@@ -38,18 +38,9 @@ require_once $tests_dir . '/includes/functions.php';
 /**
  * Activate Total Mail Queue early so its hooks are registered before
  * WP fires any of its own.
- *
- * The `global` declarations are required because `require_once` here
- * runs inside the closure's scope, so the plugin's top-level
- * `$wp_tmq_options = wp_tmq_get_settings();` would otherwise create a
- * closure-local variable instead of the real global.
  */
-tests_add_filter( 'muplugins_loaded', static function () use ( $project_root ) : void {
-    global $wp_tmq_version, $wp_tmq_options, $wp_tmq_mailid, $wp_tmq_pre_wp_mail_priority, $wp_tmq_next_cron_timestamp, $wp_tmq_capturing_phpmailer;
-
+tests_add_filter( 'muplugins_loaded', static function () use ( $project_root ): void {
     require_once $project_root . '/total-mail-queue.php';
-    require_once $project_root . '/total-mail-queue-options.php';
-    require_once $project_root . '/total-mail-queue-smtp.php';
 
     // Run the activation hook so the plugin's tables exist.
     \TotalMailQueue\Lifecycle\Activator::activate();

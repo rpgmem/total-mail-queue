@@ -46,7 +46,12 @@ final class SettingsApi {
 			)
 		);
 
-		add_settings_section( 'wp_tmq_settings_section', '', null, self::PAGE );
+		add_settings_section(
+			'wp_tmq_settings_section',
+			'',
+			static function (): void {},
+			self::PAGE
+		);
 
 		$fields = array(
 			'wp_tmq_status'        => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),

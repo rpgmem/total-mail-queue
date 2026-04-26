@@ -287,7 +287,7 @@ final class LogTable extends WP_List_Table {
 			}
 		}
 		$name = $smtp_names[ $acct_id ] ?? __( 'Deleted', 'total-mail-queue' );
-		return '<span title="#' . esc_attr( $acct_id ) . '">#' . esc_html( $acct_id ) . ' ' . esc_html( $name ) . '</span>';
+		return '<span title="#' . esc_attr( (string) $acct_id ) . '">#' . esc_html( (string) $acct_id ) . ' ' . esc_html( (string) $name ) . '</span>';
 	}
 
 	/**

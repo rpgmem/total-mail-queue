@@ -258,8 +258,8 @@ if ( ! function_exists( 'add_settings_field' ) ) {
     function add_settings_field( ...$args ): void {}
 }
 
-// Minimal WP_List_Table replacement so total-mail-queue-options.php can declare
-// wp_tmq_Log_Table without requiring WordPress's admin includes.
+// Minimal WP_List_Table replacement so the LogTable subclass can be loaded
+// at unit-test bootstrap time without requiring WordPress's admin includes.
 if ( ! class_exists( 'WP_List_Table' ) ) {
     class WP_List_Table {
         protected $_args = array( 'plural' => 'items' );

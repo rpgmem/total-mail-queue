@@ -8,8 +8,6 @@
 
     <!-- What to scan -->
     <file>total-mail-queue.php</file>
-    <file>total-mail-queue-options.php</file>
-    <file>total-mail-queue-smtp.php</file>
     <file>src/</file>
 
     <!-- What to skip -->
@@ -42,19 +40,10 @@
         <!-- WP_TMQ_PHPMailer-Config and friends in queue headers don't follow
              WP hook naming because they're not WP hooks. -->
         <exclude name="WordPress.NamingConventions.ValidHookName"/>
-        <!-- The file is structured as procedural functions plus one helper
-             class (wp_tmq_Log_Table extends WP_List_Table); separating them
-             is out of scope. -->
-        <exclude name="Universal.Files.SeparateFunctionsFromOO"/>
         <!-- Long lines in inline notice / FAQ HTML are intentional. -->
         <exclude name="Generic.Files.LineLength"/>
-        <!-- The wp_tmq_Log_Table class is intentionally lower-case to match
-             the plugin's wp_tmq_ function prefix; renaming is a public-API
-             break we're not taking. -->
-        <exclude name="WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid"/>
-        <exclude name="PEAR.NamingConventions.ValidClassName.Invalid"/>
-        <exclude name="PEAR.NamingConventions.ValidClassName.StartWithCapital"/>
-        <!-- Reserved-keyword param names on legacy callbacks. -->
+        <!-- WordPress filter conventions reserve `$return` as the first
+             param of preempt filters such as `pre_wp_mail`. -->
         <exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
         <!-- The plugin intentionally registers a custom cron interval; the
              sniff flags any code that touches `cron_schedules`. -->
