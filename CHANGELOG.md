@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Full WordPress coding standard adopted.** `phpcs.xml.dist` now references `<rule ref="WordPress"/>` directly. A single `phpcbf` pass auto-corrected 3,395 mechanical violations across the three plugin files (spaces→tabs, parenthesis spacing, control-structure spacing, concatenation padding, array indentation, comma spacing). Authorial fixes (variable naming, docblocks, Yoda, etc.) are scheduled across follow-up phases F2–F4 and excluded with rationale in the ruleset until then. No behavior changes — the suite of 86 tests continues to pass.
+- **F2 — Manual code cleanup.** Removed the F2 exclusions from `phpcs.xml.dist` after addressing the underlying violations:
+    - 137 inline comments now end with `.`/`!`/`?` per WPCS.
+    - 17 block-comment closers (`*/`) moved to their own line.
+    - All loose comparisons (`==`/`!=`) involving control-flow flags converted to strict (`===`/`!==`).
+    - `in_array()` calls against fixed string sets now use the strict flag.
+    - All public methods on `wp_tmq_Log_Table` declare visibility (`public` for parent overrides like `get_columns`, `protected` for the new query helpers).
+    - Stray `break;` after `return` and an unnecessary trailing `return;` removed.
+    - Documented why `@unserialize` is intentionally suppressed (corrupt legacy payloads), now annotated with both `serialize_unserialize` and `NoSilencedErrors` `phpcs:ignore` reasons.
+    - `wp_tmq_mail_succeeded` lost its unused `$mail_data` parameter; `add_action` now registers it with `accepted_args=0` so WordPress doesn't pass an arg the function would just discard.
 - Added `.git-blame-ignore-revs` listing the F1 reformat commit so `git blame` and the GitHub blame UI continue to surface the real authorship of the surrounding lines.
 - `wp_tmq_prewpmail` queue-alert payload now uses `wp_json_encode()` instead of `json_encode()`, matching WordPress conventions for handling encoding edge cases.
 - `wp_tmq_handle_export()` was split into a pure `wp_tmq_build_export_xml()` helper plus a thin handler that emits headers and exits — the pure helper makes the export logic unit-testable without touching the HTTP layer.
