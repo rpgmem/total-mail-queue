@@ -40,6 +40,7 @@ final class Menu {
 		add_submenu_page( self::SLUG, __( 'Log', 'total-mail-queue' ), __( 'Log', 'total-mail-queue' ), 'manage_options', 'wp_tmq_mail_queue-tab-log', $render );
 		add_submenu_page( self::SLUG, __( 'Retention', 'total-mail-queue' ), __( 'Retention', 'total-mail-queue' ), 'manage_options', 'wp_tmq_mail_queue-tab-queue', $render );
 		add_submenu_page( self::SLUG, __( 'SMTP Accounts', 'total-mail-queue' ), __( 'SMTP Accounts', 'total-mail-queue' ), 'manage_options', 'wp_tmq_mail_queue-tab-smtp', $render );
+		add_submenu_page( self::SLUG, __( 'Sources', 'total-mail-queue' ), __( 'Sources', 'total-mail-queue' ), 'manage_options', 'wp_tmq_mail_queue-tab-sources', $render );
 		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
 			add_submenu_page( self::SLUG, __( 'Cron Information', 'total-mail-queue' ), __( 'Cron Information', 'total-mail-queue' ), 'manage_options', 'wp_tmq_mail_queue-tab-croninfo', $render );
 		}
