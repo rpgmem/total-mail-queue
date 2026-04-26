@@ -202,9 +202,6 @@ final class ExportImport {
 			}
 		}
 
-		// Refresh the legacy global so the rest of the request sees the new values.
-		$GLOBALS['wp_tmq_options'] = Options::get();
-
 		$exported_at = (string) ( $xml['exported_at'] ?? '' );
 		/* translators: %s: export date */
 		$date_info = $exported_at ? ' ' . sprintf( __( '(exported on %s)', 'total-mail-queue' ), esc_html( $exported_at ) ) : '';

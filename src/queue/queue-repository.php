@@ -15,8 +15,8 @@ use TotalMailQueue\Database\Schema;
  * Read/write access to `{$prefix}total_mail_queue`.
  *
  * Holds every SQL query the cron loop, the mail interceptor and the
- * retention sweeps used to inline through `$wpdb` against
- * `$wp_tmq_options['tableName']`.
+ * retention sweeps issue. Table name is resolved through
+ * {@see Schema::queueTable()}.
  */
 final class QueueRepository {
 

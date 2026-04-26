@@ -22,10 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Composer autoloader (provides the TotalMailQueue\* namespace + dev-mode test classes).
-require_once __DIR__ . '/vendor/autoload.php';
+// PSR-4-style autoloader for the plugin's TotalMailQueue\ namespace. No
+// third-party runtime dependencies, so vendor/autoload.php is purely a
+// dev-time concern.
+require_once __DIR__ . '/autoload.php';
 
 // All plugin behaviour — settings, support helpers, queue, cron, retention,
 // SMTP, admin UI, REST, lifecycle — is owned by namespaced classes under
-// TotalMailQueue\, autoloaded by Composer. Plugin::boot() wires every hook.
+// TotalMailQueue\. Plugin::boot() wires every hook.
 \TotalMailQueue\Plugin::boot( __FILE__ );
