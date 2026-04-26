@@ -146,12 +146,24 @@ final class SourcesTable extends WP_List_Table {
 
 	/**
 	 * Per-row action links — the per-row toggle and the "filter log by
-	 * this source" shortcut.
+	 * this source" shortcut. System sources (e.g. `total_mail_queue:alert`)
+	 * render a non-actionable "system" badge instead of the toggle so the
+	 * admin cannot disable the plugin's own monitoring email.
 	 *
 	 * @param array<string,mixed> $item Row data.
 	 */
 	private static function renderRowActions( array $item ): string {
-		$id      = (int) $item['id'];
+		$id  = (int) $item['id'];
+		$key = (string) $item['source_key'];
+
+		$log_url    = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log&source_filter=' . rawurlencode( $key ) );
+		$filter_log = '<a href="' . esc_url( $log_url ) . '">' . esc_html__( 'Filter log', 'total-mail-queue' ) . '</a>';
+
+		if ( SourcesRepository::isSystem( $key ) ) {
+			$badge = '<span class="description" title="' . esc_attr__( 'This source is hardcoded as always-enabled and cannot be disabled.', 'total-mail-queue' ) . '">' . esc_html__( 'system (always on)', 'total-mail-queue' ) . '</span>';
+			return $badge . ' | ' . $filter_log;
+		}
+
 		$enabled = 1 === (int) $item['enabled'];
 		$action  = $enabled ? 'disable' : 'enable';
 		$label   = $enabled ? __( 'Disable', 'total-mail-queue' ) : __( 'Enable', 'total-mail-queue' );
@@ -160,9 +172,6 @@ final class SourcesTable extends WP_List_Table {
 			'wp_tmq_source_toggle_' . $id
 		);
 		$toggle  = '<a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
-
-		$log_url    = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log&source_filter=' . rawurlencode( (string) $item['source_key'] ) );
-		$filter_log = '<a href="' . esc_url( $log_url ) . '">' . esc_html__( 'Filter log', 'total-mail-queue' ) . '</a>';
 
 		return $toggle . ' | ' . $filter_log;
 	}

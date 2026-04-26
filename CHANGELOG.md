@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Phase S4 — enforcement.** Disabled sources now actually block delivery (the previous phases only persisted the catalog and previewed the toggle).
+    - `Queue\MailInterceptor::handle()` calls `Sources\Repository::isEnabled()` after detecting the source. When the source is disabled the message is stored with the new `blocked_by_source` status instead of being scheduled for sending. The wp_mail() return value is still `true` so callers can't tell their message was suppressed (same swallow as block-mode).
+    - **`blocked_by_source` overrides `Instant` priority.** A third-party plugin cannot set `X-Mail-Queue-Prio: Instant` to bypass an admin-imposed source block.
+    - **System sources are hardcoded as always-enabled.** Any `source_key` starting with `total_mail_queue:` (currently only `total_mail_queue:alert`) is recognised by `Repository::isSystem()`; `setEnabled()` and `setEnabledByGroup()` silently refuse to flip it, and `Admin\Tables\SourcesTable` renders a non-actionable "system (always on)" badge in place of the per-row toggle.
+    - `Sources\Repository::SYSTEM_PREFIX` constant exposes the prefix for callers.
+    - `Sources\Repository::setEnabledByGroup()` rewritten to use `$wpdb->query()` + a `NOT LIKE 'total_mail_queue:%'` WHERE clause so a "Disable group" call against the system group leaves the system rows untouched.
+    - **Log table** picks up the new status: badge label "Blocked by source" (red CSS class `tmq-status-blocked-by-source`), and the status filter dropdown now offers `Blocked by source` alongside Sent / Error / Alert.
+    - The Sources tab notice copy refreshed to reflect that toggles are live now, and to call out the system-source rule.
+    - Skipped for blocked rows in `MailInterceptor`: `Content-Type` / `From` backfill, third-party PHPMailer config snapshot, and attachment staging — none of those are needed since the message will never be sent.
+- **15 new tests for S4** — 4 integration tests on `Sources\Repository` (`isSystem`, `setEnabled` skipping a system row, `setEnabled` proceeding for a non-system row, `setEnabledByGroup` SQL excludes the system prefix), 6 functional tests on the end-to-end flow (`SourcesEnforcementTest`: disabled source → `blocked_by_source` row, enabled source still queues, Instant header doesn't bypass the block, repository refuses to disable system source, group disable skips system sources, admin UI per-row toggle cannot disable a system source). `MockWpdb` gained an `esc_like()` helper.
 - **Phase S3 — admin UI.** The "Sources" tab is the place admins go to inspect what their site sends and toggle delivery per-source. Toggle UI is live; the actual blocking still lands in S4 (until then, disabling a source previews the change but the queue keeps delivering).
     - New tab **"Sources"** (slug `wp_tmq_mail_queue-tab-sources`), wired in `Admin\Menu` and `Admin\PluginPage`. Routes to the new `Admin\Pages\SourcesPage` renderer.
     - `Admin\Tables\SourcesTable` (new `WP_List_Table` under `src/admin/tables/`) — columns: status badge / label / source_key (as code chip) / group / total emails / last seen ("X ago" with full timestamp on hover) / per-row Actions (Enable-or-Disable + "Filter log" shortcut).

@@ -66,8 +66,10 @@ final class MailInterceptor {
 		$options = Options::get();
 
 		// Resolve the source: prefer the marker a primary listener set; fall
-		// back to the call stack. (S4 will use this to enforce per-source
-		// allow/block decisions; S2 only records and surfaces it).
+		// back to the call stack. The source decides two things: which
+		// `source_key` to persist, and (since S4) whether the admin has
+		// disabled this source — in which case the message is stored as
+		// `blocked_by_source` instead of being scheduled.
 		$source = Detector::consume();
 		if ( null === $source ) {
 			$source = Detector::inferFromBacktrace();
@@ -83,16 +85,29 @@ final class MailInterceptor {
 		$headers = self::normaliseHeaders( $headers );
 		$status  = self::scanPriorityHeaders( $headers, $status, (string) $options['enabled'], $has_content_type, $has_from );
 
-		if ( 'instant' !== $status ) {
+		// Per-source enforcement: a disabled source overrides the priority
+		// headers (Instant included — otherwise a third-party plugin could
+		// bypass the admin's block by setting `X-Mail-Queue-Prio: Instant`).
+		// System sources are always allowed (Repository::isEnabled() short-
+		// circuits to true for the `total_mail_queue:` prefix).
+		$blocked_by_source = ! SourcesRepository::isEnabled( $source['key'] );
+		if ( $blocked_by_source ) {
+			$status = 'blocked_by_source';
+		}
+
+		if ( 'instant' !== $status && 'blocked_by_source' !== $status ) {
 			self::backfillContentTypeHeader( $headers, $has_content_type );
 			self::backfillFromHeader( $headers, $has_from );
 		}
 
-		// Snapshot any third-party SMTP config so the cron can replay it on send.
-		$phpmailer_config = PhpMailerCapturer::capture();
-		if ( $phpmailer_config ) {
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- transport-encoding the captured config so it survives as an email header
-			$headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( Serializer::encode( $phpmailer_config ) );
+		// Snapshot any third-party SMTP config so the cron can replay it on
+		// send. Skipped for blocked rows since they will never be sent.
+		if ( 'blocked_by_source' !== $status ) {
+			$phpmailer_config = PhpMailerCapturer::capture();
+			if ( $phpmailer_config ) {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- transport-encoding the captured config so it survives as an email header
+				$headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( Serializer::encode( $phpmailer_config ) );
+			}
 		}
 
 		$data = array(
@@ -138,7 +153,9 @@ final class MailInterceptor {
 		if ( 0 === $insert_id ) {
 			return false; // No DB entry, email cannot be sent — wp_mail() returns false.
 		}
-		return true; // Fake success — caller thinks the mail went out.
+		// `blocked_by_source` shares the queue/high return path: the caller
+		// sees a successful enqueue, the message just never leaves the row.
+		return true;
 	}
 
 	/**

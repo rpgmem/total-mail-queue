@@ -36,7 +36,7 @@ final class LogTable extends WP_List_Table {
 	 */
 	protected function get_log_where( string $status_filter = '', string $source_filter = '' ): string {
 		global $wpdb;
-		if ( $status_filter && in_array( $status_filter, array( 'sent', 'error', 'alert' ), true ) ) {
+		if ( $status_filter && in_array( $status_filter, array( 'sent', 'error', 'alert', 'blocked_by_source' ), true ) ) {
 			$base = $wpdb->prepare( '`status` = %s', $status_filter );
 		} else {
 			$base = "`status` != 'queue' AND `status` != 'high'";
@@ -145,10 +145,11 @@ final class LogTable extends WP_List_Table {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
 		$current  = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
 		$statuses = array(
-			''      => __( 'All statuses', 'total-mail-queue' ),
-			'sent'  => __( 'Sent', 'total-mail-queue' ),
-			'error' => __( 'Error', 'total-mail-queue' ),
-			'alert' => __( 'Alert', 'total-mail-queue' ),
+			''                  => __( 'All statuses', 'total-mail-queue' ),
+			'sent'              => __( 'Sent', 'total-mail-queue' ),
+			'error'             => __( 'Error', 'total-mail-queue' ),
+			'alert'             => __( 'Alert', 'total-mail-queue' ),
+			'blocked_by_source' => __( 'Blocked by source', 'total-mail-queue' ),
 		);
 		echo '<div class="alignleft actions">';
 		echo '<select name="status_filter">';
@@ -284,11 +285,12 @@ final class LogTable extends WP_List_Table {
 	 */
 	private static function renderStatusColumn( array $item ): string {
 		$labels = array(
-			'sent'  => __( 'Sent', 'total-mail-queue' ),
-			'error' => __( 'Error', 'total-mail-queue' ),
-			'alert' => __( 'Alert', 'total-mail-queue' ),
-			'queue' => __( 'Queue', 'total-mail-queue' ),
-			'high'  => __( 'High', 'total-mail-queue' ),
+			'sent'              => __( 'Sent', 'total-mail-queue' ),
+			'error'             => __( 'Error', 'total-mail-queue' ),
+			'alert'             => __( 'Alert', 'total-mail-queue' ),
+			'queue'             => __( 'Queue', 'total-mail-queue' ),
+			'high'              => __( 'High', 'total-mail-queue' ),
+			'blocked_by_source' => __( 'Blocked by source', 'total-mail-queue' ),
 		);
 		$raw    = $item['status'];
 		$label  = $labels[ $raw ] ?? esc_html( $raw );
