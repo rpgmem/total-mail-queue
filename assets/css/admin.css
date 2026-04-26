@@ -64,6 +64,9 @@ span.tmq-status.tmq-status-instant {
 span.tmq-status.tmq-status-alert {
 	background: #1d2327;
 	color: white; }
+span.tmq-status.tmq-status-blocked-by-source {
+	background: #b32d2e;
+	color: white; }
 .tmq-status-has-info {
 	position: relative; }
 .tmq-status-has-info::after {

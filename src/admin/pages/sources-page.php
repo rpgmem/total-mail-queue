@@ -39,7 +39,7 @@ final class SourcesPage {
 		echo '<div class="tmq-box">';
 		echo '<h2>' . esc_html__( 'Sources', 'total-mail-queue' ) . '</h2>';
 		echo '<p class="description">';
-		echo esc_html__( 'Every email passing through wp_mail() is tagged with a source — a stable identifier (key) plus a human-readable label and group. New sources are auto-detected and registered with delivery enabled. Disabling a source here will NOT block its messages yet — that enforcement lands in a follow-up release; for now the toggles are previewed but the queue still delivers every message.', 'total-mail-queue' );
+		echo esc_html__( 'Every email passing through wp_mail() is tagged with a source — a stable identifier (key) plus a human-readable label and group. New sources are auto-detected and registered with delivery enabled. Disabling a source stores any further messages from it with the "Blocked by source" status and skips the actual send. System sources marked "always on" cannot be disabled (they protect the plugin\'s own monitoring email).', 'total-mail-queue' );
 		echo '</p>';
 
 		self::renderGroupToolbar();

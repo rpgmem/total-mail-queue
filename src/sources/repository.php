@@ -28,6 +28,26 @@ use TotalMailQueue\Database\Schema;
 final class Repository {
 
 	/**
+	 * Prefix used for "system" sources that the admin must never be allowed
+	 * to disable (currently only `total_mail_queue:alert`).
+	 *
+	 * `setEnabled()` and `setEnabledByGroup()` short-circuit when the key
+	 * starts with this prefix; `isSystem()` is the public predicate used by
+	 * the admin UI to render a non-toggleable badge.
+	 */
+	public const SYSTEM_PREFIX = 'total_mail_queue:';
+
+	/**
+	 * Whether the given `source_key` is a system source (always-enabled,
+	 * un-toggleable from the admin UI).
+	 *
+	 * @param string $source_key Canonical key.
+	 */
+	public static function isSystem( string $source_key ): bool {
+		return 0 === strpos( $source_key, self::SYSTEM_PREFIX );
+	}
+
+	/**
 	 * Look up a single row by its `source_key`.
 	 *
 	 * @param string $source_key Canonical key, e.g. `wp_core:password_reset`.
@@ -141,13 +161,20 @@ final class Repository {
 	}
 
 	/**
-	 * Toggle the `enabled` flag for a single source.
+	 * Toggle the `enabled` flag for a single source. System sources
+	 * (see {@see isSystem()}) silently refuse to flip — they're hardcoded
+	 * to always-enabled so the admin can't accidentally silence the
+	 * plugin's own monitoring email.
 	 *
 	 * @param int  $id      Row id.
 	 * @param bool $enabled New value.
 	 */
 	public static function setEnabled( int $id, bool $enabled ): void {
 		if ( $id <= 0 ) {
+			return;
+		}
+		$row = self::findById( $id );
+		if ( null !== $row && self::isSystem( (string) $row['source_key'] ) ) {
 			return;
 		}
 		global $wpdb;
@@ -164,7 +191,8 @@ final class Repository {
 
 	/**
 	 * Toggle every source that belongs to a given `group_label` (e.g. enable
-	 * or disable "WooCommerce" en masse).
+	 * or disable "WooCommerce" en masse). System sources inside the group
+	 * are excluded from the update.
 	 *
 	 * @param string $group_label Group label as stored on the row.
 	 * @param bool   $enabled     New value applied to every member of the group.
@@ -174,12 +202,13 @@ final class Repository {
 		global $wpdb;
 		$table = Schema::sourcesTable();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			$table,
-			array( 'enabled' => $enabled ? 1 : 0 ),
-			array( 'group_label' => $group_label ),
-			array( '%d' ),
-			array( '%s' )
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE `$table` SET `enabled` = %d WHERE `group_label` = %s AND `source_key` NOT LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$enabled ? 1 : 0,
+				$group_label,
+				$wpdb->esc_like( self::SYSTEM_PREFIX ) . '%'
+			)
 		);
 		return (int) $updated;
 	}

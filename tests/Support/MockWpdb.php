@@ -77,6 +77,14 @@ final class MockWpdb {
         return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
     }
 
+    /**
+     * Quote LIKE wildcards in the input. Mirrors $wpdb->esc_like(); we don't
+     * track the call because callers always feed it back through prepare().
+     */
+    public function esc_like( string $text ): string {
+        return addcslashes( $text, '_%\\' );
+    }
+
     public function prepare( string $query, mixed ...$args ): string {
         $this->calls[] = array( 'method' => 'prepare', 'args' => array( $query, $args ) );
         // Replace WordPress format specifiers with sprintf-compatible ones.
