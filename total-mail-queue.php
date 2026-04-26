@@ -46,178 +46,8 @@ $wp_tmq_version = \TotalMailQueue\Plugin::VERSION;
 // Support helpers (Encryption, Serializer, Paths, HtmlPreview) are now provided
 // by the namespaced classes under TotalMailQueue\Support\, autoloaded via Composer.
 
-/**
- * **************************************************************
-SMTP Account Helpers
- * ***************************************************************
- */
-function wp_tmq_reset_smtp_counters() {
-	global $wpdb, $wp_tmq_options;
-	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
 
-	$today      = current_time( 'Y-m-d' );
-	$this_month = current_time( 'Y-m' );
-	$now        = current_time( 'mysql', false );
 
-	// Reset per-cycle bulk counter:
-	// - Accounts with send_interval=0 (global): reset every cron run (each cron = one cycle).
-	// - Accounts with send_interval>0: reset only when the interval has elapsed (new cycle).
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$wpdb->query(
-		"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` = 0" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix
-	);
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$wpdb->query(
-		$wpdb->prepare(
-			"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$now
-		)
-	);
-
-	// Reset daily counters if day changed.
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$wpdb->query(
-		$wpdb->prepare(
-			"UPDATE `$smtp_table` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$today,
-			$today
-		)
-	);
-
-	// Reset monthly counters if month changed.
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$wpdb->query(
-		$wpdb->prepare(
-			"UPDATE `$smtp_table` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$today,
-			$this_month
-		)
-	);
-}
-/**
- * Get available smtp.
- *
- * @since 2.3.0
- *
- * @return mixed Function output.
- */
-function wp_tmq_get_available_smtp() {
-	global $wpdb, $wp_tmq_options;
-	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
-
-	// Get enabled SMTP accounts ordered by priority, where:
-	// - daily/monthly limits not reached.
-	// - per-account bulk limit not reached (cycle_sent < send_bulk, or send_bulk=0 means unlimited).
-	//
-	// Note: send_interval is NOT checked here. The interval controls when.
-	// cycle_sent is reset (in wp_tmq_reset_smtp_counters). As long as the.
-	// current cycle still has room (cycle_sent < send_bulk), the account.
-	// remains available. The interval only blocks new cycles — not mid-cycle sends.
-    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table name from $wpdb->prefix
-	$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1 AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`) AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`) AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`) ORDER BY `priority` ASC", ARRAY_A );
-
-	return $accounts ? $accounts : array();
-}
-
-/**
- * Pick the first available SMTP account from the in-memory list.
- *
- * Checks cycle_sent against send_bulk without hitting the database.
- *
- * @since 2.2.0
- *
- * @param array<int,array<string,mixed>> $smtp_accounts Accounts in priority order.
- * @return array<string,mixed>|null Selected account row, or null if all are exhausted.
- */
-function wp_tmq_pick_available_smtp( $smtp_accounts ) {
-	foreach ( $smtp_accounts as $acct ) {
-		$bulk = intval( $acct['send_bulk'] );
-		if ( 0 === $bulk || intval( $acct['cycle_sent'] ) < $bulk ) {
-			return $acct;
-		}
-	}
-	return null;
-}
-
-/**
- * Update the in-memory SMTP accounts list after a successful send.
- *
- * Increments cycle_sent for the given account id in the array.
- *
- * @since 2.2.0
- *
- * @param array<int,array<string,mixed>> $smtp_accounts Accounts list, modified by reference.
- * @param int                            $smtp_id       ID of the account that just sent.
- * @return void
- */
-function wp_tmq_update_memory_counter( &$smtp_accounts, $smtp_id ) {
-	$target_id = intval( $smtp_id );
-	foreach ( $smtp_accounts as $key => $acct ) {
-		if ( intval( $acct['id'] ) === $target_id ) {
-			$smtp_accounts[ $key ]['cycle_sent'] = intval( $acct['cycle_sent'] ) + 1;
-			break;
-		}
-	}
-}
-/**
- * Increment smtp counter.
- *
- * @since 2.3.0
- *
- * @param mixed $smtp_id Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_increment_smtp_counter( $smtp_id ) {
-	global $wpdb, $wp_tmq_options;
-	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
-	$now        = current_time( 'mysql', false );
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$wpdb->query(
-		$wpdb->prepare(
-			"UPDATE `$smtp_table` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$now,
-			intval( $smtp_id )
-		)
-	);
-}
-/**
- * Configure phpmailer.
- *
- * @since 2.3.0
- *
- * @param mixed $phpmailer Parameter description.
- * @param mixed $smtp_account Parameter description.
- *
- * @return mixed Function output.
- */
-function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
-	// Close any existing SMTP connection so we start fresh.
-	// (WordPress reuses the same PHPMailer instance across wp_mail calls).
-	if ( method_exists( $phpmailer, 'smtpClose' ) ) {
-		$phpmailer->smtpClose();
-	}
-	$phpmailer->isSMTP();
-	$phpmailer->Host       = $smtp_account['host'];
-	$phpmailer->Port       = intval( $smtp_account['port'] );
-	$phpmailer->SMTPSecure = 'none' === $smtp_account['encryption'] ? '' : $smtp_account['encryption'];
-	$phpmailer->SMTPAuth   = (bool) $smtp_account['auth'];
-	if ( $smtp_account['auth'] ) {
-		$phpmailer->Username = $smtp_account['username'];
-		$phpmailer->Password = \TotalMailQueue\Support\Encryption::decrypt( $smtp_account['password'] );
-	}
-	if ( ! empty( $smtp_account['from_email'] ) ) {
-		$phpmailer->From     = $smtp_account['from_email'];
-		$phpmailer->Sender   = $smtp_account['from_email'];
-		$phpmailer->FromName = ! empty( $smtp_account['from_name'] ) ? $smtp_account['from_name'] : $phpmailer->FromName;
-	}
-	// Apply configurable SMTP timeout to prevent a stalled connection from blocking the batch.
-	global $wp_tmq_options;
-	$smtp_timeout = intval( $wp_tmq_options['smtp_timeout'] );
-	if ( $smtp_timeout > 0 ) {
-		$phpmailer->Timeout = $smtp_timeout;
-	}
-}
 
 
 /*
@@ -338,7 +168,7 @@ function wp_tmq_prewpmail( $return, $atts ) {
 
 	// Capture phpmailer_init configurations from other plugins.
 	// We store them so when sending from queue we can replay them.
-	$phpmailer_config = wp_tmq_capture_phpmailer_config();
+	$phpmailer_config = \TotalMailQueue\Smtp\PhpMailerCapturer::capture();
 	if ( $phpmailer_config ) {
         // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- transport-encoding the captured config so it survives as an email header
 		$headers[] = 'X-TMQ-PHPMailer-Config: ' . base64_encode( \TotalMailQueue\Support\Serializer::encode( $phpmailer_config ) );
@@ -408,52 +238,6 @@ function wp_tmq_prewpmail( $return, $atts ) {
 		// Fake Submit by returning 'True'.
 		return true;
 	}
-}
-
-
-/**
- * **************************************************************
-Capture phpmailer_init configurations from other plugins
- * ***************************************************************
- */
-function wp_tmq_capture_phpmailer_config() {
-	global $wp_tmq_capturing_phpmailer;
-	$wp_tmq_capturing_phpmailer = true;
-	$config                     = array();
-
-	// Create a temporary PHPMailer to capture configurations.
-	if ( ! class_exists( 'PHPMailer\PHPMailer\PHPMailer' ) ) {
-		require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
-		require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
-		require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
-	}
-
-	$test_mailer = new PHPMailer\PHPMailer\PHPMailer( true );
-
-	// Store defaults before hooks.
-	$default_host = $test_mailer->Host;
-	$default_port = $test_mailer->Port;
-	$default_auth = $test_mailer->SMTPAuth;
-
-	// Apply phpmailer_init hooks to capture what other plugins configure.
-    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core action
-	do_action_ref_array( 'phpmailer_init', array( &$test_mailer ) );
-
-	// Only store config if something was changed by hooks.
-	if ( $test_mailer->Host !== $default_host || $test_mailer->Port !== $default_port || $test_mailer->SMTPAuth !== $default_auth ) {
-		$config['Mailer']     = $test_mailer->Mailer;
-		$config['Host']       = $test_mailer->Host;
-		$config['Port']       = $test_mailer->Port;
-		$config['SMTPSecure'] = $test_mailer->SMTPSecure;
-		$config['SMTPAuth']   = $test_mailer->SMTPAuth;
-		$config['Username']   = $test_mailer->Username;
-		$config['Password']   = \TotalMailQueue\Support\Encryption::encrypt( $test_mailer->Password );
-		$config['From']       = $test_mailer->From;
-		$config['FromName']   = $test_mailer->FromName;
-	}
-
-	$wp_tmq_capturing_phpmailer = false;
-	return ! empty( $config ) ? $config : null;
 }
 
 
@@ -673,8 +457,8 @@ function wp_tmq_search_mail_from_queue() {
 	}
 
 	// Reset SMTP counters once per cron run, then get available accounts.
-	wp_tmq_reset_smtp_counters();
-	$smtp_accounts = wp_tmq_get_available_smtp();
+	\TotalMailQueue\Smtp\Repository::resetCounters();
+	$smtp_accounts = \TotalMailQueue\Smtp\Repository::available();
 
 	// Track diagnostics.
 	$diag['queue_total']   = $mailjobs_total;
@@ -726,7 +510,7 @@ function wp_tmq_search_mail_from_queue() {
 				// Find available SMTP account from in-memory list (skip if send_method is 'php').
 				$smtp_to_use = null;
 			if ( 'php' !== $send_method && ! empty( $smtp_accounts ) ) {
-				$smtp_to_use = wp_tmq_pick_available_smtp( $smtp_accounts );
+				$smtp_to_use = \TotalMailQueue\Smtp\Repository::pickAvailable( $smtp_accounts );
 			}
 
 				// In 'smtp' mode, if no SMTP account is available, skip remaining emails.
@@ -747,7 +531,7 @@ function wp_tmq_search_mail_from_queue() {
 				$tmq_phpmailer_hook = null;
 			if ( $smtp_to_use ) {
 				$tmq_phpmailer_hook = function ( $phpmailer ) use ( $smtp_to_use ) {
-					wp_tmq_configure_phpmailer( $phpmailer, $smtp_to_use );
+					\TotalMailQueue\Smtp\Configurator::apply( $phpmailer, $smtp_to_use );
 				};
 					add_action( 'phpmailer_init', $tmq_phpmailer_hook, 999999 );
 			} elseif ( 'auto' === $send_method && $captured_phpmailer_config && is_array( $captured_phpmailer_config ) ) {
@@ -814,8 +598,8 @@ function wp_tmq_search_mail_from_queue() {
 				);
 				// Increment SMTP counter (DB for persistence + in-memory for next iteration).
 				if ( $smtp_to_use ) {
-					wp_tmq_increment_smtp_counter( $smtp_to_use['id'] );
-					wp_tmq_update_memory_counter( $smtp_accounts, $smtp_to_use['id'] );
+					\TotalMailQueue\Smtp\Repository::incrementCounter( $smtp_to_use['id'] );
+					\TotalMailQueue\Smtp\Repository::bumpMemoryCounter( $smtp_accounts, $smtp_to_use['id'] );
 				}
 				++$diag['sent'];
 			} else {
@@ -950,77 +734,6 @@ if ( is_admin() ) {
 
 
 
-/**
- * **************************************************************
-SMTP Test Connection (AJAX)
- * ***************************************************************
- */
-function wp_tmq_ajax_test_smtp_connection() {
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'total-mail-queue' ) ), 403 );
-	}
-
-	if ( ! check_ajax_referer( 'wp_tmq_test_smtp', '_nonce', false ) ) {
-		wp_send_json_error( array( 'message' => __( 'Security check failed. Please reload the page and try again.', 'total-mail-queue' ) ), 403 );
-	}
-
-	$host       = sanitize_text_field( wp_unslash( $_POST['host'] ?? '' ) );
-	$port       = intval( $_POST['port'] ?? 587 );
-	$encryption = sanitize_key( $_POST['encryption'] ?? 'tls' );
-	$auth       = intval( $_POST['auth'] ?? 0 );
-	$username   = sanitize_text_field( wp_unslash( $_POST['username'] ?? '' ) );
-    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
-	$password = wp_unslash( $_POST['password'] ?? '' );
-	$smtp_id  = intval( $_POST['smtp_id'] ?? 0 );
-
-	if ( empty( $host ) ) {
-		wp_send_json_error( array( 'message' => __( 'SMTP host is required.', 'total-mail-queue' ) ) );
-	}
-
-	// If password is empty and we are editing an existing account, use the stored password.
-	if ( '' === $password && 0 < $smtp_id ) {
-		global $wpdb, $wp_tmq_options;
-		$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT `password` FROM `$smtp_table` WHERE `id` = %d", $smtp_id ) );
-		if ( $stored ) {
-			$password = \TotalMailQueue\Support\Encryption::decrypt( $stored );
-		}
-	}
-
-	// Use WordPress built-in PHPMailer.
-	global $phpmailer;
-	require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
-	require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
-	require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
-
-	$mail = new PHPMailer\PHPMailer\PHPMailer( true );
-
-	try {
-		$mail->isSMTP();
-		$mail->Host       = $host;
-		$mail->Port       = $port;
-		$mail->SMTPSecure = 'none' === $encryption ? '' : $encryption;
-		$mail->SMTPAuth   = (bool) $auth;
-		if ( $auth ) {
-			$mail->Username = $username;
-			$mail->Password = $password;
-		}
-		$mail->Timeout = 15;
-
-		$mail->smtpConnect();
-		$mail->smtpClose();
-
-		wp_send_json_success( array( 'message' => __( 'Connection successful! SMTP server responded correctly.', 'total-mail-queue' ) ) );
-
-	} catch ( PHPMailer\PHPMailer\Exception $e ) {
-		wp_send_json_error( array( 'message' => $mail->ErrorInfo ) );
-	} catch ( \Exception $e ) {
-		wp_send_json_error( array( 'message' => $e->getMessage() ) );
-	}
-}
-add_action( 'wp_ajax_wp_tmq_test_smtp', 'wp_tmq_ajax_test_smtp_connection' );
 
 
 /**

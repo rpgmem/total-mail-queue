@@ -69,7 +69,10 @@ final class Plugin {
 		// Run pending schema migrations on every load (cheap when up-to-date).
 		add_action( 'plugins_loaded', array( Database\Migrator::class, 'maybeMigrate' ), 10, 0 );
 
-		// Service registrations are added by later rebuild phases.
+		// Admin AJAX endpoints.
+		Smtp\ConnectionTester::register();
+
+		// Further service registrations are added by upcoming rebuild phases.
 	}
 
 	/**

@@ -7,13 +7,13 @@ namespace TMQ\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers ::wp_tmq_pick_available_smtp
- * @covers ::wp_tmq_update_memory_counter
+ * @covers \TotalMailQueue\Smtp\Repository::pickAvailable
+ * @covers \TotalMailQueue\Smtp\Repository::bumpMemoryCounter
  */
 final class SmtpHelpersTest extends TestCase {
 
     public function test_pick_returns_null_when_list_is_empty(): void {
-        self::assertNull( wp_tmq_pick_available_smtp( array() ) );
+        self::assertNull( \TotalMailQueue\Smtp\Repository::pickAvailable( array() ) );
     }
 
     public function test_pick_returns_first_account_with_unlimited_bulk(): void {
@@ -22,7 +22,7 @@ final class SmtpHelpersTest extends TestCase {
             array( 'id' => 8, 'send_bulk' => 0, 'cycle_sent' => 0 ),
         );
 
-        $picked = wp_tmq_pick_available_smtp( $accounts );
+        $picked = \TotalMailQueue\Smtp\Repository::pickAvailable( $accounts );
 
         self::assertSame( 7, $picked['id'], 'send_bulk=0 means unlimited, so the first one wins regardless of cycle_sent.' );
     }
@@ -33,7 +33,7 @@ final class SmtpHelpersTest extends TestCase {
             array( 'id' => 2, 'send_bulk' => 10, 'cycle_sent' => 9 ),
         );
 
-        $picked = wp_tmq_pick_available_smtp( $accounts );
+        $picked = \TotalMailQueue\Smtp\Repository::pickAvailable( $accounts );
 
         self::assertSame( 2, $picked['id'] );
     }
@@ -44,7 +44,7 @@ final class SmtpHelpersTest extends TestCase {
             array( 'id' => 2, 'send_bulk' => 3, 'cycle_sent' => 3 ),
         );
 
-        self::assertNull( wp_tmq_pick_available_smtp( $accounts ) );
+        self::assertNull( \TotalMailQueue\Smtp\Repository::pickAvailable( $accounts ) );
     }
 
     public function test_pick_handles_string_numeric_values(): void {
@@ -54,7 +54,7 @@ final class SmtpHelpersTest extends TestCase {
             array( 'id' => '5', 'send_bulk' => '2', 'cycle_sent' => '1' ),
         );
 
-        $picked = wp_tmq_pick_available_smtp( $accounts );
+        $picked = \TotalMailQueue\Smtp\Repository::pickAvailable( $accounts );
 
         self::assertSame( '5', $picked['id'] );
     }
@@ -65,7 +65,7 @@ final class SmtpHelpersTest extends TestCase {
             array( 'id' => 2, 'send_bulk' => 10, 'cycle_sent' => 4 ),
         );
 
-        wp_tmq_update_memory_counter( $accounts, 2 );
+        \TotalMailQueue\Smtp\Repository::bumpMemoryCounter( $accounts, 2 );
 
         self::assertSame( 0, $accounts[0]['cycle_sent'] );
         self::assertSame( 5, $accounts[1]['cycle_sent'] );
@@ -77,7 +77,7 @@ final class SmtpHelpersTest extends TestCase {
         );
         $original = $accounts;
 
-        wp_tmq_update_memory_counter( $accounts, 99 );
+        \TotalMailQueue\Smtp\Repository::bumpMemoryCounter( $accounts, 99 );
 
         self::assertSame( $original, $accounts );
     }
@@ -90,7 +90,7 @@ final class SmtpHelpersTest extends TestCase {
             array( 'id' => 3, 'send_bulk' => 10, 'cycle_sent' => 1 ),
         );
 
-        wp_tmq_update_memory_counter( $accounts, 3 );
+        \TotalMailQueue\Smtp\Repository::bumpMemoryCounter( $accounts, 3 );
 
         self::assertSame( 2, $accounts[0]['cycle_sent'] );
         self::assertSame( 1, $accounts[1]['cycle_sent'] );
