@@ -1,19 +1,21 @@
 <?php
-/*
-Plugin Name:         Total Mail Queue
-Plugin URI:          https://github.com/rpgmem/total-mail-queue.
-Description:         Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
-Version:             2.2.1
-Requires at least:   5.9
-Requires PHP:        7.4
-Author:              Alex Meusburger
-Author URI:          https://github.com/rpgmem.
-License:             GPLv3 or later
-License URI:         https://www.gnu.org/licenses/gpl-3.0.html.
-Text Domain:         total-mail-queue
-
-This plugin is a fork of Mail Queue by WDM (https://www.webdesign-muenchen.de).
-Original plugin: https://wordpress.org/plugins/mail-queue/.
+/**
+ * Plugin Name:       Total Mail Queue
+ * Plugin URI:        https://github.com/rpgmem/total-mail-queue
+ * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
+ * Version:           2.2.1
+ * Requires at least: 5.9
+ * Requires PHP:      7.4
+ * Author:            Alex Meusburger
+ * Author URI:        https://github.com/rpgmem
+ * License:           GPLv3 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
+ * Text Domain:       total-mail-queue
+ *
+ * This plugin is a fork of Mail Queue by WDM (https://www.webdesign-muenchen.de).
+ * Original plugin: https://wordpress.org/plugins/mail-queue/
+ *
+ * @package TotalMailQueue
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,11 +34,11 @@ $wp_tmq_version = '2.2.1';
 
 
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 PLUGIN DEFAULT SETTINGS
-****************************************************************
-*/
+ * ***************************************************************
+ */
 function wp_tmq_get_settings() {
 	$defaults = array(
 		'enabled'             => '0',   // 0=disabled, 1=queue (retain+send), 2=block (retain only, no sending).
@@ -59,7 +61,7 @@ function wp_tmq_get_settings() {
 	$args     = get_option( 'wp_tmq_settings' );
 	$options  = wp_parse_args( $args, $defaults );
 
-	if ( $options['queue_interval_unit'] === 'seconds' ) {
+	if ( 'seconds' === $options['queue_interval_unit'] ) {
 		$options['queue_interval'] = intval( $options['queue_interval'] );
 		if ( $options['queue_interval'] < 10 ) {
 			$options['queue_interval'] = 10; } // Minimum Interval 10 Seconds.
@@ -72,11 +74,17 @@ function wp_tmq_get_settings() {
 }
 
 
-/*
- ***************************************************************
-SMTP Password Encryption Helpers
-****************************************************************
-*/
+/**
+ * Encrypt an SMTP account password for at-rest storage.
+ *
+ * Uses AES-256-CBC with a per-call random IV. The wp_salt('auth') is the
+ * key, so the ciphertext is bound to this WordPress installation.
+ *
+ * @since 2.1.0
+ *
+ * @param string $plain_text Password in plaintext (empty string allowed).
+ * @return string Base64-encoded "iv::ciphertext" payload, or '' for empty input.
+ */
 function wp_tmq_encrypt_password( $plain_text ) {
 	if ( empty( $plain_text ) ) {
 		return '';
@@ -88,7 +96,15 @@ function wp_tmq_encrypt_password( $plain_text ) {
     // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- safe storage of binary IV+ciphertext
 	return base64_encode( $iv . '::' . $encrypted );
 }
-
+/**
+ * Decrypt password.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $encrypted_text Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_decrypt_password( $encrypted_text ) {
 	if ( empty( $encrypted_text ) ) {
 		return '';
@@ -106,25 +122,39 @@ function wp_tmq_decrypt_password( $encrypted_text ) {
 }
 
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 Attachments directory helper
-****************************************************************
-*/
+ * ***************************************************************
+ */
 function wp_tmq_attachments_dir() {
 	$upload_dir = wp_upload_dir();
 	return trailingslashit( $upload_dir['basedir'] ) . 'tmq-attachments/';
 }
 
-/*
- ***************************************************************
-Safe serialization helpers (JSON, with backwards-compat for old PHP-serialized data)
-****************************************************************
-*/
+/**
+ * Encode a value for storage in the queue table.
+ *
+ * JSON is used for new writes; wp_tmq_decode() understands both this format
+ * and the legacy PHP-serialize payloads that older versions wrote.
+ *
+ * @since 2.2.0
+ *
+ * @param mixed $value Anything wp_json_encode() accepts.
+ * @return string|false JSON string, or false when encoding fails.
+ */
 function wp_tmq_encode( $value ) {
 	return wp_json_encode( $value );
 }
-
+/**
+ * Decode.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $raw Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_decode( $raw ) {
 	if ( empty( $raw ) || ! is_string( $raw ) ) {
 		return $raw;
@@ -145,11 +175,11 @@ function wp_tmq_decode( $raw ) {
 	return $raw;
 }
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 SMTP Account Helpers
-****************************************************************
-*/
+ * ***************************************************************
+ */
 function wp_tmq_reset_smtp_counters() {
 	global $wpdb, $wp_tmq_options;
 	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
@@ -193,7 +223,13 @@ function wp_tmq_reset_smtp_counters() {
 		)
 	);
 }
-
+/**
+ * Get available smtp.
+ *
+ * @since 2.3.0
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_get_available_smtp() {
 	global $wpdb, $wp_tmq_options;
 	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
@@ -216,12 +252,16 @@ function wp_tmq_get_available_smtp() {
  * Pick the first available SMTP account from the in-memory list.
  *
  * Checks cycle_sent against send_bulk without hitting the database.
- * Returns the account array or null if none available.
+ *
+ * @since 2.2.0
+ *
+ * @param array<int,array<string,mixed>> $smtp_accounts Accounts in priority order.
+ * @return array<string,mixed>|null Selected account row, or null if all are exhausted.
  */
 function wp_tmq_pick_available_smtp( $smtp_accounts ) {
 	foreach ( $smtp_accounts as $acct ) {
 		$bulk = intval( $acct['send_bulk'] );
-		if ( $bulk === 0 || intval( $acct['cycle_sent'] ) < $bulk ) {
+		if ( 0 === $bulk || intval( $acct['cycle_sent'] ) < $bulk ) {
 			return $acct;
 		}
 	}
@@ -231,7 +271,13 @@ function wp_tmq_pick_available_smtp( $smtp_accounts ) {
 /**
  * Update the in-memory SMTP accounts list after a successful send.
  *
- * Increments cycle_sent for the given account key in the array.
+ * Increments cycle_sent for the given account id in the array.
+ *
+ * @since 2.2.0
+ *
+ * @param array<int,array<string,mixed>> $smtp_accounts Accounts list, modified by reference.
+ * @param int                            $smtp_id       ID of the account that just sent.
+ * @return void
  */
 function wp_tmq_update_memory_counter( &$smtp_accounts, $smtp_id ) {
 	$target_id = intval( $smtp_id );
@@ -242,7 +288,15 @@ function wp_tmq_update_memory_counter( &$smtp_accounts, $smtp_id ) {
 		}
 	}
 }
-
+/**
+ * Increment smtp counter.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $smtp_id Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_increment_smtp_counter( $smtp_id ) {
 	global $wpdb, $wp_tmq_options;
 	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
@@ -256,7 +310,16 @@ function wp_tmq_increment_smtp_counter( $smtp_id ) {
 		)
 	);
 }
-
+/**
+ * Configure phpmailer.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $phpmailer Parameter description.
+ * @param mixed $smtp_account Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
 	// Close any existing SMTP connection so we start fresh.
 	// (WordPress reuses the same PHPMailer instance across wp_mail calls).
@@ -266,7 +329,7 @@ function wp_tmq_configure_phpmailer( $phpmailer, $smtp_account ) {
 	$phpmailer->isSMTP();
 	$phpmailer->Host       = $smtp_account['host'];
 	$phpmailer->Port       = intval( $smtp_account['port'] );
-	$phpmailer->SMTPSecure = $smtp_account['encryption'] === 'none' ? '' : $smtp_account['encryption'];
+	$phpmailer->SMTPSecure = 'none' === $smtp_account['encryption'] ? '' : $smtp_account['encryption'];
 	$phpmailer->SMTPAuth   = (bool) $smtp_account['auth'];
 	if ( $smtp_account['auth'] ) {
 		$phpmailer->Username = $smtp_account['username'];
@@ -303,6 +366,16 @@ if ( in_array( $wp_tmq_options['enabled'], array( '1', '2' ), true ) && wp_doing
 }
 
 // pre WP Mail Filter.
+/**
+ * Prewpmail.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $return Parameter description.
+ * @param mixed $atts Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_prewpmail( $return, $atts ) {
 
 	global $wpdb, $wp_tmq_options, $wp_tmq_mailid;
@@ -339,7 +412,7 @@ function wp_tmq_prewpmail( $return, $atts ) {
 		if ( preg_match( '#^X-Mail-Queue-Prio: +Instant *$#i', $val ) ) {
 			array_splice( $headers, $index, 1 );
 			// In block mode, instant emails are also blocked (retained).
-			if ( $wp_tmq_options['enabled'] === '2' ) {
+			if ( '2' === $wp_tmq_options['enabled'] ) {
 				$status = 'queue';
 			} else {
 				$status = 'instant';
@@ -363,7 +436,7 @@ function wp_tmq_prewpmail( $return, $atts ) {
 	// - wp_mail_charset.
 	// - wp_mail_from.
 	// - wp_mail_from_name.
-	if ( $status !== 'instant' ) {
+	if ( 'instant' !== $status ) {
 		if ( ! $has_content_type_header ) {
             // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core filter
 			$content_type = apply_filters( 'wp_mail_content_type', 'text/plain' );
@@ -454,7 +527,7 @@ function wp_tmq_prewpmail( $return, $atts ) {
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$inserted = $wpdb->insert( $table_name, $data );
 
-	if ( $status === 'instant' ) {
+	if ( 'instant' === $status ) {
 		$wp_tmq_mailid = $wpdb->insert_id;
 		return null;
 	} elseif ( ! $inserted ) {
@@ -467,11 +540,11 @@ function wp_tmq_prewpmail( $return, $atts ) {
 }
 
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 Capture phpmailer_init configurations from other plugins
-****************************************************************
-*/
+ * ***************************************************************
+ */
 function wp_tmq_capture_phpmailer_config() {
 	global $wp_tmq_capturing_phpmailer;
 	$wp_tmq_capturing_phpmailer = true;
@@ -514,9 +587,18 @@ function wp_tmq_capture_phpmailer_config() {
 
 
 // show wp_mail() errors — with auto-retry support.
+/**
+ * Mail failed.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $wp_error Parameter description.
+ *
+ * @return void
+ */
 function wp_tmq_mail_failed( $wp_error ) {
 	global $wpdb, $wp_tmq_options, $wp_tmq_mailid;
-	if ( isset( $wp_tmq_mailid ) && $wp_tmq_mailid !== 0 ) {
+	if ( isset( $wp_tmq_mailid ) && 0 !== $wp_tmq_mailid ) {
 		$table_name           = $wpdb->prefix . $wp_tmq_options['tableName'];
 		$wp_mail_failed_error = isset( $wp_error->errors ) && isset( $wp_error->errors['wp_mail_failed'][0] ) ? implode( '; ', $wp_error->errors['wp_mail_failed'] ) : '<em>' . __( 'Unknown', 'total-mail-queue' ) . '</em>';
 
@@ -572,13 +654,20 @@ add_action( 'wp_mail_failed', 'wp_tmq_mail_failed', 10, 1 );
 // WP fires `do_action( 'wp_mail_succeeded', $mail_data )` but we don't read the.
 // payload — we identify the row via the $wp_tmq_mailid global that wp_tmq_prewpmail.
 // set when the row was inserted. accepted_args=0 below tells WP not to forward it.
+/**
+ * Mail succeeded.
+ *
+ * @since 2.3.0
+ *
+ * @return void
+ */
 function wp_tmq_mail_succeeded() {
 	global $wpdb, $wp_tmq_options, $wp_tmq_mailid;
-	if ( isset( $wp_tmq_mailid ) && $wp_tmq_mailid !== 0 ) {
+	if ( isset( $wp_tmq_mailid ) && 0 !== $wp_tmq_mailid ) {
 		$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$current = $wpdb->get_row( $wpdb->prepare( "SELECT `status` FROM `$table_name` WHERE `id` = %d", intval( $wp_tmq_mailid ) ), ARRAY_A );
-		if ( $current && $current['status'] === 'instant' ) {
+		if ( $current && 'instant' === $current['status'] ) {
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$table_name,
@@ -600,11 +689,11 @@ add_action( 'wp_mail_succeeded', 'wp_tmq_mail_succeeded', 10, 0 );
 
 
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 CRON
-****************************************************************
-*/
+ * ***************************************************************
+ */
 function wp_tmq_search_mail_from_queue() {
 
 	global $wpdb, $wp_tmq_options, $wp_tmq_mailid, $wp_tmq_pre_wp_mail_priority;
@@ -613,7 +702,7 @@ function wp_tmq_search_mail_from_queue() {
 	$diag = array( 'time' => current_time( 'mysql', false ) );
 
 	// Only process queue in mode 1 (queue). Mode 2 (block) retains but never sends.
-	if ( $wp_tmq_options['enabled'] !== '1' ) {
+	if ( '1' !== $wp_tmq_options['enabled'] ) {
 		$diag['result'] = 'skipped: plugin not in queue mode (enabled=' . $wp_tmq_options['enabled'] . ')';
 		update_option( 'wp_tmq_last_cron', $diag, false );
 		return;
@@ -667,7 +756,7 @@ function wp_tmq_search_mail_from_queue() {
 	$mails_in_queue = is_array( $mailjob_ids ) ? count( $mailjob_ids ) : 0;
 
 	// Alert Admin, if too many mails in the Queue.
-	if ( $wp_tmq_options['alert_enabled'] === '1' && $mailjobs_total > intval( $wp_tmq_options['email_amount'] ) ) {
+	if ( '1' === $wp_tmq_options['alert_enabled'] && $mailjobs_total > intval( $wp_tmq_options['email_amount'] ) ) {
 
 		// Last alerts older than 6 hours?
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -765,12 +854,12 @@ function wp_tmq_search_mail_from_queue() {
 
 				// Find available SMTP account from in-memory list (skip if send_method is 'php').
 				$smtp_to_use = null;
-			if ( $send_method !== 'php' && ! empty( $smtp_accounts ) ) {
+			if ( 'php' !== $send_method && ! empty( $smtp_accounts ) ) {
 				$smtp_to_use = wp_tmq_pick_available_smtp( $smtp_accounts );
 			}
 
 				// In 'smtp' mode, if no SMTP account is available, skip remaining emails.
-			if ( $send_method === 'smtp' && ! $smtp_to_use ) {
+			if ( 'smtp' === $send_method && ! $smtp_to_use ) {
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				$wpdb->update(
 					$table_name,
@@ -790,7 +879,7 @@ function wp_tmq_search_mail_from_queue() {
 					wp_tmq_configure_phpmailer( $phpmailer, $smtp_to_use );
 				};
 					add_action( 'phpmailer_init', $tmq_phpmailer_hook, 999999 );
-			} elseif ( $send_method === 'auto' && $captured_phpmailer_config && is_array( $captured_phpmailer_config ) ) {
+			} elseif ( 'auto' === $send_method && $captured_phpmailer_config && is_array( $captured_phpmailer_config ) ) {
 				// Replay captured phpmailer config only in 'auto' mode.
 				$tmq_phpmailer_hook = function ( $phpmailer ) use ( $captured_phpmailer_config ) {
 					if ( method_exists( $phpmailer, 'smtpClose' ) ) {
@@ -798,7 +887,7 @@ function wp_tmq_search_mail_from_queue() {
 					}
 					foreach ( $captured_phpmailer_config as $prop => $val ) {
 						if ( property_exists( $phpmailer, $prop ) ) {
-							if ( $prop === 'Password' ) {
+							if ( 'Password' === $prop ) {
 								$val = wp_tmq_decrypt_password( $val );
 							}
 							$phpmailer->$prop = $val;
@@ -920,6 +1009,15 @@ function wp_tmq_search_mail_from_queue() {
 add_action( 'wp_tmq_mail_queue_hook', 'wp_tmq_search_mail_from_queue' );
 
 // Custom Cron Interval.
+/**
+ * Cron interval.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $schedules Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_cron_interval( $schedules ) {
 	global $wp_tmq_options;
 	$schedules['wp_tmq_interval'] = array(
@@ -932,9 +1030,9 @@ add_filter( 'cron_schedules', 'wp_tmq_cron_interval' );
 
 // Set or Remove Cron (enabled=1 needs cron, enabled=2 block mode doesn't need cron).
 $wp_tmq_next_cron_timestamp = wp_next_scheduled( 'wp_tmq_mail_queue_hook' );
-if ( $wp_tmq_next_cron_timestamp && $wp_tmq_options['enabled'] !== '1' ) {
+if ( $wp_tmq_next_cron_timestamp && '1' !== $wp_tmq_options['enabled'] ) {
 	wp_unschedule_event( $wp_tmq_next_cron_timestamp, 'wp_tmq_mail_queue_hook' );
-} elseif ( ! $wp_tmq_next_cron_timestamp && $wp_tmq_options['enabled'] === '1' ) {
+} elseif ( ! $wp_tmq_next_cron_timestamp && '1' === $wp_tmq_options['enabled'] ) {
 	wp_schedule_event( time(), 'wp_tmq_interval', 'wp_tmq_mail_queue_hook' );
 }
 
@@ -947,7 +1045,7 @@ Install/Uninstall/Upgrade
 */
 
 
-/* Delete plugin options and database table */
+/** Delete plugin options and database table */
 function wp_tmq_uninstall() {
 	global $wpdb;
 
@@ -984,12 +1082,12 @@ function wp_tmq_uninstall() {
 	}
 }
 
-/* Delete Cron when Plugin deactivated */
+/** Delete Cron when Plugin deactivated */
 function wp_tmq_deactivate() {
 	wp_clear_scheduled_hook( 'wp_tmq_mail_queue_hook' );
 }
 
-/* Create/Upgrade MySQL Table on Activation/Upgrade: https://codex.wordpress.org/Creating_Tables_with_Plugins */
+/** Create/Upgrade MySQL Table on Activation/Upgrade: https://codex.wordpress.org/Creating_Tables_with_Plugins */
 function wp_tmq_updateDatabaseTables() {
 	global $wpdb, $wp_tmq_version;
 
@@ -1048,7 +1146,7 @@ function wp_tmq_updateDatabaseTables() {
 	update_option( 'wp_tmq_version', $wp_tmq_version, /*autoload*/true );
 }
 
-/* Update database on activation */
+/** Update database on activation */
 function wp_tmq_activate() {
 	wp_tmq_updateDatabaseTables();
 }
@@ -1056,7 +1154,7 @@ register_activation_hook( __FILE__, 'wp_tmq_activate' );
 register_deactivation_hook( __FILE__, 'wp_tmq_deactivate' );
 register_uninstall_hook( __FILE__, 'wp_tmq_uninstall' );
 
-/* Upgrade routine: check for mismatching version numbers and run database update if necessary */
+/** Upgrade routine: check for mismatching version numbers and run database update if necessary */
 function wp_tmq_check_update_db() {
 	global $wp_tmq_version;
 	if ( get_option( 'wp_tmq_version' ) !== $wp_tmq_version ) {
@@ -1066,6 +1164,13 @@ function wp_tmq_check_update_db() {
 add_action( 'plugins_loaded', 'wp_tmq_check_update_db', 10, 0 );
 
 // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- needed for self-hosted installs and custom language paths
+/**
+ * Load textdomain.
+ *
+ * @since 2.3.0
+ *
+ * @return void
+ */
 function wp_tmq_load_textdomain() {
 	load_plugin_textdomain( 'total-mail-queue', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
@@ -1087,12 +1192,11 @@ if ( is_admin() ) {
 
 
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 SMTP Test Connection (AJAX)
-****************************************************************
-*/
-
+ * ***************************************************************
+ */
 function wp_tmq_ajax_test_smtp_connection() {
 
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -1117,7 +1221,7 @@ function wp_tmq_ajax_test_smtp_connection() {
 	}
 
 	// If password is empty and we are editing an existing account, use the stored password.
-	if ( $password === '' && $smtp_id > 0 ) {
+	if ( '' === $password && 0 < $smtp_id ) {
 		global $wpdb, $wp_tmq_options;
 		$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -1139,7 +1243,7 @@ function wp_tmq_ajax_test_smtp_connection() {
 		$mail->isSMTP();
 		$mail->Host       = $host;
 		$mail->Port       = $port;
-		$mail->SMTPSecure = $encryption === 'none' ? '' : $encryption;
+		$mail->SMTPSecure = 'none' === $encryption ? '' : $encryption;
 		$mail->SMTPAuth   = (bool) $auth;
 		if ( $auth ) {
 			$mail->Username = $username;
@@ -1161,13 +1265,11 @@ function wp_tmq_ajax_test_smtp_connection() {
 add_action( 'wp_ajax_wp_tmq_test_smtp', 'wp_tmq_ajax_test_smtp_connection' );
 
 
-/*
- ***************************************************************
+/**
+ * **************************************************************
 REST API
-****************************************************************
-*/
-
-
+ * ***************************************************************
+ */
 function wp_tmq_add_rest_endpoints() {
 	register_rest_route(
 		'tmq/v1',
@@ -1182,8 +1284,15 @@ function wp_tmq_add_rest_endpoints() {
 	);
 }
 add_action( 'rest_api_init', 'wp_tmq_add_rest_endpoints', 10, 0 );
-
-
+/**
+ * Rest get message.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $request Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_rest_get_message( $request ) {
 	global $wpdb, $wp_tmq_options;
 	$table_name = $wpdb->prefix . $wp_tmq_options['tableName'];
@@ -1215,7 +1324,16 @@ function wp_tmq_rest_get_message( $request ) {
 		return new WP_Error( 'no_message', __( 'Message not found', 'total-mail-queue' ), array( 'status' => 404 ) );
 	}
 }
-
+/**
+ * Render list message.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $message Parameter description.
+ * @param mixed $is_content_type_html Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_render_list_message( $message, $is_content_type_html ) {
 	// Split html emails into parts and extract plain text preview.
 	$parts   = explode( '<body', $message );
@@ -1256,7 +1374,15 @@ function wp_tmq_render_list_message( $message, $is_content_type_html ) {
 	$html .= $footer ? '<details class="tmq-email-source-meta"><summary>' . esc_html__( 'HTML Footer', 'total-mail-queue' ) . '</summary><pre>' . esc_html( wp_tmq_render_html_for_display( $footer ) ) . '</pre></details>' : '';
 	return $html;
 }
-
+/**
+ * Render html for display.
+ *
+ * @since 2.3.0
+ *
+ * @param mixed $html Parameter description.
+ *
+ * @return mixed Function output.
+ */
 function wp_tmq_render_html_for_display( $html ) {
 	$html = preg_replace( '/;base64,[^"\']+("|\')+/', ';base64, [...] $1', $html );
 	return $html;
