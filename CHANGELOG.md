@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > A full namespaced rebuild of the plugin. Procedural functions and the
 > `$wp_tmq_*` globals are gone; every responsibility now lives in a
 > dedicated class under the `TotalMailQueue\` namespace, loaded by a
-> small inline PSR-4 autoloader. Hook wiring is centralised in
-> `Plugin::boot()`. The on-disk schema, option keys, cron events, page
-> slugs, nonces and AJAX action names are unchanged — existing installs
-> upgrade in place.
+> small inline autoloader (`autoload.php` at the plugin root). Hook
+> wiring is centralised in `Plugin::boot()`. Source files live under
+> `src/` with lowercase directories + kebab-case filenames
+> (`src/admin/plugin-page.php`) for case-coherent Linux deployments.
+> The on-disk schema, option keys, cron events, page slugs, nonces and
+> AJAX action names are unchanged — existing installs upgrade in place.
 
 ### Added
 

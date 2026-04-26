@@ -22,24 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// PSR-4 autoloader for the plugin's own TotalMailQueue\ namespace.
-// The plugin has no third-party runtime dependencies, so it doesn't ship
-// (or rely on) a Composer-generated vendor/. Dev tooling (PHPUnit, PHPCS,
-// PHPStan, Brain Monkey) still uses vendor/autoload.php from the test
-// bootstraps; production loads only this inline autoloader.
-spl_autoload_register(
-	static function ( $class ) {
-		$prefix = 'TotalMailQueue\\';
-		if ( 0 !== strpos( $class, $prefix ) ) {
-			return;
-		}
-		$relative = substr( $class, strlen( $prefix ) );
-		$path     = __DIR__ . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
-		if ( is_file( $path ) ) {
-			require $path;
-		}
-	}
-);
+// PSR-4-style autoloader for the plugin's TotalMailQueue\ namespace. No
+// third-party runtime dependencies, so vendor/autoload.php is purely a
+// dev-time concern.
+require_once __DIR__ . '/autoload.php';
 
 // All plugin behaviour — settings, support helpers, queue, cron, retention,
 // SMTP, admin UI, REST, lifecycle — is owned by namespaced classes under
