@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TMQ\Tests\Functional;
 
 /**
- * Exercises wp_tmq_search_mail_from_queue() with a real database.
+ * Exercises \TotalMailQueue\Cron\BatchProcessor::run() with a real database.
  *
  * The plugin clears every pre_wp_mail filter before calling wp_mail() in cron,
  * which means a test-only short-circuit filter is unreliable. Instead we lean
@@ -13,7 +13,7 @@ namespace TMQ\Tests\Functional;
  * intercepts at the PHPMailer level — so wp_mail() returns true without
  * making any network calls, and we can introspect the captured messages.
  *
- * @covers ::wp_tmq_search_mail_from_queue
+ * @covers \TotalMailQueue\Cron\BatchProcessor::run
  */
 final class CronFlowTest extends FunctionalTestCase {
 
@@ -31,7 +31,7 @@ final class CronFlowTest extends FunctionalTestCase {
             $this->insertQueueItem( array( 'subject' => 'c' ) ),
         );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         foreach ( $ids as $id ) {
@@ -50,7 +50,7 @@ final class CronFlowTest extends FunctionalTestCase {
             $this->insertQueueItem( array( 'subject' => "msg-$i" ) );
         }
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         $mailer = tests_retrieve_phpmailer_instance();
         self::assertCount( 2, $mailer->mock_sent, 'A single cron run must send at most queue_amount emails.' );
@@ -66,7 +66,7 @@ final class CronFlowTest extends FunctionalTestCase {
         $normal = $this->insertQueueItem( array( 'status' => 'queue', 'subject' => 'normal' ) );
         $high   = $this->insertQueueItem( array( 'status' => 'high',  'subject' => 'urgent' ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         $high_status   = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM `{$this->queueTable()}` WHERE id = %d", $high ) );
@@ -80,7 +80,7 @@ final class CronFlowTest extends FunctionalTestCase {
         $this->setPluginOptions( array( 'enabled' => '0', 'queue_amount' => 5 ) );
         $this->insertQueueItem( array( 'subject' => 'should-stay' ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         $mailer = tests_retrieve_phpmailer_instance();
         self::assertEmpty( $mailer->mock_sent );
@@ -94,7 +94,7 @@ final class CronFlowTest extends FunctionalTestCase {
         $this->setPluginOptions( array( 'enabled' => '2', 'queue_amount' => 5 ) );
         $this->insertQueueItem( array( 'subject' => 'blocked' ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         $mailer = tests_retrieve_phpmailer_instance();
         self::assertEmpty( $mailer->mock_sent );
@@ -107,7 +107,7 @@ final class CronFlowTest extends FunctionalTestCase {
         $this->setPluginOptions( array( 'enabled' => '1', 'queue_amount' => 5, 'send_method' => 'smtp' ) );
         $this->insertQueueItem( array( 'subject' => 'waiting-for-smtp' ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         $row = $wpdb->get_row( "SELECT status, info FROM `{$this->queueTable()}` LIMIT 1", ARRAY_A );
@@ -122,7 +122,7 @@ final class CronFlowTest extends FunctionalTestCase {
         $this->insertQueueItem();
         $this->insertQueueItem();
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         $diag = get_option( 'wp_tmq_last_cron' );
         self::assertIsArray( $diag );

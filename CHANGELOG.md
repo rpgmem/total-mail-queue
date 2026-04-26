@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Namespaced rebuild — phase N6 (queue + cron + retention).** The heart of the plugin moved into namespaced classes:
+    - **Queue:**
+        - `Queue\QueueRepository` — every read/write against `{$prefix}total_mail_queue` (insert, update by id, find by id, pending count/ids, status/info/retry-state lookups, recent-alert check).
+        - `Queue\AttachmentStore` — staging area under `wp-content/uploads/tmq-attachments/`. `stage()` copies the originals into a per-email subfolder; `releaseFor()` deletes the subfolder after the send.
+        - `Queue\Tracker` — replaces the legacy `$wp_tmq_mailid` global. Static `set()`/`get()`/`reset()` carry the in-flight queue row id between the interceptor and the success/failure handlers.
+        - `Queue\MailInterceptor` — `pre_wp_mail` filter. Recognises `X-Mail-Queue-Prio: Instant|High`, backfills `Content-Type`/`From` from `wp_mail_*` filters before storing, snapshots third-party `phpmailer_init` config, and inserts the row.
+        - `Queue\MailFailedHandler` — `wp_mail_failed` action. Auto-retry up to `max_retries`, then mark `error` with a "Failed after N attempt(s)" message.
+        - `Queue\MailSucceededHandler` — `wp_mail_succeeded` action. Flips `instant` rows to `sent` once WordPress confirms delivery.
+    - **Cron:**
+        - `Cron\Scheduler` — registers the `wp_tmq_interval` schedule, hooks `BatchProcessor::run` onto the queue event, and (un)schedules the event based on `enabled`.
+        - `Cron\BatchProcessor` — the cron worker. Same orchestration as the legacy `wp_tmq_search_mail_from_queue`, split into `run()` (top-level) and `sendOne()` (per-row). `reset()` clears the in-process re-entrancy guard for tests.
+        - `Cron\CronLock` — wraps MySQL `GET_LOCK` / `RELEASE_LOCK`. `acquire()` registers a shutdown function for the failsafe release.
+        - `Cron\Diagnostics` — accumulator for the `wp_tmq_last_cron` option.
+        - `Cron\AlertSender` — fires the queue-overflow alert email (with the 6-hour throttle).
+    - **Retention:**
+        - `Retention\LogPruner` — `pruneByAge()` (clear_queue) + `pruneByCount()` (log_max_records). Run at the end of every batch.
 - **Namespaced rebuild — phase N5 (SMTP).** Six SMTP-related procedural functions and one AJAX handler replaced by four namespaced classes:
     - `TotalMailQueue\Smtp\Repository` — CRUD-adjacent access to the SMTP accounts table. `resetCounters()`, `available()`, `pickAvailable()`, `bumpMemoryCounter()`, `incrementCounter()`, `findPasswordById()`. Uses `Database\Schema::smtpTable()` for the table name.
     - `TotalMailQueue\Smtp\Configurator` — `apply($phpmailer, $smtp_account)`. Reads the SMTP timeout from `Settings\Options::get()` rather than the legacy `$wp_tmq_options` global, and decrypts the stored password through `Support\Encryption::decrypt()`.
@@ -41,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All 7 procedural support functions (`wp_tmq_encrypt_password`, `wp_tmq_decrypt_password`, `wp_tmq_encode`, `wp_tmq_decode`, `wp_tmq_attachments_dir`, `wp_tmq_render_list_message`, `wp_tmq_render_html_for_display`) **removed**. Every call site — including the test suite — was migrated to the namespaced equivalents.
 - The 5 procedural lifecycle/upgrade functions (`wp_tmq_activate`, `wp_tmq_deactivate`, `wp_tmq_uninstall`, `wp_tmq_updateDatabaseTables`, `wp_tmq_check_update_db`) **removed**. Their hook registrations (`register_activation_hook`, `register_deactivation_hook`, `register_uninstall_hook`, `add_action('plugins_loaded', …)`) now live in `Plugin::boot()` and target the new namespaced handlers.
 - The 2 procedural settings functions (`wp_tmq_get_settings`, `wp_tmq_sanitize_settings`) **removed**. Boot-time and post-import refreshes of the `$wp_tmq_options` global now call `\TotalMailQueue\Settings\Options::get()`. The Settings API `register_setting()` callback now references `\TotalMailQueue\Settings\Sanitizer::sanitize`.
+- The 5 procedural Queue/Cron functions (`wp_tmq_prewpmail`, `wp_tmq_mail_failed`, `wp_tmq_mail_succeeded`, `wp_tmq_search_mail_from_queue`, `wp_tmq_cron_interval`) **removed**, along with their `add_filter`/`add_action` registrations and the legacy `$wp_tmq_mailid` / `$wp_tmq_pre_wp_mail_priority` globals. Hook wiring is now centralised in `Plugin::boot()`.
 - The 7 procedural SMTP functions (`wp_tmq_reset_smtp_counters`, `wp_tmq_get_available_smtp`, `wp_tmq_pick_available_smtp`, `wp_tmq_update_memory_counter`, `wp_tmq_increment_smtp_counter`, `wp_tmq_configure_phpmailer`, `wp_tmq_capture_phpmailer_config`) and the AJAX handler `wp_tmq_ajax_test_smtp_connection` **removed**. Their call sites in the queue/cron flow point at the namespaced classes; the AJAX action is now registered by `ConnectionTester::register()` from `Plugin::boot()`.
 - `phpcs.xml.dist` extended to scan `src/` with PSR-4-compatible overrides: WP-procedural conventions (`NotHyphenatedLowercase`, `MethodNameInvalid`, `NonPrefixedNamespaceFound`, `ExceptionNotEscaped`) are scoped out of `src/*` because they conflict with PSR-12 / PSR-4 by design.
 - **Automated test suite (PHPUnit 9).**

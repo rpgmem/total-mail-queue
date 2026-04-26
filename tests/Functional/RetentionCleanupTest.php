@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace TMQ\Tests\Functional;
 
 /**
- * Verifies the cleanup paths inside wp_tmq_search_mail_from_queue() that
+ * Verifies the cleanup paths inside \TotalMailQueue\Cron\BatchProcessor::run() that
  * trim the log table by age (clear_queue) and by hard cap (log_max_records).
  *
- * @covers ::wp_tmq_search_mail_from_queue
+ * @covers \TotalMailQueue\Cron\BatchProcessor::run
  */
 final class RetentionCleanupTest extends FunctionalTestCase {
 
@@ -26,7 +26,7 @@ final class RetentionCleanupTest extends FunctionalTestCase {
             'timestamp' => gmdate( 'Y-m-d H:i:s', strtotime( '-3 days' ) ),
         ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         $rows = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$this->queueTable()}` WHERE `status` = 'sent'" );
@@ -43,7 +43,7 @@ final class RetentionCleanupTest extends FunctionalTestCase {
             'timestamp' => gmdate( 'Y-m-d H:i:s', strtotime( '-7 days' ) ),
         ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         $rows = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$this->queueTable()}` WHERE `status` = 'queue'" );
@@ -63,7 +63,7 @@ final class RetentionCleanupTest extends FunctionalTestCase {
         $this->insertQueueItem( array( 'status' => 'sent', 'timestamp' => gmdate( 'Y-m-d H:i:s', strtotime( '-2 hours' ) ), 'subject' => 'middle' ) );
         $this->insertQueueItem( array( 'status' => 'sent', 'timestamp' => gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ),  'subject' => 'newest' ) );
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         $surviving = $wpdb->get_col( "SELECT subject FROM `{$this->queueTable()}` ORDER BY timestamp DESC" );
@@ -86,7 +86,7 @@ final class RetentionCleanupTest extends FunctionalTestCase {
             ) );
         }
 
-        wp_tmq_search_mail_from_queue();
+        \TotalMailQueue\Cron\BatchProcessor::run();
 
         global $wpdb;
         $rows = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$this->queueTable()}`" );
