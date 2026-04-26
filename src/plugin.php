@@ -58,7 +58,6 @@ final class Plugin {
 
 		self::$container = new Container();
 		self::$container->set( 'plugin.file', static fn (): string => $main_file );
-		self::$container->set( 'plugin.dir', static fn (): string => trailingslashit( dirname( $main_file ) ) );
 
 		// Lifecycle hooks. Uninstall is wired via the dedicated uninstall.php
 		// file at the plugin root (WP convention) since register_uninstall_hook

@@ -84,7 +84,7 @@ final class SettingsApi {
 		if ( '0' === $mode ) {
 			echo ' <span class="tmq-warning">' . esc_html__( 'The plugin is currently disabled and has no effect.', 'total-mail-queue' ) . '</span>';
 		} elseif ( '2' === $mode ) {
-			echo ' <span class="tmq-warning tmq-warning-block">' . esc_html__( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
+			echo ' <span class="tmq-warning">' . esc_html__( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
 		}
 	}
 
@@ -202,7 +202,7 @@ final class SettingsApi {
 		/* translators: %s: recommended value */
 		echo wp_kses_post( sprintf( __( 'Maximum time a cron batch can hold the processing lock. If the batch finishes normally, the lock is released immediately. This timeout is a safety net: if PHP crashes mid-batch, the lock expires after this period and the queue resumes automatically. Recommended: %s seconds (5 minutes). Minimum: 30 seconds.', 'total-mail-queue' ), '<strong>300</strong>' ) );
 		echo '</p>';
-		echo '<p class="description tmq-warning-block">';
+		echo '<p class="description tmq-text-danger">';
 		echo esc_html__( 'Too low: the lock may expire while a large batch is still sending, allowing overlapping batches (risk of duplicate emails). Too high: if the process crashes, the queue will be blocked until the timeout expires.', 'total-mail-queue' );
 		echo '</p>';
 	}

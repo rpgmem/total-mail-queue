@@ -189,8 +189,8 @@ final class SmtpPage {
 		echo '<div class="tmq-box">';
 		echo '<h3>' . esc_html( $form_title ) . '</h3>';
 		echo '<form method="post" autocomplete="off" action="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '">';
-		// Hidden decoy fields to absorb browser autofill.
-		echo '<div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden;">';
+		// Hidden decoy fields to absorb browser autofill (positioned off-screen via .tmq-autofill-decoy in admin.css).
+		echo '<div class="tmq-autofill-decoy" aria-hidden="true">';
 		echo '<input type="text" name="tmq_decoy_user" tabindex="-1" />';
 		echo '<input type="password" name="tmq_decoy_pass" tabindex="-1" />';
 		echo '</div>';

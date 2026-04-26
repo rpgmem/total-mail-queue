@@ -1,5 +1,5 @@
 
-.wrap summary{
+.wrap summary {
 	cursor: pointer; }
 .tmq-box, .toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
 	padding: 2rem;
@@ -13,21 +13,21 @@
 .tmq-select-all {
 	margin-left: 0 !important; }
 h1.tmq-title {
-	position: relative; padding: 3rem 0 3rem 7.5rem; }
+	position: relative; padding: 1rem 0 1.25rem 5rem; margin: 0; }
 h1.tmq-title::before {
 	content: "";
 	position: absolute;
 	left: 0;
 	top: 50%;
 	transform: translateY(-50%);
-	width: 6rem;
-	height: 6rem;
+	width: 4rem;
+	height: 4rem;
 	background: url("../img/total-mail-queue-icon.gif?v=1.0.0") scroll no-repeat center center/contain transparent; }
 @media (-webkit-min-device-pixel-ratio: 1.5) {
 	h1.tmq-title::before {
 		background-image: url("../img/total-mail-queue-icon-2x.gif?v=1.0.0"); }}
-.tmq-logo { 
-	width: 18rem;
+.tmq-logo {
+	width: 14rem;
 	height: auto; }
 .tmq-box + .tmq-box {
 	border-top: 1px solid #ddd; }
@@ -50,12 +50,15 @@ span.tmq-status + span.tmq-status {
 .tmq-ok {
 	background: green;
 	color: white; }
+/*
+ * #b32d2e (darker than the WordPress signature red #d63638) keeps the
+ * white text above the WCAG AA 4.5:1 contrast threshold.
+ */
 .tmq-warning {
-	background: red;
-	color: white; }
+	background: #b32d2e;
+	color: #fff; }
 span.tmq-status.tmq-status-high,
-span.tmq-status.tmq-status-sent,
-span.tmq-status.tmq-status-sent-from-queue {
+span.tmq-status.tmq-status-sent {
 	background: green;
 	color: white; }
 span.tmq-status.tmq-status-instant {
@@ -67,37 +70,6 @@ span.tmq-status.tmq-status-alert {
 span.tmq-status.tmq-status-blocked-by-source {
 	background: #b32d2e;
 	color: white; }
-.tmq-status-has-info {
-	position: relative; }
-.tmq-status-has-info::after {
-	content: "";
-	position: absolute;
-	right: -2em;
-	top: 60%;
-	transform: translateY(-50%);
-	width: 1.5em;
-	height: 1.5em;
-	margin-left: .25em;
-	background: scroll no-repeat center center/contain transparent;
-	opacity: .35;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='currentColor'%3E%3Cpath d='M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm0-10a1 1 0 0 1 1 1v5a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm0-1a1 1 0 1 1 0-2 1 1 0 0 1 0 2z'%3E%3C/path%3E%3C/svg%3E"); }
-.tmq-info {
-	position: absolute;
-	top: 50%;
-	left: calc(100% + 1.25rem);
-	z-index: 9;
-	visibility: hidden;
-	padding: .75rem;
-	background-color: #1d2327;
-	color: #fff;
-	line-height: 1.35;
-	border-radius: 5px;
-	box-shadow: 0 .5rem 4rem -1rem rgba(0,0,0,.15);
-	white-space: pre; }
-.tmq-status-has-info:hover .tmq-info {
-	visibility: visible; }
-.column-id {
-	width: 30px; }
 .column-timestamp {
 	width: 150px; }
 .column-status {
@@ -137,7 +109,13 @@ span.tmq-status.tmq-status-blocked-by-source {
 	margin-top: .125rem; }
 .tmq-email-plain-text {
 	white-space: break-spaces; }
-.tmq-warning-block {
+/*
+ * Inline danger text (no background — for short caution paragraphs).
+ * Deliberately NOT named .tmq-warning-block to avoid colliding with
+ * .tmq-warning (red banner with white text); putting both on the same
+ * element used to win this rule on cascade and produced red-on-red.
+ */
+.tmq-text-danger {
 	color: #d63638; }
 .tmq-inline-form {
 	display: inline; }
@@ -155,3 +133,14 @@ span.tmq-status.tmq-status-blocked-by-source {
 .tmq-conn-field:disabled {
 	background-color: #f0f0f1;
 	cursor: not-allowed; }
+/*
+ * Off-screen decoy inputs that absorb browser autofill so the SMTP
+ * username/password aren't pre-filled with the WordPress admin
+ * credentials. Visually hidden + removed from the tab order.
+ */
+.tmq-autofill-decoy {
+	position: absolute;
+	left: -9999px;
+	top: -9999px;
+	height: 0;
+	overflow: hidden; }

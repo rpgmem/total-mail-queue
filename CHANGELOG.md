@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> Tracks work that will roll into **2.4.0** — a new "individual control of emails by source" feature. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. Roll-out is split across phases S1 → S5; this section grows as each phase merges.
+> Tracks work that will roll into **2.4.0** — a new "individual control of emails by source" feature plus a small admin/UI cleanup pass. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. Roll-out is split across phases S1 → S5; the cleanup ships alongside.
 
 ### Added
 
@@ -63,6 +63,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Plugin version bumped to 2.4.0** (`total-mail-queue.php` header, `readme.txt` `Stable tag`, `Plugin::VERSION`). The bump triggers `Database\Migrator::maybeMigrate()` on next load, which calls `Schema::install()` and dbDelta picks up the new table + column.
+- **Compact admin header.** The plugin's logo block on every tab page now uses a 4rem icon and 1rem/1.25rem vertical padding (was 6rem icon and 3rem/3rem padding). The wordmark image renders at 14rem instead of 18rem. Net effect: ~60px less vertical space between the WordPress admin bar and the tab nav.
+- **Block-mode banner contrast.** The "All outgoing emails are being blocked!" banner (Settings tab when the plugin is in block mode) was previously emitted with both `.tmq-warning` (red background + white text) and `.tmq-warning-block` (red text), which made it red-on-red and unreadable. Dropped the second class from the banner.
+- **Renamed `.tmq-warning-block` → `.tmq-text-danger`** so its name no longer rhymes with `.tmq-warning`. The two classes solve different problems (a red banner with white text vs. a short paragraph of red caution copy); having near-identical names invited the cascade conflict above. `.tmq-text-danger` keeps the same `color: #d63638;` rule and is used by the cron-lock-TTL caution copy in `Admin\SettingsApi::renderCronLockTtl()`.
+- **`.tmq-warning` background** darkened from CSS-named `red` (#ff0000, 4.0:1 contrast vs white text) to `#b32d2e` (5.94:1) so the banner clears WCAG AA for normal text.
+- **Inline `style=""` on the SMTP form decoy fields** moved into `.tmq-autofill-decoy` in `assets/css/admin.css`. The behaviour (off-screen browser-autofill absorbers) is identical.
+
+### Removed
+
+- **Dead CSS rules** in `assets/css/admin.css`: `.tmq-status-sent-from-queue` (no such status was ever emitted), `.tmq-status-has-info` + `.tmq-status-has-info::after` + `.tmq-status-has-info:hover .tmq-info` + `.tmq-info` (an info-tooltip pattern with no callers), `.column-id` (the WP_List_Table doesn't expose an `id` column).
+- **Dead Container entry** `plugin.dir`: registered in `Plugin::boot()` but never read by any consumer. `plugin.file` (the only entry that has callers) stays.
 
 ---
 
