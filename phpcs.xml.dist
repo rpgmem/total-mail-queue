@@ -28,34 +28,6 @@
     <rule ref="WordPress">
 
         <!-- ============================================================
-             Phase F2 — Manual fix-ups not auto-correctable by phpcbf
-             ============================================================ -->
-        <!-- 137 inline comments missing trailing punctuation (.!?). -->
-        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
-        <!-- Block comment that doesn't start with a newline (auto-fixable but
-             touches comment formatting we want to address alongside the
-             other comment work in F2). -->
-        <exclude name="Squiz.Commenting.BlockComment.NoNewLine"/>
-        <!-- Loose comparison cleanup: `==`/`!=` → `===`/`!==`. Auto-fix is
-             technically possible but is a semantic change, not a stylistic
-             one — kept manual so each call site can be reviewed. -->
-        <exclude name="Universal.Operators.StrictComparisons.LooseEqual"/>
-        <exclude name="Universal.Operators.StrictComparisons.LooseNotEqual"/>
-        <!-- in_array() without the strict flag — same rationale, manual. -->
-        <exclude name="WordPress.PHP.StrictInArray.MissingTrueStrict"/>
-        <!-- @-suppressed errors. The one remaining call (legacy unserialize
-             fallback) already has a phpcs:ignore comment but the WPCS sniff
-             still flags it; addressed alongside the other manual cleanup. -->
-        <exclude name="WordPress.PHP.NoSilencedErrors.Discouraged"/>
-        <!-- Visibility on WP_List_Table subclass methods. -->
-        <exclude name="Squiz.Scope.MethodScope.Missing"/>
-        <!-- `break;` after `return` and stray empty `return;` statements. -->
-        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable"/>
-        <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired"/>
-        <!-- Unused parameter on a hook signature kept for API compatibility. -->
-        <exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.Found"/>
-
-        <!-- ============================================================
              Phase F3 — Variable naming ($camelCase → $snake_case)
              ============================================================ -->
         <exclude name="WordPress.NamingConventions.ValidVariableName"/>

@@ -3,13 +3,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; }
 
-/* ***************************************************************
+/*
+ ***************************************************************
 SMTP Accounts Page
-**************************************************************** */
+****************************************************************
+*/
 
 function wp_tmq_render_smtp_page() {
 
-	// Only Admins
+	// Only Admins.
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return; }
 
@@ -19,11 +21,11 @@ function wp_tmq_render_smtp_page() {
 	$action  = isset( $_GET['smtp-action'] ) ? sanitize_key( $_GET['smtp-action'] ) : '';
 	$edit_id = isset( $_GET['smtp-id'] ) ? intval( $_GET['smtp-id'] ) : 0;
 
-	// -------------------------------------------------------
-	// Handle POST: Save / Delete / Reset Counters
-	// -------------------------------------------------------
+	// -------------------------------------------------------.
+	// Handle POST: Save / Delete / Reset Counters.
+	// -------------------------------------------------------.
 
-	// Save (Add / Edit)
+	// Save (Add / Edit).
 	if ( isset( $_POST['wp_tmq_smtp_save'] ) ) {
 
 		if ( ! isset( $_POST['wp_tmq_smtp_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_smtp_nonce'] ), 'wp_tmq_smtp_save' ) ) {
@@ -32,7 +34,7 @@ function wp_tmq_render_smtp_page() {
 
 		$save_id = isset( $_POST['smtp_id'] ) ? intval( $_POST['smtp_id'] ) : 0;
 
-		// Non-connection fields (always submitted)
+		// Non-connection fields (always submitted).
 		$data = array(
 			'name'          => sanitize_text_field( wp_unslash( $_POST['smtp_name'] ?? '' ) ),
 			'from_email'    => sanitize_email( wp_unslash( $_POST['smtp_from_email'] ?? '' ) ),
@@ -45,8 +47,8 @@ function wp_tmq_render_smtp_page() {
 			'enabled'       => isset( $_POST['smtp_enabled'] ) ? 1 : 0,
 		);
 
-		// Connection fields — only included when unlocked (not disabled)
-		// When disabled, these keys are absent from $_POST, so existing DB values are preserved
+		// Connection fields — only included when unlocked (not disabled).
+		// When disabled, these keys are absent from $_POST, so existing DB values are preserved.
 		if ( isset( $_POST['smtp_host'] ) ) {
 			$data['host']       = sanitize_text_field( wp_unslash( $_POST['smtp_host'] ) );
 			$data['port']       = intval( $_POST['smtp_port'] ?? 587 );
@@ -55,7 +57,7 @@ function wp_tmq_render_smtp_page() {
 			$data['username']   = sanitize_text_field( wp_unslash( $_POST['smtp_username'] ?? '' ) );
 		}
 
-		// Only update password if a new value is provided (and connection fields are unlocked)
+		// Only update password if a new value is provided (and connection fields are unlocked).
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
 		$raw_password = isset( $_POST['smtp_password'] ) ? wp_unslash( $_POST['smtp_password'] ) : '';
 		if ( $raw_password !== '' ) {
@@ -75,12 +77,12 @@ function wp_tmq_render_smtp_page() {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account added.', 'total-mail-queue' ) . '</p></div>';
 		}
 
-		// Reset action so we show the list
+		// Reset action so we show the list.
 		$action  = '';
 		$edit_id = 0;
 	}
 
-	// Delete
+	// Delete.
 	if ( $action === 'delete' && $edit_id > 0 ) {
 
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wp_tmq_smtp_delete_' . $edit_id ) ) {
@@ -94,7 +96,7 @@ function wp_tmq_render_smtp_page() {
 		$edit_id = 0;
 	}
 
-	// Reset Counters
+	// Reset Counters.
 	if ( isset( $_POST['wp_tmq_smtp_reset_counters'] ) ) {
 
 		if ( ! isset( $_POST['wp_tmq_smtp_reset_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wp_tmq_smtp_reset_nonce'] ), 'wp_tmq_smtp_reset_counters' ) ) {
@@ -106,9 +108,9 @@ function wp_tmq_render_smtp_page() {
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'All sending counters have been reset.', 'total-mail-queue' ) . '</p></div>';
 	}
 
-	// -------------------------------------------------------
-	// Show Add/Edit Form
-	// -------------------------------------------------------
+	// -------------------------------------------------------.
+	// Show Add/Edit Form.
+	// -------------------------------------------------------.
 	if ( $action === 'add' || $action === 'edit' ) {
 
 		$account = array(
@@ -144,7 +146,7 @@ function wp_tmq_render_smtp_page() {
 		echo '<div class="tmq-box">';
 		echo '<h3>' . esc_html( $form_title ) . '</h3>';
 		echo '<form method="post" autocomplete="off" action="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '">';
-		// Hidden decoy fields to absorb browser autofill
+		// Hidden decoy fields to absorb browser autofill.
 		echo '<div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden;">';
 		echo '<input type="text" name="tmq_decoy_user" tabindex="-1" />';
 		echo '<input type="password" name="tmq_decoy_pass" tabindex="-1" />';
@@ -155,13 +157,13 @@ function wp_tmq_render_smtp_page() {
 		}
 		echo '<table class="form-table">';
 
-		// Name
+		// Name.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_name">' . esc_html__( 'Name', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="text" id="smtp_name" name="smtp_name" value="' . esc_attr( $account['name'] ) . '" class="regular-text" /></td>';
 		echo '</tr>';
 
-		// Connection lock toggle (only on edit)
+		// Connection lock toggle (only on edit).
 		if ( $is_edit ) {
 			echo '<tr>';
 			echo '<th scope="row">' . esc_html__( 'Connection Settings', 'total-mail-queue' ) . '</th>';
@@ -170,19 +172,19 @@ function wp_tmq_render_smtp_page() {
 			echo '</tr>';
 		}
 
-		// Host
+		// Host.
 		echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
 		echo '<th scope="row"><label for="smtp_host">' . esc_html__( 'Host', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="text" id="smtp_host" name="smtp_host" value="' . esc_attr( $account['host'] ) . '" class="regular-text tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
 		echo '</tr>';
 
-		// Port
+		// Port.
 		echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
 		echo '<th scope="row"><label for="smtp_port">' . esc_html__( 'Port', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="number" id="smtp_port" name="smtp_port" value="' . esc_attr( $account['port'] ) . '" min="1" max="65535" class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
 		echo '</tr>';
 
-		// Encryption
+		// Encryption.
 		echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
 		echo '<th scope="row"><label for="smtp_encryption">' . esc_html__( 'Encryption', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><select id="smtp_encryption" name="smtp_encryption" class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . '>';
@@ -192,19 +194,19 @@ function wp_tmq_render_smtp_page() {
 		echo '</select></td>';
 		echo '</tr>';
 
-		// Auth
+		// Auth.
 		echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
 		echo '<th scope="row"><label for="smtp_auth">' . esc_html__( 'Authentication', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="checkbox" id="smtp_auth" name="smtp_auth" value="1"' . checked( $account['auth'], 1, false ) . ' class="tmq-conn-field"' . ( $is_edit ? ' disabled="disabled"' : '' ) . ' /></td>';
 		echo '</tr>';
 
-		// Username
+		// Username.
 		echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
 		echo '<th scope="row"><label for="smtp_username">' . esc_html__( 'Username', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="text" id="smtp_username" name="smtp_username" value="' . esc_attr( $account['username'] ) . '" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' ) . ' /></td>';
 		echo '</tr>';
 
-		// Password
+		// Password.
 		echo '<tr class="tmq-conn-row' . ( $is_edit ? ' tmq-conn-locked' : '' ) . '">';
 		echo '<th scope="row"><label for="smtp_password">' . esc_html__( 'Password', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="password" id="smtp_password" name="smtp_password" value="" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' );
@@ -218,54 +220,54 @@ function wp_tmq_render_smtp_page() {
 		echo '</td>';
 		echo '</tr>';
 
-		// From Email
+		// From Email.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_from_email">' . esc_html__( 'From Email', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="email" id="smtp_from_email" name="smtp_from_email" value="' . esc_attr( $account['from_email'] ) . '" class="regular-text" /></td>';
 		echo '</tr>';
 
-		// From Name
+		// From Name.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_from_name">' . esc_html__( 'From Name', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="text" id="smtp_from_name" name="smtp_from_name" value="' . esc_attr( $account['from_name'] ) . '" class="regular-text" /></td>';
 		echo '</tr>';
 
-		// Priority
+		// Priority.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_priority">' . esc_html__( 'Priority', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="number" id="smtp_priority" name="smtp_priority" value="' . esc_attr( $account['priority'] ) . '" min="0" /> ';
 		echo '<span class="description">' . esc_html__( 'Lower number = higher priority.', 'total-mail-queue' ) . '</span></td>';
 		echo '</tr>';
 
-		// Daily Limit
+		// Daily Limit.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_daily_limit">' . esc_html__( 'Daily Limit', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="number" id="smtp_daily_limit" name="smtp_daily_limit" value="' . esc_attr( $account['daily_limit'] ) . '" min="0" /> ';
 		echo '<span class="description">' . esc_html__( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
 		echo '</tr>';
 
-		// Monthly Limit
+		// Monthly Limit.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_monthly_limit">' . esc_html__( 'Monthly Limit', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="number" id="smtp_monthly_limit" name="smtp_monthly_limit" value="' . esc_attr( $account['monthly_limit'] ) . '" min="0" /> ';
 		echo '<span class="description">' . esc_html__( '0 = unlimited', 'total-mail-queue' ) . '</span></td>';
 		echo '</tr>';
 
-		// Send Interval
+		// Send Interval.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_send_interval">' . esc_html__( 'Send Interval (minutes)', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="number" id="smtp_send_interval" name="smtp_send_interval" value="' . esc_attr( $account['send_interval'] ) . '" min="0" /> ';
 		echo '<span class="description">' . esc_html__( 'Minimum minutes between sending cycles for this account. 0 = use global interval.', 'total-mail-queue' ) . '</span></td>';
 		echo '</tr>';
 
-		// Send Bulk
+		// Send Bulk.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_send_bulk">' . esc_html__( 'Emails per Cycle', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="number" id="smtp_send_bulk" name="smtp_send_bulk" value="' . esc_attr( $account['send_bulk'] ) . '" min="0" /> ';
 		echo '<span class="description">' . esc_html__( 'Maximum emails to send per cycle for this account. 0 = use global limit.', 'total-mail-queue' ) . '</span></td>';
 		echo '</tr>';
 
-		// Enabled
+		// Enabled.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_enabled">' . esc_html__( 'Enabled', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="checkbox" id="smtp_enabled" name="smtp_enabled" value="1"' . checked( $account['enabled'], 1, false ) . ' /></td>';
@@ -284,9 +286,9 @@ function wp_tmq_render_smtp_page() {
 		return;
 	}
 
-	// -------------------------------------------------------
-	// List SMTP Accounts
-	// -------------------------------------------------------
+	// -------------------------------------------------------.
+	// List SMTP Accounts.
+	// -------------------------------------------------------.
 
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$accounts = $wpdb->get_results( "SELECT * FROM `$smtpTable` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
