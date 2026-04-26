@@ -84,7 +84,7 @@ final class SettingsApi {
 		if ( '0' === $mode ) {
 			echo ' <span class="tmq-warning">' . esc_html__( 'The plugin is currently disabled and has no effect.', 'total-mail-queue' ) . '</span>';
 		} elseif ( '2' === $mode ) {
-			echo ' <span class="tmq-warning tmq-warning-block">' . esc_html__( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
+			echo ' <span class="tmq-warning">' . esc_html__( 'All outgoing emails are being blocked!', 'total-mail-queue' ) . '</span>';
 		}
 	}
 
