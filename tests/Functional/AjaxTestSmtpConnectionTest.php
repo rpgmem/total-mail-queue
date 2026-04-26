@@ -18,7 +18,7 @@ final class AjaxTestSmtpConnectionTest extends WP_Ajax_UnitTestCase {
         // Re-run activation in case a previous test dropped the tables.
         \TotalMailQueue\Database\Migrator::install();
         delete_option( 'wp_tmq_settings' );
-        $GLOBALS['wp_tmq_options'] = wp_tmq_get_settings();
+        $GLOBALS['wp_tmq_options'] = \TotalMailQueue\Settings\Options::get();
     }
 
     public function test_subscribers_receive_a_403_permission_error(): void {

@@ -7,14 +7,14 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers ::wp_tmq_get_settings
+ * @covers \TotalMailQueue\Settings\Options::get
  */
 final class GetSettingsTest extends IntegrationTestCase {
 
     public function test_returns_defaults_when_no_option_saved(): void {
         Functions\when( 'get_option' )->justReturn( false );
 
-        $opts = wp_tmq_get_settings();
+        $opts = \TotalMailQueue\Settings\Options::get();
 
         self::assertSame( '0', $opts['enabled'] );
         self::assertSame( '0', $opts['alert_enabled'] );
@@ -29,7 +29,7 @@ final class GetSettingsTest extends IntegrationTestCase {
             'email'   => 'me@example.test',
         ) );
 
-        $opts = wp_tmq_get_settings();
+        $opts = \TotalMailQueue\Settings\Options::get();
 
         self::assertSame( '1', $opts['enabled'] );
         self::assertSame( 'me@example.test', $opts['email'] );
@@ -43,7 +43,7 @@ final class GetSettingsTest extends IntegrationTestCase {
             'queue_interval_unit' => 'minutes',
         ) );
 
-        $opts = wp_tmq_get_settings();
+        $opts = \TotalMailQueue\Settings\Options::get();
 
         self::assertSame( 420, $opts['queue_interval'] );
     }
@@ -54,7 +54,7 @@ final class GetSettingsTest extends IntegrationTestCase {
             'queue_interval_unit' => 'seconds',
         ) );
 
-        $opts = wp_tmq_get_settings();
+        $opts = \TotalMailQueue\Settings\Options::get();
 
         self::assertSame( 15, $opts['queue_interval'] );
     }
@@ -65,7 +65,7 @@ final class GetSettingsTest extends IntegrationTestCase {
             'queue_interval_unit' => 'seconds',
         ) );
 
-        $opts = wp_tmq_get_settings();
+        $opts = \TotalMailQueue\Settings\Options::get();
 
         self::assertSame( 10, $opts['queue_interval'] );
     }
@@ -73,7 +73,7 @@ final class GetSettingsTest extends IntegrationTestCase {
     public function test_clear_queue_in_days_is_multiplied_by_24_hours(): void {
         Functions\when( 'get_option' )->justReturn( array( 'clear_queue' => '7' ) );
 
-        $opts = wp_tmq_get_settings();
+        $opts = \TotalMailQueue\Settings\Options::get();
 
         self::assertSame( 168, $opts['clear_queue'] );
     }

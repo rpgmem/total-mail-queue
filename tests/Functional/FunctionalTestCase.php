@@ -25,7 +25,7 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
         // Reset options to a known baseline so tests can reason about state.
         delete_option( 'wp_tmq_settings' );
         delete_option( 'wp_tmq_last_cron' );
-        $wp_tmq_options = wp_tmq_get_settings();
+        $wp_tmq_options = \TotalMailQueue\Settings\Options::get();
 
         // Clear plugin tables.
         $main = $wpdb->prefix . $wp_tmq_options['tableName'];
@@ -48,7 +48,7 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
             $current = array();
         }
         update_option( 'wp_tmq_settings', array_merge( $current, $overrides ) );
-        $wp_tmq_options = wp_tmq_get_settings();
+        $wp_tmq_options = \TotalMailQueue\Settings\Options::get();
     }
 
     protected function queueTable(): string {
