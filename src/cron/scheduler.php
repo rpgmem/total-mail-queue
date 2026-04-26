@@ -46,6 +46,12 @@ final class Scheduler {
 	/**
 	 * `cron_schedules` filter — append the plugin's custom interval.
 	 *
+	 * Note: `cron_schedules` can fire as early as `plugins_loaded` (before
+	 * the `init` action), so this callback must NOT call any i18n function.
+	 * Doing so would trigger WP 6.7+'s `_load_textdomain_just_in_time`
+	 * notice. The display string is the plugin's brand name and stays as
+	 * a plain literal.
+	 *
 	 * @param array<string,array<string,mixed>> $schedules Existing schedules.
 	 * @return array<string,array<string,mixed>>
 	 */
@@ -53,7 +59,7 @@ final class Scheduler {
 		$options                          = Options::get();
 		$schedules[ self::INTERVAL_SLUG ] = array(
 			'interval' => (int) $options['queue_interval'],
-			'display'  => esc_html__( 'Total Mail Queue', 'total-mail-queue' ),
+			'display'  => 'Total Mail Queue',
 		);
 		return $schedules;
 	}
