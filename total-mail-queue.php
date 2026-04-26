@@ -3,7 +3,7 @@
  * Plugin Name:       Total Mail Queue
  * Plugin URI:        https://github.com/rpgmem/total-mail-queue
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
- * Version:           2.3.0
+ * Version:           2.4.0
  * Requires at least: 5.9
  * Requires PHP:      7.4
  * Author:            Alex Meusburger

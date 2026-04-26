@@ -5,6 +5,31 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+> Tracks work that will roll into **2.4.0** — a new "individual control of emails by source" feature. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. Roll-out is split across phases S1 → S5; this section grows as each phase merges.
+
+### Added
+
+- **Phase S1 — schema + repository foundation.** Wiring code only; no detection, no UI, no enforcement yet.
+    - **New table** `{$prefix}total_mail_queue_sources` (`id`, `source_key` UNIQUE, `label`, `group_label`, `enabled`, `detected_at`, `last_seen_at`, `total_count`). Created idempotently via `dbDelta()` on activation / version-bump.
+    - **New column** `source_key VARCHAR(120)` on `{$prefix}total_mail_queue` plus a matching `KEY idx_source_key` so the upcoming "filter log by source" query is indexed.
+    - `Database\Schema::sourcesTable()` accessor + `Schema::SOURCES_TABLE` constant. `Schema::install()` and `Schema::drop()` updated to cover the new table.
+    - `Sources\Repository` — read/write helpers that the upcoming detector + admin UI will consume:
+      - `findByKey()` / `findById()` — single-row lookup.
+      - `register()` — insert-or-return-existing for auto-detected keys (UNIQUE index handles dedup).
+      - `markSeen()` — bumps `total_count` + `last_seen_at`.
+      - `isEnabled()` — central decision point; **defaults to true** for unknown keys so the upgrade is non-breaking (opt-out, not opt-in).
+      - `setEnabled()` / `setEnabledByGroup()` — toggle one row or every row in a group.
+      - `all()` / `count()` — listing helpers for the admin tab.
+- **15 integration tests** for `Sources\Repository` covering every method (default-true behaviour, dedup on `register`, no-op guards on non-positive ids, ORDER BY contract on `all()`, etc.).
+
+### Changed
+
+- **Plugin version bumped to 2.4.0** (`total-mail-queue.php` header, `readme.txt` `Stable tag`, `Plugin::VERSION`). The bump triggers `Database\Migrator::maybeMigrate()` on next load, which calls `Schema::install()` and dbDelta picks up the new table + column.
+
+---
+
 ## [2.3.0] - 2026-04-26
 
 > A full namespaced rebuild of the plugin. Procedural functions and the `$wp_tmq_*` globals are gone; every responsibility now lives in a dedicated class under the `TotalMailQueue\` namespace, loaded by a small inline autoloader registered directly in `total-mail-queue.php` (and mirrored in `uninstall.php`). Hook wiring is centralised in `Plugin::boot()`. Source files live under `src/` with lowercase directories + kebab-case filenames (e.g. `src/admin/plugin-page.php`) for case-coherent Linux deployments. The on-disk schema, option keys, cron events, page slugs, nonces and AJAX action names are unchanged — existing installs upgrade in place.
