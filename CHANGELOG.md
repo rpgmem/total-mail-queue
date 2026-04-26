@@ -5,9 +5,9 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.4.0] - 2026-04-26
 
-> Tracks work that will roll into **2.4.0** — a new "individual control of emails by source" feature plus a small admin/UI cleanup pass. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. Roll-out is split across phases S1 → S5; the cleanup ships alongside.
+> A new **"individual control of emails by source"** feature plus a small admin/UI cleanup pass. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. The roll-out was split across phases S1 → S5; the cleanup shipped alongside.
 
 ### Added
 
