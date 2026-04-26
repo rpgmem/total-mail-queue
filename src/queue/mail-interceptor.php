@@ -11,6 +11,8 @@ namespace TotalMailQueue\Queue;
 
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\PhpMailerCapturer;
+use TotalMailQueue\Sources\Detector;
+use TotalMailQueue\Sources\Repository as SourcesRepository;
 use TotalMailQueue\Support\Serializer;
 
 /**
@@ -63,6 +65,14 @@ final class MailInterceptor {
 
 		$options = Options::get();
 
+		// Resolve the source: prefer the marker a primary listener set; fall
+		// back to the call stack. (S4 will use this to enforce per-source
+		// allow/block decisions; S2 only records and surfaces it).
+		$source = Detector::consume();
+		if ( null === $source ) {
+			$source = Detector::inferFromBacktrace();
+		}
+
 		$to          = $atts['to'];
 		$subject     = $atts['subject'];
 		$message     = $atts['message'];
@@ -92,6 +102,7 @@ final class MailInterceptor {
 			'message'     => $message,
 			'status'      => $status,
 			'attachments' => '',
+			'source_key'  => $source['key'],
 		);
 		if ( ! empty( $headers ) ) {
 			$data['headers'] = Serializer::encode( $headers );
@@ -107,6 +118,16 @@ final class MailInterceptor {
 		}
 
 		$insert_id = QueueRepository::insert( $data );
+
+		// Update the source catalog so the admin can find this row in the
+		// Sources tab even if it never sent before. UNIQUE on source_key
+		// makes the insert path a no-op when the row already exists.
+		if ( $insert_id > 0 ) {
+			$source_id = SourcesRepository::register( $source['key'], $source['label'], $source['group'] );
+			if ( $source_id > 0 ) {
+				SourcesRepository::markSeen( $source_id );
+			}
+		}
 
 		if ( 'instant' === $status ) {
 			// wp_mail() will proceed normally. Stash the row id so the

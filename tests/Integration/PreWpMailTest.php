@@ -75,7 +75,10 @@ final class PreWpMailTest extends IntegrationTestCase {
         self::assertNull( $result, 'Instant emails must let wp_mail() continue with the actual send.' );
         $data = $this->wpdb->call( 'insert' )['args'][1];
         self::assertSame( 'instant', $data['status'] );
-        self::assertSame( $this->wpdb->insert_id, \TotalMailQueue\Queue\Tracker::get() );
+        // The queue insert is the first one MockWpdb sees; its insert_id is 1.
+        // (Subsequent inserts from the source-catalog auto-registration bump
+        // $wpdb->insert_id, but Tracker captured the queue value.)
+        self::assertSame( 1, \TotalMailQueue\Queue\Tracker::get() );
     }
 
     public function test_block_mode_keeps_instant_emails_in_queue_instead_of_sending(): void {
