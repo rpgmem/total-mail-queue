@@ -27,10 +27,10 @@
          will address so phpcbf-driven F1 can pass clean. -->
     <rule ref="WordPress">
 
-        <!-- ============================================================
-             Phase F3 — Variable naming ($camelCase → $snake_case)
-             ============================================================ -->
-        <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+        <!-- Properties on external classes (DOMDocument, PHPMailer, …) are
+             part of those libraries' APIs and cannot be renamed by us. We only
+             enforce snake_case on variables we own. -->
+        <exclude name="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase"/>
 
         <!-- ============================================================
              Phase F4 — Authorial work

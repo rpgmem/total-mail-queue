@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Full WordPress coding standard adopted.** `phpcs.xml.dist` now references `<rule ref="WordPress"/>` directly. A single `phpcbf` pass auto-corrected 3,395 mechanical violations across the three plugin files (spaces→tabs, parenthesis spacing, control-structure spacing, concatenation padding, array indentation, comma spacing). Authorial fixes (variable naming, docblocks, Yoda, etc.) are scheduled across follow-up phases F2–F4 and excluded with rationale in the ruleset until then. No behavior changes — the suite of 86 tests continues to pass.
+- **F3 — Variable naming.** 22 local `$camelCase` variables renamed to `$snake_case` per WPCS (e.g. `$smtpTable` → `$smtp_table`, `$wpMailFailedError` → `$wp_mail_failed_error`, `$hasContentTypeHeader` → `$has_content_type_header`). Done with a single `perl -i -pe` pass using word boundaries, longest-name-first ordering, then a `phpcbf` pass to re-align the `=` columns the renames disturbed. The `WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase` sub-sniff stays excluded — `DOMDocument::$preserveWhiteSpace`, `PHPMailer::$Host`, etc. belong to external APIs we don't own.
 - **F2 — Manual code cleanup.** Removed the F2 exclusions from `phpcs.xml.dist` after addressing the underlying violations:
     - 137 inline comments now end with `.`/`!`/`?` per WPCS.
     - 17 block-comment closers (`*/`) moved to their own line.

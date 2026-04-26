@@ -16,7 +16,7 @@ function wp_tmq_render_smtp_page() {
 		return; }
 
 	global $wpdb, $wp_tmq_options;
-	$smtpTable = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
+	$smtp_table = $wpdb->prefix . $wp_tmq_options['smtpTableName'];
 
 	$action  = isset( $_GET['smtp-action'] ) ? sanitize_key( $_GET['smtp-action'] ) : '';
 	$edit_id = isset( $_GET['smtp-id'] ) ? intval( $_GET['smtp-id'] ) : 0;
@@ -66,14 +66,14 @@ function wp_tmq_render_smtp_page() {
 
 		if ( $save_id > 0 ) {
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $smtpTable, $data, array( 'id' => $save_id ), null, '%d' );
+			$wpdb->update( $smtp_table, $data, array( 'id' => $save_id ), null, '%d' );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account updated.', 'total-mail-queue' ) . '</p></div>';
 		} else {
 			if ( ! isset( $data['password'] ) ) {
 				$data['password'] = '';
 			}
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( $smtpTable, $data );
+			$wpdb->insert( $smtp_table, $data );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account added.', 'total-mail-queue' ) . '</p></div>';
 		}
 
@@ -90,7 +90,7 @@ function wp_tmq_render_smtp_page() {
 		}
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( $smtpTable, array( 'id' => $edit_id ), '%d' );
+		$wpdb->delete( $smtp_table, array( 'id' => $edit_id ), '%d' );
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account deleted.', 'total-mail-queue' ) . '</p></div>';
 		$action  = '';
 		$edit_id = 0;
@@ -104,7 +104,7 @@ function wp_tmq_render_smtp_page() {
 		}
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( "UPDATE `$smtpTable` SET `daily_sent` = 0, `monthly_sent` = 0" );
+		$wpdb->query( "UPDATE `$smtp_table` SET `daily_sent` = 0, `monthly_sent` = 0" );
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'All sending counters have been reset.', 'total-mail-queue' ) . '</p></div>';
 	}
 
@@ -134,7 +134,7 @@ function wp_tmq_render_smtp_page() {
 
 		if ( $action === 'edit' && $edit_id > 0 ) {
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtpTable` WHERE `id` = %d", $edit_id ), ARRAY_A );
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtp_table` WHERE `id` = %d", $edit_id ), ARRAY_A );
 			if ( $row ) {
 				$account = $row;
 			}
@@ -291,7 +291,7 @@ function wp_tmq_render_smtp_page() {
 	// -------------------------------------------------------.
 
     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$accounts = $wpdb->get_results( "SELECT * FROM `$smtpTable` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
+	$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
 
 	echo '<div class="tmq-box">';
 	echo '<h3>' . esc_html__( 'SMTP Accounts', 'total-mail-queue' ) . '</h3>';
