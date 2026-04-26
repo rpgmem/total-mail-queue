@@ -177,6 +177,18 @@ Please make sure that your WP Cron is running reliably.
 
 == Changelog ==
 
+= 2.3.0 =
+* Full namespaced rebuild — every responsibility moved into a class under the `TotalMailQueue\` namespace; the legacy procedural admin files (`total-mail-queue-options.php` / `total-mail-queue-smtp.php`) and the `wp_tmq_*` globals are gone.
+* Hook wiring centralised in `Plugin::boot()` — lifecycle, mail interception, cron schedule + worker, AJAX, admin UI, REST controller.
+* Inline PSR-4-style autoloader: no Composer `vendor/` at runtime; classes load directly from `src/` (lowercase directories + kebab-case filenames).
+* Same on-disk schema, option keys, cron events, page slugs, nonces and AJAX action names — existing installs upgrade in place.
+* SMTP Accounts admin: new connection-lock toggle protects host + credential fields when editing an existing account.
+* Settings sanitiser hardens the `wp_tmq_settings` write path (whitelist; `tableName` / `smtpTableName` cannot be injected via a forged form POST).
+* XML export/import enforces the same key whitelist on import and uses `LIBXML_NONET` to block external-entity (XXE) resolution.
+* `manage_options` capability is verified at the REST permission callback (`/tmq/v1/message/{id}`) and at the AJAX entry point (`wp_tmq_test_smtp`).
+* SMTP password storage uses AES-256-CBC + a per-record IV; legacy passwords are re-encrypted lazily on next save.
+* New automated test suite — 86 tests (25 unit + 27 integration + 34 functional) running on PHP 8.1/8.2/8.3 in CI; PHPCS (full WordPress ruleset) and PHPStan level 5.
+
 = 2.2.1 =
 * WordPress Plugin Check compliance: output escaping, ABSPATH guards, safe redirects
 * Cross-process cron lock using MySQL GET_LOCK to prevent overlapping batch sends

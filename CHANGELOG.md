@@ -7,192 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.0] - 2026-04-26
 
-> A full namespaced rebuild of the plugin. Procedural functions and the
-> `$wp_tmq_*` globals are gone; every responsibility now lives in a
-> dedicated class under the `TotalMailQueue\` namespace, loaded by a
-> small inline autoloader (`autoload.php` at the plugin root). Hook
-> wiring is centralised in `Plugin::boot()`. Source files live under
-> `src/` with lowercase directories + kebab-case filenames
-> (`src/admin/plugin-page.php`) for case-coherent Linux deployments.
-> The on-disk schema, option keys, cron events, page slugs, nonces and
-> AJAX action names are unchanged — existing installs upgrade in place.
+> A full namespaced rebuild of the plugin. Procedural functions and the `$wp_tmq_*` globals are gone; every responsibility now lives in a dedicated class under the `TotalMailQueue\` namespace, loaded by a small inline autoloader registered directly in `total-mail-queue.php` (and mirrored in `uninstall.php`). Hook wiring is centralised in `Plugin::boot()`. Source files live under `src/` with lowercase directories + kebab-case filenames (e.g. `src/admin/plugin-page.php`) for case-coherent Linux deployments. The on-disk schema, option keys, cron events, page slugs, nonces and AJAX action names are unchanged — existing installs upgrade in place.
 
 ### Added
 
-- **PSR-4 autoload root `TotalMailQueue\` mapping to `src/`**, plus the
-  orchestration scaffolding:
-    - `Plugin` — singleton orchestrator with `VERSION` /
-      `REQUIRES_PHP` / `REQUIRES_WP` constants and a `boot()` /
-      `container()` API.
-    - `Container` — minimal lazy service locator (`set` / `get` / `has`).
-- **Pure utility classes** — `Support\Encryption` (AES-256-CBC password
-  helper), `Support\Serializer` (JSON encode/decode with backwards-
-  compatible `unserialize` fallback, `allowed_classes => false`),
-  `Support\Paths` (single source of truth for the attachments
-  directory + the legacy attachments path), `Support\HtmlPreview`
-  (admin log/queue HTML rendering).
-- **Database + lifecycle** — `Database\Schema` (authoritative table
-  definitions with idempotent `install()` via `dbDelta()`, `drop()`,
-  and `queueTable()` / `smtpTable()` accessors), `Database\Migrator`
-  (version detection on `plugins_loaded`), `Lifecycle\Activator`,
-  `Lifecycle\Deactivator`, and `Lifecycle\Uninstaller` driven by the
-  new `uninstall.php` (WP convention; `register_uninstall_hook`
-  cannot serialize closures).
-- **Settings** — `Settings\Options` (single source of truth for the
-  `wp_tmq_settings` option; `defaults()` + `get()` apply the queue
-  interval / clear-queue derivations every consumer expects),
-  `Settings\Sanitizer` (`register_setting` callback that whitelists
-  admin-settable keys so a crafted POST cannot inject `tableName`,
-  `smtpTableName`, or `triggercount`).
-- **SMTP** — `Smtp\Repository` (CRUD-adjacent access to the SMTP
-  accounts table: `resetCounters()`, `available()`, `pickAvailable()`,
-  `bumpMemoryCounter()`, `incrementCounter()`, `findPasswordById()`),
-  `Smtp\Configurator` (`apply($phpmailer, $smtp_account)` — reads the
-  SMTP timeout from `Options::get()`), `Smtp\PhpMailerCapturer`
-  (returns the configuration third-party `phpmailer_init` listeners
-  apply, with the password encrypted before storage; the
-  `$wp_tmq_capturing_phpmailer` global moved to a typed static
-  property `PhpMailerCapturer::$capturing`), `Smtp\ConnectionTester`
-  (admin AJAX "Test Connection" handler).
-- **Queue** — `Queue\QueueRepository` (every read/write against
-  `{$prefix}total_mail_queue`), `Queue\AttachmentStore`
-  (per-email staging area under `wp-content/uploads/tmq-attachments/`,
-  released after the send), `Queue\Tracker` (replaces the legacy
-  `$wp_tmq_mailid` global with `set()` / `get()` / `reset()`),
-  `Queue\MailInterceptor` (`pre_wp_mail` filter — recognises
-  `X-Mail-Queue-Prio: Instant|High`, backfills `Content-Type` /
-  `From` from `wp_mail_*` filters, snapshots third-party
-  `phpmailer_init` config), `Queue\MailFailedHandler` (`wp_mail_failed`
-  with auto-retry up to `max_retries`), `Queue\MailSucceededHandler`
-  (`wp_mail_succeeded` flips `instant` rows to `sent`).
-- **Cron** — `Cron\Scheduler` (registers the `wp_tmq_interval`
-  schedule + (un)schedules the queue event based on `enabled`),
-  `Cron\BatchProcessor` (the cron worker; `run()` + `sendOne()` per
-  row + `reset()` for tests), `Cron\CronLock` (MySQL `GET_LOCK` /
-  `RELEASE_LOCK` with shutdown-time failsafe release),
-  `Cron\Diagnostics` (accumulator for the `wp_tmq_last_cron`
-  option), `Cron\AlertSender` (queue-overflow alert email with the
-  6-hour throttle).
-- **Retention** — `Retention\LogPruner` (`pruneByAge()` for
-  `clear_queue` + `pruneByCount()` for `log_max_records`, run at
-  the end of every batch).
-- **Admin UI** — `Admin\TextDomain`, `Admin\PluginRowLinks`,
-  `Admin\Menu`, `Admin\Assets` (admin CSS/JS + the inline
-  `window.tmq` config blob with `restNonce` / `testSmtpNonce` /
-  i18n strings), `Admin\SettingsApi` (`register_setting` + every
-  field renderer: status, alert status, queue, log, send method,
-  retry, smtp timeout, cron lock TTL, sensitivity), `Admin\Notices`
-  (last-error notice + warning when known wp_mail-bypassing plugins
-  like MailPoet are active), `Admin\ExportImport` (XML export/import
-  with `LIBXML_NONET` for XXE protection and a settings-key
-  whitelist on import), `Admin\PluginPage` (the single page
-  callback dispatched by every submenu — routes by `page` slug to
-  the per-tab renderers, runs the Settings API, surfaces the
-  mode/cron/conflict notices, handles the `addtestmail` queue
-  insert), `Admin\FaqRenderer` (long-form static FAQ split into
-  focused private renderers), `Admin\Pages\SmtpPage` (full SMTP
-  CRUD: list, add, edit with the connection-lock toggle that
-  protects host + credential fields, delete, reset counters),
-  `Admin\Tables\LogTable` (`WP_List_Table` subclass powering the
-  Log + Retention tabs: status filter, bulk delete/resend/
-  force-resend, lazy-loaded message preview, SMTP-account name
-  caching).
-- **REST** — `Rest\MessageController` registers `GET
-  /tmq/v1/message/{id}` for the lazy-loaded message preview,
-  gated on `manage_options`.
-- **Automated test suite (PHPUnit 9.6).** 86 tests / 213 assertions.
-    - 25 unit tests covering pure-PHP helpers without booting WP
-      (Encryption AES-256-CBC round-trip + tamper detection,
-      Serializer JSON+unserialize fallback, SMTP picker, in-memory
-      counter increment, base64 redaction in HTML preview).
-    - 27 integration tests with Brain Monkey + Mockery + an
-      in-memory `MockWpdb` test double (Options `get()` defaults +
-      interval conversion + 10s minimum clamp; Sanitizer whitelist;
-      MailInterceptor priority handling, block mode, content-type
-      backfill; PhpMailerCapturer encrypted-password capture;
-      MailFailedHandler retry counter + error finalisation).
-    - 34 functional tests against a real WordPress + MySQL via
-      `wp-phpunit/wp-phpunit` (activation + dbDelta schema/indexes;
-      retention cleanup by age + count cap; REST endpoint
-      capability + 404; bulk actions delete/resend/force_resend;
-      full cron flow with priority ordering, batch limit,
-      block/disabled modes, smtp-only fallback, diagnostics; AJAX
-      `wp_tmq_test_smtp` permission/nonce/validation/connection
-      failure paths; XML export/import round-trip with whitelist
-      enforcement and XXE protection).
-- **Static analysis with PHPStan (level 5)** using
-  `szepeviktor/phpstan-wordpress`.
-- **Coding standards with PHP_CodeSniffer + WordPress Coding
-  Standards 3.x** (full ruleset, with PSR-4-compatible scoped
-  exclusions for `src/*`).
-- **PHP compatibility checks** via
-  `phpcompatibility/phpcompatibility-wp` against the declared
-  minimum PHP 7.4.
-- **GitHub Actions workflow** — PHPUnit on PHP 8.1 / 8.2 / 8.3,
-  functional tests against MySQL 8 on PHP 8.1 + 8.3, PHPStan,
-  PHPCS — runs on every push and pull request.
-- **`bin/install-wp-tests.sh`** helper that bootstraps the
-  WordPress test database for local development.
+- **PSR-4 autoload root `TotalMailQueue\` mapping to `src/`** plus the orchestration scaffolding: `Plugin` (singleton orchestrator with `VERSION` / `REQUIRES_PHP` / `REQUIRES_WP` constants and a `boot()` / `container()` API) and `Container` (minimal lazy service locator with `set` / `get` / `has`).
+- **Pure utility classes** — `Support\Encryption` (AES-256-CBC password helper), `Support\Serializer` (JSON encode/decode with backwards-compatible `unserialize` fallback, `allowed_classes => false`), `Support\Paths` (single source of truth for the attachments directory and the legacy attachments path), `Support\HtmlPreview` (admin log/queue HTML rendering).
+- **Database + lifecycle** — `Database\Schema` (authoritative table definitions with idempotent `install()` via `dbDelta()`, `drop()`, plus `queueTable()` / `smtpTable()` accessors), `Database\Migrator` (version detection on `plugins_loaded`), `Lifecycle\Activator`, `Lifecycle\Deactivator`, and `Lifecycle\Uninstaller` driven by the new `uninstall.php` (WP convention; `register_uninstall_hook` cannot serialize closures).
+- **Settings** — `Settings\Options` (single source of truth for the `wp_tmq_settings` option; `defaults()` + `get()` apply the queue interval / clear-queue derivations every consumer expects) and `Settings\Sanitizer` (`register_setting` callback that whitelists admin-settable keys so a crafted POST cannot inject `tableName`, `smtpTableName`, or `triggercount`).
+- **SMTP** — `Smtp\Repository` (CRUD-adjacent access to the SMTP accounts table: `resetCounters()`, `available()`, `pickAvailable()`, `bumpMemoryCounter()`, `incrementCounter()`, `findPasswordById()`), `Smtp\Configurator` (`apply($phpmailer, $smtp_account)` — reads the SMTP timeout from `Options::get()`), `Smtp\PhpMailerCapturer` (returns the configuration third-party `phpmailer_init` listeners apply, with the password encrypted before storage; the `$wp_tmq_capturing_phpmailer` global moved to a typed static property `PhpMailerCapturer::$capturing`), `Smtp\ConnectionTester` (admin AJAX "Test Connection" handler).
+- **Queue** — `Queue\QueueRepository` (every read/write against `{$prefix}total_mail_queue`), `Queue\AttachmentStore` (per-email staging area under `wp-content/uploads/tmq-attachments/`, released after the send), `Queue\Tracker` (replaces the legacy `$wp_tmq_mailid` global with `set()` / `get()` / `reset()`), `Queue\MailInterceptor` (`pre_wp_mail` filter — recognises `X-Mail-Queue-Prio: Instant|High`, backfills `Content-Type` / `From` from `wp_mail_*` filters, snapshots third-party `phpmailer_init` config), `Queue\MailFailedHandler` (`wp_mail_failed` with auto-retry up to `max_retries`), `Queue\MailSucceededHandler` (`wp_mail_succeeded` flips `instant` rows to `sent`).
+- **Cron** — `Cron\Scheduler` (registers the `wp_tmq_interval` schedule + (un)schedules the queue event based on `enabled`), `Cron\BatchProcessor` (the cron worker; `run()` + `sendOne()` per row + `reset()` for tests), `Cron\CronLock` (MySQL `GET_LOCK` / `RELEASE_LOCK` with shutdown-time failsafe release), `Cron\Diagnostics` (accumulator for the `wp_tmq_last_cron` option), `Cron\AlertSender` (queue-overflow alert email with the 6-hour throttle).
+- **Retention** — `Retention\LogPruner` with `pruneByAge()` (for `clear_queue`) + `pruneByCount()` (for `log_max_records`), run at the end of every batch.
+- **Admin UI** — `Admin\TextDomain`, `Admin\PluginRowLinks`, `Admin\Menu`, `Admin\Assets` (admin CSS/JS + the inline `window.tmq` config blob with `restNonce` / `testSmtpNonce` / i18n strings), `Admin\SettingsApi` (`register_setting` + every field renderer: status, alert status, queue, log, send method, retry, smtp timeout, cron lock TTL, sensitivity), `Admin\Notices` (last-error notice + warning when known wp_mail-bypassing plugins like MailPoet are active), `Admin\ExportImport` (XML export/import with `LIBXML_NONET` for XXE protection and a settings-key whitelist on import), `Admin\PluginPage` (the single page callback dispatched by every submenu — routes by `page` slug to the per-tab renderers, runs the Settings API, surfaces the mode/cron/conflict notices, handles the `addtestmail` queue insert), `Admin\FaqRenderer` (long-form static FAQ split into focused private renderers), `Admin\Pages\SmtpPage` (full SMTP CRUD: list, add, edit with the connection-lock toggle that protects host + credential fields, delete, reset counters), `Admin\Tables\LogTable` (`WP_List_Table` subclass powering the Log + Retention tabs: status filter, bulk delete/resend/force-resend, lazy-loaded message preview, SMTP-account name caching).
+- **REST** — `Rest\MessageController` registers `GET /tmq/v1/message/{id}` for the lazy-loaded message preview, gated on `manage_options`.
+- **Automated test suite (PHPUnit 9.6).** 86 tests / 213 assertions across three suites — 25 unit tests (pure-PHP helpers without booting WP: Encryption AES-256-CBC round-trip + tamper detection, Serializer JSON+unserialize fallback, SMTP picker, in-memory counter increment, base64 redaction in HTML preview), 27 integration tests (Brain Monkey + Mockery + an in-memory `MockWpdb` test double covering Options defaults + interval conversion + 10s minimum clamp; Sanitizer whitelist; MailInterceptor priority handling, block mode, content-type backfill; PhpMailerCapturer encrypted-password capture; MailFailedHandler retry counter + error finalisation), 34 functional tests against a real WordPress + MySQL via `wp-phpunit/wp-phpunit` (activation + dbDelta schema/indexes; retention cleanup by age + count cap; REST endpoint capability + 404; bulk actions delete/resend/force_resend; full cron flow with priority ordering, batch limit, block/disabled modes, smtp-only fallback, diagnostics; AJAX `wp_tmq_test_smtp` permission/nonce/validation/connection failure paths; XML export/import round-trip with whitelist enforcement and XXE protection).
+- **Static analysis** with PHPStan (level 5) using `szepeviktor/phpstan-wordpress`.
+- **Coding standards** with PHP_CodeSniffer + WordPress Coding Standards 3.x (full ruleset, with PSR-4-compatible scoped exclusions for `src/*`).
+- **PHP compatibility checks** via `phpcompatibility/phpcompatibility-wp` against the declared minimum PHP 7.4.
+- **GitHub Actions workflow** — PHPUnit on PHP 8.1 / 8.2 / 8.3, functional tests against MySQL 8 on PHP 8.1 + 8.3, PHPStan, PHPCS — runs on every push and pull request.
+- **`bin/install-wp-tests.sh`** helper that bootstraps the WordPress test database for local development.
 - **`CHANGELOG.md`** following the Keep a Changelog format.
 
 ### Changed
 
-- **Plugin version bumped to 2.3.0** (header in
-  `total-mail-queue.php`, `Stable tag` in `readme.txt`,
-  `Plugin::VERSION`).
-- **Bootstrap** (`total-mail-queue.php`) shrunk to ~30 lines:
-  `ABSPATH` guard → `vendor/autoload.php` → `Plugin::boot(__FILE__)`. The Composer-generated `vendor/autoload.php` is no longer required at runtime; the bootstrap registers a small inline PSR-4 autoloader for the plugin's own namespace, and dev tooling still uses `vendor/` from the test bootstraps.
-- **Hook wiring** centralised in `Plugin::boot()`: lifecycle hooks,
-  the `pre_wp_mail` / `wp_mail_failed` / `wp_mail_succeeded`
-  chain, the cron schedule + worker, the AJAX endpoint, the
-  admin UI scaffolding, and the REST controller.
+- **Plugin version bumped to 2.3.0** (header in `total-mail-queue.php`, `Stable tag` in `readme.txt`, `Plugin::VERSION`).
+- **Bootstrap** (`total-mail-queue.php`) shrunk to ~30 lines: `ABSPATH` guard → inline `spl_autoload_register` for the `TotalMailQueue\` namespace → `Plugin::boot(__FILE__)`. The Composer-generated `vendor/autoload.php` is no longer required at runtime — the plugin has no third-party runtime dependencies, so a small inline autoloader handles the namespace lookup. Dev tooling (PHPUnit, PHPCS, PHPStan, Brain Monkey) still uses `vendor/` from the test bootstraps.
+- **Hook wiring** centralised in `Plugin::boot()`: lifecycle hooks, the `pre_wp_mail` / `wp_mail_failed` / `wp_mail_succeeded` chain, the cron schedule + worker, the AJAX endpoint, the admin UI scaffolding, and the REST controller.
 
 ### Removed
 
-- **The two procedural admin files** (`total-mail-queue-options.php`
-  and `total-mail-queue-smtp.php`, ~1900 lines combined) and the
-  `is_admin()` includes that loaded them.
-- **All 30+ procedural `wp_tmq_*` functions** that lived in those
-  files plus the bootstrap (encrypt/decrypt password, encode/decode,
-  attachments_dir, render_list_message / render_html_for_display;
-  activate / deactivate / uninstall / updateDatabaseTables /
-  check_update_db; get_settings / sanitize_settings; prewpmail /
-  mail_failed / mail_succeeded / search_mail_from_queue /
-  cron_interval; reset_smtp_counters / get_available_smtp /
-  pick_available_smtp / update_memory_counter / increment_smtp_
-  counter / configure_phpmailer / capture_phpmailer_config; the
-  `wp_tmq_ajax_test_smtp_connection` AJAX handler; load_textdomain,
-  actionlinks, settings_page_assets / _inline_script /
-  settings_init / every render_option_*, checkLogForErrors,
-  maybe_handle_export / handle_export / build_export_xml /
-  handle_import, add_rest_endpoints / rest_get_message,
-  settings_page / settings_page_navi / settings_page_menuitem,
-  render_smtp_page) and their `add_action` / `add_filter` /
-  `register_*_hook` registrations.
-- **The legacy globals** — `$wp_tmq_options`, `$wp_tmq_version`,
-  `$wp_tmq_mailid`, `$wp_tmq_pre_wp_mail_priority`,
-  `$wp_tmq_next_cron_timestamp`, `$wp_tmq_capturing_phpmailer`.
-- **The `wp_tmq_Log_Table` class** (replaced by
-  `Admin\Tables\LogTable`).
+- **The two procedural admin files** (`total-mail-queue-options.php` and `total-mail-queue-smtp.php`, ~1900 lines combined) and the `is_admin()` includes that loaded them.
+- **All 30+ procedural `wp_tmq_*` functions** that lived in those files plus the bootstrap (encrypt/decrypt password, encode/decode, attachments_dir, render_list_message / render_html_for_display; activate / deactivate / uninstall / updateDatabaseTables / check_update_db; get_settings / sanitize_settings; prewpmail / mail_failed / mail_succeeded / search_mail_from_queue / cron_interval; reset_smtp_counters / get_available_smtp / pick_available_smtp / update_memory_counter / increment_smtp_counter / configure_phpmailer / capture_phpmailer_config; the `wp_tmq_ajax_test_smtp_connection` AJAX handler; load_textdomain, actionlinks, settings_page_assets / _inline_script / settings_init / every render_option_*, checkLogForErrors, maybe_handle_export / handle_export / build_export_xml / handle_import, add_rest_endpoints / rest_get_message, settings_page / settings_page_navi / settings_page_menuitem, render_smtp_page) and their `add_action` / `add_filter` / `register_*_hook` registrations.
+- **The legacy globals** — `$wp_tmq_options`, `$wp_tmq_version`, `$wp_tmq_mailid`, `$wp_tmq_pre_wp_mail_priority`, `$wp_tmq_next_cron_timestamp`, `$wp_tmq_capturing_phpmailer`.
+- **The `wp_tmq_Log_Table` class** (replaced by `Admin\Tables\LogTable`).
 - **The PHPStan baseline** — empty after the file deletions.
 
 ### Security
 
-- **Settings import whitelist (`Admin\ExportImport`).** A crafted
-  XML payload cannot rewrite `tableName` / `smtpTableName` to
-  redirect SQL queries to other tables.
-- **XXE protection on import.** `simplexml_load_string` is called
-  with `LIBXML_NONET`, blocking external-entity resolution.
-- **Settings sanitiser whitelist (`Settings\Sanitizer`).** Same
-  whitelist enforced server-side on every `wp_tmq_settings` write,
-  so a forged form POST cannot inject the protected option keys.
-- **REST + AJAX gating.** `manage_options` is verified at the
-  permission callback for `GET /tmq/v1/message/{id}` and at the
-  AJAX entry point for `wp_tmq_test_smtp`.
-- **SMTP password storage.** Passwords are encrypted with
-  AES-256-CBC + a per-record IV before being written to
-  `{$prefix}total_mail_queue_smtp.password` (legacy passwords are
-  re-encrypted lazily on next save).
+- **Settings import whitelist (`Admin\ExportImport`).** A crafted XML payload cannot rewrite `tableName` / `smtpTableName` to redirect SQL queries to other tables.
+- **XXE protection on import.** `simplexml_load_string` is called with `LIBXML_NONET`, blocking external-entity resolution.
+- **Settings sanitiser whitelist (`Settings\Sanitizer`).** Same whitelist enforced server-side on every `wp_tmq_settings` write, so a forged form POST cannot inject the protected option keys.
+- **REST + AJAX gating.** `manage_options` is verified at the permission callback for `GET /tmq/v1/message/{id}` and at the AJAX entry point for `wp_tmq_test_smtp`.
+- **SMTP password storage.** Passwords are encrypted with AES-256-CBC + a per-record IV before being written to `{$prefix}total_mail_queue_smtp.password` (legacy passwords are re-encrypted lazily on next save).
 
 ---
 
