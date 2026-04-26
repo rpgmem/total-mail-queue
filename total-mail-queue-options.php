@@ -695,7 +695,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
 		switch ( $column_name ) {
 			case 'timestamp':
 			case 'subject':
-				return esc_html( wp_tmq_decode( $item[ $column_name ] ) );
+				return esc_html( \TotalMailQueue\Support\Serializer::decode( $item[ $column_name ] ) );
 			case 'info':
 				$info        = isset( $item['info'] ) && $item['info'] ? $item['info'] : '';
 				$retry_count = isset( $item['retry_count'] ) ? intval( $item['retry_count'] ) : 0;
@@ -710,7 +710,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
 				return implode( '<br>', $parts );
 			case 'recipient':
 			case 'headers':
-				$return = wp_tmq_decode( $item[ $column_name ] );
+				$return = \TotalMailQueue\Support\Serializer::decode( $item[ $column_name ] );
 				if ( is_array( $return ) ) {
 					return esc_html( implode( ',', $return ) );
 				} else {
@@ -718,7 +718,7 @@ class wp_tmq_Log_Table extends WP_List_Table {
 				}
 				break;
 			case 'attachments':
-				$return = wp_tmq_decode( $item[ $column_name ] );
+				$return = \TotalMailQueue\Support\Serializer::decode( $item[ $column_name ] );
 				if ( is_array( $return ) ) {
 					$betterreturn = array();
 					foreach ( $return as $item ) {

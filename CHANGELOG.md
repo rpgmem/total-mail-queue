@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Namespaced rebuild — phase N1 (foundation).** PSR-4 autoload root `TotalMailQueue\` mapping to `src/`, plus the orchestration scaffolding subsequent phases will populate:
+    - `TotalMailQueue\Plugin` — singleton orchestrator with `VERSION`, `REQUIRES_PHP`, `REQUIRES_WP` constants and a `boot()` / `container()` API.
+    - `TotalMailQueue\Container` — minimal lazy service locator (`set` / `get` / `has`).
+- **Namespaced rebuild — phase N2 (Support helpers).** Pure utility classes extracted from the procedural code:
+    - `TotalMailQueue\Support\Encryption` — AES-256-CBC password helper (replaces `wp_tmq_encrypt_password` / `wp_tmq_decrypt_password`).
+    - `TotalMailQueue\Support\Serializer` — JSON encode/decode with backwards-compatible `unserialize` fallback (replaces `wp_tmq_encode` / `wp_tmq_decode`).
+    - `TotalMailQueue\Support\Paths` — single source of truth for the attachments directory and the legacy attachments path (replaces `wp_tmq_attachments_dir` and the duplicated path literal in the uninstall routine).
+    - `TotalMailQueue\Support\HtmlPreview` — admin log/queue HTML preview rendering (replaces `wp_tmq_render_list_message` / `wp_tmq_render_html_for_display`).
+
+### Changed
+
+- **Plugin version bumped to 2.3.0** (header in `total-mail-queue.php`, `Stable tag` in `readme.txt`, `Plugin::VERSION`).
+- The bootstrap file `total-mail-queue.php` now loads `vendor/autoload.php` and calls `\TotalMailQueue\Plugin::boot( __FILE__ )` immediately after the `ABSPATH` guard. The legacy `$wp_tmq_version` global is now sourced from `Plugin::VERSION`.
+- All 7 procedural support functions (`wp_tmq_encrypt_password`, `wp_tmq_decrypt_password`, `wp_tmq_encode`, `wp_tmq_decode`, `wp_tmq_attachments_dir`, `wp_tmq_render_list_message`, `wp_tmq_render_html_for_display`) **removed**. Every call site — including the test suite — was migrated to the namespaced equivalents.
+- `phpcs.xml.dist` extended to scan `src/` with PSR-4-compatible overrides: WP-procedural conventions (`NotHyphenatedLowercase`, `MethodNameInvalid`, `NonPrefixedNamespaceFound`, `ExceptionNotEscaped`) are scoped out of `src/*` because they conflict with PSR-12 / PSR-4 by design.
 - **Automated test suite (PHPUnit 9).**
   - Unit tests (25) covering pure-PHP helpers without booting WordPress: AES-256-CBC password round-trip and tamper detection, JSON encode/decode with backwards-compatible unserialize fallback (object instantiation blocked via `allowed_classes => false`), SMTP account picker (`cycle_sent` vs `send_bulk`), in-memory SMTP counter increment, and base64 redaction of inline image data in HTML preview.
   - Integration tests (27) using Brain Monkey + Mockery for hook-and-database interactions, covering `wp_tmq_get_settings` (defaults, queue interval unit conversion, 10s minimum clamp), `wp_tmq_sanitize_settings` (whitelist of admin-settable keys, blocks `tableName`/`smtpTableName`/`triggercount` injection), `wp_tmq_prewpmail` (filter pass-through, `X-Mail-Queue-Prio: High`/`Instant`, block-mode behavior, `wp_mail_content_type` header, instant-email filter skip), `wp_tmq_capture_phpmailer_config` (no-op when nothing changed, capture path with encrypted password), and `wp_tmq_mail_failed` (auto-retry counter, error finalization, unknown-message fallback).
