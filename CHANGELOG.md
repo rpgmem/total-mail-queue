@@ -5,6 +5,24 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-04-27
+
+> Hotfix on top of 2.5.0. The `WooCommerceTokens` class shipped with a file name (`woocommerce-tokens.php`) that the inline autoloader in `total-mail-queue.php` couldn't resolve, so production sites — which run only the inline autoloader and not Composer's classmap — hit `Fatal error: Class "TotalMailQueue\Templates\WooCommerceTokens" not found` immediately on plugin load.
+
+### Fixed
+
+- **Autoloader miss on `WooCommerceTokens`.** Renamed `src/templates/woocommerce-tokens.php` → `src/templates/woo-commerce-tokens.php` so the camelCase-to-kebab regex in the inline autoloader (`(?<=[a-z0-9])(?=[A-Z])`) finds it. `WooCommerceTokens` → `Woo-Commerce-Tokens` → `woo-commerce-tokens.php`. Local CI was green because Composer's classmap autoloader (loaded from the test bootstrap) finds files regardless of name; production has no Composer.
+
+### Added
+
+- **Regression guard for the inline autoloader.** New unit test `AutoloaderConsistencyTest::test_every_class_under_src_is_reachable_by_the_inline_autoloader` walks every `.php` file under `src/`, parses each `namespace` + `class` declaration, and asserts the inline autoloader's regex resolves to a file that actually exists on disk. Catches this class of bug before merge.
+
+### Changed
+
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.5.1**.
+
+---
+
 ## [2.5.0] - 2026-04-27
 
 > A new **HTML template engine** ports the visual styling layer of the GPL Email Templates plugin into Total Mail Queue's namespaced architecture. Every outgoing email is now wrapped in a configurable card-on-light-grey envelope before it leaves the server (or before it lands in the queue, in queue mode), with an admin tab to customize colors / fonts / logo / footer, a "Send test email" button, and a WooCommerce-aware token registry that pulls order context into customer emails.
