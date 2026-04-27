@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.1] - 2026-04-27
 
-> Hotfix on top of 2.5.0. The `WooCommerceTokens` class shipped with a file name (`woocommerce-tokens.php`) that the inline autoloader in `total-mail-queue.php` couldn't resolve, so production sites — which run only the inline autoloader and not Composer's classmap — hit `Fatal error: Class "TotalMailQueue\Templates\WooCommerceTokens" not found` immediately on plugin load.
+> Hotfix bundle on top of 2.5.0. Two production issues: a Fatal on plugin load because the `WooCommerceTokens` file name didn't match the inline autoloader's kebab-case convention, and a `_load_textdomain_just_in_time` `_doing_it_wrong` notice surfaced by WordPress 6.7+ that this release silences by loading the textdomain earlier.
 
 ### Fixed
 
 - **Autoloader miss on `WooCommerceTokens`.** Renamed `src/templates/woocommerce-tokens.php` → `src/templates/woo-commerce-tokens.php` so the camelCase-to-kebab regex in the inline autoloader (`(?<=[a-z0-9])(?=[A-Z])`) finds it. `WooCommerceTokens` → `Woo-Commerce-Tokens` → `woo-commerce-tokens.php`. Local CI was green because Composer's classmap autoloader (loaded from the test bootstrap) finds files regardless of name; production has no Composer.
+- **`_load_textdomain_just_in_time` notice on WP 6.7+.** `Admin\TextDomain::register()` now hooks `plugins_loaded` priority 0 instead of `init`. The earlier-load makes `$GLOBALS['l10n']['total-mail-queue']` available before any callback on `plugins_loaded` / `cron_schedules` / `pre_wp_mail` / `plugin_action_links_*` runs, so WP's just-in-time loader short-circuits and never fires the `_doing_it_wrong` notice. No change in user-visible behavior — translations were already loading correctly; this only silences the warning.
 
 ### Added
 
