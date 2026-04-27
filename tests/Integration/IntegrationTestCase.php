@@ -32,9 +32,16 @@ abstract class IntegrationTestCase extends TestCase {
 
         // Stub get_option so the namespaced Settings\Options::get() (which
         // every queue/cron/smtp class reads) sees the test's option values.
+        // The template-engine option is forced off here because this suite
+        // does not load the WordPress text-helpers (wpautop / wptexturize /
+        // …) the engine depends on; per-test scenarios enable it explicitly
+        // when needed.
         \Brain\Monkey\Functions\when( 'get_option' )->alias( function ( $key, $default = false ) {
             if ( 'wp_tmq_settings' === $key ) {
                 return $this->options;
+            }
+            if ( 'wp_tmq_template_options' === $key ) {
+                return array( 'enabled' => false );
             }
             return $default;
         } );

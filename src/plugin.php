@@ -78,6 +78,12 @@ final class Plugin {
 		Queue\MailFailedHandler::register();
 		Queue\MailSucceededHandler::register();
 
+		// HTML template engine. Hooks `wp_mail` (priority 100) so mail that
+		// is about to leave the server gets wrapped — both direct sends in
+		// disabled mode and cron drains in queue mode. Skipped automatically
+		// in block mode (no mail leaves anyway).
+		Templates\Engine::register();
+
 		// Cron worker — schedule + the actual queue-draining action.
 		Cron\Scheduler::register();
 

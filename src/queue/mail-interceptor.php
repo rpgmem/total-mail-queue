@@ -14,6 +14,7 @@ use TotalMailQueue\Smtp\PhpMailerCapturer;
 use TotalMailQueue\Sources\Detector;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
 use TotalMailQueue\Support\Serializer;
+use TotalMailQueue\Templates\Engine as TemplateEngine;
 
 /**
  * Backbone of the queue: hooks `pre_wp_mail` at very high priority so it
@@ -93,6 +94,28 @@ final class MailInterceptor {
 		$blocked_by_source = ! SourcesRepository::isEnabled( $source['key'] );
 		if ( $blocked_by_source ) {
 			$status = 'blocked_by_source';
+		}
+
+		// Apply the HTML template wrapper before the row hits the queue, so
+		// the persisted message is the same byte string the recipient will
+		// see. Skipped for `instant` (wp_mail() proceeds normally and the
+		// engine wraps via the `wp_mail` filter) and `blocked_by_source`
+		// (no point — the row is never sent). The Engine self-gates on the
+		// templates toggle and on block mode, so we can call it
+		// unconditionally for the queue / high paths.
+		if ( 'queue' === $status || 'high' === $status ) {
+			$wrapped = TemplateEngine::apply(
+				array(
+					'to'          => $to,
+					'subject'     => $subject,
+					'message'     => $message,
+					'headers'     => $headers,
+					'attachments' => $attachments,
+				)
+			);
+			if ( isset( $wrapped['message'] ) && is_string( $wrapped['message'] ) ) {
+				$message = $wrapped['message'];
+			}
 		}
 
 		if ( 'instant' !== $status && 'blocked_by_source' !== $status ) {
