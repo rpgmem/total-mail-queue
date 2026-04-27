@@ -5,6 +5,50 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-04-27
+
+> A new **HTML template engine** ports the visual styling layer of the GPL Email Templates plugin into Total Mail Queue's namespaced architecture. Every outgoing email is now wrapped in a configurable card-on-light-grey envelope before it leaves the server (or before it lands in the queue, in queue mode), with an admin tab to customize colors / fonts / logo / footer, a "Send test email" button, and a WooCommerce-aware token registry that pulls order context into customer emails.
+
+### Added
+
+- **Phase T1 — HTML wrapper engine.** New `Templates\Engine` class that hooks `wp_mail` at priority 100 (or is invoked directly by `Queue\MailInterceptor` in queue/block mode for "capture → process → queue" ordering). Wraps the body in a styled HTML envelope, forces `Content-Type: text/html`, and replaces `{token}` placeholders. Skips full-HTML messages (`<html>` / `<!DOCTYPE` near the top) so builders like Elementor / MemberPress pass through untouched, plus a `wp_tmq_template_skip` filter for explicit opt-out. The wrapper template (`src/templates/default-html.php`) is table-based with inline CSS for cross-client rendering, system font stack (no external Google Fonts requests), RTL-aware via `language_attributes()`, and mobile-responsive via a single `@media` query.
+- **Phase T2 — `Templates\Options` storage layer.** Mirrors the shape of `Settings\Options` with `defaults()` / `get()` / `update()` / `reset()` / `sanitize()` / `isEnabled()`. The 23-key option map covers Header (bg / text / alignment / padding / logo URL / logo width), Body (bg / text / link color / font family / font size / padding / max width), Footer (bg / text color / free text / powered-by toggle), Wrapper (bg / border radius / padding), and Sender (from_email / from_name). Strict per-field sanitizer: hex colors via `sanitize_hex_color` (invalid → default), integers via `absint`, enums via whitelist, URL via `esc_url_raw`, email via `sanitize_email`, plain text via `sanitize_text_field`, footer text via `wp_kses_post`. Booleans round-trip correctly through `$_POST` strings and JSON.
+- **Phase T3 — Templates admin tab.** New "Templates" submenu under "Total Mail Queue", routed via `Admin\PluginPage::TAB_TEMPLATES`. The renderer (`Admin\Pages\TemplatesPage`) ships a 5-section settings form with WP-native color pickers, a `wp.media()`-backed logo picker, font-family dropdown (5 system stacks), Save / Reset / Send-test-email actions, and mode-aware notices at the top (block / disabled / queue). The "Send test email" widget calls `wp_mail()` so the recipient sees the styled HTML through the live engine. Per-tab asset gating: `wp-color-picker` + `wp_enqueue_media()` + `tmq-templates.js` load only on this tab.
+- **Phase T4 — Token registry + WooCommerce handler.** New `Templates\Tokens` module owns `{token}` substitution: nine globals (`{site_title}`, `{site_url}`, `{home_url}`, `{site_description}`, `{admin_email}`, `{recipient}`, `{date}`, `{time}`, `{year}`) plus a `wp_tmq_template_tokens` filter for extensions. Bundled `Templates\WooCommerceTokens` captures the live `WC_Order` from `WC_Email->object` via the `woocommerce_email_header` action and publishes six order tokens (`{order_number}`, `{customer_first_name}`, `{customer_last_name}`, `{customer_email}`, `{order_total}`, `{order_date}`). Duck-typed so the file loads without WooCommerce installed; cost on non-WC sites is two filter registrations.
+- **Send-test-email AJAX endpoint.** `Templates\TestEmailSender` (`wp_ajax_wp_tmq_send_template_test`) — capability + nonce + sanitized recipient → `wp_mail()` so the engine pipeline is exercised end-to-end.
+
+### Changed
+
+- **`Engine::replacePlaceholders` is now a one-liner delegate to `Tokens::replace`** — engine no longer owns the token map directly.
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.5.0**.
+
+### Filters / Actions exposed
+
+| Hook | Purpose |
+|---|---|
+| `wp_tmq_template_skip` (filter) | Short-circuit wrapping for a specific email |
+| `wp_tmq_template_content` (filter) | Pre-process raw body before wrapping |
+| `wp_tmq_template_html` (filter) | Final pass over the rendered HTML |
+| `wp_tmq_template_tokens` (filter) | Add per-source / per-plugin tokens |
+| `wp_tmq_template_default_options` (filter) | Override hardcoded defaults |
+| `wp_tmq_template_options` (filter) | Override resolved (post-merge) options |
+| `wp_tmq_template_before_apply` / `_after_apply` (action) | Around `Engine::apply()` |
+
+### Tests
+
+35 new functional tests across four files: 9 in `TemplateEngineTest` (wrapping, full-HTML pass-through, toggle / block-mode skips, placeholder substitution, content-type force, reset-link cleanup, skip filter), 4 in `TemplateInterceptionTest` (queue mode wraps, block mode doesn't, engine-disabled doesn't, blocked-by-source doesn't), 8 in `TemplateOptionsTest` (defaults, roundtrip, color / email / enum / integer sanitizers, reset, default-options filter), 9 in `TemplatesPageTest` (save POST, unchecked-toggle round-trip, invalid-nonce wp_die, reset, three mode notices, toggle-off inline warning, rendered structure), and 7 in `TemplateTokensTest` (globals, unknown-token passthrough, custom filter, WC happy path with stub order, no-order fallback, malformed-email-object rejection, substitution over realistic HTML).
+
+### Out of scope (intentional cuts vs. the GPL plugin we ported from)
+
+- WP Customizer-based UI (replaced by a native admin page).
+- WC sub-templates per email state (use the per-Source override pattern from v2.4.1 instead).
+- Google Fonts dynamic loader (system stack — most clients block external fonts anyway).
+- Social-links repeater (use the free-text footer with `<a>` tags).
+- EDD / Gravity Forms / MemberPress integrations (out of TMQ's domain).
+- Postman / Post SMTP marketing (TMQ has SMTP natively).
+
+---
+
 ## [2.4.1] - 2026-04-26
 
 > UX patch on top of the 2.4.0 Sources tab: the labels are now translatable via Loco / `.po` files, the admin can override label and group per-row, the table has a "Filter by group" dropdown, and the page warns when the global Operation Mode (Block / Disabled) means per-source toggles can't take effect.
