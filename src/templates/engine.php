@@ -288,57 +288,17 @@ final class Engine {
 	}
 
 	/**
-	 * Substitute the global `{token}` placeholders. T4 will introduce a
-	 * proper registry; T1 ships with the nine globals only.
+	 * Substitute every `{token}` placeholder in the rendered HTML. Thin
+	 * delegate to {@see Tokens::replace()} — the registry-aware module
+	 * combines globals with filter-supplied additions (e.g. the bundled
+	 * WooCommerce handler).
 	 *
 	 * @param string              $html Rendered HTML.
 	 * @param array<string,mixed> $args wp_mail() arguments.
 	 * @return string
 	 */
 	private static function replacePlaceholders( string $html, array $args ): string {
-		$tokens = self::globalTokens( $args );
-
-		/**
-		 * Filter the token map used for placeholder substitution. Add
-		 * source-specific tokens here (T4 will register a default
-		 * WooCommerce handler).
-		 *
-		 * @param array<string,string> $tokens   Token name (without braces) → value.
-		 * @param array<string,mixed>  $args     wp_mail() arguments.
-		 */
-		$tokens = (array) apply_filters( 'wp_tmq_template_tokens', $tokens, $args );
-
-		$search  = array();
-		$replace = array();
-		foreach ( $tokens as $name => $value ) {
-			$search[]  = '{' . $name . '}';
-			$replace[] = (string) $value;
-		}
-		return str_replace( $search, $replace, $html );
-	}
-
-	/**
-	 * Built-in token map — the same nine values are available in any
-	 * email regardless of source.
-	 *
-	 * @param array<string,mixed> $args wp_mail() arguments.
-	 * @return array<string,string>
-	 */
-	private static function globalTokens( array $args ): array {
-		$to        = isset( $args['to'] ) ? $args['to'] : '';
-		$recipient = is_array( $to ) ? (string) reset( $to ) : (string) $to;
-
-		return array(
-			'site_title'       => (string) get_bloginfo( 'name' ),
-			'site_url'         => (string) get_option( 'siteurl' ),
-			'home_url'         => (string) get_option( 'home' ),
-			'site_description' => (string) get_bloginfo( 'description' ),
-			'admin_email'      => (string) get_option( 'admin_email' ),
-			'recipient'        => $recipient,
-			'date'             => date_i18n( (string) get_option( 'date_format' ) ),
-			'time'             => date_i18n( (string) get_option( 'time_format' ) ),
-			'year'             => date_i18n( 'Y' ),
-		);
+		return Tokens::replace( $html, $args );
 	}
 
 	/**
