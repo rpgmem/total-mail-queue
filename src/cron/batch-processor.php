@@ -42,6 +42,18 @@ final class BatchProcessor {
 	private static int $invocation_count = 0;
 
 	/**
+	 * True while {@see BatchProcessor::run()} is iterating the queue.
+	 * Read by {@see \TotalMailQueue\Queue\MailInterceptor::handle()} so it
+	 * doesn't re-queue messages we are already sending — mirrors the
+	 * `pre_wp_mail` filter teardown that {@see dispatchOnce()} performs,
+	 * but covers paths that call `wp_mail()` outside dispatchOnce too
+	 * (e.g. {@see AlertSender::maybeAlert()}).
+	 *
+	 * @var bool
+	 */
+	private static bool $is_draining = false;
+
+	/**
 	 * Reset the in-process re-entrancy guard. Tests call this between cases;
 	 * production code never does.
 	 *
@@ -49,6 +61,17 @@ final class BatchProcessor {
 	 */
 	public static function reset(): void {
 		self::$invocation_count = 0;
+		self::$is_draining      = false;
+	}
+
+	/**
+	 * Whether the cron drainer is currently sending queued rows.
+	 *
+	 * Used by {@see \TotalMailQueue\Queue\MailInterceptor} to short-circuit
+	 * its own filter so the drainer's `wp_mail()` calls are not re-queued.
+	 */
+	public static function isDraining(): bool {
+		return self::$is_draining;
 	}
 
 	/**
@@ -77,34 +100,42 @@ final class BatchProcessor {
 			return;
 		}
 
-		$pending_total = QueueRepository::pendingCount();
-		$pending_ids   = QueueRepository::pendingIds( (int) $options['queue_amount'] );
-		$batch_size    = count( $pending_ids );
+		// Mark the drain in progress so MailInterceptor knows to leave our
+		// own wp_mail() calls alone. Wrapped in try / finally so a fatal
+		// (or `wp_die()`) inside the loop doesn't strand the flag at true.
+		self::$is_draining = true;
+		try {
+			$pending_total = QueueRepository::pendingCount();
+			$pending_ids   = QueueRepository::pendingIds( (int) $options['queue_amount'] );
+			$batch_size    = count( $pending_ids );
 
-		AlertSender::maybeAlert( $pending_total, $batch_size );
+			AlertSender::maybeAlert( $pending_total, $batch_size );
 
-		// Reset SMTP counters once per cron run, then snapshot the available accounts.
-		SmtpRepository::resetCounters();
-		$smtp_accounts = SmtpRepository::available();
+			// Reset SMTP counters once per cron run, then snapshot the available accounts.
+			SmtpRepository::resetCounters();
+			$smtp_accounts = SmtpRepository::available();
 
-		$diag->set( 'queue_total', $pending_total );
-		$diag->set( 'queue_batch', $batch_size );
-		$diag->set( 'smtp_accounts', count( $smtp_accounts ) );
-		$diag->set( 'send_method', $options['send_method'] );
-		$diag->set( 'sent', 0 );
-		$diag->set( 'errors', 0 );
+			$diag->set( 'queue_total', $pending_total );
+			$diag->set( 'queue_batch', $batch_size );
+			$diag->set( 'smtp_accounts', count( $smtp_accounts ) );
+			$diag->set( 'send_method', $options['send_method'] );
+			$diag->set( 'sent', 0 );
+			$diag->set( 'errors', 0 );
 
-		foreach ( $pending_ids as $mail_id ) {
-			$loop_result = self::sendOne( $mail_id, $options, $smtp_accounts, $diag );
-			if ( 'smtp_unavailable' === $loop_result ) {
-				$diag->set( 'result', 'smtp_unavailable' );
-				break;
+			foreach ( $pending_ids as $mail_id ) {
+				$loop_result = self::sendOne( $mail_id, $options, $smtp_accounts, $diag );
+				if ( 'smtp_unavailable' === $loop_result ) {
+					$diag->set( 'result', 'smtp_unavailable' );
+					break;
+				}
 			}
-		}
 
-		LogPruner::pruneByAge();
-		LogPruner::pruneByCount();
-		CronLock::release();
+			LogPruner::pruneByAge();
+			LogPruner::pruneByCount();
+		} finally {
+			self::$is_draining = false;
+			CronLock::release();
+		}
 
 		if ( ! $diag->has( 'result' ) ) {
 			$diag->set( 'result', 'ok' );
@@ -266,8 +297,11 @@ final class BatchProcessor {
 
 	/**
 	 * Send via wp_mail() once, with all pre_wp_mail filters temporarily
-	 * removed (so the plugin's own interceptor — already not registered
-	 * during cron — and any third-party blockers don't re-enter).
+	 * removed so neither the plugin's own interceptor nor any third-party
+	 * blocker re-enters. Belt-and-suspenders: {@see $is_draining} also
+	 * makes {@see \TotalMailQueue\Queue\MailInterceptor::handle()} bail
+	 * immediately, but stripping the filter chain protects against other
+	 * mail plugins that filter `pre_wp_mail` for routing/short-circuit.
 	 *
 	 * @param mixed               $to          Recipient(s).
 	 * @param string              $subject     Subject.

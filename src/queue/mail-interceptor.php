@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Queue;
 
+use TotalMailQueue\Cron\BatchProcessor;
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\PhpMailerCapturer;
 use TotalMailQueue\Sources\Detector;
@@ -22,6 +23,14 @@ use TotalMailQueue\Templates\Engine as TemplateEngine;
  * and either inserts the email into the queue table for the cron to send
  * later or — for "instant" priority headers — records the row id and
  * lets `wp_mail()` proceed normally.
+ *
+ * Cron-context behavior: the filter stays registered during cron requests so
+ * outgoing mail from other plugins' scheduled events (ffcertificate-style
+ * deferred user notifications, WooCommerce abandoned-cart, etc.) lands in
+ * the queue / log just like in a frontend request. The plugin's own
+ * {@see BatchProcessor::run()} flips a `draining` flag while it is sending
+ * queued rows, and {@see handle()} short-circuits when that flag is true so
+ * we do not re-queue what we are already sending.
  */
 final class MailInterceptor {
 
@@ -34,15 +43,13 @@ final class MailInterceptor {
 
 	/**
 	 * Register the filter on `pre_wp_mail` for queue (`enabled=1`) and block
-	 * (`enabled=2`) modes. No-op when disabled (`enabled=0`) or when the
-	 * current request is a WP cron run.
+	 * (`enabled=2`) modes. No-op when disabled (`enabled=0`).
+	 *
+	 * Cron requests register too — see the class docblock for why.
 	 */
 	public static function register(): void {
 		$options = Options::get();
 		if ( ! in_array( $options['enabled'], array( '1', '2' ), true ) ) {
-			return;
-		}
-		if ( wp_doing_cron() ) {
 			return;
 		}
 		add_filter( 'pre_wp_mail', array( self::class, 'handle' ), self::FILTER_PRIORITY, 2 );
@@ -62,6 +69,16 @@ final class MailInterceptor {
 		if ( null !== $return ) {
 			// Another pre_wp_mail filter already short-circuited.
 			return $return;
+		}
+
+		// Defensive: if our own cron drainer is currently sending a queued
+		// row, do not re-queue it. {@see BatchProcessor::dispatchOnce()}
+		// already strips every `pre_wp_mail` filter before each send, so this
+		// branch is belt-and-suspenders for any path that calls wp_mail()
+		// during the drain without going through dispatchOnce (e.g.
+		// {@see \TotalMailQueue\Cron\AlertSender}).
+		if ( BatchProcessor::isDraining() ) {
+			return null;
 		}
 
 		$options = Options::get();
