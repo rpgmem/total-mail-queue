@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TMQ\Tests\Functional;
 
 use TotalMailQueue\Templates\Engine;
+use TotalMailQueue\Templates\Options;
 
 /**
  * T1 — HTML template engine: wraps wp_mail() bodies in a styled envelope,
@@ -19,7 +20,7 @@ final class TemplateEngineTest extends FunctionalTestCase {
 		parent::setUp();
 
 		// Each test starts from a clean engine state.
-		delete_option( Engine::OPTION_NAME );
+		delete_option( Options::OPTION_NAME );
 
 		// Plugin::boot() ran during bootstrap and may have already wired
 		// the engine's filters with the bootstrap settings. Strip them so
@@ -53,7 +54,7 @@ final class TemplateEngineTest extends FunctionalTestCase {
 	}
 
 	public function test_engine_skips_when_toggle_disabled(): void {
-		update_option( Engine::OPTION_NAME, array( 'enabled' => false ) );
+		update_option( Options::OPTION_NAME, array( 'enabled' => false ) );
 
 		Engine::register();
 
@@ -76,7 +77,7 @@ final class TemplateEngineTest extends FunctionalTestCase {
 
 	public function test_engine_substitutes_global_placeholders(): void {
 		update_option(
-			Engine::OPTION_NAME,
+			Options::OPTION_NAME,
 			array(
 				'footer_text' => 'Sent by {site_title} to {recipient} on {year}.',
 			)

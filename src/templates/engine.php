@@ -34,11 +34,6 @@ use TotalMailQueue\Settings\Options as MainOptions;
 final class Engine {
 
 	/**
-	 * Option key under which the templates feature settings live.
-	 */
-	public const OPTION_NAME = 'wp_tmq_template_options';
-
-	/**
 	 * Filter priority for the `wp_mail` hook. Run late so other plugins
 	 * have already modified the body (the wrapper sees the final content).
 	 */
@@ -205,81 +200,22 @@ final class Engine {
 	}
 
 	/**
-	 * Whether the templates feature is currently enabled.
+	 * Whether the templates feature is currently enabled. Convenience
+	 * delegate to {@see Options::isEnabled()} so callers don't need to
+	 * reach across modules for the toggle check.
 	 */
 	public static function isEnabled(): bool {
-		$options = self::options();
-		// Default to enabled when no row exists yet.
-		if ( ! array_key_exists( 'enabled', $options ) ) {
-			return true;
-		}
-		$value = $options['enabled'];
-		return ( true === $value || '1' === $value || 1 === $value );
+		return Options::isEnabled();
 	}
 
 	/**
-	 * Read template options merged with built-in defaults. Cheap on hot
-	 * paths — `get_option()` is cached by core.
+	 * Resolved template options. Convenience delegate to
+	 * {@see Options::get()} for the same reason as {@see isEnabled()}.
 	 *
 	 * @return array<string,mixed>
 	 */
 	public static function options(): array {
-		$stored   = get_option( self::OPTION_NAME, array() );
-		$stored   = is_array( $stored ) ? $stored : array();
-		$defaults = self::defaults();
-
-		/**
-		 * Filter the resolved template options after the defaults have been
-		 * merged in. Use to override values without changing the row in the
-		 * options table.
-		 *
-		 * @param array<string,mixed> $options Resolved options.
-		 */
-		return (array) apply_filters( 'wp_tmq_template_options', array_merge( $defaults, $stored ) );
-	}
-
-	/**
-	 * Built-in defaults for every option key. T2 will surface these in the
-	 * admin UI; T1 keeps them inline so the engine produces a sensible
-	 * envelope out of the box.
-	 *
-	 * @return array<string,mixed>
-	 */
-	public static function defaults(): array {
-		/**
-		 * Filter the engine's hardcoded defaults. Plugins can override
-		 * baseline styling without touching the stored row.
-		 *
-		 * @param array<string,mixed> $defaults Built-in defaults.
-		 */
-		return (array) apply_filters(
-			'wp_tmq_template_default_options',
-			array(
-				'enabled'               => true,
-				'header_bg'             => '#2c3e50',
-				'header_text_color'     => '#ffffff',
-				'header_alignment'      => 'center',
-				'header_padding'        => 24,
-				'header_logo_url'       => '',
-				'header_logo_max_width' => 180,
-				'body_bg'               => '#ffffff',
-				'body_text_color'       => '#333333',
-				'body_link_color'       => '#2271b1',
-				'body_font_family'      => 'system',
-				'body_font_size'        => 14,
-				'body_padding'          => 24,
-				'body_max_width'        => 600,
-				'footer_bg'             => '#f5f5f5',
-				'footer_text_color'     => '#666666',
-				'footer_text'           => 'Sent by {site_title}',
-				'footer_powered_by'     => true,
-				'wrapper_bg'            => '#f0f0f1',
-				'wrapper_border_radius' => 6,
-				'wrapper_padding'       => 32,
-				'from_email'            => '',
-				'from_name'             => '',
-			)
-		);
+		return Options::get();
 	}
 
 	/**
