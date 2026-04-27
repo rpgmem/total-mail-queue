@@ -7,6 +7,7 @@ namespace TMQ\Tests\Functional;
 use TotalMailQueue\Queue\MailInterceptor;
 use TotalMailQueue\Sources\Detector;
 use TotalMailQueue\Templates\Engine;
+use TotalMailQueue\Templates\Options;
 
 /**
  * End-to-end check that the template engine runs **before** the queue insert,
@@ -22,7 +23,7 @@ final class TemplateInterceptionTest extends FunctionalTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		Detector::reset();
-		delete_option( Engine::OPTION_NAME );
+		delete_option( Options::OPTION_NAME );
 
 		// Plugin::boot() already wired the engine's wp_mail filters with the
 		// bootstrap defaults — strip them so each test re-registers under its
@@ -70,7 +71,7 @@ final class TemplateInterceptionTest extends FunctionalTestCase {
 
 	public function test_queue_mode_with_engine_disabled_persists_raw_body(): void {
 		$this->setPluginOptions( array( 'enabled' => '1' ) );
-		update_option( Engine::OPTION_NAME, array( 'enabled' => false ) );
+		update_option( Options::OPTION_NAME, array( 'enabled' => false ) );
 		Engine::register();
 		MailInterceptor::register();
 
