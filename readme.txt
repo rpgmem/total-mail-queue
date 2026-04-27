@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
