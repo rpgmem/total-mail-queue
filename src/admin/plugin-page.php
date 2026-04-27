@@ -11,6 +11,7 @@ namespace TotalMailQueue\Admin;
 
 use TotalMailQueue\Admin\Pages\SmtpPage;
 use TotalMailQueue\Admin\Pages\SourcesPage;
+use TotalMailQueue\Admin\Pages\TemplatesPage;
 use TotalMailQueue\Admin\Tables\LogTable;
 use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Plugin;
@@ -35,6 +36,7 @@ final class PluginPage {
 	public const TAB_QUEUE     = 'wp_tmq_mail_queue-tab-queue';
 	public const TAB_SMTP      = 'wp_tmq_mail_queue-tab-smtp';
 	public const TAB_SOURCES   = 'wp_tmq_mail_queue-tab-sources';
+	public const TAB_TEMPLATES = 'wp_tmq_mail_queue-tab-templates';
 	public const TAB_CRON_INFO = 'wp_tmq_mail_queue-tab-croninfo';
 	public const TAB_FAQ       = 'wp_tmq_mail_queue-tab-faq';
 
@@ -67,6 +69,9 @@ final class PluginPage {
 				break;
 			case self::TAB_SOURCES:
 				SourcesPage::render();
+				break;
+			case self::TAB_TEMPLATES:
+				TemplatesPage::render();
 				break;
 			case self::TAB_FAQ:
 				self::renderFaqTab();
@@ -135,11 +140,12 @@ final class PluginPage {
 	 */
 	private static function renderNav( string $tab ): void {
 		$tabs = array(
-			self::TAB_SETTINGS => __( 'Settings', 'total-mail-queue' ),
-			self::TAB_LOG      => __( 'Log', 'total-mail-queue' ),
-			self::TAB_QUEUE    => __( 'Retention', 'total-mail-queue' ),
-			self::TAB_SMTP     => __( 'SMTP Accounts', 'total-mail-queue' ),
-			self::TAB_SOURCES  => __( 'Sources', 'total-mail-queue' ),
+			self::TAB_SETTINGS  => __( 'Settings', 'total-mail-queue' ),
+			self::TAB_LOG       => __( 'Log', 'total-mail-queue' ),
+			self::TAB_QUEUE     => __( 'Retention', 'total-mail-queue' ),
+			self::TAB_SMTP      => __( 'SMTP Accounts', 'total-mail-queue' ),
+			self::TAB_SOURCES   => __( 'Sources', 'total-mail-queue' ),
+			self::TAB_TEMPLATES => __( 'Templates', 'total-mail-queue' ),
 		);
 		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
 			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );

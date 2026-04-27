@@ -11,6 +11,7 @@ namespace TotalMailQueue\Admin;
 
 use TotalMailQueue\Plugin;
 use TotalMailQueue\Smtp\ConnectionTester;
+use TotalMailQueue\Templates\TestEmailSender;
 
 /**
  * Enqueues the admin stylesheet and the inline JS bridge that wires the
@@ -38,6 +39,23 @@ final class Assets {
 		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin.css', array(), Plugin::VERSION );
 		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin.js', array( 'jquery' ), Plugin::VERSION, true );
 		wp_add_inline_script( 'wp_tmq_script', self::inlineConfig(), 'before' );
+
+		// Templates tab carries its own asset bundle (color picker + media
+		// uploader + the test-email handler). Loaded only on that tab so the
+		// other plugin pages stay slim.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, not a sensitive action.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'wp_tmq_mail_queue-tab-templates' === $page ) {
+			wp_enqueue_style( 'wp-color-picker' );
+			wp_enqueue_media();
+			wp_enqueue_script(
+				'wp_tmq_templates',
+				$base . 'assets/js/tmq-templates.js',
+				array( 'jquery', 'wp-color-picker' ),
+				Plugin::VERSION,
+				true
+			);
+		}
 	}
 
 	/**
@@ -57,6 +75,11 @@ final class Assets {
 		$d .= 'tmq.i18n.testConnection = "' . esc_js( __( 'Test Connection', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.ajaxUrl = "' . esc_url( admin_url( 'admin-ajax.php' ) ) . '";';
 		$d .= 'tmq.testSmtpNonce = "' . esc_js( wp_create_nonce( ConnectionTester::NONCE ) ) . '";';
+		$d .= 'tmq.templateTest = { action: "' . esc_js( TestEmailSender::ACTION ) . '" };';
+		$d .= 'tmq.i18n.sending = "' . esc_js( __( 'Sending…', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.i18n.testFailed = "' . esc_js( __( 'Test email failed: ', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.i18n.mediaTitle = "' . esc_js( __( 'Choose a logo', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.i18n.mediaButton = "' . esc_js( __( 'Use this image', 'total-mail-queue' ) ) . '";';
 		$d .= '}) ( this );';
 		return $d;
 	}
