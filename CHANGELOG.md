@@ -5,6 +5,26 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] - 2026-04-27
+
+> Fix for a long-standing capture gap: emails sent from inside a WP-Cron event by other plugins (deferred user-creation flows, abandoned-cart hooks, scheduled digests) bypassed the `MailInterceptor` and never landed in the queue / log. Worse, in **block mode** they actually went out — block mode silently failed for cron-originated mail. The plugin now intercepts in cron context too, with a precise drainer-only short-circuit.
+
+### Fixed
+
+- **Emails from third-party cron events were leaking past the queue.** `Queue\MailInterceptor::register()` no longer skips registration when `wp_doing_cron()` is true. Instead, `Queue\MailInterceptor::handle()` consults a new `Cron\BatchProcessor::isDraining()` flag and short-circuits only while the plugin's own drain loop is iterating queued rows. Effect: deferred sends from any plugin (ffcertificate, WooCommerce abandoned-cart, custom CSV-import hooks, etc.) now land in the queue / Sources catalog with the right `source_key`, and **block mode now actually blocks** in cron context.
+- **`Cron\BatchProcessor::run()` is now exception-safe around the drain.** The new `is_draining` flag is set before the loop and cleared in a `finally` block, so a fatal mid-loop no longer strands the flag at true and silences subsequent intercepts. The cron lock release moved into the same `finally`.
+
+### Added
+
+- **`Cron\BatchProcessor::isDraining()` (public).** Returns true while `run()` is iterating; documented as the right way for any future component to detect "we are sending queued mail right now".
+- **6 functional tests** in `CronContextCaptureTest`: `register()` no longer skips in cron context; `register()` still skips when disabled; `handle()` short-circuits while draining; cron-originated wp_mail lands in the queue with the expected source key; block mode in cron context retains emails (regression for the silent-leak); `isDraining()` is false at baseline.
+
+### Changed
+
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.5.2**.
+
+---
+
 ## [2.5.1] - 2026-04-27
 
 > Hotfix bundle on top of 2.5.0. Two production issues: a Fatal on plugin load because the `WooCommerceTokens` file name didn't match the inline autoloader's kebab-case convention, and a `_load_textdomain_just_in_time` `_doing_it_wrong` notice surfaced by WordPress 6.7+ that this release silences by loading the textdomain earlier.
