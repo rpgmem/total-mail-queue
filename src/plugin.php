@@ -83,6 +83,7 @@ final class Plugin {
 		// disabled mode and cron drains in queue mode. Skipped automatically
 		// in block mode (no mail leaves anyway).
 		Templates\Engine::register();
+		Templates\WooCommerceTokens::register();
 
 		// Cron worker — schedule + the actual queue-draining action.
 		Cron\Scheduler::register();
