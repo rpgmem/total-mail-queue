@@ -128,7 +128,10 @@ final class TemplateEngineTest extends FunctionalTestCase {
 		$out = Engine::cleanResetPasswordLink( $msg );
 
 		self::assertStringNotContainsString( '<https://', $out, 'The angle brackets WP wraps reset URLs in must be stripped.' );
-		self::assertStringContainsString( 'https://example.test/wp-login.php?action=rp&key=abc', $out );
+		// `make_clickable()` HTML-encodes `&` in URLs (`&` → `&#038;`), so we
+		// only assert on the prefix that survives encoding intact.
+		self::assertStringContainsString( 'https://example.test/wp-login.php?action=rp', $out );
+		self::assertStringContainsString( 'key=abc', $out );
 		self::assertStringContainsString( '<a ', $out, 'make_clickable() must turn the bare URL into an anchor.' );
 	}
 

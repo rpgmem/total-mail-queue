@@ -47,6 +47,14 @@ final class Engine {
 	/**
 	 * Register the engine's filters when the templates feature is on
 	 * and the plugin is not in block mode.
+	 *
+	 * The `wp_mail` filter registration is gated on whether the
+	 * {@see \TotalMailQueue\Queue\MailInterceptor} is going to catch the call
+	 * itself: if it is (queue/block mode, non-cron context), the interceptor
+	 * dispatches to {@see Engine::apply()} directly so we keep the
+	 * "capture → process → queue" ordering and avoid double-wrapping. In
+	 * disabled mode, or during cron drains where the interceptor stays out
+	 * of the way, the engine binds to `wp_mail` to wrap inline.
 	 */
 	public static function register(): void {
 		if ( ! self::isEnabled() ) {
@@ -56,10 +64,26 @@ final class Engine {
 			return;
 		}
 
-		add_filter( 'wp_mail', array( self::class, 'apply' ), self::FILTER_PRIORITY, 1 );
+		if ( ! self::interceptorWillDispatch() ) {
+			add_filter( 'wp_mail', array( self::class, 'apply' ), self::FILTER_PRIORITY, 1 );
+		}
 		add_filter( 'wp_mail_content_type', array( self::class, 'forceHtmlContentType' ), self::FILTER_PRIORITY, 1 );
 		add_filter( 'wp_mail_from', array( self::class, 'overrideFromEmail' ), self::FILTER_PRIORITY, 1 );
 		add_filter( 'wp_mail_from_name', array( self::class, 'overrideFromName' ), self::FILTER_PRIORITY, 1 );
+	}
+
+	/**
+	 * Whether the queue interceptor will catch outgoing mail in the current
+	 * request — when it does, we leave the `wp_mail` filter alone and let
+	 * {@see \TotalMailQueue\Queue\MailInterceptor::handle()} call us directly
+	 * just before the queue insert.
+	 */
+	private static function interceptorWillDispatch(): bool {
+		if ( wp_doing_cron() ) {
+			return false;
+		}
+		$tmq = MainOptions::get();
+		return isset( $tmq['enabled'] ) && in_array( (string) $tmq['enabled'], array( '1', '2' ), true );
 	}
 
 	/**
@@ -71,8 +95,18 @@ final class Engine {
 	 * @return array<string,mixed>
 	 */
 	public static function apply( $args ): array {
-		if ( ! is_array( $args ) || empty( $args['message'] ) || ! is_string( $args['message'] ) ) {
-			return is_array( $args ) ? $args : array();
+		if ( ! is_array( $args ) ) {
+			return array();
+		}
+
+		// Self-gate so direct callers (MailInterceptor::handle()) get the
+		// same toggle / block-mode short-circuit as the wp_mail filter path.
+		if ( ! self::isEnabled() || self::isBlockMode() ) {
+			return $args;
+		}
+
+		if ( empty( $args['message'] ) || ! is_string( $args['message'] ) ) {
+			return $args;
 		}
 
 		/**
