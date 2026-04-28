@@ -14,6 +14,11 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
     protected function setUp(): void {
         parent::setUp();
         Functions\when( 'sanitize_text_field' )->returnArg();
+        // Match WP's contract: returns the address if it parses, else ''.
+        Functions\when( 'sanitize_email' )->alias( static function ( $value ) {
+            $value = (string) $value;
+            return ( false !== filter_var( $value, FILTER_VALIDATE_EMAIL ) ) ? $value : '';
+        } );
     }
 
     public function test_returns_empty_array_when_input_is_not_an_array(): void {
@@ -53,7 +58,7 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
         self::assertArrayNotHasKey( 'triggercount', $sanitized );
     }
 
-    public function test_each_kept_value_is_passed_through_sanitize_text_field(): void {
+    public function test_text_keys_are_passed_through_sanitize_text_field(): void {
         $observed = array();
         Functions\when( 'sanitize_text_field' )->alias( static function ( $value ) use ( &$observed ) {
             $observed[] = $value;
@@ -61,14 +66,47 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
         } );
 
         $result = \TotalMailQueue\Settings\Sanitizer::sanitize( array(
-            'enabled' => 'yes',
-            'email'   => 'me@example.test',
-            'unknown' => 'should be skipped before sanitize is called',
+            'enabled'   => 'yes',
+            'from_name' => 'Site Robot',
+            'unknown'   => 'should be skipped before sanitize is called',
         ) );
 
-        // sanitize_text_field is invoked exactly for the whitelisted keys.
-        self::assertSame( array( 'yes', 'me@example.test' ), $observed );
+        // sanitize_text_field is invoked exactly for the whitelisted text keys.
+        self::assertSame( array( 'yes', 'Site Robot' ), $observed );
         // And its return value is what ends up in the sanitized output.
-        self::assertSame( array( 'enabled' => 'YES', 'email' => 'ME@EXAMPLE.TEST' ), $result );
+        self::assertSame( array( 'enabled' => 'YES', 'from_name' => 'SITE ROBOT' ), $result );
+    }
+
+    public function test_email_keys_are_validated_with_sanitize_email(): void {
+        $result = \TotalMailQueue\Settings\Sanitizer::sanitize( array(
+            'email'      => 'alerts@example.test',
+            'from_email' => 'no-reply@example.test',
+        ) );
+
+        self::assertSame(
+            array(
+                'email'      => 'alerts@example.test',
+                'from_email' => 'no-reply@example.test',
+            ),
+            $result
+        );
+    }
+
+    public function test_garbage_in_email_keys_collapses_to_empty_string(): void {
+        // The real defect this guards against: previously sanitize_text_field
+        // happily persisted "not an email" as a setting, causing wp_mail to
+        // ship malformed From: headers downstream.
+        $result = \TotalMailQueue\Settings\Sanitizer::sanitize( array(
+            'email'      => 'not an email',
+            'from_email' => '<garbage>',
+        ) );
+
+        self::assertSame(
+            array(
+                'email'      => '',
+                'from_email' => '',
+            ),
+            $result
+        );
     }
 }
