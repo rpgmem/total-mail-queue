@@ -72,6 +72,7 @@ final class Plugin {
 		// wp_mail(). Wired regardless of mode/cron so the catalog stays in
 		// sync; only the interceptor below cares about consuming the marker.
 		Sources\Detector::register();
+		Sources\WpVersionNotice::register();
 
 		// Mail interception (queue/block modes only, never during WP cron).
 		Queue\MailInterceptor::register();
