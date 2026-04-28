@@ -65,23 +65,24 @@ final class Detector {
 		self::$registered = true;
 
 		// All listeners read only the first argument (the filter payload they
-		// must return unchanged); accepted_args = 1 is intentional even when
-		// the underlying filter passes more context.
-		add_filter( 'retrieve_password_notification_email', array( self::class, 'markPasswordReset' ), 1, 1 );
-		add_filter( 'wp_new_user_notification_email', array( self::class, 'markNewUser' ), 1, 1 );
-		add_filter( 'wp_new_user_notification_email_admin', array( self::class, 'markNewUserAdmin' ), 1, 1 );
-		add_filter( 'password_change_email', array( self::class, 'markPasswordChange' ), 1, 1 );
-		add_filter( 'wp_password_change_notification_email', array( self::class, 'markPasswordChangeAdminNotify' ), 1, 1 );
-		add_filter( 'email_change_email', array( self::class, 'markEmailChange' ), 1, 1 );
-		add_filter( 'new_admin_email_content', array( self::class, 'markAdminEmailChangeConfirm' ), 1, 1 );
+		// must return unchanged); accepted_args bumped per filter where the
+		// extra arguments carry user / request context the wp_core template
+		// override pipeline (CoreTemplates) needs to populate tokens.
+		add_filter( 'retrieve_password_notification_email', array( self::class, 'markPasswordReset' ), 1, 4 );
+		add_filter( 'wp_new_user_notification_email', array( self::class, 'markNewUser' ), 1, 3 );
+		add_filter( 'wp_new_user_notification_email_admin', array( self::class, 'markNewUserAdmin' ), 1, 3 );
+		add_filter( 'password_change_email', array( self::class, 'markPasswordChange' ), 1, 3 );
+		add_filter( 'wp_password_change_notification_email', array( self::class, 'markPasswordChangeAdminNotify' ), 1, 3 );
+		add_filter( 'email_change_email', array( self::class, 'markEmailChange' ), 1, 3 );
+		add_filter( 'new_admin_email_content', array( self::class, 'markAdminEmailChangeConfirm' ), 1, 2 );
 		add_filter( 'auto_core_update_email', array( self::class, 'markAutoUpdate' ), 1, 1 );
 		add_filter( 'auto_plugin_theme_update_email', array( self::class, 'markAutoUpdatePluginsThemes' ), 1, 1 );
 		add_filter( 'comment_notification_text', array( self::class, 'markCommentNotification' ), 1, 1 );
 		add_filter( 'comment_moderation_text', array( self::class, 'markCommentModeration' ), 1, 1 );
-		add_filter( 'user_confirmed_action_email_content', array( self::class, 'markUserActionConfirm' ), 1, 1 );
-		add_filter( 'wp_privacy_personal_data_email_content', array( self::class, 'markPrivacyExportReady' ), 1, 1 );
-		add_filter( 'user_erasure_complete_email_content', array( self::class, 'markPrivacyErasureDone' ), 1, 1 );
-		add_filter( 'recovery_mode_email', array( self::class, 'markRecoveryMode' ), 1, 1 );
+		add_filter( 'user_confirmed_action_email_content', array( self::class, 'markUserActionConfirm' ), 1, 2 );
+		add_filter( 'wp_privacy_personal_data_email_content', array( self::class, 'markPrivacyExportReady' ), 1, 3 );
+		add_filter( 'user_erasure_complete_email_content', array( self::class, 'markPrivacyErasureDone' ), 1, 3 );
+		add_filter( 'recovery_mode_email', array( self::class, 'markRecoveryMode' ), 1, 2 );
 	}
 
 	/**
@@ -256,57 +257,138 @@ final class Detector {
 	 */
 
 	/**
-	 * Listener for `retrieve_password_notification_email`.
+	 * Listener for `retrieve_password_notification_email`. Captures the
+	 * dynamic context the wp_core override pipeline needs to populate
+	 * `{username}`, `{user_email}`, `{reset_url}`, and `{requester_ip}`.
 	 *
-	 * @param mixed $email Filter payload.
+	 * @param mixed  $email      Filter payload.
+	 * @param string $key        Reset key.
+	 * @param string $user_login Account being reset.
+	 * @param mixed  $user_data  WP_User instance, when supplied.
 	 * @return mixed
 	 */
-	public static function markPasswordReset( $email ) {
+	public static function markPasswordReset( $email, $key = '', $user_login = '', $user_data = null ) {
 		self::setCurrent( 'wp_core:password_reset', 'Password reset', 'WordPress Core' );
+
+		$reset_url = '';
+		if ( '' !== (string) $key && '' !== (string) $user_login ) {
+			$reset_url = network_site_url(
+				'wp-login.php?action=rp&key=' . rawurlencode( (string) $key ) . '&login=' . rawurlencode( (string) $user_login )
+			);
+		}
+
+		self::setData(
+			array(
+				'username'     => (string) $user_login,
+				'user_email'   => is_object( $user_data ) && isset( $user_data->user_email ) ? (string) $user_data->user_email : '',
+				'reset_url'    => $reset_url,
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below
+				'requester_ip' => isset( $_SERVER['REMOTE_ADDR'] ) ? (string) sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
+			)
+		);
+
 		return $email;
 	}
 
 	/**
 	 * Listener for `wp_new_user_notification_email`.
 	 *
-	 * @param mixed $email Filter payload.
+	 * @param mixed $email    Filter payload.
+	 * @param mixed $user     WP_User instance, when supplied.
+	 * @param mixed $blogname Site name (unused).
 	 * @return mixed
 	 */
-	public static function markNewUser( $email ) {
+	public static function markNewUser( $email, $user = null, $blogname = '' ) {
+		unset( $blogname );
 		self::setCurrent( 'wp_core:new_user', 'New user — welcome', 'WordPress Core' );
+
+		if ( is_object( $user ) ) {
+			self::setData(
+				array(
+					'username'   => isset( $user->user_login ) ? (string) $user->user_login : '',
+					'user_email' => isset( $user->user_email ) ? (string) $user->user_email : '',
+					'login_url'  => wp_login_url(),
+				)
+			);
+		}
+
 		return $email;
 	}
 
 	/**
 	 * Listener for `wp_new_user_notification_email_admin`.
 	 *
-	 * @param mixed $email Filter payload.
+	 * @param mixed $email    Filter payload.
+	 * @param mixed $user     WP_User instance, when supplied.
+	 * @param mixed $blogname Site name (unused).
 	 * @return mixed
 	 */
-	public static function markNewUserAdmin( $email ) {
+	public static function markNewUserAdmin( $email, $user = null, $blogname = '' ) {
+		unset( $blogname );
 		self::setCurrent( 'wp_core:new_user_admin', 'New user — admin notification', 'WordPress Core' );
+
+		if ( is_object( $user ) ) {
+			self::setData(
+				array(
+					'username'   => isset( $user->user_login ) ? (string) $user->user_login : '',
+					'user_email' => isset( $user->user_email ) ? (string) $user->user_email : '',
+				)
+			);
+		}
+
 		return $email;
 	}
 
 	/**
 	 * Listener for `password_change_email`.
 	 *
-	 * @param mixed $email Filter payload.
+	 * @param mixed $email    Filter payload.
+	 * @param mixed $user     WP_User instance, when supplied.
+	 * @param mixed $userdata Updated user fields (unused).
 	 * @return mixed
 	 */
-	public static function markPasswordChange( $email ) {
+	public static function markPasswordChange( $email, $user = null, $userdata = null ) {
+		unset( $userdata );
 		self::setCurrent( 'wp_core:password_change', 'Password changed', 'WordPress Core' );
+
+		if ( is_object( $user ) ) {
+			self::setData(
+				array(
+					'username'  => isset( $user->user_login ) ? (string) $user->user_login : '',
+					'recipient' => isset( $user->user_email ) ? (string) $user->user_email : '',
+				)
+			);
+		}
+
 		return $email;
 	}
 
 	/**
 	 * Listener for `email_change_email`.
 	 *
-	 * @param mixed $email Filter payload.
+	 * @param mixed $email    Filter payload.
+	 * @param mixed $user     WP_User instance, when supplied.
+	 * @param mixed $userdata Updated user fields containing the new email.
 	 * @return mixed
 	 */
-	public static function markEmailChange( $email ) {
+	public static function markEmailChange( $email, $user = null, $userdata = null ) {
 		self::setCurrent( 'wp_core:email_change', 'Email changed', 'WordPress Core' );
+
+		$data = array();
+		if ( is_object( $user ) ) {
+			$data['username']  = isset( $user->user_login ) ? (string) $user->user_login : '';
+			$data['recipient'] = isset( $user->user_email ) ? (string) $user->user_email : '';
+		}
+		if ( is_array( $userdata ) && isset( $userdata['user_email'] ) ) {
+			$data['new_email'] = (string) $userdata['user_email'];
+		} elseif ( is_object( $userdata ) && isset( $userdata->user_email ) ) {
+			$data['new_email'] = (string) $userdata->user_email;
+		}
+
+		if ( ! empty( $data ) ) {
+			self::setData( $data );
+		}
+
 		return $email;
 	}
 
@@ -347,10 +429,13 @@ final class Detector {
 	 * Listener for `wp_password_change_notification_email` (WP 5.3+).
 	 * Sent to the site admin whenever ANY user resets their password.
 	 *
-	 * @param mixed $email Filter payload.
+	 * @param mixed $email    Filter payload.
+	 * @param mixed $user     WP_User instance, when supplied (unused).
+	 * @param mixed $blogname Site name (unused).
 	 * @return mixed
 	 */
-	public static function markPasswordChangeAdminNotify( $email ) {
+	public static function markPasswordChangeAdminNotify( $email, $user = null, $blogname = '' ) {
+		unset( $user, $blogname );
 		self::setCurrent( 'wp_core:password_change_admin_notify', 'Password change — admin notification', 'WordPress Core' );
 		return $email;
 	}
@@ -360,10 +445,12 @@ final class Detector {
 	 * site-admin address when the admin email is changed in Settings →
 	 * General, asking the recipient to confirm.
 	 *
-	 * @param mixed $content Filter payload.
+	 * @param mixed $content         Filter payload.
+	 * @param mixed $new_admin_email Pending admin email address (unused).
 	 * @return mixed
 	 */
-	public static function markAdminEmailChangeConfirm( $content ) {
+	public static function markAdminEmailChangeConfirm( $content, $new_admin_email = '' ) {
+		unset( $new_admin_email );
 		self::setCurrent( 'wp_core:admin_email_change_confirm', 'Admin email change — confirmation', 'WordPress Core' );
 		return $content;
 	}
@@ -385,10 +472,12 @@ final class Detector {
 	 * The "click to confirm" email sent before personal-data export or
 	 * erasure requests are processed.
 	 *
-	 * @param mixed $content Filter payload.
+	 * @param mixed $content    Filter payload.
+	 * @param mixed $email_data Companion data array (unused).
 	 * @return mixed
 	 */
-	public static function markUserActionConfirm( $content ) {
+	public static function markUserActionConfirm( $content, $email_data = null ) {
+		unset( $email_data );
 		self::setCurrent( 'wp_core:user_action_confirm', 'Personal data — request confirmation', 'WordPress Core' );
 		return $content;
 	}
@@ -398,10 +487,13 @@ final class Detector {
 	 * Notifies the user that their personal-data export is ready for
 	 * download.
 	 *
-	 * @param mixed $content Filter payload.
+	 * @param mixed $content    Filter payload.
+	 * @param mixed $request_id Privacy request post id (unused).
+	 * @param mixed $email_data Companion data array (unused).
 	 * @return mixed
 	 */
-	public static function markPrivacyExportReady( $content ) {
+	public static function markPrivacyExportReady( $content, $request_id = 0, $email_data = null ) {
+		unset( $request_id, $email_data );
 		self::setCurrent( 'wp_core:privacy_export_ready', 'Personal data — export ready', 'WordPress Core' );
 		return $content;
 	}
@@ -411,10 +503,13 @@ final class Detector {
 	 * Notifies the user that their personal-data erasure request was
 	 * fulfilled.
 	 *
-	 * @param mixed $content Filter payload.
+	 * @param mixed $content       Filter payload.
+	 * @param mixed $email_address Recipient (unused).
+	 * @param mixed $request_id    Privacy request post id (unused).
 	 * @return mixed
 	 */
-	public static function markPrivacyErasureDone( $content ) {
+	public static function markPrivacyErasureDone( $content, $email_address = '', $request_id = 0 ) {
+		unset( $email_address, $request_id );
 		self::setCurrent( 'wp_core:privacy_erasure_done', 'Personal data — erasure complete', 'WordPress Core' );
 		return $content;
 	}
@@ -424,9 +519,11 @@ final class Detector {
 	 * admin when a fatal error triggers the recovery-mode link.
 	 *
 	 * @param mixed $email Filter payload.
+	 * @param mixed $url   Recovery link URL (unused).
 	 * @return mixed
 	 */
-	public static function markRecoveryMode( $email ) {
+	public static function markRecoveryMode( $email, $url = '' ) {
+		unset( $url );
 		self::setCurrent( 'wp_core:recovery_mode', 'Recovery mode', 'WordPress Core' );
 		return $email;
 	}
