@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TMQ\Tests\Functional;
 
+use TotalMailQueue\Cron\BatchProcessor;
 use TotalMailQueue\Database\Migrator;
 use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Queue\MailInterceptor;
@@ -175,6 +176,51 @@ final class CoreTemplateOverridesTest extends FunctionalTestCase {
 		global $wpdb;
 		$row = $wpdb->get_row( "SELECT * FROM `{$this->queueTable()}` ORDER BY id DESC LIMIT 1", ARRAY_A );
 		self::assertSame( 'Plain body, no envelope.', $row['message'], 'skip_template_wrap=1 must keep the body raw.' );
+	}
+
+	public function test_batch_processor_drain_honors_skip_template_wrap(): void {
+		// Regression for v2.6.1 — at drain time the Engine on `wp_mail`
+		// filter @100 used to re-wrap rows that MailInterceptor left raw,
+		// nullifying the per-source skip_template_wrap flag. Drain now
+		// short-circuits Engine via the `wp_tmq_template_skip` filter
+		// when the source has skip_template_wrap=1.
+		$id = SourcesRepository::register( 'wp_core:password_reset', 'Password reset', 'WordPress Core' );
+		SourcesRepository::updateTemplateOverrides( $id, '', 'Stays raw on drain.', true );
+
+		// 1. Skipping helper recognises a skip_template_wrap row.
+		self::assertTrue(
+			$this->callPrivate( BatchProcessor::class, 'skipsTemplateWrap', array( 'wp_core:password_reset' ) ),
+			'skip_template_wrap=1 must be detected by BatchProcessor at drain time.'
+		);
+
+		// 2. Same helper returns false for a row without the flag.
+		SourcesRepository::updateTemplateOverrides( $id, '', '', false );
+		self::assertFalse(
+			$this->callPrivate( BatchProcessor::class, 'skipsTemplateWrap', array( 'wp_core:password_reset' ) )
+		);
+
+		// 3. Same helper returns false for a non-wp_core source even if
+		// the skip flag would somehow be set on its row.
+		$plugin_id = SourcesRepository::register( 'plugin:woocommerce', 'WooCommerce', 'Plugins' );
+		SourcesRepository::updateTemplateOverrides( $plugin_id, '', '', true );
+		self::assertFalse(
+			$this->callPrivate( BatchProcessor::class, 'skipsTemplateWrap', array( 'plugin:woocommerce' ) ),
+			'Non-wp_core sources do not honor skip_template_wrap (the column does not apply to them).'
+		);
+	}
+
+	/**
+	 * Reflection helper for testing private static methods.
+	 *
+	 * @param string             $class  Fully-qualified class name.
+	 * @param string             $method Method name.
+	 * @param array<int,mixed>   $args   Positional arguments.
+	 * @return mixed
+	 */
+	private function callPrivate( string $class, string $method, array $args ) {
+		$ref = new \ReflectionMethod( $class, $method );
+		$ref->setAccessible( true );
+		return $ref->invoke( null, ...$args );
 	}
 
 	public function test_mailInterceptor_non_wp_core_source_is_not_overridden(): void {
