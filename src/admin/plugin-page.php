@@ -210,7 +210,7 @@ final class PluginPage {
 	 */
 	private static function renderLogTab(): void {
 		echo '<form method="post">';
-		$logtable = new LogTable();
+		$logtable = new LogTable( LogTable::MODE_LOG );
 		$logtable->prepare_items();
 		$logtable->display();
 		echo '</form>';
@@ -260,7 +260,7 @@ final class PluginPage {
 		self::renderConflictNotice( $options );
 
 		echo '<form method="post" action="admin.php?page=' . esc_attr( self::TAB_QUEUE ) . '">';
-		$queuetable = new LogTable();
+		$queuetable = new LogTable( LogTable::MODE_QUEUE );
 		$queuetable->prepare_items();
 		$queuetable->display();
 		echo '</form>';
