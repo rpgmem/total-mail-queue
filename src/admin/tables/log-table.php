@@ -22,11 +22,51 @@ if ( ! class_exists( WP_List_Table::class ) ) {
  * `WP_List_Table` subclass that powers both the Log and the Retention tabs.
  *
  * Switches its row source between the queued/high-priority rows and the rest
- * of the log based on the active admin page (`wp_tmq_mail_queue-tab-log` vs
- * `wp_tmq_mail_queue-tab-queue`), and exposes the bulk actions delete /
- * resend / force_resend.
+ * of the log based on the {@see LogTable::MODE_LOG} / {@see LogTable::MODE_QUEUE}
+ * mode passed to the constructor by the calling renderer, and exposes the
+ * bulk actions delete / resend / force_resend.
  */
 final class LogTable extends WP_List_Table {
+
+	/**
+	 * Render the "Log" tab — shows non-queued rows (sent / error / alert /
+	 * blocked_by_source) plus the status + source filters and the SMTP
+	 * column.
+	 */
+	public const MODE_LOG = 'log';
+
+	/**
+	 * Render the "Retention" tab — shows pending queued rows and hides the
+	 * status filter + SMTP column.
+	 */
+	public const MODE_QUEUE = 'queue';
+
+	/**
+	 * Active rendering mode. Set in the constructor; replaces the
+	 * pre-2.6.2 pattern of sniffing `$_GET['page']` from inside the
+	 * table methods (which broke silently when the page slug changed).
+	 *
+	 * @var string
+	 */
+	private string $mode;
+
+	/**
+	 * Build the table for a given tab.
+	 *
+	 * @param string              $mode    One of self::MODE_LOG / self::MODE_QUEUE.
+	 *                                     Defaults to MODE_LOG so legacy callers
+	 *                                     that `new LogTable()` without arguments
+	 *                                     keep working.
+	 * @param array<string,mixed> $wp_args Forwarded to {@see WP_List_Table::__construct()}
+	 *                                     for callers that need to override the
+	 *                                     `singular` / `plural` / `screen` keys
+	 *                                     (e.g. tests asserting the bulk-action
+	 *                                     nonce against a known plural slug).
+	 */
+	public function __construct( string $mode = self::MODE_LOG, array $wp_args = array() ) {
+		parent::__construct( $wp_args );
+		$this->mode = self::MODE_QUEUE === $mode ? self::MODE_QUEUE : self::MODE_LOG;
+	}
 
 	/**
 	 * Build the WHERE clause used by the log queries.
@@ -123,9 +163,7 @@ final class LogTable extends WP_List_Table {
 			'headers'         => __( 'Headers', 'total-mail-queue' ),
 			'attachments'     => __( 'Attachments', 'total-mail-queue' ),
 		);
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page routing, not form processing
-		$type = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
-		if ( 'wp_tmq_mail_queue-tab-log' !== $type ) {
+		if ( self::MODE_LOG !== $this->mode ) {
 			unset( $columns['smtp_account_id'] );
 		}
 		return $columns;
@@ -137,9 +175,7 @@ final class LogTable extends WP_List_Table {
 	 * @param string $which `top` or `bottom`.
 	 */
 	protected function extra_tablenav( $which ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page routing, not form processing
-		$type = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
-		if ( 'wp_tmq_mail_queue-tab-log' !== $type || 'top' !== $which ) {
+		if ( self::MODE_LOG !== $this->mode || 'top' !== $which ) {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
@@ -187,8 +223,6 @@ final class LogTable extends WP_List_Table {
 	 * Populate {@see $items} based on the active tab.
 	 */
 	public function prepare_items() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page routing, not form processing
-		$type                  = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
 		$columns               = $this->get_columns();
 		$hidden                = array();
 		$sortable              = array();
@@ -200,14 +234,14 @@ final class LogTable extends WP_List_Table {
 		$total_items = 0;
 		$data        = array();
 
-		if ( 'wp_tmq_mail_queue-tab-log' === $type ) {
+		if ( self::MODE_LOG === $this->mode ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
 			$status_filter = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
 			$source_filter = isset( $_REQUEST['source_filter'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['source_filter'] ) ) : '';
 			$total_items   = $this->get_log_count( $status_filter, $source_filter );
 			$data          = $this->get_log( $status_filter, $source_filter, $per_page, $offset );
-		} elseif ( 'wp_tmq_mail_queue-tab-queue' === $type ) {
+		} else {
 			$total_items = $this->get_queue_count();
 			$data        = $this->get_queue( $per_page, $offset );
 		}

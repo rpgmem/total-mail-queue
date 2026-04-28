@@ -88,7 +88,7 @@ final class BulkActionsTest extends FunctionalTestCase {
      * @param array<int,int> $ids
      */
     private function dispatchBulkAction( string $action, array $ids ): void {
-        $logtable = new LogTable( array( 'plural' => 'tmq_items' ) );
+        $logtable = new LogTable( LogTable::MODE_LOG, array( 'plural' => 'tmq_items' ) );
 
         $_POST['_wpnonce']     = wp_create_nonce( 'bulk-tmq_items' );
         $_REQUEST['_wpnonce']  = $_POST['_wpnonce'];
