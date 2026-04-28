@@ -58,6 +58,32 @@ final class MailInterceptor {
 	}
 
 	/**
+	 * Whether the interceptor will actually catch the **next** `wp_mail()`
+	 * call in the current request and dispatch the queue insert (and inline
+	 * template wrap).
+	 *
+	 * Used by {@see \TotalMailQueue\Templates\Engine::register()} to decide
+	 * whether to bind to the `wp_mail` filter itself: when the interceptor
+	 * is going to dispatch, the engine stays out of the way and lets the
+	 * interceptor call {@see \TotalMailQueue\Templates\Engine::apply()}
+	 * inline — that's how the queue row ends up with the already-wrapped
+	 * body so the admin's preview matches what ships.
+	 *
+	 * Distinct from {@see register()}'s gate: register hooks even during cron
+	 * (so cron-originated `wp_mail()` calls from other plugins get queued),
+	 * while this predicate excludes cron because the queue drainer strips
+	 * the filter mid-drain, and the engine should fall through to its own
+	 * `wp_mail` binding for cron-time sends.
+	 */
+	public static function willHandle(): bool {
+		if ( wp_doing_cron() ) {
+			return false;
+		}
+		$options = Options::get();
+		return isset( $options['enabled'] ) && in_array( (string) $options['enabled'], array( '1', '2' ), true );
+	}
+
+	/**
 	 * `pre_wp_mail` filter callback.
 	 *
 	 * @param mixed               $return Whatever an earlier filter already returned (null = nothing yet).
