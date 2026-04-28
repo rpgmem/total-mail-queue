@@ -41,12 +41,16 @@ final class Encryption {
 	}
 
 	/**
-	 * Decrypt a payload produced by {@see Encryption::encrypt()}.
+	 * Decrypt a payload produced by {@see Encryption::encrypt()}. A malformed
+	 * envelope, a wrong key, or any openssl failure collapses to an empty
+	 * string — callers (PHPMailer's $Password, the captured-config replay)
+	 * treat empty as "no credential" and the SMTP send fails loudly rather
+	 * than shipping garbage.
 	 *
 	 * @param string $encrypted_text Base64-encoded envelope.
-	 * @return string|false The plaintext, '' for empty input, or false when the payload is malformed or the wrong key was used.
+	 * @return string Plaintext, or '' when the envelope is empty / unreadable.
 	 */
-	public static function decrypt( string $encrypted_text ): string|false {
+	public static function decrypt( string $encrypted_text ): string {
 		if ( '' === $encrypted_text ) {
 			return '';
 		}
@@ -61,6 +65,7 @@ final class Encryption {
 			return '';
 		}
 		[ $iv, $encrypted ] = $parts;
-		return openssl_decrypt( $encrypted, self::CIPHER, $key, 0, $iv );
+		$plain              = openssl_decrypt( $encrypted, self::CIPHER, $key, 0, $iv );
+		return false === $plain ? '' : $plain;
 	}
 }

@@ -16,13 +16,17 @@ namespace TotalMailQueue\Support;
 final class Serializer {
 
 	/**
-	 * Encode a value as JSON.
+	 * Encode a value as JSON. Encoding failures (recursive references,
+	 * malformed UTF-8) collapse to an empty string — none of the values the
+	 * plugin serializes can hit that path under normal use, and a stored ''
+	 * round-trips through {@see decode()} to `null` rather than poisoning a
+	 * column with `false`.
 	 *
 	 * @param mixed $value Anything wp_json_encode() accepts.
-	 * @return string|false JSON string, or false on failure.
 	 */
-	public static function encode( $value ) {
-		return wp_json_encode( $value );
+	public static function encode( $value ): string {
+		$encoded = wp_json_encode( $value );
+		return false === $encoded ? '' : $encoded;
 	}
 
 	/**
