@@ -12,10 +12,12 @@ namespace TotalMailQueue\Queue;
 use TotalMailQueue\Cron\BatchProcessor;
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\PhpMailerCapturer;
+use TotalMailQueue\Sources\CoreTemplates;
 use TotalMailQueue\Sources\Detector;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
 use TotalMailQueue\Support\Serializer;
 use TotalMailQueue\Templates\Engine as TemplateEngine;
+use TotalMailQueue\Templates\Tokens;
 
 /**
  * Backbone of the queue: hooks `pre_wp_mail` at very high priority so it
@@ -113,14 +115,47 @@ final class MailInterceptor {
 			$status = 'blocked_by_source';
 		}
 
+		// wp_core template override pipeline (v2.6.0). When the source is
+		// one of the wp_core templates the admin can edit AND a non-empty
+		// override is saved, replace the subject / body with the
+		// admin-supplied template before tokens are substituted. The
+		// `skip_template_wrap` flag bypasses the global HTML envelope for
+		// this specific source.
+		$skip_template_wrap = false;
+		if ( CoreTemplates::isCoreTemplate( $source['key'] ) ) {
+			$row = SourcesRepository::findByKey( $source['key'] );
+			if ( null !== $row ) {
+				$context          = Detector::consumeData();
+				$subject_override = isset( $row['subject_override'] ) ? (string) $row['subject_override'] : '';
+				$body_override    = isset( $row['body_override'] ) ? (string) $row['body_override'] : '';
+				$has_override     = '' !== $subject_override || '' !== $body_override;
+				if ( $has_override ) {
+					$args_for_tokens = array(
+						'to'               => $to,
+						'subject'          => $subject,
+						'message'          => $message,
+						'message_original' => $message,
+					);
+					if ( '' !== $subject_override ) {
+						$subject = self::renderOverride( $subject_override, $args_for_tokens, $context );
+					}
+					if ( '' !== $body_override ) {
+						$message = self::renderOverride( $body_override, $args_for_tokens, $context );
+					}
+				}
+				if ( ! empty( $row['skip_template_wrap'] ) ) {
+					$skip_template_wrap = true;
+				}
+			}
+		}
+
 		// Apply the HTML template wrapper before the row hits the queue, so
 		// the persisted message is the same byte string the recipient will
 		// see. Skipped for `instant` (wp_mail() proceeds normally and the
-		// engine wraps via the `wp_mail` filter) and `blocked_by_source`
-		// (no point — the row is never sent). The Engine self-gates on the
-		// templates toggle and on block mode, so we can call it
-		// unconditionally for the queue / high paths.
-		if ( 'queue' === $status || 'high' === $status ) {
+		// engine wraps via the `wp_mail` filter), `blocked_by_source` (no
+		// point — the row is never sent), and per-source skip_template_wrap
+		// (admin chose to keep this template raw).
+		if ( ! $skip_template_wrap && ( 'queue' === $status || 'high' === $status ) ) {
 			$wrapped = TemplateEngine::apply(
 				array(
 					'to'          => $to,
@@ -196,6 +231,42 @@ final class MailInterceptor {
 		// `blocked_by_source` shares the queue/high return path: the caller
 		// sees a successful enqueue, the message just never leaves the row.
 		return true;
+	}
+
+	/**
+	 * Substitute `{token}` placeholders in an admin-supplied wp_core
+	 * template override. Globals come from {@see Tokens::globals()};
+	 * `$extra_context` carries per-call dynamic values that
+	 * {@see Detector::consumeData()} stashed (username, reset_url,
+	 * etc.). Per-call values win over globals so a template can rely
+	 * on the most specific source for each token.
+	 *
+	 * Implemented inline (not via Tokens::replace) so the per-call
+	 * context lives in this single pipeline step without leaking to
+	 * the global `wp_tmq_template_tokens` filter scope.
+	 *
+	 * @param string               $template      User-supplied template body or subject.
+	 * @param array<string,mixed>  $args          wp_mail args (drives globals).
+	 * @param array<string,string> $extra_context Per-call dynamic values from Detector.
+	 * @return string
+	 */
+	private static function renderOverride( string $template, array $args, array $extra_context ): string {
+		$tokens                     = Tokens::globals( $args );
+		$tokens['subject']          = isset( $args['subject'] ) ? (string) $args['subject'] : '';
+		$tokens['message_original'] = isset( $args['message_original'] ) ? (string) $args['message_original'] : '';
+		// Per-call context wins (e.g. {username} from the listener
+		// over the empty global default).
+		foreach ( $extra_context as $name => $value ) {
+			$tokens[ (string) $name ] = (string) $value;
+		}
+
+		$search  = array();
+		$replace = array();
+		foreach ( $tokens as $name => $value ) {
+			$search[]  = '{' . $name . '}';
+			$replace[] = $value;
+		}
+		return str_replace( $search, $replace, $template );
 	}
 
 	/**
