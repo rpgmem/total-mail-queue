@@ -93,15 +93,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Filters / Actions exposed
 
-| Hook | Purpose |
-|---|---|
-| `wp_tmq_template_skip` (filter) | Short-circuit wrapping for a specific email |
-| `wp_tmq_template_content` (filter) | Pre-process raw body before wrapping |
-| `wp_tmq_template_html` (filter) | Final pass over the rendered HTML |
-| `wp_tmq_template_tokens` (filter) | Add per-source / per-plugin tokens |
-| `wp_tmq_template_default_options` (filter) | Override hardcoded defaults |
-| `wp_tmq_template_options` (filter) | Override resolved (post-merge) options |
-| `wp_tmq_template_before_apply` / `_after_apply` (action) | Around `Engine::apply()` |
+| Hook                                                        | Purpose  |
+|---                                                          |       ---|
+| `wp_tmq_template_skip` (filter)                             | Short-circuit wrapping for a specific email |
+| `wp_tmq_template_content` (filter)                          | Pre-process raw body before wrapping |
+| `wp_tmq_template_html` (filter)                             | Final pass over the rendered HTML |
+| `wp_tmq_template_tokens` (filter)                           | Add per-source / per-plugin tokens |
+| `wp_tmq_template_default_options` (filter)                  | Override hardcoded defaults |
+| `wp_tmq_template_options` (filter)                          | Override resolved (post-merge) options |
+| `wp_tmq_template_before_apply` / `_after_apply` (action)    | Around `Engine::apply()` |
 
 ### Tests
 
