@@ -72,4 +72,14 @@ final class PhpMailerCapturer {
 		self::$capturing = false;
 		return ! empty( $config ) ? $config : null;
 	}
+
+	/**
+	 * Clear the `$capturing` flag. The flag is normally toggled false at
+	 * the end of {@see capture()}, but a thrown exception mid-capture would
+	 * leave it stuck on; tests and {@see \TotalMailQueue\Support\RuntimeState}
+	 * call this to guarantee a clean per-request slate.
+	 */
+	public static function reset(): void {
+		self::$capturing = false;
+	}
 }

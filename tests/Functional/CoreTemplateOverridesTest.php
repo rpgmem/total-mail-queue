@@ -38,7 +38,6 @@ final class CoreTemplateOverridesTest extends FunctionalTestCase {
 		parent::setUp();
 		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin );
-		Detector::reset();
 
 		global $wpdb;
 		$wpdb->query( "TRUNCATE TABLE `{$this->sourcesTable()}`" );

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace TMQ\Tests\Functional;
 
-use TotalMailQueue\Cron\BatchProcessor;
 use TotalMailQueue\Database\Migrator;
 use TotalMailQueue\Database\Schema;
-use TotalMailQueue\Queue\Tracker;
 use TotalMailQueue\Support\Encryption;
+use TotalMailQueue\Support\RuntimeState;
 use WP_UnitTestCase;
 
 /**
@@ -22,10 +21,10 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
     protected function setUp(): void {
         parent::setUp();
 
-        // Each test case is its own scenario; reset the namespaced singletons
-        // (BatchProcessor's invocation guard, Tracker's in-flight mail id).
-        BatchProcessor::reset();
-        Tracker::reset();
+        // Each test case is its own scenario; clear every per-request static
+        // (BatchProcessor's invocation guard, Detector's source marker,
+        // Tracker's in-flight mail id, etc.) in one shot.
+        RuntimeState::reset();
 
         // Refresh schema in case a previous test dropped tables.
         Migrator::install();

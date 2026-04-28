@@ -22,7 +22,6 @@ final class SourcesPipelineTest extends FunctionalTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        Detector::reset();
         $this->setPluginOptions( array( 'enabled' => '1' ) );
         // Hook the interceptor in this request — Plugin::boot() ran before
         // setPluginOptions persisted enabled=1, so the filter never registered.
