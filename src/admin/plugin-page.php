@@ -280,7 +280,7 @@ final class PluginPage {
 	private static function renderFaqTab(): void {
 		$postman = plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) );
 		echo '<div class="tmq-banner">';
-		echo '<img src="' . esc_url( $postman ) . '" alt="" width="1408" height="768" loading="lazy" />';
+		echo '<img src="' . esc_url( $postman ) . '" alt="" height="300" loading="lazy" />';
 		echo '</div>';
 
 		$options = Options::get();
