@@ -23,7 +23,7 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '2.5.2';
+	public const VERSION = '2.6.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
