@@ -173,11 +173,6 @@ final class PluginPage {
 	 * @param string $import_notice Already-rendered notice HTML from the import flow.
 	 */
 	private static function renderSettingsTab( string $import_notice ): void {
-		$postman = plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) );
-		echo '<div class="tmq-banner">';
-		echo '<img src="' . esc_url( $postman ) . '" alt="" width="1408" height="768" loading="lazy" />';
-		echo '</div>';
-
 		echo '<form action="options.php" method="post">';
 		settings_fields( SettingsApi::GROUP );
 		do_settings_sections( SettingsApi::PAGE );
@@ -279,9 +274,15 @@ final class PluginPage {
 	}
 
 	/**
-	 * FAQ tab — long-form static help with code samples.
+	 * FAQ tab — long-form static help with code samples, prefaced by the
+	 * postman hero banner.
 	 */
 	private static function renderFaqTab(): void {
+		$postman = plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) );
+		echo '<div class="tmq-banner">';
+		echo '<img src="' . esc_url( $postman ) . '" alt="" width="1408" height="768" loading="lazy" />';
+		echo '</div>';
+
 		$options = Options::get();
 		FaqRenderer::render( $options );
 	}
