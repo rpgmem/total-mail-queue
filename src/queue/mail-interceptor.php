@@ -121,33 +121,7 @@ final class MailInterceptor {
 		// admin-supplied template before tokens are substituted. The
 		// `skip_template_wrap` flag bypasses the global HTML envelope for
 		// this specific source.
-		$skip_template_wrap = false;
-		if ( CoreTemplates::isCoreTemplate( $source['key'] ) ) {
-			$row = SourcesRepository::findByKey( $source['key'] );
-			if ( null !== $row ) {
-				$context          = Detector::consumeData();
-				$subject_override = isset( $row['subject_override'] ) ? (string) $row['subject_override'] : '';
-				$body_override    = isset( $row['body_override'] ) ? (string) $row['body_override'] : '';
-				$has_override     = '' !== $subject_override || '' !== $body_override;
-				if ( $has_override ) {
-					$args_for_tokens = array(
-						'to'               => $to,
-						'subject'          => $subject,
-						'message'          => $message,
-						'message_original' => $message,
-					);
-					if ( '' !== $subject_override ) {
-						$subject = self::renderOverride( $subject_override, $args_for_tokens, $context );
-					}
-					if ( '' !== $body_override ) {
-						$message = self::renderOverride( $body_override, $args_for_tokens, $context );
-					}
-				}
-				if ( ! empty( $row['skip_template_wrap'] ) ) {
-					$skip_template_wrap = true;
-				}
-			}
-		}
+		$skip_template_wrap = self::applyCoreTemplateOverride( $source['key'], $to, $subject, $message );
 
 		// Apply the HTML template wrapper before the row hits the queue, so
 		// the persisted message is the same byte string the recipient will
@@ -231,6 +205,52 @@ final class MailInterceptor {
 		// `blocked_by_source` shares the queue/high return path: the caller
 		// sees a successful enqueue, the message just never leaves the row.
 		return true;
+	}
+
+	/**
+	 * Apply the wp_core template override step: when the source resolves to one
+	 * of the wp_core templates and a row exists with non-empty subject/body
+	 * overrides, render those overrides into the outgoing $subject / $message
+	 * in place. Returns the row's `skip_template_wrap` flag so the caller knows
+	 * whether to bypass the global HTML envelope further down the pipeline.
+	 *
+	 * Pulled out of {@see handle()} to keep the orchestrator linear — the
+	 * conditional nest here was four levels deep before the extraction.
+	 *
+	 * @param string $source_key Resolved source key (e.g. `wp_core:password_reset`).
+	 * @param mixed  $to         wp_mail() recipient(s) — passed through to token globals.
+	 * @param string $subject    Outgoing subject — modified in place.
+	 * @param string $message    Outgoing message body — modified in place.
+	 * @return bool Whether the source has `skip_template_wrap=1` (caller bypasses the wrapper).
+	 */
+	private static function applyCoreTemplateOverride( string $source_key, $to, string &$subject, string &$message ): bool {
+		if ( ! CoreTemplates::isCoreTemplate( $source_key ) ) {
+			return false;
+		}
+		$row = SourcesRepository::findByKey( $source_key );
+		if ( null === $row ) {
+			return false;
+		}
+
+		$context          = Detector::consumeData();
+		$subject_override = isset( $row['subject_override'] ) ? (string) $row['subject_override'] : '';
+		$body_override    = isset( $row['body_override'] ) ? (string) $row['body_override'] : '';
+		if ( '' !== $subject_override || '' !== $body_override ) {
+			$args_for_tokens = array(
+				'to'               => $to,
+				'subject'          => $subject,
+				'message'          => $message,
+				'message_original' => $message,
+			);
+			if ( '' !== $subject_override ) {
+				$subject = self::renderOverride( $subject_override, $args_for_tokens, $context );
+			}
+			if ( '' !== $body_override ) {
+				$message = self::renderOverride( $body_override, $args_for_tokens, $context );
+			}
+		}
+
+		return ! empty( $row['skip_template_wrap'] );
 	}
 
 	/**
