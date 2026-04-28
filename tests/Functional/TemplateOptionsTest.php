@@ -47,8 +47,6 @@ final class TemplateOptionsTest extends FunctionalTestCase {
 				'wrapper_bg',
 				'wrapper_border_radius',
 				'wrapper_padding',
-				'from_email',
-				'from_name',
 			) as $key
 		) {
 			self::assertArrayHasKey( $key, $opts, "Defaults must expose `$key`." );
@@ -67,8 +65,6 @@ final class TemplateOptionsTest extends FunctionalTestCase {
 				'header_bg'       => '#abcdef',
 				'body_font_size'  => 18,
 				'header_alignment' => 'left',
-				'from_email'      => 'mailer@example.test',
-				'from_name'       => '  Spaces around  ',
 				'footer_text'     => 'Hello <strong>world</strong>',
 			)
 		);
@@ -79,8 +75,6 @@ final class TemplateOptionsTest extends FunctionalTestCase {
 		self::assertSame( '#abcdef', $opts['header_bg'] );
 		self::assertSame( 18, $opts['body_font_size'] );
 		self::assertSame( 'left', $opts['header_alignment'] );
-		self::assertSame( 'mailer@example.test', $opts['from_email'] );
-		self::assertSame( 'Spaces around', $opts['from_name'], 'sanitize_text_field must trim whitespace.' );
 		self::assertSame( 'Hello <strong>world</strong>', $opts['footer_text'], 'wp_kses_post keeps allowed inline markup.' );
 	}
 
@@ -102,12 +96,11 @@ final class TemplateOptionsTest extends FunctionalTestCase {
 		self::assertSame( '#a1b2c3', $opts['wrapper_bg'] );
 	}
 
-	public function test_email_and_enum_sanitizers(): void {
+	public function test_enum_sanitizers(): void {
 		$defaults = Options::defaults();
 
 		Options::update(
 			array(
-				'from_email'      => 'not an email',
 				'header_alignment' => 'diagonal',     // not in whitelist
 				'body_font_family' => 'comic-sans',    // not in whitelist
 			)
@@ -115,7 +108,6 @@ final class TemplateOptionsTest extends FunctionalTestCase {
 
 		$opts = Options::get();
 
-		self::assertSame( '', $opts['from_email'], 'sanitize_email returns empty string for malformed input.' );
 		self::assertSame( $defaults['header_alignment'], $opts['header_alignment'] );
 		self::assertSame( $defaults['body_font_family'], $opts['body_font_family'] );
 	}

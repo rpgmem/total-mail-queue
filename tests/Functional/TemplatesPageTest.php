@@ -35,8 +35,6 @@ final class TemplatesPageTest extends FunctionalTestCase {
 			'body_font_size'    => '16',
 			'footer_text'       => 'Custom footer',
 			'footer_powered_by' => '1',
-			'from_email'        => 'mailer@example.test',
-			'from_name'         => 'Mailer Bot',
 		);
 
 		ob_start();
@@ -53,8 +51,6 @@ final class TemplatesPageTest extends FunctionalTestCase {
 		self::assertSame( 16, $opts['body_font_size'] );
 		self::assertSame( 'Custom footer', $opts['footer_text'] );
 		self::assertTrue( $opts['footer_powered_by'] );
-		self::assertSame( 'mailer@example.test', $opts['from_email'] );
-		self::assertSame( 'Mailer Bot', $opts['from_name'] );
 
 		unset( $_POST['wp_tmq_templates_save'], $_POST['wp_tmq_templates_nonce'], $_POST['tmq_template'] );
 	}
@@ -100,7 +96,7 @@ final class TemplatesPageTest extends FunctionalTestCase {
 	}
 
 	public function test_reset_action_clears_options(): void {
-		Options::update( array( 'header_bg' => '#aabbcc', 'from_name' => 'Override' ) );
+		Options::update( array( 'header_bg' => '#aabbcc', 'footer_text' => 'Override footer' ) );
 		self::assertSame( '#aabbcc', Options::get()['header_bg'] );
 
 		$_GET['templates-action'] = 'reset';
@@ -114,7 +110,7 @@ final class TemplatesPageTest extends FunctionalTestCase {
 
 		$defaults = Options::defaults();
 		self::assertSame( $defaults['header_bg'], Options::get()['header_bg'] );
-		self::assertSame( $defaults['from_name'], Options::get()['from_name'] );
+		self::assertSame( $defaults['footer_text'], Options::get()['footer_text'] );
 
 		unset( $_GET['templates-action'], $_GET['_wpnonce'] );
 	}
@@ -167,13 +163,13 @@ final class TemplatesPageTest extends FunctionalTestCase {
 		TemplatesPage::render();
 		$html = (string) ob_get_clean();
 
-		// Every section heading present.
+		// Every section heading present (Sender section moved to Settings tab in v2.6.0).
 		self::assertStringContainsString( 'HTML Template Engine', $html );
 		self::assertStringContainsString( '>Header<', $html );
 		self::assertStringContainsString( '>Body<', $html );
 		self::assertStringContainsString( '>Footer<', $html );
 		self::assertStringContainsString( '>Wrapper<', $html );
-		self::assertStringContainsString( '>Sender<', $html );
+		self::assertStringNotContainsString( '>Sender<', $html, 'Sender section was moved to Settings tab in v2.6.0.' );
 
 		// Save / reset / test buttons present.
 		self::assertStringContainsString( 'Save Changes', $html );

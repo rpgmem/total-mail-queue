@@ -62,7 +62,6 @@ final class TemplatesPage {
 		self::renderBodySection( $options );
 		self::renderFooterSection( $options );
 		self::renderWrapperSection( $options );
-		self::renderSenderSection( $options );
 
 		echo '<p class="submit">';
 		echo '<button type="submit" name="wp_tmq_templates_save" class="button button-primary">' . esc_html__( 'Save Changes', 'total-mail-queue' ) . '</button> ';
@@ -276,27 +275,6 @@ final class TemplatesPage {
 		self::renderColorRow( __( 'Outer background color', 'total-mail-queue' ), 'wrapper_bg', (string) $options['wrapper_bg'] );
 		self::renderIntRow( __( 'Border radius (px)', 'total-mail-queue' ), 'wrapper_border_radius', (int) $options['wrapper_border_radius'] );
 		self::renderIntRow( __( 'Outer padding (px)', 'total-mail-queue' ), 'wrapper_padding', (int) $options['wrapper_padding'] );
-
-		echo '</tbody></table>';
-	}
-
-	/**
-	 * Sender override settings.
-	 *
-	 * @param array<string,mixed> $options Resolved options.
-	 */
-	private static function renderSenderSection( array $options ): void {
-		echo '<h2>' . esc_html__( 'Sender', 'total-mail-queue' ) . '</h2>';
-		echo '<p class="description">' . esc_html__( 'Optional — leave blank to keep whatever upstream filters set.', 'total-mail-queue' ) . '</p>';
-		echo '<table class="form-table"><tbody>';
-
-		echo '<tr><th scope="row"><label for="tmq_from_email">' . esc_html__( 'From email', 'total-mail-queue' ) . '</label></th><td>';
-		echo '<input type="email" id="tmq_from_email" name="tmq_template[from_email]" value="' . esc_attr( (string) $options['from_email'] ) . '" class="regular-text" />';
-		echo '</td></tr>';
-
-		echo '<tr><th scope="row"><label for="tmq_from_name">' . esc_html__( 'From name', 'total-mail-queue' ) . '</label></th><td>';
-		echo '<input type="text" id="tmq_from_name" name="tmq_template[from_name]" value="' . esc_attr( (string) $options['from_name'] ) . '" class="regular-text" />';
-		echo '</td></tr>';
 
 		echo '</tbody></table>';
 	}

@@ -78,8 +78,6 @@ final class Options {
 				'wrapper_bg'            => '#f0f0f1',
 				'wrapper_border_radius' => 6,
 				'wrapper_padding'       => 32,
-				'from_email'            => '',
-				'from_name'             => '',
 			)
 		);
 	}
@@ -191,17 +189,6 @@ final class Options {
 		// URL — `esc_url_raw` keeps a clean URL or returns ''.
 		if ( array_key_exists( 'header_logo_url', $raw ) ) {
 			$out['header_logo_url'] = esc_url_raw( (string) $raw['header_logo_url'] );
-		}
-
-		// Email — empty stays empty (the override is opt-in); invalid → '' via sanitize_email.
-		if ( array_key_exists( 'from_email', $raw ) ) {
-			$val               = (string) $raw['from_email'];
-			$out['from_email'] = '' === $val ? '' : (string) sanitize_email( $val );
-		}
-
-		// Plain text.
-		if ( array_key_exists( 'from_name', $raw ) ) {
-			$out['from_name'] = sanitize_text_field( (string) $raw['from_name'] );
 		}
 
 		// `footer_text` allows a small amount of HTML so users can drop in
