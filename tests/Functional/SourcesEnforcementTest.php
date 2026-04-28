@@ -26,7 +26,6 @@ final class SourcesEnforcementTest extends FunctionalTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        Detector::reset();
         $this->setPluginOptions( array( 'enabled' => '1' ) );
         MailInterceptor::register();
 

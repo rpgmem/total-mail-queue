@@ -32,8 +32,6 @@ final class CronContextCaptureTest extends FunctionalTestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		Detector::reset();
-		BatchProcessor::reset();
 		$this->setPluginOptions( array( 'enabled' => '1' ) );
 		// Strip any prior registration so each test re-registers in its
 		// own scenario (Plugin::boot may have wired the filter at bootstrap).

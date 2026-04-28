@@ -19,7 +19,6 @@ final class TemplateTokensTest extends FunctionalTestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		WooCommerceTokens::reset();
 		// Strip any test-introduced filters from prior runs.
 		remove_all_filters( 'wp_tmq_template_tokens' );
 		// Re-register the bundled WC handler (Plugin::boot wired it

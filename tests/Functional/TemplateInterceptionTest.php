@@ -22,7 +22,6 @@ final class TemplateInterceptionTest extends FunctionalTestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		Detector::reset();
 		delete_option( Options::OPTION_NAME );
 
 		// Plugin::boot() already wired the engine's wp_mail filters with the
