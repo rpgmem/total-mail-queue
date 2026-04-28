@@ -16,6 +16,8 @@ use TotalMailQueue\Retention\LogPruner;
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\Configurator;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
+use TotalMailQueue\Sources\CoreTemplates;
+use TotalMailQueue\Sources\Repository as SourcesRepository;
 use TotalMailQueue\Support\Encryption;
 use TotalMailQueue\Support\Serializer;
 
@@ -191,7 +193,19 @@ final class BatchProcessor {
 
 		$phpmailer_hook = self::installPhpMailerHook( $smtp_to_use, $captured, $send_method );
 
+		// Honor the per-source `skip_template_wrap` flag at drain time. The
+		// Engine on the `wp_mail` filter @100 would otherwise re-wrap rows
+		// that MailInterceptor intentionally left raw at intercept time.
+		$skip_engine_for_this_send = self::skipsTemplateWrap( (string) ( $item['source_key'] ?? '' ) );
+		if ( $skip_engine_for_this_send ) {
+			add_filter( 'wp_tmq_template_skip', '__return_true', 1 );
+		}
+
 		$send_status = self::dispatchOnce( $to, $subject, $item['message'], $headers, $attachments );
+
+		if ( $skip_engine_for_this_send ) {
+			remove_filter( 'wp_tmq_template_skip', '__return_true', 1 );
+		}
 
 		if ( null !== $phpmailer_hook ) {
 			remove_action( 'phpmailer_init', $phpmailer_hook, 999999 );
@@ -228,6 +242,28 @@ final class BatchProcessor {
 
 		AttachmentStore::releaseFor( $attachments );
 		return $send_status ? 'sent' : 'failed';
+	}
+
+	/**
+	 * Whether the source row carries `skip_template_wrap = 1` and so the
+	 * Engine wrapper must be skipped for this send. Returns false fast
+	 * when the source isn't one of the wp_core templates we ship overrides
+	 * for (the column doesn't apply otherwise).
+	 *
+	 * @param string $source_key Canonical source key from the queued row.
+	 */
+	private static function skipsTemplateWrap( string $source_key ): bool {
+		if ( '' === $source_key ) {
+			return false;
+		}
+		if ( ! CoreTemplates::isCoreTemplate( $source_key ) ) {
+			return false;
+		}
+		$row = SourcesRepository::findByKey( $source_key );
+		if ( null === $row ) {
+			return false;
+		}
+		return ! empty( $row['skip_template_wrap'] );
 	}
 
 	/**

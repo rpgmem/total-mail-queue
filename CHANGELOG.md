@@ -5,6 +5,21 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2026-04-28
+
+> Hotfix on top of 2.6.0. The per-source `skip_template_wrap` checkbox introduced in 2.6.0 was honored at intercept time but the Engine on the `wp_mail` filter @100 silently re-wrapped queued rows at cron drain time, so admins ticking the box still received styled emails.
+
+### Fixed
+
+- **`skip_template_wrap` now actually skips the wrapper end-to-end.** `Cron\BatchProcessor::sendOne` consults the source row's `skip_template_wrap` column before each `dispatchOnce()` call. When set, it registers a one-shot `wp_tmq_template_skip` filter that short-circuits the Engine for the duration of the send and removes it immediately after. New `BatchProcessor::skipsTemplateWrap(string $source_key): bool` helper surfaces the check.
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.6.1**.
+
+### Tests
+
+- New `CoreTemplateOverridesTest::test_batch_processor_drain_honors_skip_template_wrap` (3 sub-assertions): helper detects a skip row, returns false when the flag is off, and returns false for non-wp_core sources regardless of the column value.
+
+---
+
 ## [2.6.0] - 2026-04-28
 
 > Per-source body & subject overrides for the 11 most-customized WordPress core emails. Admins can now edit the welcome message, password-reset wording, account-change confirmations, etc. directly from the Sources tab — with token substitution, "Reset to WP default", and a per-template "Send preview" button. The Sender override moves out of the Templates tab into a clearer Default Sender section in Settings, with explicit precedence documentation against SMTP-account senders.
