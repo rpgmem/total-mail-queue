@@ -213,11 +213,100 @@ final class SourcesPage {
 
 		echo '</table>';
 
+		// wp_core template override section (v2.6.0). Only the 11 wp_core
+		// templates we ship overrides for show this block — for plugin /
+		// theme / unknown sources it's silently skipped.
+		self::renderTemplateOverrideSection( $row );
+
 		echo '<p class="submit">';
 		echo '<input type="submit" name="wp_tmq_source_edit_save" class="button button-primary" value="' . esc_attr__( 'Save', 'total-mail-queue' ) . '" /> ';
 		echo '<a href="' . esc_url( $cancel_url ) . '" class="button">' . esc_html__( 'Cancel', 'total-mail-queue' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
+	}
+
+	/**
+	 * Render the template override fields for a wp_core source.
+	 *
+	 * @param array<string,mixed> $row Source row.
+	 */
+	private static function renderTemplateOverrideSection( array $row ): void {
+		$source_key = (string) $row['source_key'];
+		if ( ! \TotalMailQueue\Sources\CoreTemplates::isCoreTemplate( $source_key ) ) {
+			return;
+		}
+
+		$defaults         = \TotalMailQueue\Sources\CoreTemplates::get( $source_key );
+		$default_subject  = is_array( $defaults ) ? (string) $defaults['subject'] : '';
+		$default_body     = is_array( $defaults ) ? (string) $defaults['body'] : '';
+		$tokens           = \TotalMailQueue\Sources\CoreTemplates::tokensFor( $source_key );
+		$subject_override = (string) ( $row['subject_override'] ?? '' );
+		$body_override    = (string) ( $row['body_override'] ?? '' );
+		$skip_wrap        = ! empty( $row['skip_template_wrap'] );
+
+		echo '<h4>' . esc_html__( 'Template override (subject + body)', 'total-mail-queue' ) . '</h4>';
+		echo '<p class="description">' . esc_html__( 'Edit the subject and body sent for this WP-core email. Leave a field empty to keep the WordPress default.', 'total-mail-queue' );
+
+		// Token list for this template.
+		if ( ! empty( $tokens ) ) {
+			echo ' ' . esc_html__( 'Available tokens:', 'total-mail-queue' ) . ' ';
+			$rendered_tokens = array();
+			foreach ( $tokens as $token ) {
+				$rendered_tokens[] = '<code>{' . esc_html( $token ) . '}</code>';
+			}
+			echo wp_kses(
+				implode( ' ', $rendered_tokens ),
+				array( 'code' => array() )
+			);
+		}
+		echo '</p>';
+
+		echo '<table class="form-table"><tbody>';
+
+		// Subject override.
+		echo '<tr><th scope="row"><label for="tmq-template-subject">' . esc_html__( 'Subject', 'total-mail-queue' ) . '</label></th><td>';
+		echo '<input type="text" id="tmq-template-subject" name="subject_override" class="large-text" value="' . esc_attr( $subject_override ) . '" maxlength="255" />';
+		if ( '' !== $default_subject ) {
+			echo '<p class="description">';
+			echo esc_html(
+				sprintf(
+					/* translators: %s: WordPress default subject */
+					__( 'WP default: %s', 'total-mail-queue' ),
+					$default_subject
+				)
+			);
+			echo '</p>';
+		}
+		echo '</td></tr>';
+
+		// Body override.
+		echo '<tr><th scope="row"><label for="tmq-template-body">' . esc_html__( 'Body', 'total-mail-queue' ) . '</label></th><td>';
+		echo '<textarea id="tmq-template-body" name="body_override" rows="10" class="large-text code">' . esc_textarea( $body_override ) . '</textarea>';
+		if ( '' !== $default_body ) {
+			echo '<details><summary>' . esc_html__( 'Show WP default body', 'total-mail-queue' ) . '</summary>';
+			echo '<pre style="white-space:pre-wrap; background:#f6f7f7; padding:10px; border-left:4px solid #c3c4c7;">' . esc_html( $default_body ) . '</pre>';
+			echo '</details>';
+		}
+		echo '</td></tr>';
+
+		// Skip template wrap.
+		echo '<tr><th scope="row">' . esc_html__( 'Skip template wrapper', 'total-mail-queue' ) . '</th><td>';
+		echo '<label><input type="checkbox" name="skip_template_wrap" value="1" ' . checked( $skip_wrap, true, false ) . ' /> ';
+		echo esc_html__( 'Send this email raw (bypass the global HTML envelope from the Templates tab).', 'total-mail-queue' );
+		echo '</label></td></tr>';
+
+		// Reset row.
+		if ( '' !== $subject_override || '' !== $body_override || $skip_wrap ) {
+			$reset_url = wp_nonce_url(
+				admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-sources&source-action=reset_template&source-id=' . (int) $row['id'] ),
+				'wp_tmq_source_reset_template_' . (int) $row['id']
+			);
+			echo '<tr><th scope="row">' . esc_html__( 'Reset', 'total-mail-queue' ) . '</th><td>';
+			echo '<a href="' . esc_url( $reset_url ) . '" class="button" onclick="return confirm(\'' . esc_js( __( 'Reset subject and body overrides for this template? The WP default will be used again.', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Reset to WP default', 'total-mail-queue' ) . '</a>';
+			echo '</td></tr>';
+		}
+
+		echo '</tbody></table>';
 	}
 
 	/**
@@ -288,7 +377,29 @@ final class SourcesPage {
 			$label = isset( $_POST['label_override'] ) ? sanitize_text_field( wp_unslash( $_POST['label_override'] ) ) : '';
 			$group = isset( $_POST['group_override'] ) ? sanitize_text_field( wp_unslash( $_POST['group_override'] ) ) : '';
 			SourcesRepository::updateOverrides( $source_id, $label, $group );
+
+			// Template override fields (only relevant for wp_core sources).
+			$row = SourcesRepository::findById( $source_id );
+			if ( null !== $row && \TotalMailQueue\Sources\CoreTemplates::isCoreTemplate( (string) $row['source_key'] ) ) {
+				$subject_override = isset( $_POST['subject_override'] ) ? sanitize_text_field( wp_unslash( $_POST['subject_override'] ) ) : '';
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- preserved as-is for textarea round-trip; rendered with str_replace + tokens, no shell/SQL context
+				$body_override = isset( $_POST['body_override'] ) ? wp_kses_post( wp_unslash( (string) $_POST['body_override'] ) ) : '';
+				$skip_wrap     = isset( $_POST['skip_template_wrap'] );
+				SourcesRepository::updateTemplateOverrides( $source_id, $subject_override, $body_override, $skip_wrap );
+			}
+
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Source updated.', 'total-mail-queue' ) . '</p></div>';
+		}
+
+		// Reset template overrides via GET link.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified just below.
+		if ( isset( $_GET['source-action'] ) && 'reset_template' === $_GET['source-action'] && isset( $_GET['source-id'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+			$reset_id = (int) $_GET['source-id'];
+			if ( $reset_id > 0 && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_source_reset_template_' . $reset_id ) ) {
+				SourcesRepository::clearTemplateOverrides( $reset_id );
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Template overrides reset to WP default.', 'total-mail-queue' ) . '</p></div>';
+			}
 		}
 
 		// Bulk action via the WP_List_Table dropdown.
