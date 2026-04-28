@@ -144,3 +144,34 @@ span.tmq-status.tmq-status-blocked-by-source {
 	top: -9999px;
 	height: 0;
 	overflow: hidden; }
+/*
+ * FAQ tab — code samples. Inline `<code>` (single tokens like header
+ * names) renders as a soft chip; `<pre><code>` blocks (multi-line
+ * snippets) get a dark theme so they stand apart from the surrounding
+ * help text.
+ */
+.tmq-box code {
+	background-color: #f0f0f1;
+	border: 1px solid #dcdcde;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 13px;
+	color: #1d2327; }
+.tmq-box pre {
+	background-color: #1d2327;
+	color: #f6f7f7;
+	padding: 1em;
+	border-radius: 4px;
+	overflow-x: auto;
+	line-height: 1.5;
+	margin: 1em 0; }
+.tmq-box pre code {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	color: inherit;
+	font-size: 13px; }
+.tmq-faq-bullets {
+	list-style: disc;
+	padding-left: 1.5em;
+	margin-top: 0.5em; }

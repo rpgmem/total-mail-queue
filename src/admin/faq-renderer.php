@@ -79,7 +79,9 @@ final class FaqRenderer {
 	}
 
 	/**
-	 * "Does this plugin change how emails are sent?" — clarifies wp_mail() usage.
+	 * "Does this plugin change how emails are sent?" — clarifies that the
+	 * delay-only default expands once SMTP / template / sources features
+	 * are enabled.
 	 */
 	private static function sectionDoesntChangeHow(): void {
 		echo '<div class="tmq-box">';
@@ -94,38 +96,74 @@ final class FaqRenderer {
 		echo '<p>' . wp_kses_post(
 			sprintf(
 				/* translators: %1$s: opening bold tag, %2$s: closing bold tag, %3$s: wp_mail() link */
-				__( 'No, don\'t worry. This plugin only affects %1$sWHEN%2$s emails are sent, not how. It delays the sending (by the Queue), nonetheless all emails are sent through the standard %3$s function.', 'total-mail-queue' ),
+				__( 'By default, no — the plugin only affects %1$sWHEN%2$s emails are sent. The Queue delays delivery, then forwards each row through the standard %3$s function so whatever transport you have in place (PHP mail, an SMTP plugin like WP Mail SMTP, an external service like Mailgun) keeps doing its job.', 'total-mail-queue' ),
 				'<b>',
 				'</b>',
 				'<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>'
 			)
 		) . '</p>';
-		echo '<p>' . esc_html__( 'If you use SMTP for sending, or an external service like Mailgun, everything will still work as expected.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening bold tag, %2$s: closing bold tag */
+				__( 'However, the plugin %1$scan%2$s change how (and even whether) emails are sent if you opt in to one of these features:', 'total-mail-queue' ),
+				'<b>',
+				'</b>'
+			)
+		) . '</p>';
+		echo '<ul class="tmq-faq-bullets">';
+		echo '<li>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening SMTP link tag, %2$s: closing tag */
+				__( '%1$sSMTP Accounts%2$s — when you configure one or more accounts, the cron drainer sends through them based on the Send Method (auto / SMTP-only / WP-default). Captured config from third-party SMTP plugins is also replayed on send.', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_SMTP . '">',
+				'</a>'
+			)
+		) . '</li>';
+		echo '<li>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Templates link tag, %2$s: closing tag */
+				__( '%1$sTemplate engine%2$s — when enabled, every outgoing email is wrapped in a styled HTML envelope. Plain-text bodies are auto-converted to HTML; existing full HTML documents pass through untouched.', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_TEMPLATES . '">',
+				'</a>'
+			)
+		) . '</li>';
+		echo '<li>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Sources link tag, %2$s: closing tag */
+				__( '%1$sSources%2$s — disabling a source flips its outgoing emails to "blocked_by_source"; they appear in the Log but never leave the server. wp_core templates can also have their subject and body overridden per-source.', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_SOURCES . '">',
+				'</a>'
+			)
+		) . '</li>';
+		echo '</ul>';
 		echo '</div>';
 	}
 
 	/**
-	 * Caching-plugin caveat (need to call wp-cron.php manually).
+	 * Caching-plugin caveat — explains the WP-Cron interaction without
+	 * over-prescribing a manual fix, since several caching plugins ship
+	 * their own WP-Cron triggers.
 	 */
 	private static function sectionCachingPlugins(): void {
 		echo '<div class="tmq-box">';
 		echo '<h3>' . wp_kses_post(
 			sprintf(
 				/* translators: %1$s: example caching plugin name */
-				__( 'Does this plugin work, if I have a Caching Plugin installed? E.g. %1$s or similar?', 'total-mail-queue' ),
+				__( 'Does this plugin work with a Caching Plugin like %1$s?', 'total-mail-queue' ),
 				'<i>W3 Total Cache</i>'
 			)
 		) . '</h3>';
+		echo '<p>' . esc_html__( 'Yes — with one caveat about WP-Cron.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'WordPress runs scheduled tasks (including the Queue drainer) by piggy-backing on regular page loads. Caching plugins that serve static HTML to anonymous visitors can prevent those page loads from reaching PHP, which means WP-Cron may run less often or stop running altogether — and queued emails would pile up.', 'total-mail-queue' ) . '</p>';
 		echo '<p>' . wp_kses_post(
 			sprintf(
-				/* translators: %1$s: W3 Total Cache, %2$s: WP Rocket, %3$s: wp-cron.php link */
-				__( 'If you\'re using a Caching plugin like %1$s, %2$s or any other caching solution which generates static html-files and serves them to visitors, you\'ll have to make sure you\'re calling the %3$s manually every couple of minutes.', 'total-mail-queue' ),
-				'<i>W3 Total Cache</i>',
-				'<i>WP Rocket</i>',
-				'<a href="' . esc_url( get_option( 'siteurl' ) ) . '/wp-cron.php" target="_blank">' . esc_html__( 'wp-cron file', 'total-mail-queue' ) . '</a>'
+				/* translators: %1$s: opening i, %2$s: closing i, %3$s: wp-cron.php link */
+				__( 'Some caching plugins (%1$sW3 Total Cache%2$s among them) ship a built-in WP-Cron trigger — check your caching plugin\'s docs and turn it on if available. Otherwise, set up an external cron job that hits %3$s every couple of minutes.', 'total-mail-queue' ),
+				'<i>',
+				'</i>',
+				'<a href="' . esc_url( get_option( 'siteurl' ) ) . '/wp-cron.php" target="_blank">' . esc_html__( 'wp-cron.php', 'total-mail-queue' ) . '</a>'
 			)
 		) . '</p>';
-		echo '<p>' . esc_html__( 'Otherwise your normal WP Cron wouldn\'t be called as often as it should be and scheduled messages would be sent with big delays.', 'total-mail-queue' ) . '</p>';
 		echo '</div>';
 	}
 
