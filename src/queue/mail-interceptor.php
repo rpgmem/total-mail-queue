@@ -311,11 +311,11 @@ final class MailInterceptor {
 	 * supplied a `Content-Type:` or `From:` header (so we don't duplicate
 	 * them when filling in defaults).
 	 *
-	 * @param array     $headers          Headers — modified in place.
-	 * @param string    $status           Current status guess.
-	 * @param string    $enabled          Plugin mode (`0`/`1`/`2`).
-	 * @param bool|null $has_content_type Out param.
-	 * @param bool|null $has_from         Out param.
+	 * @param array<int,string> $headers          Headers — modified in place.
+	 * @param string            $status           Current status guess.
+	 * @param string            $enabled          Plugin mode (`0`/`1`/`2`).
+	 * @param bool|null         $has_content_type Out param.
+	 * @param bool|null         $has_from         Out param.
 	 * @return string Resolved status (`queue` / `high` / `instant`).
 	 */
 	private static function scanPriorityHeaders( array &$headers, string $status, string $enabled, ?bool &$has_content_type, ?bool &$has_from ): string {
@@ -346,8 +346,8 @@ final class MailInterceptor {
 	 * Persist the Content-Type that wp_mail() would otherwise compute at send
 	 * time — needed because cron sends drop the active filter context.
 	 *
-	 * @param array $headers          Headers — modified in place.
-	 * @param bool  $has_content_type Whether the caller already set Content-Type.
+	 * @param array<int,string> $headers          Headers — modified in place.
+	 * @param bool              $has_content_type Whether the caller already set Content-Type.
 	 */
 	private static function backfillContentTypeHeader( array &$headers, bool $has_content_type ): void {
 		if ( $has_content_type ) {
@@ -370,8 +370,8 @@ final class MailInterceptor {
 	 * Persist the From header from the wp_mail_from / wp_mail_from_name
 	 * filters — same rationale as Content-Type.
 	 *
-	 * @param array $headers  Headers — modified in place.
-	 * @param bool  $has_from Whether the caller already set From.
+	 * @param array<int,string> $headers  Headers — modified in place.
+	 * @param bool              $has_from Whether the caller already set From.
 	 */
 	private static function backfillFromHeader( array &$headers, bool $has_from ): void {
 		if ( $has_from ) {

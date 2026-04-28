@@ -174,7 +174,7 @@ final class LogTable extends WP_List_Table {
 	 *
 	 * @param string $which `top` or `bottom`.
 	 */
-	protected function extra_tablenav( $which ) {
+	protected function extra_tablenav( $which ): void {
 		if ( self::MODE_LOG !== $this->mode || 'top' !== $which ) {
 			return;
 		}
@@ -222,7 +222,7 @@ final class LogTable extends WP_List_Table {
 	/**
 	 * Populate {@see $items} based on the active tab.
 	 */
-	public function prepare_items() {
+	public function prepare_items(): void {
 		$columns               = $this->get_columns();
 		$hidden                = array();
 		$sortable              = array();
@@ -419,7 +419,7 @@ final class LogTable extends WP_List_Table {
 	/**
 	 * Dispatch the chosen bulk action.
 	 */
-	public function process_bulk_action() {
+	public function process_bulk_action(): void {
 		if ( ! $this->current_action() ) {
 			return;
 		}

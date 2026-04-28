@@ -66,7 +66,7 @@ final class SourcesTable extends WP_List_Table {
 	 * Populate {@see $items} from the repository, optionally narrowed by
 	 * the `?group_filter=` query param.
 	 */
-	public function prepare_items() {
+	public function prepare_items(): void {
 		$columns               = $this->get_columns();
 		$hidden                = array();
 		$sortable              = array();
@@ -104,7 +104,7 @@ final class SourcesTable extends WP_List_Table {
 	 *
 	 * @param array<string,mixed> $item Row data.
 	 */
-	protected function column_cb( $item ) {
+	protected function column_cb( $item ): string {
 		return '<input type="checkbox" name="id[]" value="' . esc_attr( (string) $item['id'] ) . '" />';
 	}
 
@@ -113,7 +113,7 @@ final class SourcesTable extends WP_List_Table {
 	 *
 	 * @param string $which `top` or `bottom`.
 	 */
-	protected function extra_tablenav( $which ) {
+	protected function extra_tablenav( $which ): void {
 		if ( 'top' !== $which ) {
 			return;
 		}
@@ -154,7 +154,7 @@ final class SourcesTable extends WP_List_Table {
 	 * @param array<string,mixed> $item        Row data.
 	 * @param string              $column_name Column id.
 	 */
-	public function column_default( $item, $column_name ) {
+	public function column_default( $item, $column_name ): string {
 		switch ( $column_name ) {
 			case 'enabled':
 				return self::renderEnabledBadge( (int) $item['enabled'] );
