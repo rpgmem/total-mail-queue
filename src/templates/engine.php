@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Templates;
 
+use TotalMailQueue\Queue\MailInterceptor;
 use TotalMailQueue\Settings\Options as MainOptions;
 
 /**
@@ -59,26 +60,12 @@ final class Engine {
 			return;
 		}
 
-		if ( ! self::interceptorWillDispatch() ) {
+		if ( ! MailInterceptor::willHandle() ) {
 			add_filter( 'wp_mail', array( self::class, 'apply' ), self::FILTER_PRIORITY, 1 );
 		}
 		add_filter( 'wp_mail_content_type', array( self::class, 'forceHtmlContentType' ), self::FILTER_PRIORITY, 1 );
 		add_filter( 'wp_mail_from', array( self::class, 'overrideFromEmail' ), self::FILTER_PRIORITY, 1 );
 		add_filter( 'wp_mail_from_name', array( self::class, 'overrideFromName' ), self::FILTER_PRIORITY, 1 );
-	}
-
-	/**
-	 * Whether the queue interceptor will catch outgoing mail in the current
-	 * request — when it does, we leave the `wp_mail` filter alone and let
-	 * {@see \TotalMailQueue\Queue\MailInterceptor::handle()} call us directly
-	 * just before the queue insert.
-	 */
-	private static function interceptorWillDispatch(): bool {
-		if ( wp_doing_cron() ) {
-			return false;
-		}
-		$tmq = MainOptions::get();
-		return isset( $tmq['enabled'] ) && in_array( (string) $tmq['enabled'], array( '1', '2' ), true );
 	}
 
 	/**
