@@ -36,6 +36,18 @@ final class Detector {
 	private static ?array $current = null;
 
 	/**
+	 * Per-call context captured by the primary listeners that have access
+	 * to dynamic data WP doesn't expose post-hoc — user object, reset
+	 * key, request id, etc. Cleared by {@see consumeData()} alongside
+	 * the source marker. Used by the wp_core template-override pipeline
+	 * (see {@see \TotalMailQueue\Sources\CoreTemplates}) to populate
+	 * tokens like `{username}` and `{reset_url}`.
+	 *
+	 * @var array<string,string>
+	 */
+	private static array $current_data = array();
+
+	/**
 	 * Whether {@see register()} already ran. Guards against double-wiring
 	 * when `Plugin::boot()` is called more than once (e.g. inside tests).
 	 *
@@ -100,14 +112,39 @@ final class Detector {
 	}
 
 	/**
+	 * Stash per-call context for the wp_core template-override pipeline.
+	 * Called by primary listeners that have access to dynamic data
+	 * (user object, reset key, etc.) the {@see consume()} marker doesn't
+	 * carry on its own.
+	 *
+	 * @param array<string,string> $data Token name → value map.
+	 */
+	public static function setData( array $data ): void {
+		self::$current_data = $data;
+	}
+
+	/**
+	 * Read the current context map and clear it. Returns an empty array
+	 * when no listener stashed anything for this call.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function consumeData(): array {
+		$data               = self::$current_data;
+		self::$current_data = array();
+		return $data;
+	}
+
+	/**
 	 * Drop any pending marker. Tests use this between cases; production code
 	 * never needs to call it directly.
 	 *
 	 * @internal
 	 */
 	public static function reset(): void {
-		self::$current    = null;
-		self::$registered = false;
+		self::$current      = null;
+		self::$current_data = array();
+		self::$registered   = false;
 	}
 
 	/**
