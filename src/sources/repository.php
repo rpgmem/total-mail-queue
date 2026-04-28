@@ -279,6 +279,53 @@ final class Repository {
 	}
 
 	/**
+	 * Persist the wp_core template override fields for a source row.
+	 *
+	 * Empty `subject_override` / `body_override` disable that part of the
+	 * override (the WP default rendered by core continues to be used).
+	 *
+	 * @param int    $id                  Row id.
+	 * @param string $subject_override    Custom subject template (empty = clear).
+	 * @param string $body_override       Custom body template (empty = clear).
+	 * @param bool   $skip_template_wrap  Bypass the global HTML envelope.
+	 */
+	public static function updateTemplateOverrides( int $id, string $subject_override, string $body_override, bool $skip_template_wrap ): void {
+		if ( $id <= 0 ) {
+			return;
+		}
+		$row = self::findById( $id );
+		if ( null === $row ) {
+			return;
+		}
+		global $wpdb;
+		$table = Schema::sourcesTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$table,
+			array(
+				'subject_override'   => $subject_override,
+				'body_override'      => $body_override,
+				'skip_template_wrap' => $skip_template_wrap ? 1 : 0,
+			),
+			array( 'id' => $id ),
+			array( '%s', '%s', '%d' ),
+			array( '%d' )
+		);
+	}
+
+	/**
+	 * Reset the wp_core template override fields back to their empty
+	 * baseline so that subsequent sends fall back to WP core's defaults
+	 * (or the {@see CoreTemplates} hardcoded baseline when the admin
+	 * preview-tests).
+	 *
+	 * @param int $id Row id.
+	 */
+	public static function clearTemplateOverrides( int $id ): void {
+		self::updateTemplateOverrides( $id, '', '', false );
+	}
+
+	/**
 	 * Distinct **canonical** group labels currently used by the catalog —
 	 * union of `group_label` and any non-empty `group_override`. The
 	 * dropdown that consumes this list translates each entry for display
