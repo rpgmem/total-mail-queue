@@ -306,7 +306,57 @@ final class SourcesPage {
 			echo '</td></tr>';
 		}
 
+		// Send preview test row.
+		$current_user      = wp_get_current_user();
+		$default_recipient = $current_user instanceof \WP_User ? (string) $current_user->user_email : (string) get_option( 'admin_email' );
+		echo '<tr><th scope="row">' . esc_html__( 'Send preview test', 'total-mail-queue' ) . '</th><td>';
+		echo '<input type="email" id="tmq-template-test-to" value="' . esc_attr( $default_recipient ) . '" class="regular-text" /> ';
+		echo '<button type="button" id="tmq-template-test-send" class="button" '
+			. 'data-source-key="' . esc_attr( $source_key ) . '" '
+			. 'data-nonce="' . esc_attr( wp_create_nonce( \TotalMailQueue\Templates\TestEmailSender::NONCE ) ) . '" '
+			. 'data-action="' . esc_attr( \TotalMailQueue\Templates\TestEmailSender::ACTION ) . '">'
+			. esc_html__( 'Send preview', 'total-mail-queue' )
+			. '</button> ';
+		echo '<span id="tmq-template-test-result" aria-live="polite"></span>';
+		echo '<p class="description">' . esc_html__( 'Sends the current saved template (override OR WP default) to the address above. Save changes first if you want to preview unsaved edits.', 'total-mail-queue' ) . '</p>';
+		echo '</td></tr>';
+
 		echo '</tbody></table>';
+
+		// Inline JS for the preview button. Kept inline (not in a separate
+		// asset) so the template-override section is self-contained.
+		?>
+<script>
+( function () {
+	'use strict';
+	var btn = document.getElementById( 'tmq-template-test-send' );
+	if ( ! btn ) {
+		return;
+	}
+	btn.addEventListener( 'click', function () {
+		var input  = document.getElementById( 'tmq-template-test-to' );
+		var result = document.getElementById( 'tmq-template-test-result' );
+		var to     = input ? input.value : '';
+		var data   = new FormData();
+		data.append( 'action', btn.dataset.action );
+		data.append( '_nonce', btn.dataset.nonce );
+		data.append( 'source_key', btn.dataset.sourceKey );
+		data.append( 'to', to );
+		btn.disabled = true;
+		result.textContent = '…';
+		fetch( ajaxurl, { method: 'POST', body: data, credentials: 'same-origin' } )
+			.then( function ( r ) { return r.json(); } )
+			.then( function ( json ) {
+				result.textContent = ( json && json.data && json.data.message ) ? json.data.message : '';
+			} )
+			.catch( function () {
+				result.textContent = '<?php echo esc_js( __( 'Request failed.', 'total-mail-queue' ) ); ?>';
+			} )
+			.finally( function () { btn.disabled = false; } );
+	} );
+} )();
+</script>
+		<?php
 	}
 
 	/**
