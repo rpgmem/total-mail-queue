@@ -18,12 +18,11 @@ use TotalMailQueue\Database\Schema;
  * with `enabled = 1` so existing sites keep delivering every email after the
  * upgrade. The admin can later toggle individual rows off in the "Sources"
  * tab; queued messages whose source resolves to a disabled row will be stored
- * with the `blocked_by_source` status (introduced in S4) instead of being
- * scheduled for sending.
+ * with the `blocked_by_source` status instead of being scheduled for sending.
  *
- * Methods here only deal with the catalog itself — detection, auto-registration
- * triggered from `pre_wp_mail`, and the enforcement check live in classes
- * introduced by the later S2 / S4 phases.
+ * Methods here only deal with the catalog itself — detection,
+ * auto-registration triggered from `pre_wp_mail`, and the enforcement check
+ * live in {@see Detector} and {@see \TotalMailQueue\Queue\MailInterceptor}.
  */
 final class Repository {
 

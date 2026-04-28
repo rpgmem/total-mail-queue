@@ -13,8 +13,7 @@ namespace TotalMailQueue\Admin;
  * Long-form help shown under the "FAQ" tab.
  *
  * Split into its own class so {@see PluginPage} doesn't grow beyond what's
- * comfortable to skim. The content matches the legacy procedural FAQ verbatim
- * (verified during the N7b port).
+ * comfortable to skim.
  */
 final class FaqRenderer {
 
