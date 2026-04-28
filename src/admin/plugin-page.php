@@ -117,8 +117,8 @@ final class PluginPage {
 	 * @param string $tab Active tab slug.
 	 */
 	private static function renderHeader( string $tab ): void {
-		$logo = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.svg', Plugin::container()->get( 'plugin.file' ) );
-		echo '<h1 class="tmq-title"><img class="tmq-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="308" height="56" /></h1>';
+		$logo = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.png', Plugin::container()->get( 'plugin.file' ) );
+		echo '<h1 class="tmq-title"><img class="tmq-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="692" height="342" /></h1>';
 
 		if ( self::TAB_CRON_INFO === $tab ) {
 			return;
@@ -173,6 +173,11 @@ final class PluginPage {
 	 * @param string $import_notice Already-rendered notice HTML from the import flow.
 	 */
 	private static function renderSettingsTab( string $import_notice ): void {
+		$postman = plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) );
+		echo '<div class="tmq-banner">';
+		echo '<img src="' . esc_url( $postman ) . '" alt="" width="1408" height="768" loading="lazy" />';
+		echo '</div>';
+
 		echo '<form action="options.php" method="post">';
 		settings_fields( SettingsApi::GROUP );
 		do_settings_sections( SettingsApi::PAGE );
