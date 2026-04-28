@@ -59,9 +59,9 @@ final class AlertSender {
 		);
 
 		// Make sure the alert source exists in the catalog, then attribute
-		// both the log row and the wp_mail() call to it. (S4 will hardcode
-		// `total_mail_queue:alert` as un-toggleable so the admin cannot
-		// silence their own monitoring).
+		// both the log row and the wp_mail() call to it. The
+		// `total_mail_queue:alert` key is hardcoded as un-toggleable so the
+		// admin cannot silence their own monitoring.
 		$source_id = SourcesRepository::register( self::SOURCE_KEY, 'Total Mail Queue alert', 'Total Mail Queue' );
 		if ( $source_id > 0 ) {
 			SourcesRepository::markSeen( $source_id );

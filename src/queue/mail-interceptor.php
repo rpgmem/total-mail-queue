@@ -87,8 +87,8 @@ final class MailInterceptor {
 
 		// Resolve the source: prefer the marker a primary listener set; fall
 		// back to the call stack. The source decides two things: which
-		// `source_key` to persist, and (since S4) whether the admin has
-		// disabled this source — in which case the message is stored as
+		// `source_key` to persist, and whether the admin has disabled this
+		// source — in which case the message is stored as
 		// `blocked_by_source` instead of being scheduled.
 		$source = Detector::consume();
 		if ( null === $source ) {

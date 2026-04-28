@@ -18,8 +18,8 @@ namespace TotalMailQueue\Templates;
  * step the admin form uses to scrub user input before it lands in
  * `wp_options`.
  *
- * The shape is intentionally flat (no nested arrays) so the eventual admin UI
- * (T3) maps directly to one form input per key.
+ * The shape is intentionally flat (no nested arrays) so the admin UI maps
+ * directly to one form input per key.
  */
 final class Options {
 
