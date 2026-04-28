@@ -4,12 +4,19 @@
 .tmq-box, .toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
 	padding: 2rem;
 	background-color: #fff; }
-.toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
-	background: url("../img/total-mail-queue-postman.png?v=2.0.0") scroll no-repeat bottom 3.5rem right 2rem / 20rem auto #fff; }
-@media (min-width: 100em) {
-	.toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
-		background-position: bottom 3.5rem right 5rem; }
-}
+/*
+ * Hero banner shown at the top of the Settings tab. Constrained to a
+ * sane max-width so the 1408×768 source doesn't dominate the layout on
+ * wide screens; height: auto preserves the 16:9 aspect ratio.
+ */
+.tmq-banner {
+	margin: 1rem 0 1.5rem; }
+.tmq-banner img {
+	display: block;
+	width: 100%;
+	max-width: 60rem;
+	height: auto;
+	border-radius: 6px; }
 .tmq-select-all {
 	margin-left: 0 !important; }
 h1.tmq-title {
