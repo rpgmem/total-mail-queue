@@ -25,6 +25,10 @@ final class FaqRenderer {
 	 */
 	public static function render( array $options ): void {
 		self::sectionWhatItDoes( $options );
+		self::sectionBlockMode( $options );
+		self::sectionSourcesCatalog();
+		self::sectionTemplatesEngine();
+		self::sectionWpCoreOverrides();
 		self::sectionDoesntChangeHow();
 		self::sectionCachingPlugins();
 		self::sectionProxyCaching();
@@ -33,6 +37,7 @@ final class FaqRenderer {
 		self::sectionPriorityHeader();
 		self::sectionInstantHeader();
 		self::sectionSendMethod();
+		self::sectionCronContextCapture();
 		self::sectionTestMail( $options );
 	}
 
@@ -276,6 +281,116 @@ final class FaqRenderer {
 		echo '<li><b>' . esc_html__( 'Plugin SMTP only', 'total-mail-queue' ) . '</b> — ' . esc_html__( 'Emails will ONLY be sent via SMTP accounts configured in this plugin. If no account is available (limits reached or none configured), emails will remain in the retention queue waiting until an SMTP account becomes available. This is useful if you want to guarantee all emails go through your own SMTP servers.', 'total-mail-queue' ) . '</li>';
 		echo '<li><b>' . esc_html__( 'WordPress default', 'total-mail-queue' ) . '</b> — ' . esc_html__( 'Ignores all SMTP accounts configured in this plugin and any captured configurations. Emails are sent using whatever wp_mail() does by default — which could be the PHP mail() function or another SMTP plugin like WP Mail SMTP.', 'total-mail-queue' ) . '</li>';
 		echo '</ul>';
+		echo '</div>';
+	}
+
+	/**
+	 * "What is Block mode?" — explains the third Operation Mode and when
+	 * to use it.
+	 *
+	 * @param array<string,mixed> $options Live settings.
+	 */
+	private static function sectionBlockMode( array $options ): void {
+		echo '<div class="tmq-box">';
+		echo '<h3>' . esc_html__( 'What is Block mode?', 'total-mail-queue' ) . '</h3>';
+		echo '<p>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Settings link tag, %2$s: closing tag */
+				__( 'In addition to %1$sSettings → Operation Mode%2$s\'s Disabled and Queue options, the plugin offers Block mode. Every outgoing email is intercepted and stored in the queue, but the cron drainer never sends them — they are retained forever (or until you delete them from the Log tab).', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_SETTINGS . '">',
+				'</a>'
+			)
+		) . '</p>';
+		echo '<p>' . esc_html__( 'Use cases: staging environments where you want to inspect what real WordPress would have emailed, security incident response (stop all outgoing email immediately), or migration drills.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Block mode catches mail sent during cron events too — a third-party plugin\'s deferred user-creation, abandoned-cart, or scheduled-digest emails are retained, not delivered. Switch back to Queue mode to drain the captured rows.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Current state:', 'total-mail-queue' ) . ' ';
+		if ( '2' === (string) $options['enabled'] ) {
+			echo '<b class="tmq-warning">' . esc_html__( 'Block mode is active — no emails are leaving the server.', 'total-mail-queue' ) . '</b>';
+		} else {
+			echo '<b>' . esc_html__( 'Block mode is off.', 'total-mail-queue' ) . '</b>';
+		}
+		echo '</p>';
+		echo '</div>';
+	}
+
+	/**
+	 * "What is the Sources tab?" — explains per-source enable/disable +
+	 * the auto-detected catalog.
+	 */
+	private static function sectionSourcesCatalog(): void {
+		echo '<div class="tmq-box">';
+		echo '<h3>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Sources link tag, %2$s: closing tag */
+				__( 'What is the %1$sSources%2$s tab?', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_SOURCES . '">',
+				'</a>'
+			)
+		) . '</h3>';
+		echo '<p>' . esc_html__( 'Every email passing through the queue is tagged with a stable source key (e.g. wp_core:password_reset, plugin:woocommerce, theme:my-child). The Sources tab lists every source the plugin has seen plus a curated catalog of common ones (15 WordPress-core emails + popular plugins) so the admin can disable a source up-front without waiting for the first send.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Disabling a source flips its outgoing emails to "blocked_by_source" status — they appear in the Log but are never delivered. The X-Mail-Queue-Prio: Instant header cannot bypass this, so disabling a source is a hard block.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Each row also carries label / group overrides (purely cosmetic — useful for Loco translations or bespoke groupings).', 'total-mail-queue' ) . '</p>';
+		echo '</div>';
+	}
+
+	/**
+	 * "What does the HTML template engine do?" — visual styling overview
+	 * + pointer to the Templates tab.
+	 */
+	private static function sectionTemplatesEngine(): void {
+		echo '<div class="tmq-box">';
+		echo '<h3>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Templates link tag, %2$s: closing tag */
+				__( 'What does the %1$sTemplates%2$s engine do?', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_TEMPLATES . '">',
+				'</a>'
+			)
+		) . '</h3>';
+		echo '<p>' . esc_html__( 'When enabled, every outgoing email is wrapped in a styled HTML envelope: header (with optional logo), body, and footer. Header / body / footer / wrapper colors, fonts, padding, and footer text are all configurable from the Templates tab. Plain-text bodies are auto-converted to HTML before wrapping.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Plugins that already produce a full HTML email (DOCTYPE detected at the top of the body) are passed through untouched, so Elementor / MemberPress / your own builders are safe.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Settings link tag, %2$s: closing tag */
+				__( 'The From address used when no SMTP account is sending the email is configured in %1$sSettings → Default Sender%2$s. Precedence: SMTP account → Default Sender → WordPress core (admin_email + "WordPress").', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_SETTINGS . '">',
+				'</a>'
+			)
+		) . '</p>';
+		echo '</div>';
+	}
+
+	/**
+	 * "Can I rewrite the WordPress emails?" — wp_core override editor
+	 * (the v2.6.0 feature).
+	 */
+	private static function sectionWpCoreOverrides(): void {
+		echo '<div class="tmq-box">';
+		echo '<h3>' . esc_html__( 'Can I rewrite the WordPress core emails (welcome, password reset, etc.)?', 'total-mail-queue' ) . '</h3>';
+		echo '<p>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Sources link tag, %2$s: closing tag */
+				__( 'Yes. Open %1$sSources%2$s, find one of the 11 supported WordPress-core templates (password_reset, new_user welcome / admin notification, password_change, email_change, admin_email_change_confirm, the privacy data templates, recovery_mode), click Edit and use the Subject and Body fields to override the WP defaults.', 'total-mail-queue' ),
+				'<a href="admin.php?page=' . PluginPage::TAB_SOURCES . '">',
+				'</a>'
+			)
+		) . '</p>';
+		echo '<p>' . esc_html__( 'Each template lists the tokens valid for that template (e.g. {username}, {reset_url}, {recipient}, {site_title}). Two extra tokens work in any override: {subject} (the original subject WP would have used) and {message_original} (the WP-default body — useful for prefix / suffix overrides without losing dynamic content like reset URLs).', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Per-template "Skip template wrapper" checkbox bypasses the HTML envelope when the override is plain text. "Send preview" sends the saved template (with realistic fake values) to the address you choose so you can preview without triggering a real WP event.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'Plugin-source emails (WooCommerce, Contact Form 7, etc.) keep going through their plugin\'s own template editor and are not editable here.', 'total-mail-queue' ) . '</p>';
+		echo '</div>';
+	}
+
+	/**
+	 * "Why do my other plugin's scheduled emails show up here?" — explains
+	 * the cron-context capture introduced in 2.5.2.
+	 */
+	private static function sectionCronContextCapture(): void {
+		echo '<div class="tmq-box">';
+		echo '<h3>' . esc_html__( 'Why do my other plugin\'s scheduled emails show up in the queue?', 'total-mail-queue' ) . '</h3>';
+		echo '<p>' . esc_html__( 'Total Mail Queue intercepts every wp_mail() call, including those triggered from inside a WP-Cron event by other plugins (deferred user-creation flows, abandoned-cart hooks, scheduled digests). They land in the queue / Sources catalog with the right source key just like a frontend send.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'In Block mode, those cron-originated emails are also retained — block mode is now genuinely all-or-nothing.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'The plugin\'s own queue drainer is the one cron caller exempted from interception (otherwise it would re-queue every row it sends).', 'total-mail-queue' ) . '</p>';
 		echo '</div>';
 	}
 
