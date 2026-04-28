@@ -5,14 +5,18 @@
 	padding: 2rem;
 	background-color: #fff; }
 /*
- * Hero banner shown at the top of the Settings tab. Constrained to a
- * sane max-width so the 1408×768 source doesn't dominate the layout on
- * wide screens; height: auto preserves the 16:9 aspect ratio.
+ * Hero banner shown at the top of the FAQ tab. Constrained to a sane
+ * max-width so the 1408×768 source doesn't dominate the layout on wide
+ * screens; height: auto preserves the 16:9 aspect ratio. Centered in
+ * the tab via auto horizontal margins on the inner <img> so the
+ * banner sits in the middle regardless of how wide the .wrap is.
  */
 .tmq-banner {
-	margin: 1rem 0 1.5rem; }
+	margin: 1rem 0 1.5rem;
+	text-align: center; }
 .tmq-banner img {
 	display: block;
+	margin: 0 auto;
 	width: 100%;
 	max-width: 60rem;
 	height: auto;
@@ -20,19 +24,7 @@
 .tmq-select-all {
 	margin-left: 0 !important; }
 h1.tmq-title {
-	position: relative; padding: 1rem 0 1.25rem 5rem; margin: 0; }
-h1.tmq-title::before {
-	content: "";
-	position: absolute;
-	left: 0;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 4rem;
-	height: 4rem;
-	background: url("../img/total-mail-queue-icon.gif?v=2.0.0") scroll no-repeat center center/contain transparent; }
-@media (-webkit-min-device-pixel-ratio: 1.5) {
-	h1.tmq-title::before {
-		background-image: url("../img/total-mail-queue-icon-2x.gif?v=2.0.0"); }}
+	padding: 1rem 0 1.25rem; margin: 0; }
 .tmq-logo {
 	width: 14rem;
 	height: auto; }
