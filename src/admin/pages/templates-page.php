@@ -63,6 +63,15 @@ final class TemplatesPage {
 		self::renderFooterSection( $options );
 		self::renderWrapperSection( $options );
 
+		echo '<p class="description tmq-sender-moved-note">' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Settings link tag, %2$s: closing tag */
+				__( 'Looking for the From email / From name fields? They moved to %1$sSettings → Default Sender%2$s in v2.6.0 to match the precedence model with SMTP accounts.', 'total-mail-queue' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue#wp_tmq_default_sender' ) ) . '">',
+				'</a>'
+			)
+		) . '</p>';
+
 		echo '<p class="submit">';
 		echo '<button type="submit" name="wp_tmq_templates_save" class="button button-primary">' . esc_html__( 'Save Changes', 'total-mail-queue' ) . '</button> ';
 
