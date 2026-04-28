@@ -117,8 +117,8 @@ final class PluginPage {
 	 * @param string $tab Active tab slug.
 	 */
 	private static function renderHeader( string $tab ): void {
-		$logo = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.svg', Plugin::container()->get( 'plugin.file' ) );
-		echo '<h1 class="tmq-title"><img class="tmq-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="308" height="56" /></h1>';
+		$logo = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.png', Plugin::container()->get( 'plugin.file' ) );
+		echo '<h1 class="tmq-title"><img class="tmq-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="692" height="342" /></h1>';
 
 		if ( self::TAB_CRON_INFO === $tab ) {
 			return;

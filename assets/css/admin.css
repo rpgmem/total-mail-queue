@@ -5,7 +5,7 @@
 	padding: 2rem;
 	background-color: #fff; }
 .toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
-	background: url("../img/total-mail-queue-postman.svg?v=1.0.0") scroll no-repeat bottom 3.5rem right 2rem #fff; }
+	background: url("../img/total-mail-queue-postman.png?v=2.0.0") scroll no-repeat bottom 3.5rem right 2rem / 20rem auto #fff; }
 @media (min-width: 100em) {
 	.toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
 		background-position: bottom 3.5rem right 5rem; }
@@ -22,10 +22,10 @@ h1.tmq-title::before {
 	transform: translateY(-50%);
 	width: 4rem;
 	height: 4rem;
-	background: url("../img/total-mail-queue-icon.gif?v=1.0.0") scroll no-repeat center center/contain transparent; }
+	background: url("../img/total-mail-queue-icon.gif?v=2.0.0") scroll no-repeat center center/contain transparent; }
 @media (-webkit-min-device-pixel-ratio: 1.5) {
 	h1.tmq-title::before {
-		background-image: url("../img/total-mail-queue-icon-2x.gif?v=1.0.0"); }}
+		background-image: url("../img/total-mail-queue-icon-2x.gif?v=2.0.0"); }}
 .tmq-logo {
 	width: 14rem;
 	height: auto; }
