@@ -308,7 +308,7 @@ final class BatchProcessor {
 		}
 		if ( 'auto' === $send_method && $captured ) {
 			$cb = static function ( $phpmailer ) use ( $captured ): void {
-				if ( method_exists( $phpmailer, 'smtpClose' ) ) {
+				if ( is_object( $phpmailer ) && method_exists( $phpmailer, 'smtpClose' ) ) {
 					$phpmailer->smtpClose();
 				}
 				foreach ( $captured as $prop => $val ) {

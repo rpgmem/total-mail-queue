@@ -128,10 +128,15 @@ final class ExportImport {
 			}
 		}
 
+		$xml_string = $xml->asXML();
+		if ( false === $xml_string ) {
+			return '';
+		}
+
 		$dom                     = new DOMDocument( '1.0', 'UTF-8' );
 		$dom->preserveWhiteSpace = false;
 		$dom->formatOutput       = true;
-		$dom->loadXML( $xml->asXML() );
+		$dom->loadXML( $xml_string );
 		return (string) $dom->saveXML();
 	}
 

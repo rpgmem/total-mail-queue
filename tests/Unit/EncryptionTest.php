@@ -56,11 +56,13 @@ final class EncryptionTest extends TestCase {
         self::assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( $bogus ) );
     }
 
-    public function test_decrypt_returns_false_for_payload_tampered_with_garbage_ciphertext(): void {
+    public function test_decrypt_returns_empty_string_for_payload_tampered_with_garbage_ciphertext(): void {
         // Valid structure (iv::ciphertext) but the ciphertext part is not a real openssl_encrypt output.
         $iv      = str_repeat( 'A', openssl_cipher_iv_length( 'aes-256-cbc' ) );
         $tampered = base64_encode( $iv . '::not-real-ciphertext' );
 
-        self::assertFalse( \TotalMailQueue\Support\Encryption::decrypt( $tampered ) );
+        // openssl_decrypt() returns false; the helper collapses that to ''
+        // so callers (PHPMailer's $Password) never receive a non-string.
+        self::assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( $tampered ) );
     }
 }
