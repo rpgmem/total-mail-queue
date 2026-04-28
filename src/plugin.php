@@ -23,7 +23,7 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '2.5.2';
+	public const VERSION = '2.6.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
@@ -72,6 +72,7 @@ final class Plugin {
 		// wp_mail(). Wired regardless of mode/cron so the catalog stays in
 		// sync; only the interceptor below cares about consuming the marker.
 		Sources\Detector::register();
+		Sources\WpVersionNotice::register();
 
 		// Mail interception (queue/block modes only, never during WP cron).
 		Queue\MailInterceptor::register();

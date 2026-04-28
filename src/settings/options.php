@@ -46,6 +46,8 @@ final class Options {
 			'tableName'           => 'total_mail_queue',
 			'smtpTableName'       => 'total_mail_queue_smtp',
 			'triggercount'        => 0,
+			'from_email'          => '',
+			'from_name'           => '',
 		);
 	}
 

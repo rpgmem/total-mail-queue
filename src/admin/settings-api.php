@@ -54,15 +54,16 @@ final class SettingsApi {
 		);
 
 		$fields = array(
-			'wp_tmq_status'        => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
-			'wp_tmq_queue'         => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
-			'wp_tmq_log'           => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
-			'wp_tmq_send_method'   => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
-			'wp_tmq_retry'         => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
-			'wp_tmq_smtp_timeout'  => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
-			'wp_tmq_cron_lock_ttl' => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
-			'wp_tmq_alert_status'  => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
-			'wp_tmq_sensitivity'   => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
+			'wp_tmq_status'         => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
+			'wp_tmq_queue'          => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
+			'wp_tmq_log'            => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
+			'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
+			'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
+			'wp_tmq_smtp_timeout'   => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
+			'wp_tmq_cron_lock_ttl'  => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
+			'wp_tmq_alert_status'   => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
+			'wp_tmq_sensitivity'    => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
+			'wp_tmq_default_sender' => array( __( 'Default Sender', 'total-mail-queue' ), 'renderDefaultSender' ),
 		);
 
 		foreach ( $fields as $id => $spec ) {
@@ -240,5 +241,25 @@ final class SettingsApi {
 					'</a>'
 				)
 			);
+	}
+
+	/**
+	 * Default Sender — global from-address fallback used when no SMTP
+	 * account is sending the email (e.g. Send Method = PHP mail, or no
+	 * configured SMTP account is available).
+	 *
+	 * Precedence at delivery time:
+	 *   1. SMTP account from_email/from_name (when an account is sending)
+	 *   2. Default Sender configured here
+	 *   3. WordPress default (admin_email + 'WordPress')
+	 */
+	public static function renderDefaultSender(): void {
+		$options    = Options::get();
+		$from_email = (string) ( $options['from_email'] ?? '' );
+		$from_name  = (string) ( $options['from_name'] ?? '' );
+
+		echo '<input type="email" id="wp_tmq_from_email" name="wp_tmq_settings[from_email]" value="' . esc_attr( $from_email ) . '" placeholder="' . esc_attr__( 'noreply@example.com', 'total-mail-queue' ) . '" class="regular-text" /> ';
+		echo '<input type="text" id="wp_tmq_from_name" name="wp_tmq_settings[from_name]" value="' . esc_attr( $from_name ) . '" placeholder="' . esc_attr__( 'My Site', 'total-mail-queue' ) . '" class="regular-text" />';
+		echo '<p class="description">' . esc_html__( 'From address + name used when no SMTP account is sending the email. Leave blank to keep WordPress\'s default ("admin_email" + "WordPress"). When an SMTP account sends the email, that account\'s From wins.', 'total-mail-queue' ) . '</p>';
 	}
 }

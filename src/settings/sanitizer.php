@@ -35,6 +35,8 @@ final class Sanitizer {
 		'max_retries',
 		'cron_lock_ttl',
 		'smtp_timeout',
+		'from_email',
+		'from_name',
 	);
 
 	/**

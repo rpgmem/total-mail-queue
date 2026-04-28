@@ -5,6 +5,36 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-04-28
+
+> Per-source body & subject overrides for the 11 most-customized WordPress core emails. Admins can now edit the welcome message, password-reset wording, account-change confirmations, etc. directly from the Sources tab — with token substitution, "Reset to WP default", and a per-template "Send preview" button. The Sender override moves out of the Templates tab into a clearer Default Sender section in Settings, with explicit precedence documentation against SMTP-account senders.
+
+### Added
+
+- **Per-source template editor.** When the source being edited in the Sources tab is one of the 11 supported WP-core emails, the edit form gains a Template override section with subject input, body textarea, available-tokens help row, "Send preview" button, "Reset to WP default" link, and a per-template "Skip template wrapper" checkbox to bypass the global HTML envelope for raw delivery.
+- **`Sources\CoreTemplates`** — hardcoded WP 6.9.4 baseline for 11 templates: `password_reset`, `new_user`, `new_user_admin`, `password_change`, `password_change_admin_notify`, `email_change`, `admin_email_change_confirm`, `user_action_confirm`, `privacy_export_ready`, `privacy_erasure_done`, `recovery_mode`. Each carries its WP default subject + body and the list of tokens valid for that template.
+- **Token registry extension.** Two new dynamic tokens available inside override templates: `{subject}` (the original WP-default subject for chained reuse) and `{message_original}` (the WP-default body). These let admins prefix or suffix without losing dynamic content.
+- **`Sources\Detector` per-call context.** Primary listeners (password_reset, new_user, etc.) now capture user/key/url context via `Detector::setData()`. The override pipeline reads it through `consumeData()` and substitutes per-call tokens like `{username}` and `{reset_url}` correctly.
+- **`Sources\WpVersionNotice`.** When WordPress is upgraded between requests, an admin info notice points to the Sources tab so admins can re-verify the wp_core baseline against the new WP version. Dismissed by clicking Dismiss or by visiting the Sources tab.
+- **`Templates\TestEmailSender` preview by source_key.** The existing "Send test email" AJAX endpoint accepts an optional `source_key`. When supplied, it fakes a realistic `Detector` context (preview-username = current user, fake reset URLs that point back to the same site) and dispatches the override pipeline so the recipient sees the saved template exactly as a real recipient would.
+- **`tests/Unit/CoreTemplatesBaselineTest`** — sanity guard that asserts every template in our hardcoded baseline still carries its historically-stable canonical phrase, AND (when `vendor/wordpress/` is present in the test environment) the same phrase still appears in the live WP source. Catches drift before merge.
+
+### Changed
+
+- **Schema:** `{$prefix}total_mail_queue_sources` gains three columns: `subject_override VARCHAR(255) NOT NULL DEFAULT ''`, `body_override LONGTEXT NOT NULL`, `skip_template_wrap TINYINT(1) NOT NULL DEFAULT 0`. Applied via `dbDelta()` on version-bump.
+- **`Queue\MailInterceptor::handle()`** now consults the Sources row before the Engine wraps. When the source is wp_core AND a non-empty subject_override / body_override exists, the user-supplied template is rendered with `Tokens::globals()` + `Detector::consumeData()` context. `skip_template_wrap=1` bypasses the global HTML envelope for that source.
+- **`Queue\MailInterceptor::handle()`** also exposes `{subject}` and `{message_original}` to override templates, so admins can wrap or quote the original WP content rather than rewriting from scratch.
+- **`Sources\Repository`** gains `updateTemplateOverrides( id, subject, body, skip_wrap )` and `clearTemplateOverrides( id )` — used by the Sources edit form save handler and the "Reset to WP default" link.
+- **Sender override moved.** `from_email` / `from_name` left the Templates tab and now live in the main Settings tab as a "Default Sender" section. Migration runs once on `Migrator::install`: legacy values in `wp_tmq_template_options` are copied into `wp_tmq_settings` (only when the new location is empty), then stripped from the legacy row. The Templates tab carries a `<p class="description">` note pointing v2.5-and-earlier admins to the new home. Help text on both the Settings → Default Sender section and on each SMTP account's From Email/Name fields documents the three-tier precedence: SMTP account → Default Sender → WordPress core.
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.6.0**.
+
+### Out of scope (intentional cuts)
+
+- Four wp_core templates whose bodies are dynamically composed from many `sprintf` calls instead of a single literal — `auto_update`, `auto_update_plugins_themes`, `comment_notification`, `comment_moderation`. These keep going through WP core unmodified; the source still appears in the Sources tab but the body/subject editor is silently disabled for them.
+- WC, ffcertificate, and other plugin-source templates — the override editor only surfaces for `wp_core:*` sources. Plugin authors should ship their own template editors (WooCommerce already does).
+
+---
+
 ## [2.5.2] - 2026-04-27
 
 > Fix for a long-standing capture gap: emails sent from inside a WP-Cron event by other plugins (deferred user-creation flows, abandoned-cart hooks, scheduled digests) bypassed the `MailInterceptor` and never landed in the queue / log. Worse, in **block mode** they actually went out — block mode silently failed for cron-originated mail. The plugin now intercepts in cron context too, with a precise drainer-only short-circuit.

@@ -42,7 +42,50 @@ final class Migrator {
 	public static function install(): void {
 		Schema::install();
 		KnownSources::seed();
+		self::migrateSenderToSettings();
 		update_option( self::VERSION_OPTION, Plugin::VERSION, true );
+	}
+
+	/**
+	 * V2.6.0 migration: Sender override moved from `wp_tmq_template_options`
+	 * (Templates tab) to `wp_tmq_settings` (Settings tab → Default Sender).
+	 *
+	 * Idempotent: only copies when the new location is empty AND the old
+	 * location has a non-empty value. Existing settings entries (e.g.
+	 * upgrade-then-edit) are never overwritten.
+	 */
+	private static function migrateSenderToSettings(): void {
+		$old = get_option( 'wp_tmq_template_options' );
+		if ( ! is_array( $old ) ) {
+			return;
+		}
+		$old_email = isset( $old['from_email'] ) ? (string) $old['from_email'] : '';
+		$old_name  = isset( $old['from_name'] ) ? (string) $old['from_name'] : '';
+		if ( '' === $old_email && '' === $old_name ) {
+			return;
+		}
+
+		$settings = get_option( 'wp_tmq_settings' );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		$changed = false;
+		if ( '' !== $old_email && empty( $settings['from_email'] ) ) {
+			$settings['from_email'] = $old_email;
+			$changed                = true;
+		}
+		if ( '' !== $old_name && empty( $settings['from_name'] ) ) {
+			$settings['from_name'] = $old_name;
+			$changed               = true;
+		}
+		if ( $changed ) {
+			update_option( 'wp_tmq_settings', $settings );
+		}
+
+		// Drop the legacy keys from template options so the source of truth
+		// is unambiguously the Settings tab from now on.
+		unset( $old['from_email'], $old['from_name'] );
+		update_option( 'wp_tmq_template_options', $old );
 	}
 
 	/**

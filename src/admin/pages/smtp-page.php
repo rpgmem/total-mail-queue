@@ -302,13 +302,24 @@ final class SmtpPage {
 		// From Email.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_from_email">' . esc_html__( 'From Email', 'total-mail-queue' ) . '</label></th>';
-		echo '<td><input type="email" id="smtp_from_email" name="smtp_from_email" value="' . esc_attr( (string) $account['from_email'] ) . '" class="regular-text" /></td>';
+		echo '<td><input type="email" id="smtp_from_email" name="smtp_from_email" value="' . esc_attr( (string) $account['from_email'] ) . '" class="regular-text" />';
+		echo '<p class="description">' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: opening Settings link tag, %2$s: closing tag */
+				__( 'Wins over the global Default Sender configured in %1$sSettings%2$s when this SMTP account is sending the email. Leave blank to fall back to the Default Sender.', 'total-mail-queue' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue' ) ) . '">',
+				'</a>'
+			)
+		) . '</p>';
+		echo '</td>';
 		echo '</tr>';
 
 		// From Name.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_from_name">' . esc_html__( 'From Name', 'total-mail-queue' ) . '</label></th>';
-		echo '<td><input type="text" id="smtp_from_name" name="smtp_from_name" value="' . esc_attr( (string) $account['from_name'] ) . '" class="regular-text" /></td>';
+		echo '<td><input type="text" id="smtp_from_name" name="smtp_from_name" value="' . esc_attr( (string) $account['from_name'] ) . '" class="regular-text" />';
+		echo '<p class="description">' . esc_html__( 'Same precedence as From Email above — wins over the Default Sender when this account is sending.', 'total-mail-queue' ) . '</p>';
+		echo '</td>';
 		echo '</tr>';
 
 		// Priority.

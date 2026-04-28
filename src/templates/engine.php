@@ -154,14 +154,15 @@ final class Engine {
 	}
 
 	/**
-	 * `wp_mail_from` filter callback. Returns the user-defined sender
-	 * email if configured; otherwise leaves the upstream value untouched.
+	 * `wp_mail_from` filter callback. Returns the admin-defined Default
+	 * Sender email (from the main Settings tab) if configured; otherwise
+	 * leaves the upstream value untouched.
 	 *
 	 * @param string $email Current from-address.
 	 * @return string
 	 */
 	public static function overrideFromEmail( $email ): string {
-		$options = self::options();
+		$options = MainOptions::get();
 		if ( empty( $options['from_email'] ) ) {
 			return (string) $email;
 		}
@@ -169,14 +170,15 @@ final class Engine {
 	}
 
 	/**
-	 * `wp_mail_from_name` filter callback. Returns the user-defined sender
-	 * name if configured; otherwise leaves the upstream value untouched.
+	 * `wp_mail_from_name` filter callback. Returns the admin-defined Default
+	 * Sender name (from the main Settings tab) if configured; otherwise
+	 * leaves the upstream value untouched.
 	 *
 	 * @param string $name Current from-name.
 	 * @return string
 	 */
 	public static function overrideFromName( $name ): string {
-		$options = self::options();
+		$options = MainOptions::get();
 		if ( empty( $options['from_name'] ) ) {
 			return (string) $name;
 		}
