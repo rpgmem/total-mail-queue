@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Total Mail Queue\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-31 00:52+0000\n"
-"PO-Revision-Date: 2026-04-28 03:45+0000\n"
+"PO-Revision-Date: 2026-04-28 20:52+0000\n"
 "Last-Translator: Alex Meusburger\n"
 "Language-Team: Português do Brasil\n"
 "Language: pt_BR\n"
@@ -16,42 +16,60 @@ msgstr ""
 "X-Domain: total-mail-queue"
 
 #. %1$d: number of emails resent, %2$s: link open, %3$s: link close
-#: src/admin/tables/log-table.php:553
+#: src/admin/tables/log-table.php:587
 #, php-format
 msgid "%1$d email(s) have been force-resent to the %2$sRetention%3$s queue."
 msgstr "%1$d e-mails foram reenviados à força para a fila %2$sRetention%3$s."
 
 #. %1$d: count, %2$s: link open, %3$s: link close
-#: src/admin/tables/log-table.php:485
+#: src/admin/tables/log-table.php:519
 #, php-format
 msgid "%1$d email(s) have been put again into the %2$sQueue%3$s."
 msgstr "%1$d e-mails foram colocados novamente na %2$sQueue%3$s."
 
 #. %1$d: number of rows, %2$s: group label
-#: src/admin/pages/sources-page.php:500
+#: src/admin/pages/sources-actions.php:173
 #, php-format
 msgid "%1$d source in \"%2$s\" updated."
 msgid_plural "%1$d sources in \"%2$s\" updated."
 msgstr[0] "Fonte %1$d em \"%2$s\" atualizada."
 msgstr[1] "Fontes %1$d em \"%2$s\" atualizadas."
 
+#. %1$s: opening SMTP link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:117
+#, php-format
+msgid "%1$sSMTP Accounts%2$s — when you configure one or more accounts, the cron drainer sends through them based on the Send Method (auto / SMTP-only / WP-default). Captured config from third-party SMTP plugins is also replayed on send."
+msgstr "%1$sContas SMTP%2$s — quando você configura uma ou mais contas, o coletor de dados cron envia os dados por meio delas com base no Método de Envio (automático / somente SMTP / padrão do WP). A configuração capturada de plugins SMTP de terceiros também é reproduzida no envio."
+
+#. %1$s: opening Sources link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:133
+#, php-format
+msgid "%1$sSources%2$s — disabling a source flips its outgoing emails to \"blocked_by_source\"; they appear in the Log but never leave the server. wp_core templates can also have their subject and body overridden per-source."
+msgstr "%1$sSources%2$s — desativar uma fonte altera o status de seus e-mails enviados para \"bloqueados_pela_fonte\"; eles aparecem no Log, mas nunca saem do servidor. Os modelos wp_core também podem ter seu assunto e corpo alterados por fonte."
+
+#. %1$s: opening Templates link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:125
+#, php-format
+msgid "%1$sTemplate engine%2$s — when enabled, every outgoing email is wrapped in a styled HTML envelope. Plain-text bodies are auto-converted to HTML; existing full HTML documents pass through untouched."
+msgstr "%1$sMecanismo de modelos%2$s — quando ativado, cada e-mail enviado é envolvido em um envelope HTML estilizado. Corpos de texto simples são convertidos automaticamente para HTML; documentos HTML completos existentes são transmitidos sem alterações."
+
 #. %d: number of emails resent
-#: src/admin/plugin-page.php:235
+#: src/admin/plugin-page.php:242
 msgid "%d email(s) have been added back to the queue for resending."
 msgstr "%d e-mails foram adicionados novamente à fila para reenvio."
 
 #. %d: number of skipped emails
-#: src/admin/tables/log-table.php:591
+#: src/admin/tables/log-table.php:625
 msgid "%d email(s) were skipped because they are already in the queue waiting to be sent."
 msgstr "%d e-mails foram ignorados porque já estão na fila aguardando envio."
 
 #. %d: number of skipped emails
-#: src/admin/tables/log-table.php:584
+#: src/admin/tables/log-table.php:618
 msgid "%d email(s) were skipped because they have already been sent successfully. Sent emails cannot be re-queued."
 msgstr "%d e-mails foram ignorados porque já foram enviados com sucesso. E-mails enviados não podem ser reenviados para a fila."
 
 #. %d: number of source rows updated
-#: src/admin/pages/sources-page.php:481
+#: src/admin/pages/sources-actions.php:149
 msgid "%d source updated."
 msgid_plural "%d sources updated."
 msgstr[0] "Fonte %d atualizada."
@@ -69,7 +87,7 @@ msgstr "%s atrás"
 msgid "%s — template test"
 msgstr "%s — teste de modelo"
 
-#: src/admin/plugin-page.php:358
+#: src/admin/queue-diagnostics.php:117
 msgid "(closure)"
 msgstr "(fechamento)"
 
@@ -78,7 +96,7 @@ msgid "(custom)"
 msgstr "(personalizado)"
 
 #. %s: export date
-#: src/admin/export-import.php:207
+#: src/admin/export-import.php:212
 #, php-format
 msgid "(exported on %s)"
 msgstr "(exportado em %s)"
@@ -103,7 +121,7 @@ msgstr "(pré-visualização detalhes)"
 msgid "0 = no retries, email is immediately marked as error"
 msgstr "0 = sem tentativas, o e-mail é imediatamente marcado como erro."
 
-#: src/admin/settings-api.php:168 src/admin/pages/smtp-page.php:336 src/admin/pages/smtp-page.php:343
+#: src/admin/settings-api.php:168 src/admin/pages/smtp-form-renderer.php:216 src/admin/pages/smtp-form-renderer.php:223
 msgid "0 = unlimited"
 msgstr "0 = ilimitado"
 
@@ -157,11 +175,11 @@ msgstr "[{site_title}] Exportação de Dados Pessoais"
 msgid "[{site_title}] Your Site is Experiencing a Technical Issue"
 msgstr "[{site_title}] Seu site está apresentando um problema técnico"
 
-#: src/admin/pages/smtp-page.php:421 src/admin/tables/sources-table.php:49
+#: src/admin/pages/smtp-list-renderer.php:63 src/admin/tables/sources-table.php:49
 msgid "Actions"
 msgstr "Ações"
 
-#: src/admin/pages/smtp-page.php:187 src/admin/pages/smtp-page.php:391
+#: src/admin/pages/smtp-form-renderer.php:67 src/admin/pages/smtp-list-renderer.php:33
 msgid "Add SMTP Account"
 msgstr "Adicionar conta SMTP"
 
@@ -177,7 +195,7 @@ msgstr "Grupo personalizado definido pelo administrador (substitui o padrão tra
 msgid "Admin-set custom label (overrides the translated default)"
 msgstr "Rótulo personalizado definido pelo administrador (substitui o padrão traduzido)"
 
-#: src/admin/tables/log-table.php:151 src/admin/tables/log-table.php:290
+#: src/admin/tables/log-table.php:187 src/admin/tables/log-table.php:324
 msgid "Alert"
 msgstr "Alerta"
 
@@ -189,11 +207,11 @@ msgstr "Alerta ativado"
 msgid "Alert Sensitivity"
 msgstr "Sensibilidade de Alerta"
 
-#: src/admin/faq-renderer.php:182
+#: src/admin/faq-renderer.php:224
 msgid "Alerting is disabled"
 msgstr "O alerta está desativado."
 
-#: src/admin/faq-renderer.php:173
+#: src/admin/faq-renderer.php:215
 msgid "Alerts are enabled"
 msgstr "Os alertas estão ativados."
 
@@ -210,7 +228,7 @@ msgid "All groups"
 msgstr "Todos os grupos"
 
 #. %1$s: wp_mail() link, %2$s: opening Queue link tag, %3$s: closing link tag
-#: src/admin/faq-renderer.php:62
+#: src/admin/faq-renderer.php:66
 #, php-format
 msgid "All Mails sent through %1$s are delayed by the %2$sQueue%3$s."
 msgstr "Todos os e-mails enviados através de %1$s são atrasados ​​pela fila %2$sQueue%3$s."
@@ -219,19 +237,19 @@ msgstr "Todos os e-mails enviados através de %1$s são atrasados ​​pela fil
 msgid "All outgoing emails are being blocked!"
 msgstr "Todos os e-mails enviados estão sendo bloqueados!"
 
-#: src/admin/faq-renderer.php:69
+#: src/admin/faq-renderer.php:73
 msgid "All outgoing emails are being retained and will NOT be sent."
 msgstr "Todos os e-mails enviados estão sendo retidos e NÃO serão reenviados."
 
-#: src/admin/plugin-page.php:278
+#: src/admin/queue-diagnostics.php:37
 msgid "All outgoing emails are being retained and will NOT be sent. No emails will leave this server."
 msgstr "Todos os e-mails enviados estão sendo retidos e NÃO serão reenviados. Nenhum e-mail sairá deste servidor."
 
-#: src/admin/pages/smtp-page.php:140
+#: src/admin/pages/smtp-actions.php:154
 msgid "All sending counters have been reset."
 msgstr "Todos os contadores de envio foram reiniciados."
 
-#: src/admin/tables/log-table.php:148
+#: src/admin/tables/log-table.php:184
 msgid "All statuses"
 msgstr "Todos os status"
 
@@ -239,11 +257,11 @@ msgstr "Todos os status"
 msgid "Are you sure you want to delete the selected items? This action cannot be undone."
 msgstr "Tem certeza de que deseja excluir os itens selecionados? Esta ação não pode ser desfeita."
 
-#: src/admin/pages/smtp-page.php:479
+#: src/admin/pages/smtp-list-renderer.php:121
 msgid "Are you sure you want to delete this SMTP account?"
 msgstr "Tem certeza de que deseja excluir esta conta SMTP?"
 
-#: src/admin/pages/smtp-page.php:396
+#: src/admin/pages/smtp-list-renderer.php:38
 msgid "Are you sure you want to reset all sending counters to zero?"
 msgstr "Tem certeza de que deseja zerar todos os contadores de envio?"
 
@@ -251,16 +269,16 @@ msgstr "Tem certeza de que deseja zerar todos os contadores de envio?"
 msgid "Arial"
 msgstr "Arial"
 
-#: src/admin/tables/log-table.php:124
+#: src/admin/tables/log-table.php:164
 msgid "Attachments"
 msgstr "Anexos"
 
 #. %d: number of retry attempts
-#: src/admin/tables/log-table.php:273
+#: src/admin/tables/log-table.php:307
 msgid "Attempt #%d"
 msgstr "Tentativa nº %d"
 
-#: src/admin/plugin-page.php:421
+#: src/admin/pages/cron-info-page.php:69
 msgid "Attention: It seems that your WP Cron is not running. There are some jobs waiting to be completed."
 msgstr "Atenção: Parece que seu WP Cron não está em execução. Há algumas tarefas aguardando conclusão."
 
@@ -268,7 +286,7 @@ msgstr "Atenção: Parece que seu WP Cron não está em execução. Há algumas 
 msgid "Attention: Your website has problems sending e-mails"
 msgstr "Atenção: Seu site está com problemas para enviar e-mails."
 
-#: src/admin/pages/smtp-page.php:263 src/admin/pages/smtp-page.php:267
+#: src/admin/pages/smtp-form-renderer.php:143 src/admin/pages/smtp-form-renderer.php:147
 msgid "Authentication"
 msgstr "Autenticação"
 
@@ -276,7 +294,7 @@ msgstr "Autenticação"
 msgid "Auto-Retry"
 msgstr "Tentativa Automática"
 
-#: src/admin/faq-renderer.php:275
+#: src/admin/faq-renderer.php:317
 msgid "Automatic"
 msgstr "Automático"
 
@@ -288,7 +306,7 @@ msgstr "Atualização automática do núcleo"
 msgid "Automatic — Use plugin SMTP if available, then captured config, then WordPress default"
 msgstr "Automático — Usar SMTP do plugin, se disponível, depois a configuração capturada e, por fim, a configuração padrão do WordPress."
 
-#: src/admin/pages/sources-page.php:252
+#: src/admin/pages/sources-edit-renderer.php:153
 msgid "Available tokens:"
 msgstr "Tokens disponíveis:"
 
@@ -296,27 +314,39 @@ msgstr "Tokens disponíveis:"
 msgid "Background color"
 msgstr "Cor de fundo"
 
-#: src/admin/plugin-page.php:278
+#: src/admin/queue-diagnostics.php:37
 msgid "Block Mode Active"
 msgstr "Modo de Bloqueio Ativo"
 
-#: src/admin/faq-renderer.php:69
+#: src/admin/faq-renderer.php:342
+msgid "Block mode catches mail sent during cron events too — a third-party plugin's deferred user-creation, abandoned-cart, or scheduled-digest emails are retained, not delivered. Switch back to Queue mode to drain the captured rows."
+msgstr "O modo de bloqueio também captura e-mails enviados durante eventos cron — e-mails de criação de usuário adiada, carrinho abandonado ou resumos agendados de plugins de terceiros são retidos, mas não entregues. Alterne para o modo de fila para liberar as linhas capturadas."
+
+#: src/admin/faq-renderer.php:73
 msgid "Block mode is active"
 msgstr "O modo de bloqueio está ativo"
 
-#: src/admin/pages/sources-page.php:106 src/admin/pages/templates-page.php:149
+#: src/admin/faq-renderer.php:345
+msgid "Block mode is active — no emails are leaving the server."
+msgstr "O modo de bloqueio está ativo — nenhum e-mail está saindo do servidor."
+
+#: src/admin/pages/sources-page.php:78 src/admin/pages/templates-page.php:149
 msgid "Block mode is active."
 msgstr "O modo de bloqueio está ativo."
+
+#: src/admin/faq-renderer.php:347
+msgid "Block mode is off."
+msgstr "O modo de bloqueio está desativado."
 
 #: src/admin/settings-api.php:83
 msgid "Block — Retain all emails, never send (block all outgoing)"
 msgstr "Bloquear — Reter todos os emails, nunca enviar (bloquear todos os emails de saída)"
 
-#: src/admin/tables/log-table.php:152 src/admin/tables/log-table.php:293
+#: src/admin/tables/log-table.php:188 src/admin/tables/log-table.php:327
 msgid "Blocked by source"
 msgstr "Bloqueado pela fonte"
 
-#: src/admin/pages/sources-page.php:283 src/admin/pages/templates-page.php:225
+#: src/admin/pages/sources-edit-renderer.php:184 src/admin/pages/templates-page.php:225
 msgid "Body"
 msgstr "Corpo"
 
@@ -331,15 +361,25 @@ msgstr "Raio da borda (px)"
 msgid "by %1$sWP Cron%2$s."
 msgstr "por %1$sWP Cron%2$s."
 
-#: src/admin/faq-renderer.php:194
+#. %1$s: opening bold tag, %2$s: closing bold tag, %3$s: wp_mail() link
+#: src/admin/faq-renderer.php:99
+#, php-format
+msgid "By default, no — the plugin only affects %1$sWHEN%2$s emails are sent. The Queue delays delivery, then forwards each row through the standard %3$s function so whatever transport you have in place (PHP mail, an SMTP plugin like WP Mail SMTP, an external service like Mailgun) keeps doing its job."
+msgstr "Por padrão, não — o plugin só afeta %1$sWHEN%2$s e-mails são enviados. A fila atrasa a entrega e, em seguida, encaminha cada linha pela função %3$s padrão, para que qualquer meio de transporte que você tenha configurado (e-mail PHP, um plugin SMTP como o WP Mail SMTP, um serviço externo como o Mailgun) continue funcionando."
+
+#: src/admin/faq-renderer.php:236
 msgid "Can I add emails with a high priority to the queue?"
 msgstr "Posso adicionar e-mails com alta prioridade à fila?"
 
-#: src/admin/faq-renderer.php:232
+#: src/admin/faq-renderer.php:406
+msgid "Can I rewrite the WordPress core emails (welcome, password reset, etc.)?"
+msgstr "Posso reescrever os e-mails padrão do WordPress (boas-vindas, redefinição de senha, etc.)?"
+
+#: src/admin/faq-renderer.php:274
 msgid "Can I send emails <i>instantly</i> without going through the queue?"
 msgstr "Posso enviar e-mails <i>instantaneamente</i> sem passar pela fila?"
 
-#: src/admin/pages/smtp-page.php:370 src/admin/pages/sources-page.php:223
+#: src/admin/pages/smtp-form-renderer.php:250 src/admin/pages/sources-edit-renderer.php:123
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -348,7 +388,7 @@ msgid "Center"
 msgstr "Centro"
 
 #. %1$s: opening link tag, %2$s: closing link tag
-#: src/admin/plugin-page.php:281
+#: src/admin/queue-diagnostics.php:40
 #, php-format
 #| msgid "Change this in %sSettings%s."
 msgid "Change this in %1$sSettings%2$s."
@@ -366,7 +406,7 @@ msgstr "Selecione a imagem…"
 msgid "Clear group filter"
 msgstr "Limpar filtro de grupo"
 
-#: src/admin/tables/log-table.php:181
+#: src/admin/tables/log-table.php:217
 msgid "Clear source filter"
 msgstr "Limpar filtro de origem"
 
@@ -378,7 +418,7 @@ msgstr "Moderação de comentários"
 msgid "Comment notification"
 msgstr "Notificação de comentário"
 
-#: src/admin/pages/smtp-page.php:212
+#: src/admin/pages/smtp-form-renderer.php:92
 msgid "Connection Settings"
 msgstr "Configurações de Conexão"
 
@@ -390,7 +430,7 @@ msgstr "Conexão bem-sucedida! O servidor SMTP respondeu corretamente."
 msgid "Contact Form 7"
 msgstr "Contact Form 7"
 
-#: src/admin/menu.php:46 src/admin/plugin-page.php:151
+#: src/admin/menu.php:46 src/admin/plugin-page.php:158
 msgid "Cron Information"
 msgstr "Informações sobre a Cron"
 
@@ -398,15 +438,15 @@ msgstr "Informações sobre a Cron"
 msgid "Cron Lock Timeout"
 msgstr "Tempo Limite de Bloqueio Cron"
 
-#: src/admin/faq-renderer.php:56 src/admin/faq-renderer.php:171
+#: src/admin/faq-renderer.php:60 src/admin/faq-renderer.php:213 src/admin/faq-renderer.php:343
 msgid "Current state:"
 msgstr "Estado atual:"
 
-#: src/admin/pages/sources-page.php:414
+#: src/admin/pages/sources-actions.php:66
 msgid "Custom label/group cleared; the translated default is back."
 msgstr "Rótulo/grupo personalizado apagado; o padrão traduzido foi restaurado."
 
-#: src/admin/pages/smtp-page.php:334 src/admin/pages/smtp-page.php:416
+#: src/admin/pages/smtp-form-renderer.php:214 src/admin/pages/smtp-list-renderer.php:58
 msgid "Daily Limit"
 msgstr "Limite Diário"
 
@@ -416,7 +456,7 @@ msgstr "dias."
 
 #. %s: stored fallback label
 #. %s: stored fallback group label
-#: src/admin/pages/sources-page.php:175 src/admin/pages/sources-page.php:205
+#: src/admin/pages/sources-edit-renderer.php:75 src/admin/pages/sources-edit-renderer.php:105
 #, php-format
 msgid "Default (stored fallback): %s"
 msgstr "Valor padrão (contingente armazenado): %s"
@@ -427,12 +467,12 @@ msgstr "Remetente Padrão"
 
 #. %s: default translated label
 #. %s: default translated group label
-#: src/admin/pages/sources-page.php:167 src/admin/pages/sources-page.php:197
+#: src/admin/pages/sources-edit-renderer.php:67 src/admin/pages/sources-edit-renderer.php:97
 #, php-format
 msgid "Default: %s"
 msgstr "Padrão: %s"
 
-#: src/admin/pages/smtp-page.php:479 src/admin/tables/log-table.php:376 src/admin/tables/log-table.php:379
+#: src/admin/pages/smtp-list-renderer.php:121 src/admin/tables/log-table.php:410 src/admin/tables/log-table.php:413
 msgid "Delete"
 msgstr "Excluir"
 
@@ -440,7 +480,7 @@ msgstr "Excluir"
 msgid "Delete Log entries older than"
 msgstr "Excluir entradas de log mais antigas que"
 
-#: src/admin/tables/log-table.php:321
+#: src/admin/tables/log-table.php:355
 msgid "Deleted"
 msgstr "Excluído"
 
@@ -448,7 +488,7 @@ msgstr "Excluído"
 msgid "Disable"
 msgstr "Desativar"
 
-#: src/admin/pages/sources-page.php:383
+#: src/admin/pages/sources-list-renderer.php:79
 msgid "Disable group"
 msgstr "Desativar grupo"
 
@@ -460,25 +500,28 @@ msgstr "Desativado"
 msgid "Disabled — No interception, emails sent normally"
 msgstr "Desativado — Sem interceptação, e-mails enviados normalmente"
 
+#: src/admin/faq-renderer.php:368
+msgid "Disabling a source flips its outgoing emails to \"blocked_by_source\" status — they appear in the Log but are never delivered. The X-Mail-Queue-Prio: Instant header cannot bypass this, so disabling a source is a hard block."
+msgstr "Desativar uma origem faz com que seus e-mails enviados passem a ter o status \"bloqueado_pela_origem\" — eles aparecem no Log, mas nunca são entregues. O cabeçalho X-Mail-Queue-Prio: Instant não consegue contornar isso, portanto, desativar uma origem representa um bloqueio permanente."
+
 #: src/sources/wp-version-notice.php:84
 msgid "Dismiss"
 msgstr "Liberar"
 
 #. %1$s: opening bold tag, %2$s: closing bold tag
-#: src/admin/faq-renderer.php:85
+#: src/admin/faq-renderer.php:91
 #, php-format
 #| msgid "Does this plugin change the way %sHOW%s emails are sent?"
 msgid "Does this plugin change the way %1$sHOW%2$s emails are sent?"
 msgstr "Este plugin altera a forma %1$sCOMO%2$s os e-mails da  são enviados?"
 
 #. %1$s: example caching plugin name
-#: src/admin/faq-renderer.php:111
+#: src/admin/faq-renderer.php:152
 #, php-format
-#| msgid "Does this plugin work, if I have a Caching Plugin installed? E.g. %s or similar?"
-msgid "Does this plugin work, if I have a Caching Plugin installed? E.g. %1$s or similar?"
-msgstr "Este plugin funciona se eu tiver um plugin de cache instalado? Por exemplo, %1$s ou similar?"
+msgid "Does this plugin work with a Caching Plugin like %1$s?"
+msgstr "Este plugin funciona com um plugin de cache como o %1$s?"
 
-#: src/admin/plugin-page.php:187
+#: src/admin/plugin-page.php:194
 msgid "Download an XML file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys."
 msgstr "Faça o download de um arquivo XML com todas as configurações do plugin e contas SMTP. As senhas estão incluídas de forma criptografada e só podem ser importadas em um site com as mesmas chaves de segurança do WordPress."
 
@@ -486,21 +529,29 @@ msgstr "Faça o download de um arquivo XML com todas as configurações do plugi
 msgid "Drop the custom label/group; fall back to the translated default."
 msgstr "Remova o rótulo/grupo personalizado; utilize o padrão traduzido."
 
-#: src/admin/pages/smtp-page.php:478 src/admin/tables/sources-table.php:277
+#: src/admin/faq-renderer.php:369
+msgid "Each row also carries label / group overrides (purely cosmetic — useful for Loco translations or bespoke groupings)."
+msgstr "Cada linha também contém substituições de rótulo/grupo (puramente cosméticas — úteis para traduções do Loco ou agrupamentos personalizados)."
+
+#: src/admin/faq-renderer.php:415
+msgid "Each template lists the tokens valid for that template (e.g. {username}, {reset_url}, {recipient}, {site_title}). Two extra tokens work in any override: {subject} (the original subject WP would have used) and {message_original} (the WP-default body — useful for prefix / suffix overrides without losing dynamic content like reset URLs)."
+msgstr "Cada modelo lista os tokens válidos para esse modelo (por exemplo, {username}, {reset_url}, {recipient}, {site_title}). Dois tokens extras funcionam em qualquer sobreposição: {subject} (o assunto original que o WordPress teria usado) e {message_original} (o corpo padrão do WordPress — útil para sobreposições de prefixo/sufixo sem perder conteúdo dinâmico, como URLs de redefinição)."
+
+#: src/admin/pages/smtp-list-renderer.php:120 src/admin/tables/sources-table.php:277
 msgid "Edit"
 msgstr "Editar"
 
-#: src/admin/pages/smtp-page.php:187
+#: src/admin/pages/smtp-form-renderer.php:67
 msgid "Edit SMTP Account"
 msgstr "Editar Conta SMTP"
 
 #. %s: source key
-#: src/admin/pages/sources-page.php:145
+#: src/admin/pages/sources-edit-renderer.php:45
 #, php-format
 msgid "Edit source: %s"
 msgstr "Editar fonte: %s"
 
-#: src/admin/pages/sources-page.php:248
+#: src/admin/pages/sources-edit-renderer.php:149
 msgid "Edit the subject and body sent for this WP-core email. Leave a field empty to keep the WordPress default."
 msgstr "Edite o assunto e o corpo do e-mail enviado para este e-mail do núcleo do WordPress. Deixe um campo vazio para manter o padrão do WordPress."
 
@@ -524,16 +575,16 @@ msgid "Email: {user_email}"
 msgstr "E-mail: {user_email}"
 
 #. %1$s: opening Settings link tag, %2$s: closing tag
-#: src/admin/pages/sources-page.php:120
+#: src/admin/pages/sources-page.php:92
 #, php-format
 msgid "Emails go straight to wp_mail() without interception, so toggling sources here has no effect until you enable the plugin in %1$sSettings%2$s."
 msgstr "Os emails vão diretamente para wp_mail() sem interceptação, portanto, alternar as fontes aqui não tem efeito até que você habilite o plugin em %1$sSettings%2$s."
 
-#: src/admin/pages/smtp-page.php:355
+#: src/admin/pages/smtp-form-renderer.php:235
 msgid "Emails per Cycle"
 msgstr "E-mails por Ciclo"
 
-#: src/admin/faq-renderer.php:276
+#: src/admin/faq-renderer.php:318
 msgid "Emails will ONLY be sent via SMTP accounts configured in this plugin. If no account is available (limits reached or none configured), emails will remain in the retention queue waiting until an SMTP account becomes available. This is useful if you want to guarantee all emails go through your own SMTP servers."
 msgstr "Os e-mails serão enviados SOMENTE por meio das contas SMTP configuradas neste plugin. Se nenhuma conta estiver disponível (limites atingidos ou nenhuma configurada), os e-mails permanecerão na fila de retenção aguardando até que uma conta SMTP fique disponível. Isso é útil se você quiser garantir que todos os e-mails passem por seus próprios servidores SMTP."
 
@@ -541,7 +592,7 @@ msgstr "Os e-mails serão enviados SOMENTE por meio das contas SMTP configuradas
 msgid "Emails will wait in the retention queue until an SMTP account with available limits is found."
 msgstr "Os e-mails ficarão na fila de retenção até que uma conta SMTP com limites disponíveis seja encontrada."
 
-#: src/admin/tables/log-table.php:348
+#: src/admin/tables/log-table.php:382
 msgid "Empty"
 msgstr "Vazia"
 
@@ -549,7 +600,7 @@ msgstr "Vazia"
 msgid "Enable"
 msgstr "Ativar"
 
-#: src/admin/pages/sources-page.php:382
+#: src/admin/pages/sources-list-renderer.php:78
 msgid "Enable group"
 msgstr "Ativar grupo"
 
@@ -557,23 +608,23 @@ msgstr "Ativar grupo"
 msgid "Enable HTML wrapping"
 msgstr "Ativar quebra de linha HTML"
 
-#: src/admin/pages/smtp-page.php:362 src/admin/pages/smtp-page.php:420 src/admin/tables/sources-table.php:185
+#: src/admin/pages/smtp-form-renderer.php:242 src/admin/pages/smtp-list-renderer.php:62 src/admin/tables/sources-table.php:185
 msgid "Enabled"
 msgstr "Habilitado"
 
-#: src/admin/pages/smtp-page.php:247 src/admin/pages/smtp-page.php:251
+#: src/admin/pages/smtp-form-renderer.php:127 src/admin/pages/smtp-form-renderer.php:131
 msgid "Encryption"
 msgstr "Criptografia"
 
-#: src/cron/batch-processor.php:167
+#: src/cron/batch-processor.php:169
 msgid "ERROR"
 msgstr "ERRO"
 
-#: src/admin/tables/log-table.php:150 src/admin/tables/log-table.php:289
+#: src/admin/tables/log-table.php:186 src/admin/tables/log-table.php:323
 msgid "Error"
 msgstr "Erro"
 
-#: src/admin/export-import.php:149
+#: src/admin/export-import.php:154
 msgid "Error uploading file. Please try again."
 msgstr "Erro ao enviar o arquivo. Tente novamente."
 
@@ -581,53 +632,57 @@ msgstr "Erro ao enviar o arquivo. Tente novamente."
 msgid "Error: Could not store attachments"
 msgstr "Erro: Não foi possível armazenar os anexos."
 
-#: src/admin/plugin-page.php:311
+#: src/admin/queue-diagnostics.php:70
 msgid "Errors:"
 msgstr "Erros:"
 
-#: src/admin/pages/sources-page.php:48
+#: src/admin/faq-renderer.php:367
+msgid "Every email passing through the queue is tagged with a stable source key (e.g. wp_core:password_reset, plugin:woocommerce, theme:my-child). The Sources tab lists every source the plugin has seen plus a curated catalog of common ones (15 WordPress-core emails + popular plugins) so the admin can disable a source up-front without waiting for the first send."
+msgstr "Cada e-mail que passa pela fila é marcado com uma chave de origem estável (por exemplo, wp_core:password_reset, plugin:woocommerce, theme:my-child). A aba \"Origens\" lista todas as origens que o plugin viu, além de um catálogo selecionado de origens comuns (15 e-mails do núcleo do WordPress + plugins populares), para que o administrador possa desativar uma origem antecipadamente, sem precisar esperar pelo primeiro envio."
+
+#: src/admin/pages/sources-page.php:45
 msgid "Every email passing through wp_mail() is tagged with a source — a stable identifier (key) plus a human-readable label and group. New sources are auto-detected and registered with delivery enabled. Disabling a source stores any further messages from it with the \"Blocked by source\" status and skips the actual send. System sources marked \"always on\" cannot be disabled (they protect the plugin's own monitoring email)."
 msgstr "Cada e-mail que passa pela função wp_mail() é etiquetado com uma origem — um identificador estável (chave) mais um rótulo legível e um grupo. Novas origens são detectadas automaticamente e registradas com a entrega ativada. Desativar uma origem armazena quaisquer mensagens futuras provenientes dela com o status \"Bloqueado pela origem\" e ignora o envio propriamente dito. Origens do sistema marcadas como \"sempre ativas\" não podem ser desativadas (elas protegem o próprio sistema de monitoramento de e-mail do plugin)."
 
 #. %1$s: opening Settings link tag, %2$s: closing tag
-#: src/admin/pages/sources-page.php:109
+#: src/admin/pages/sources-page.php:81
 #, php-format
 msgid "Every outgoing email is being retained regardless of these per-source toggles. Change the Operation Mode in %1$sSettings%2$s to use the catalog below for actual delivery decisions."
 msgstr "Todos os e-mails enviados estão sendo retidos, independentemente dessas configurações de origem. Altere o Modo de Operação em %1$sSettings%2$s para usar o catálogo abaixo para as decisões de entrega."
 
-#: src/admin/faq-renderer.php:197
+#: src/admin/faq-renderer.php:239
 msgid "Example 1 (add priority to Woocommerce emails):"
 msgstr "Exemplo 1 (adicionar prioridade aos e-mails do WooCommerce):"
 
-#: src/admin/faq-renderer.php:237
+#: src/admin/faq-renderer.php:279
 msgid "Example 1 (instantly send Woocommerce emails):"
 msgstr "Exemplo 1 (envio instantâneo de e-mails do WooCommerce):"
 
-#: src/admin/faq-renderer.php:209
+#: src/admin/faq-renderer.php:251
 msgid "Example 2 (add priority to Contact Form 7 form emails):"
 msgstr "Exemplo 2 (adicionar prioridade aos e-mails do formulário Contact Form 7):"
 
-#: src/admin/faq-renderer.php:249
+#: src/admin/faq-renderer.php:291
 msgid "Example 2 (instantly send Contact Form 7 form emails):"
 msgstr "Exemplo 2 (envio instantâneo de e-mails com formulários do Contact Form 7):"
 
-#: src/admin/faq-renderer.php:213
+#: src/admin/faq-renderer.php:255
 msgid "Example 3 (add priority to WordPress reset password emails):"
 msgstr "Exemplo 3 (adicionar prioridade aos e-mails de redefinição de senha do WordPress):"
 
-#: src/admin/faq-renderer.php:253
+#: src/admin/faq-renderer.php:295
 msgid "Example 3 (instantly send WordPress reset password emails):"
 msgstr "Exemplo 3 (envio instantâneo de e-mails de redefinição de senha do WordPress):"
 
-#: src/admin/plugin-page.php:186
+#: src/admin/plugin-page.php:193
 msgid "Export"
 msgstr "Exportar"
 
-#: src/admin/plugin-page.php:176
+#: src/admin/plugin-page.php:183
 msgid "Export / Import"
 msgstr "Exportar/Importar"
 
-#: src/admin/plugin-page.php:190
+#: src/admin/plugin-page.php:197
 #| msgid "Alert settings"
 msgid "Export Settings"
 msgstr "Configurações de Exportação"
@@ -638,11 +693,11 @@ msgstr "Configurações de Exportação"
 msgid "Failed after %1$d attempt(s) — %2$s"
 msgstr "Falha após %1$d tentativa(s) — %2$s"
 
-#: src/admin/menu.php:48 src/admin/plugin-row-links.php:48 src/admin/plugin-page.php:153
+#: src/admin/menu.php:48 src/admin/plugin-row-links.php:48 src/admin/plugin-page.php:160
 msgid "FAQ"
 msgstr "FAQ"
 
-#: src/admin/tables/log-table.php:172 src/admin/tables/sources-table.php:143
+#: src/admin/tables/log-table.php:208 src/admin/tables/sources-table.php:143
 msgid "Filter"
 msgstr "Filtro"
 
@@ -650,7 +705,7 @@ msgstr "Filtro"
 msgid "Filter log"
 msgstr "Filtrar log"
 
-#: src/admin/tables/log-table.php:337
+#: src/admin/tables/log-table.php:371
 msgid "Filter the log by this source"
 msgstr "Filtre o registro por esta fonte."
 
@@ -670,21 +725,21 @@ msgstr "Rodapé"
 msgid "Footer text"
 msgstr "Texto do rodapé"
 
-#: src/admin/faq-renderer.php:234
+#: src/admin/faq-renderer.php:276
 msgid "For this you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`Instant`</i> to your email. These emails are sent instantly circumventing the mail queue. They still appear in the Total Mail Queue log flagged as `instant`."
 msgstr "Para isso, você pode adicionar o cabeçalho personalizado <i>`X-Mail-Queue-Prio`</i> definido como <i>`Instant`</i> ao seu e-mail. Esses e-mails são enviados instantaneamente, contornando a fila de e-mails. Eles ainda aparecem no registro da fila de e-mails total sinalizados como `instant`."
 
-#: src/admin/tables/log-table.php:381
+#: src/admin/tables/log-table.php:415
 msgid "Force Resend (ignore retry limit)"
 msgstr "Forçar Reenvio (ignorar limite de tentativas)"
 
 #. %s: original error info
-#: src/admin/tables/log-table.php:533
+#: src/admin/tables/log-table.php:567
 #, php-format
 msgid "Force resent — Original: %s"
 msgstr "Forçar reenvio — Original: %s"
 
-#: src/admin/pages/smtp-page.php:414
+#: src/admin/pages/smtp-list-renderer.php:56
 msgid "From"
 msgstr "De"
 
@@ -692,11 +747,11 @@ msgstr "De"
 msgid "From address + name used when no SMTP account is sending the email. Leave blank to keep WordPress's default (\"admin_email\" + \"WordPress\"). When an SMTP account sends the email, that account's From wins."
 msgstr "Endereço de remetente + nome usados ​​quando nenhuma conta SMTP está enviando o e-mail. Deixe em branco para manter o padrão do WordPress (\"admin_email\" + \"WordPress\"). Quando uma conta SMTP envia o e-mail, o remetente dessa conta prevalece."
 
-#: src/admin/pages/smtp-page.php:304
+#: src/admin/pages/smtp-form-renderer.php:184
 msgid "From Email"
 msgstr "Do E-mail"
 
-#: src/admin/pages/smtp-page.php:319
+#: src/admin/pages/smtp-form-renderer.php:199
 msgid "From Name"
 msgstr "De Nome"
 
@@ -704,11 +759,11 @@ msgstr "De Nome"
 msgid "Georgia"
 msgstr "Georgia"
 
-#: src/admin/pages/smtp-page.php:458 src/admin/pages/smtp-page.php:459
+#: src/admin/pages/smtp-list-renderer.php:100 src/admin/pages/smtp-list-renderer.php:101
 msgid "global"
 msgstr "global"
 
-#: src/admin/pages/sources-page.php:185 src/admin/tables/sources-table.php:46
+#: src/admin/pages/sources-edit-renderer.php:85 src/admin/tables/sources-table.php:46
 msgid "Group"
 msgstr "Grupo"
 
@@ -716,7 +771,7 @@ msgstr "Grupo"
 msgid "Header"
 msgstr "Cabeçalho"
 
-#: src/admin/tables/log-table.php:123
+#: src/admin/tables/log-table.php:163
 msgid "Headers"
 msgstr "Cabeçalhos"
 
@@ -724,21 +779,27 @@ msgstr "Cabeçalhos"
 msgid "Hi,"
 msgstr "Oi,"
 
-#: src/admin/tables/log-table.php:292
+#: src/admin/tables/log-table.php:326
 msgid "High"
 msgstr "Alto"
 
-#: src/admin/pages/smtp-page.php:224
+#: src/admin/pages/smtp-form-renderer.php:104
 msgid "Host"
 msgstr "Host"
 
-#: src/admin/pages/smtp-page.php:413
+#: src/admin/pages/smtp-list-renderer.php:55
 msgid "Host:Port"
 msgstr "Host:Port"
 
-#: src/admin/faq-renderer.php:46
+#: src/admin/faq-renderer.php:50
 msgid "How does this Plugin work?"
 msgstr "Como funciona este plugin?"
+
+#. %1$s: opening bold tag, %2$s: closing bold tag
+#: src/admin/faq-renderer.php:108
+#, php-format
+msgid "However, the plugin %1$scan%2$s change how (and even whether) emails are sent if you opt in to one of these features:"
+msgstr "No entanto, o plugin %1$scan%2$s altera a forma como (e até mesmo se) os emails são enviados caso você opte por ativar uma dessas funcionalidades:"
 
 #: src/support/html-preview.php:61
 msgid "HTML Body"
@@ -764,12 +825,12 @@ msgstr "https://github.com/rpgmem"
 msgid "https://github.com/rpgmem/total-mail-queue"
 msgstr "https://github.com/rpgmem/total-mail-queue"
 
-#: src/admin/pages/smtp-page.php:411
+#: src/admin/pages/smtp-list-renderer.php:53
 msgid "ID"
 msgstr "ID"
 
 #. %1$s: wp_mail() link, %2$s: WP Cron label
-#: src/admin/faq-renderer.php:50
+#: src/admin/faq-renderer.php:54
 #, php-format
 #| msgid "If enabled this plugin intercepts the %s function. Instead of sending the mails directly, it stores them in the database and sends them step by step with a delay during the %s."
 msgid "If enabled this plugin intercepts the %1$s function. Instead of sending the mails directly, it stores them in the database and sends them step by step with a delay during the %2$s."
@@ -780,7 +841,7 @@ msgid "if more than"
 msgstr "se mais de"
 
 #. %1$s: email amount threshold, %2$s: alert email address
-#: src/admin/faq-renderer.php:176
+#: src/admin/faq-renderer.php:218
 #, php-format
 msgid "If more than %1$s emails are waiting in the Queue, WordPress will send an alert email to %2$s."
 msgstr "Se houver mais de %1$s e-mails aguardando na fila, o WordPress enviará um e-mail de alerta para %2$s."
@@ -789,62 +850,62 @@ msgstr "Se houver mais de %1$s e-mails aguardando na fila, o WordPress enviará 
 msgid "If sending fails, retry up to"
 msgstr "Se o envio falhar, tente novamente até"
 
-#: src/admin/faq-renderer.php:99
-msgid "If you use SMTP for sending, or an external service like Mailgun, everything will still work as expected."
-msgstr "Se você usa SMTP para envio, ou um serviço externo como o Mailgun, tudo continuará funcionando como esperado."
-
-#. %1$s: W3 Total Cache, %2$s: WP Rocket, %3$s: wp-cron.php link
-#: src/admin/faq-renderer.php:118
-#, php-format
-msgid "If you're using a Caching plugin like %1$s, %2$s or any other caching solution which generates static html-files and serves them to visitors, you'll have to make sure you're calling the %3$s manually every couple of minutes."
-msgstr "Se você estiver usando um plugin de cache como %1$s, %2$s ou qualquer outra solução de cache que gere arquivos HTML estáticos e os sirva aos visitantes, você terá que garantir que está chamando o %3$s manualmente a cada poucos minutos."
-
-#: src/admin/faq-renderer.php:277
+#: src/admin/faq-renderer.php:319
 msgid "Ignores all SMTP accounts configured in this plugin and any captured configurations. Emails are sent using whatever wp_mail() does by default — which could be the PHP mail() function or another SMTP plugin like WP Mail SMTP."
 msgstr "Ignora todas as contas SMTP configuradas neste plugin e quaisquer configurações capturadas. Os e-mails são enviados usando o que a função wp_mail() faz por padrão — que pode ser a função mail() do PHP ou outro plugin SMTP como o WP Mail SMTP."
 
 #. %1$s: wp_mail() link
-#: src/admin/faq-renderer.php:166
+#: src/admin/faq-renderer.php:208
 #, php-format
 #| msgid "Imagine: In case your website is sending spam through %s, the email Queue would fill up very quickly preventing your website from sending so many spam emails at once. This gives you time and avoids a lot of trouble."
 msgid "Imagine: In case your website is sending spam through %1$s, the email Queue would fill up very quickly preventing your website from sending so many spam emails at once. This gives you time and avoids a lot of trouble."
 msgstr "Imagine: caso seu site esteja enviando spam por meio de %1$s, a fila de e-mails se encheria rapidamente, impedindo o envio de tantos e-mails de spam de uma só vez. Isso lhe dá tempo e evita muitos problemas."
 
-#: src/admin/plugin-page.php:196
+#: src/admin/plugin-page.php:203
 msgid "Import"
 msgstr "Importar"
 
-#: src/admin/plugin-page.php:201
+#: src/admin/plugin-page.php:208
 msgid "Import Settings"
 msgstr "Configurações de Importação"
+
+#. %1$s: opening Settings link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:336
+#, php-format
+msgid "In addition to %1$sSettings → Operation Mode%2$s's Disabled and Queue options, the plugin offers Block mode. Every outgoing email is intercepted and stored in the queue, but the cron drainer never sends them — they are retained forever (or until you delete them from the Log tab)."
+msgstr "Além das opções Desativado e Fila em %1$sSettings → Modo de Operação%2$s, o plugin oferece o modo Bloqueio. Todos os e-mails enviados são interceptados e armazenados na fila, mas o coletor de e-mails nunca os envia — eles são retidos indefinidamente (ou até que você os exclua na aba Log)."
+
+#: src/admin/faq-renderer.php:429
+msgid "In Block mode, those cron-originated emails are also retained — block mode is now genuinely all-or-nothing."
+msgstr "No modo de bloqueio, esses e-mails originados pelo cron também são retidos — o modo de bloqueio agora é realmente tudo ou nada."
 
 #: src/cron/alert-sender.php:107
 msgid "In case this is the usual amount of emails, you can adjust the threshold for alerts in the settings of your Total Mail Queue Plugin."
 msgstr "Caso essa seja a quantidade usual de e-mails, você pode ajustar o limite de alertas nas configurações do seu plugin Total Mail Queue."
 
 #. %s: wp-cron.php URL
-#: src/admin/plugin-page.php:390
+#: src/admin/pages/cron-info-page.php:38
 #, php-format
 msgid "In general, this is no problem at all. We just want to remind you to make sure you're running the Cron manually by calling %s every couple of minutes."
 msgstr "Em geral, isso não é problema algum. Apenas queremos lembrar que você deve executar o Cron manualmente, chamando %s a cada poucos minutos."
 
-#: src/admin/tables/log-table.php:119
+#: src/admin/tables/log-table.php:159
 msgid "Info"
 msgstr "Info"
 
-#: src/admin/plugin-page.php:384
+#: src/admin/pages/cron-info-page.php:32
 msgid "Information: Your common WP Cron is disabled"
 msgstr "Informação: Seu WP Cron comum está desativado."
 
-#: src/admin/pages/smtp-page.php:418
+#: src/admin/pages/smtp-list-renderer.php:60
 msgid "Interval"
 msgstr "Intervalo"
 
-#: src/admin/export-import.php:160
+#: src/admin/export-import.php:165
 msgid "Invalid XML file."
 msgstr "Arquivo XML inválido."
 
-#: src/admin/plugin-page.php:385
+#: src/admin/pages/cron-info-page.php:33
 msgid "It looks like you deactivated the WP Cron by <i>define( 'DISABLE_WP_CRON', true )</i>."
 msgstr "Parece que você desativou o WP Cron por <i>define( 'DISABLE_WP_CRON', true )</i>."
 
@@ -856,15 +917,15 @@ msgstr "Parece que você está usando os seguintes plugins que não utilizam a f
 msgid "Keep a maximum of"
 msgstr "Mantenha um máximo de"
 
-#: src/admin/pages/smtp-page.php:214
+#: src/admin/pages/smtp-form-renderer.php:94
 msgid "Keep locked to safely change only limits and other options."
 msgstr "Mantenha bloqueado para alterar com segurança apenas os limites e outras opções."
 
-#: src/admin/pages/sources-page.php:159 src/admin/tables/sources-table.php:44
+#: src/admin/pages/sources-edit-renderer.php:59 src/admin/tables/sources-table.php:44
 msgid "Label"
 msgstr "Rótulo"
 
-#: src/admin/plugin-page.php:305
+#: src/admin/queue-diagnostics.php:64
 msgid "Last cron run:"
 msgstr "Última execução da cron:"
 
@@ -884,11 +945,11 @@ msgstr "Última mensagem de erro: %s"
 msgid "Last seen"
 msgstr "Última vez visto"
 
-#: src/admin/pages/sources-page.php:149
+#: src/admin/pages/sources-edit-renderer.php:49
 msgid "Leave a field empty to fall back to the translated default. The override only affects what you see in the admin — the source_key, detection and enforcement stay identical."
 msgstr "Deixe um campo vazio para usar o valor padrão traduzido. A alteração afeta apenas o que você vê no painel de administração — a chave de origem, a detecção e a aplicação permanecem idênticas."
 
-#: src/admin/pages/smtp-page.php:297
+#: src/admin/pages/smtp-form-renderer.php:177
 msgid "Leave blank to keep the current password."
 msgstr "Deixe em branco para manter a senha atual."
 
@@ -904,11 +965,11 @@ msgstr "Esquerdo"
 msgid "Link color"
 msgstr "Cor do link"
 
-#: src/admin/tables/log-table.php:354
+#: src/admin/tables/log-table.php:388
 msgid "Loading..."
 msgstr "Carregando..."
 
-#: src/admin/menu.php:40 src/admin/plugin-row-links.php:45 src/admin/settings-api.php:59 src/admin/plugin-page.php:144
+#: src/admin/menu.php:40 src/admin/plugin-row-links.php:45 src/admin/settings-api.php:59 src/admin/plugin-page.php:151
 msgid "Log"
 msgstr "Registro"
 
@@ -930,7 +991,7 @@ msgstr "Largura máxima do logotipo (px)"
 msgid "Looking for the From email / From name fields? They moved to %1$sSettings → Default Sender%2$s in v2.6.0 to match the precedence model with SMTP accounts."
 msgstr "Procurando pelos campos de e-mail do remetente / nome do remetente? Eles foram movidos para %1$sSettings → Remetente Padrão%2$s na versão 2.6.0 para corresponder ao modelo de precedência das contas SMTP."
 
-#: src/admin/pages/smtp-page.php:329
+#: src/admin/pages/smtp-form-renderer.php:209
 msgid "Lower number = higher priority."
 msgstr "Número menor = prioridade maior."
 
@@ -944,7 +1005,7 @@ msgstr "As mensagens são enviadas diretamente para wp_mail() sem serem enfileir
 msgid "Max width (px)"
 msgstr "Largura máxima (px)"
 
-#: src/admin/pages/smtp-page.php:357
+#: src/admin/pages/smtp-form-renderer.php:237
 msgid "Maximum emails to send per cycle for this account. 0 = use global limit."
 msgstr "Número máximo de e-mails a enviar por ciclo para esta conta. 0 = usar o limite global."
 
@@ -960,7 +1021,7 @@ msgstr "Tempo máximo que um lote cron pode manter o bloqueio de processamento. 
 msgid "Maximum time to wait for a response from the SMTP server per email. If the server does not respond within this time, the email is marked as failed and the batch continues to the next email. Recommended: %s seconds. Minimum: 5 seconds."
 msgstr "Tempo máximo de espera por uma resposta do servidor SMTP por e-mail. Se o servidor não responder dentro desse tempo, o e-mail será marcado como falho e o lote continuará para o próximo e-mail. Recomendado: %s segundos. Mínimo: 5 segundos."
 
-#: src/admin/tables/log-table.php:122
+#: src/admin/tables/log-table.php:162
 msgid "Message"
 msgstr "Mensagem"
 
@@ -968,11 +1029,11 @@ msgstr "Mensagem"
 msgid "Message not found"
 msgstr "Mensagem não encontrada"
 
-#: src/admin/faq-renderer.php:235
+#: src/admin/faq-renderer.php:277
 msgid "Mind that this is a potential security risk and should be considered carefully. Please use only as an exception."
 msgstr "Tenha em mente que isso representa um risco potencial de segurança e deve ser considerado com cautela. Utilize apenas em casos excepcionais."
 
-#: src/admin/pages/smtp-page.php:350
+#: src/admin/pages/smtp-form-renderer.php:230
 msgid "Minimum minutes between sending cycles for this account. 0 = use global interval."
 msgstr "Minutos mínimos entre ciclos de envio para esta conta. 0 = usar intervalo global."
 
@@ -984,15 +1045,15 @@ msgstr "minuto(s)"
 msgid "Monospace"
 msgstr "Monoespaçado"
 
-#: src/admin/pages/smtp-page.php:341 src/admin/pages/smtp-page.php:417
+#: src/admin/pages/smtp-form-renderer.php:221 src/admin/pages/smtp-list-renderer.php:59
 msgid "Monthly Limit"
 msgstr "Limite Mensal"
 
-#: src/admin/plugin-page.php:132 src/admin/notices.php:125
+#: src/admin/plugin-page.php:139 src/admin/notices.php:125
 msgid "More information"
 msgstr "Mais informações"
 
-#: src/admin/faq-renderer.php:149
+#: src/admin/faq-renderer.php:191
 msgid "My form builder supports attachments. What about them?"
 msgstr "Meu construtor de formulários suporta anexos. E quanto a eles?"
 
@@ -1000,7 +1061,7 @@ msgstr "Meu construtor de formulários suporta anexos. E quanto a eles?"
 msgid "My Site"
 msgstr "Meu Site"
 
-#: src/admin/pages/smtp-page.php:205 src/admin/pages/smtp-page.php:412
+#: src/admin/pages/smtp-form-renderer.php:85 src/admin/pages/smtp-list-renderer.php:54
 msgid "Name"
 msgstr "Nome"
 
@@ -1017,16 +1078,16 @@ msgid "New user — welcome"
 msgstr "Novo usuário — seja bem-vindo(a)"
 
 #. %1$s: human-readable time diff, %2$s: scheduled time
-#: src/admin/plugin-page.php:295
+#: src/admin/queue-diagnostics.php:54
 #, php-format
 msgid "Next sending will be triggered in %1$s at %2$s."
 msgstr "O próximo envio será acionado em %1$s às %2$s."
 
-#: src/admin/pages/smtp-page.php:476
+#: src/admin/pages/smtp-list-renderer.php:118
 msgid "No"
 msgstr "Não"
 
-#: src/admin/faq-renderer.php:182
+#: src/admin/faq-renderer.php:224
 msgid "No alerts will be sent."
 msgstr "Nenhum alerta será enviado."
 
@@ -1036,21 +1097,15 @@ msgstr "Nenhum alerta será enviado."
 msgid "No mail leaves the server right now. You can still edit the template, but changes have no visible effect until the Operation Mode is set to Queue in %1$sSettings%2$s."
 msgstr "Nenhuma mensagem está saindo do servidor neste momento. Você ainda pode editar o modelo, mas as alterações não terão efeito visível até que o Modo de Operação seja definido como Fila em %1$sSettings%2$s."
 
-#: src/admin/pages/smtp-page.php:403
+#: src/admin/pages/smtp-list-renderer.php:45
 msgid "No SMTP accounts configured yet."
 msgstr "Nenhuma conta SMTP configurada ainda."
 
-#: src/admin/pages/sources-page.php:180
+#: src/admin/pages/sources-edit-renderer.php:80
 msgid "No translated default available — fill in a label below."
 msgstr "Nenhuma tradução padrão disponível — preencha um rótulo abaixo."
 
-#. %1$s: opening bold tag, %2$s: closing bold tag, %3$s: wp_mail() link
-#: src/admin/faq-renderer.php:93
-#, php-format
-msgid "No, don't worry. This plugin only affects %1$sWHEN%2$s emails are sent, not how. It delays the sending (by the Queue), nonetheless all emails are sent through the standard %3$s function."
-msgstr "Não, não se preocupe. Este plugin afeta apenas %1$sQUANDO%2$s os e-mails são enviados, não como. Ele atrasa o envio (pela fila), mas todos os e-mails são enviados pela função padrão %3$s."
-
-#: src/admin/pages/smtp-page.php:254
+#: src/admin/pages/smtp-form-renderer.php:134
 msgid "None"
 msgstr "Nenhum"
 
@@ -1061,10 +1116,6 @@ msgstr "noreply@example.com"
 #: src/admin/settings-api.php:57
 msgid "Operation Mode"
 msgstr "Modo de Operação"
-
-#: src/admin/faq-renderer.php:124
-msgid "Otherwise your normal WP Cron wouldn't be called as often as it should be and scheduled messages would be sent with big delays."
-msgstr "Caso contrário, seu WP Cron normal não seria chamado com a frequência necessária e as mensagens agendadas seriam enviadas com grandes atrasos."
 
 #: src/admin/pages/templates-page.php:284
 msgid "Outer background color"
@@ -1078,7 +1129,7 @@ msgstr "Espaçamento externo (px)"
 msgid "Padding (px)"
 msgstr "Preenchimento (px)"
 
-#: src/admin/pages/smtp-page.php:290
+#: src/admin/pages/smtp-form-renderer.php:170
 msgid "Password"
 msgstr "Senha"
 
@@ -1106,9 +1157,13 @@ msgstr "Redefinição de senha"
 msgid "Password reset (user)"
 msgstr "Redefinição de senha (usuário)"
 
-#: src/admin/pages/smtp-page.php:419
+#: src/admin/pages/smtp-list-renderer.php:61
 msgid "Per Cycle"
 msgstr "Por Ciclo"
+
+#: src/admin/faq-renderer.php:416
+msgid "Per-template \"Skip template wrapper\" checkbox bypasses the HTML envelope when the override is plain text. \"Send preview\" sends the saved template (with realistic fake values) to the address you choose so you can preview without triggering a real WP event."
+msgstr "A opção \"Ignorar estrutura do modelo\" por modelo ignora o envelope HTML quando a substituição é um texto simples. \"Enviar pré-visualização\" envia o modelo salvo (com valores fictícios realistas) para o endereço que você escolher, permitindo que você visualize o modelo sem acionar um evento real do WordPress."
 
 #: src/templates/test-email-sender.php:52 src/smtp/connection-tester.php:53
 msgid "Permission denied."
@@ -1134,11 +1189,11 @@ msgstr "Por favor, entre em contato com o administrador. Parece que o WordPress 
 msgid "Please enter a valid recipient email."
 msgstr "Por favor, insira um endereço de e-mail válido para o destinatário."
 
-#: src/admin/plugin-page.php:125 src/admin/notices.php:110
+#: src/admin/plugin-page.php:132 src/admin/notices.php:110
 msgid "Please note:"
 msgstr "Por favor, observe:"
 
-#: src/admin/faq-renderer.php:185
+#: src/admin/faq-renderer.php:227
 msgid "Please note: This plugin will only send one alert every six hours."
 msgstr "Atenção: Este plugin enviará apenas um alerta a cada seis horas."
 
@@ -1146,13 +1201,17 @@ msgstr "Atenção: Este plugin enviará apenas um alerta a cada seis horas."
 msgid "Please take a close look at the email queue, because it contains more messages than the specified limit."
 msgstr "Por favor, verifique atentamente a fila de e-mails, pois ela contém mais mensagens do que o limite especificado."
 
-#: src/admin/faq-renderer.php:276
+#: src/admin/faq-renderer.php:318
 msgid "Plugin SMTP only"
 msgstr "Plugin SMTP apenas"
 
 #: src/admin/settings-api.php:219
 msgid "Plugin SMTP only — Only send via SMTP accounts configured in this plugin (hold emails if none available)"
 msgstr "Plugin SMTP apenas — Envie e-mails somente por meio de contas SMTP configuradas neste plugin (retenha os e-mails caso nenhum esteja disponível)."
+
+#: src/admin/faq-renderer.php:417
+msgid "Plugin-source emails (WooCommerce, Contact Form 7, etc.) keep going through their plugin's own template editor and are not editable here."
+msgstr "Os e-mails provenientes de plugins (WooCommerce, Contact Form 7, etc.) continuam sendo processados ​​pelo editor de modelos do próprio plugin e não podem ser editados aqui."
 
 #: src/sources/known-sources.php:121
 msgid "Plugin/theme auto-update report"
@@ -1162,7 +1221,11 @@ msgstr "Relatório de atualização automática de plugins/temas"
 msgid "Plugins"
 msgstr "Plugins"
 
-#: src/admin/pages/smtp-page.php:235 src/admin/pages/smtp-page.php:239
+#: src/admin/faq-renderer.php:388
+msgid "Plugins that already produce a full HTML email (DOCTYPE detected at the top of the body) are passed through untouched, so Elementor / MemberPress / your own builders are safe."
+msgstr "Plugins que já geram um e-mail HTML completo (com o DOCTYPE detectado no início do corpo) são repassados ​​sem alterações, portanto, Elementor, MemberPress e seus próprios construtores de e-mail estão seguros."
+
+#: src/admin/pages/smtp-form-renderer.php:115 src/admin/pages/smtp-form-renderer.php:119
 msgid "Port"
 msgstr "Porta"
 
@@ -1176,15 +1239,15 @@ msgstr "Linha \"Distribuído por\""
 msgid "Preview of %1$s queued / sent to %2$s."
 msgstr "Pré-visualização de %1$s enfileirada/enviada para %2$s."
 
-#: src/admin/pages/smtp-page.php:327 src/admin/pages/smtp-page.php:415
+#: src/admin/pages/smtp-form-renderer.php:207 src/admin/pages/smtp-list-renderer.php:57
 msgid "Priority"
 msgstr "Prioridade"
 
-#: src/admin/settings-api.php:58 src/admin/tables/log-table.php:291
+#: src/admin/settings-api.php:58 src/admin/tables/log-table.php:325
 msgid "Queue"
 msgstr "Fila"
 
-#: src/admin/faq-renderer.php:170
+#: src/admin/faq-renderer.php:212
 msgid "Queue Alerts warn you, if the Queue is longer than usual. You decide at which point you want to be alerted. So you get the chance to have a look if there might be something wrong on the website."
 msgstr "Os alertas de fila avisam quando a fila está mais longa que o normal. Você decide quando quer ser alertado, tendo assim a oportunidade de verificar se há algum problema no site."
 
@@ -1192,11 +1255,11 @@ msgstr "Os alertas de fila avisam quando a fila está mais longa que o normal. V
 msgid "Queue — Retain emails and send via queue"
 msgstr "Fila — Reter e-mails e enviá-los por meio de fila."
 
-#: src/admin/plugin-page.php:308
+#: src/admin/queue-diagnostics.php:67
 msgid "Queue:"
 msgstr "Fila:"
 
-#: src/admin/tables/log-table.php:120
+#: src/admin/tables/log-table.php:160
 msgid "Recipient"
 msgstr "Recebedor"
 
@@ -1204,15 +1267,15 @@ msgstr "Recebedor"
 msgid "Recovery mode"
 msgstr "Modo de recuperação"
 
-#: src/admin/pages/sources-page.php:353
+#: src/admin/pages/sources-edit-renderer.php:254
 msgid "Request failed."
 msgstr "A solicitação falhou."
 
-#: src/admin/tables/log-table.php:380
+#: src/admin/tables/log-table.php:414
 msgid "Resend"
 msgstr "Reenviar"
 
-#: src/admin/pages/sources-page.php:304 src/admin/tables/sources-table.php:287
+#: src/admin/pages/sources-edit-renderer.php:205 src/admin/tables/sources-table.php:287
 msgid "Reset"
 msgstr "Reiniciar"
 
@@ -1220,11 +1283,11 @@ msgstr "Reiniciar"
 msgid "Reset all template settings to defaults? This cannot be undone."
 msgstr "Restaurar todas as configurações do modelo para os padrões? Esta ação não pode ser desfeita."
 
-#: src/admin/pages/smtp-page.php:396
+#: src/admin/pages/smtp-list-renderer.php:38
 msgid "Reset Counters"
 msgstr "Reiniciar Contadores"
 
-#: src/admin/pages/sources-page.php:305
+#: src/admin/pages/sources-edit-renderer.php:206
 msgid "Reset subject and body overrides for this template? The WP default will be used again."
 msgstr "Redefinir as alterações de assunto e corpo para este modelo? O padrão do WordPress será usado novamente."
 
@@ -1232,15 +1295,15 @@ msgstr "Redefinir as alterações de assunto e corpo para este modelo? O padrão
 msgid "Reset to Defaults"
 msgstr "Restaurar Padrões"
 
-#: src/admin/pages/sources-page.php:305
+#: src/admin/pages/sources-edit-renderer.php:206
 msgid "Reset to WP default"
 msgstr "Restaurar configurações padrão do WordPress"
 
-#: src/admin/plugin-page.php:306
+#: src/admin/queue-diagnostics.php:65
 msgid "Result:"
 msgstr "Resultado:"
 
-#: src/admin/menu.php:41 src/admin/plugin-row-links.php:46 src/admin/plugin-page.php:145
+#: src/admin/menu.php:41 src/admin/plugin-row-links.php:46 src/admin/plugin-page.php:152
 msgid "Retention"
 msgstr "Retenção"
 
@@ -1254,17 +1317,17 @@ msgstr "Tentar novamente %1$d/%2$d — %3$s"
 msgid "Right"
 msgstr "Direta"
 
-#: src/admin/pages/smtp-page.php:321
+#: src/admin/pages/smtp-form-renderer.php:201
 msgid "Same precedence as From Email above — wins over the Default Sender when this account is sending."
 msgstr "A mesma precedência do e-mail \"De\" acima — prevalece sobre o remetente padrão quando esta conta está enviando."
 
 #. %s: WordPress Cron link
-#: src/admin/faq-renderer.php:137
+#: src/admin/faq-renderer.php:179
 #, php-format
 msgid "Same situation here. Please make sure you're calling the %s by an external service or your webhoster every couple of minutes."
 msgstr "Aqui está a mesma situação. Certifique-se de que está a chamar o %s através de um serviço externo ou do seu fornecedor de alojamento web a cada poucos minutos."
 
-#: src/admin/pages/sources-page.php:222
+#: src/admin/pages/sources-edit-renderer.php:122
 msgid "Save"
 msgstr "Salvar"
 
@@ -1272,7 +1335,7 @@ msgstr "Salvar"
 msgid "Save Changes"
 msgstr "Salvar Alterações"
 
-#: src/admin/pages/smtp-page.php:368
+#: src/admin/pages/smtp-form-renderer.php:248
 msgid "Save SMTP Account"
 msgstr "Salvar conta SMTP"
 
@@ -1284,7 +1347,7 @@ msgstr "segundo(s)"
 msgid "seconds"
 msgstr "segundos"
 
-#: src/admin/export-import.php:66 src/admin/plugin-page.php:102 src/admin/pages/smtp-page.php:67 src/admin/pages/smtp-page.php:122 src/admin/pages/smtp-page.php:136 src/admin/pages/sources-page.php:403 src/admin/pages/sources-page.php:411 src/admin/pages/sources-page.php:425 src/admin/pages/sources-page.php:464 src/admin/pages/sources-page.php:491 src/admin/pages/templates-page.php:97 src/admin/pages/templates-page.php:127 src/admin/tables/log-table.php:395
+#: src/admin/export-import.php:66 src/admin/plugin-page.php:109 src/admin/pages/smtp-actions.php:76 src/admin/pages/smtp-actions.php:134 src/admin/pages/smtp-actions.php:150 src/admin/pages/templates-page.php:97 src/admin/pages/templates-page.php:127 src/admin/pages/sources-actions.php:55 src/admin/pages/sources-actions.php:63 src/admin/pages/sources-actions.php:83 src/admin/pages/sources-actions.php:132 src/admin/pages/sources-actions.php:164 src/admin/tables/log-table.php:429
 msgid "Security check failed!"
 msgstr "A verificação de segurança falhou!"
 
@@ -1292,7 +1355,7 @@ msgstr "A verificação de segurança falhou!"
 msgid "Security check failed. Please reload the page and try again."
 msgstr "A verificação de segurança falhou. Recarregue a página e tente novamente."
 
-#: src/admin/tables/log-table.php:114 src/admin/tables/sources-table.php:42
+#: src/admin/tables/log-table.php:154 src/admin/tables/sources-table.php:42
 msgid "Select all"
 msgstr "Selecionar tudo"
 
@@ -1304,7 +1367,7 @@ msgstr "Enviar um e-mail de teste"
 msgid "Send alert to"
 msgstr "Enviar alerta para"
 
-#: src/admin/pages/smtp-page.php:348
+#: src/admin/pages/smtp-form-renderer.php:228
 msgid "Send Interval (minutes)"
 msgstr "Intervalo de Envio (minutos)"
 
@@ -1316,15 +1379,15 @@ msgstr "Enviar no máximo"
 msgid "Send Method"
 msgstr "Método de Envio"
 
-#: src/admin/plugin-page.php:310
+#: src/admin/queue-diagnostics.php:69
 msgid "Send method:"
 msgstr "Método de envio:"
 
-#: src/admin/pages/sources-page.php:318
+#: src/admin/pages/sources-edit-renderer.php:219
 msgid "Send preview"
 msgstr "Enviar pré-visualização"
 
-#: src/admin/pages/sources-page.php:312
+#: src/admin/pages/sources-edit-renderer.php:213
 msgid "Send preview test"
 msgstr "Enviar pré-visualização teste"
 
@@ -1332,7 +1395,7 @@ msgstr "Enviar pré-visualização teste"
 msgid "Send test email"
 msgstr "Enviar e-mail de teste"
 
-#: src/admin/pages/sources-page.php:295
+#: src/admin/pages/sources-edit-renderer.php:196
 msgid "Send this email raw (bypass the global HTML envelope from the Templates tab)."
 msgstr "Envie este e-mail em formato bruto (ignore o envelope HTML global da guia Modelos)."
 
@@ -1344,11 +1407,11 @@ msgstr "Enviando…"
 msgid "Sends a sample message to the address below using the current template settings (must be saved first)."
 msgstr "Envia uma mensagem de exemplo para o endereço abaixo usando as configurações de modelo atuais (que devem ser salvas primeiro)."
 
-#: src/admin/pages/sources-page.php:321
+#: src/admin/pages/sources-edit-renderer.php:222
 msgid "Sends the current saved template (override OR WP default) to the address above. Save changes first if you want to preview unsaved edits."
 msgstr "Envia o modelo salvo atual (substituir ou o padrão do WordPress) para o endereço acima. Salve as alterações primeiro se quiser visualizar as edições não salvas."
 
-#: src/admin/tables/log-table.php:149 src/admin/tables/log-table.php:288
+#: src/admin/tables/log-table.php:185 src/admin/tables/log-table.php:322
 msgid "Sent"
 msgstr "Enviado"
 
@@ -1358,7 +1421,7 @@ msgstr "Enviado"
 msgid "Sent via %s"
 msgstr "Enviado via %s"
 
-#: src/admin/plugin-page.php:311
+#: src/admin/queue-diagnostics.php:70
 msgid "Sent:"
 msgstr "Enviado:"
 
@@ -1366,11 +1429,11 @@ msgstr "Enviado:"
 msgid "Serif"
 msgstr "Serif"
 
-#: src/admin/menu.php:39 src/admin/plugin-row-links.php:44 src/admin/plugin-page.php:143
+#: src/admin/menu.php:39 src/admin/plugin-row-links.php:44 src/admin/plugin-page.php:150
 msgid "Settings"
 msgstr "Configurações"
 
-#: src/admin/export-import.php:208
+#: src/admin/export-import.php:213
 msgid "Settings and SMTP accounts imported successfully."
 msgstr "Configurações e contas SMTP importadas com sucesso."
 
@@ -1378,35 +1441,35 @@ msgstr "Configurações e contas SMTP importadas com sucesso."
 msgid "Show \"Sent via Total Mail Queue\" beneath the footer text."
 msgstr "Exibir \"Enviado via Total Mail Queue\" abaixo do texto do rodapé."
 
-#: src/admin/pages/sources-page.php:286
+#: src/admin/pages/sources-edit-renderer.php:187
 msgid "Show WP default body"
 msgstr "Exibir corpo padrão do WP"
 
-#: src/admin/pages/sources-page.php:293
+#: src/admin/pages/sources-edit-renderer.php:194
 msgid "Skip template wrapper"
 msgstr "Ignorar o contêiner do modelo"
 
-#: src/admin/plugin-row-links.php:47 src/admin/tables/log-table.php:118
+#: src/admin/plugin-row-links.php:47 src/admin/tables/log-table.php:158
 msgid "SMTP"
 msgstr "SMTP"
 
-#: src/admin/pages/smtp-page.php:110
+#: src/admin/pages/smtp-actions.php:121
 msgid "SMTP account added."
 msgstr "Conta SMTP adicionada."
 
-#: src/admin/pages/smtp-page.php:126
+#: src/admin/pages/smtp-actions.php:138
 msgid "SMTP account deleted."
 msgstr "Conta SMTP excluída."
 
-#: src/admin/pages/smtp-page.php:103
+#: src/admin/pages/smtp-actions.php:112
 msgid "SMTP account updated."
 msgstr "Conta SMTP atualizada."
 
-#: src/admin/menu.php:42 src/admin/plugin-page.php:146 src/admin/pages/smtp-page.php:389
+#: src/admin/menu.php:42 src/admin/plugin-page.php:153 src/admin/pages/smtp-list-renderer.php:31
 msgid "SMTP Accounts"
 msgstr "Contas SMTP"
 
-#: src/admin/plugin-page.php:309
+#: src/admin/queue-diagnostics.php:68
 msgid "SMTP accounts:"
 msgstr "Contas SMTP:"
 
@@ -1418,13 +1481,19 @@ msgstr "É necessário um servidor SMTP."
 msgid "SMTP Timeout"
 msgstr "Tempo Limite SMTP"
 
+#. %1$s: opening i, %2$s: closing i, %3$s: wp-cron.php link
+#: src/admin/faq-renderer.php:161
+#, php-format
+msgid "Some caching plugins (%1$sW3 Total Cache%2$s among them) ship a built-in WP-Cron trigger — check your caching plugin's docs and turn it on if available. Otherwise, set up an external cron job that hits %3$s every couple of minutes."
+msgstr "Alguns plugins de cache (incluindo o %1$sW3Total Cache%2$s) incluem um gatilho WP-Cron integrado — verifique a documentação do seu plugin de cache e ative-o, se disponível. Caso contrário, configure uma tarefa cron externa que execute %3$s o comando a cada poucos minutos."
+
 #. %s: recipient email address
-#: src/admin/tables/log-table.php:567
+#: src/admin/tables/log-table.php:601
 #, php-format
 msgid "Sorry, your email to %s can't be sent again."
 msgstr "Desculpe, seu e-mail para %s não poderá ser reenviado."
 
-#: src/admin/tables/log-table.php:117
+#: src/admin/tables/log-table.php:157
 msgid "Source"
 msgstr "Fonte"
 
@@ -1432,38 +1501,38 @@ msgstr "Fonte"
 msgid "Source key"
 msgstr "Chave de fonte"
 
-#: src/admin/pages/sources-page.php:135
+#: src/admin/pages/sources-edit-renderer.php:35
 msgid "Source not found."
 msgstr "Fonte não encontrada."
 
-#: src/admin/pages/sources-page.php:406 src/admin/pages/sources-page.php:441
+#: src/admin/pages/sources-actions.php:58 src/admin/pages/sources-actions.php:99
 msgid "Source updated."
 msgstr "Fonte atualizada."
 
 #. %s: source key
-#: src/admin/tables/log-table.php:178
+#: src/admin/tables/log-table.php:214
 #, php-format
 msgid "Source: %s"
 msgstr "Fonte: %s"
 
-#: src/admin/menu.php:43 src/admin/plugin-page.php:147 src/admin/pages/sources-page.php:43
+#: src/admin/menu.php:43 src/admin/plugin-page.php:154 src/admin/pages/sources-page.php:40
 msgid "Sources"
 msgstr "Fontes"
 
-#: src/admin/pages/smtp-page.php:256
+#: src/admin/pages/smtp-form-renderer.php:136
 msgid "SSL"
 msgstr "SSL"
 
-#: src/admin/tables/log-table.php:116 src/admin/tables/sources-table.php:43
+#: src/admin/tables/log-table.php:156 src/admin/tables/sources-table.php:43
 msgid "Status"
 msgstr "Status"
 
-#: src/admin/pages/sources-page.php:267 src/admin/tables/log-table.php:121
+#: src/admin/pages/sources-edit-renderer.php:168 src/admin/tables/log-table.php:161
 msgid "Subject"
 msgstr "Assunto"
 
 #. %s: admin email address
-#: src/admin/faq-renderer.php:294
+#: src/admin/faq-renderer.php:446
 #, php-format
 msgid "Sure! Put a Test Email for %s into the Queue"
 msgstr "Claro! Coloque um e-mail de teste para %s na fila."
@@ -1476,7 +1545,7 @@ msgstr "sistema (sempre ligado)"
 msgid "System (default)"
 msgstr "Sistema (padrão)"
 
-#: src/admin/pages/sources-page.php:188
+#: src/admin/pages/sources-edit-renderer.php:88
 msgid "System sources keep their built-in group; the group cannot be overridden."
 msgstr "As fontes do sistema mantêm seu grupo interno; o grupo não pode ser alterado."
 
@@ -1484,11 +1553,11 @@ msgstr "As fontes do sistema mantêm seu grupo interno; o grupo não pode ser al
 msgid "Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual."
 msgstr "Assuma o controle e melhore a segurança do wp_mail(). Coloque em fila e registre os e-mails enviados e receba alertas caso seu site tente enviar mais e-mails do que o normal."
 
-#: src/admin/pages/sources-page.php:247
+#: src/admin/pages/sources-edit-renderer.php:148
 msgid "Template override (subject + body)"
 msgstr "Substituição de modelo (assunto + corpo)"
 
-#: src/admin/pages/sources-page.php:451
+#: src/admin/pages/sources-actions.php:114
 msgid "Template overrides reset to WP default."
 msgstr "As alterações de modelo são redefinidas para o padrão do WordPress."
 
@@ -1500,11 +1569,11 @@ msgstr "As configurações do modelo foram redefinidas para os valores padrão."
 msgid "Template settings saved."
 msgstr "Configurações do modelo salvas."
 
-#: src/admin/menu.php:44 src/admin/plugin-page.php:148
+#: src/admin/menu.php:44 src/admin/plugin-page.php:155
 msgid "Templates"
 msgstr "Modelos"
 
-#: src/admin/assets.php:75 src/admin/pages/smtp-page.php:369
+#: src/admin/assets.php:75 src/admin/pages/smtp-form-renderer.php:249
 msgid "Test Connection"
 msgstr "Testar Conexão"
 
@@ -1523,7 +1592,7 @@ msgid "Testing..."
 msgstr "Testando..."
 
 #. %s: timestamp
-#: src/admin/plugin-page.php:251
+#: src/admin/plugin-page.php:258
 #, php-format
 msgid "Testmail #%s"
 msgstr "E-mail teste #%s"
@@ -1536,17 +1605,23 @@ msgstr "Texto"
 msgid "Text color"
 msgstr "Cor do texto"
 
-#: src/admin/tables/log-table.php:568
+#: src/admin/tables/log-table.php:602
 msgid "The email used to have attachments, which are not available anymore. Only emails without attachments can be resent."
 msgstr "O e-mail costumava conter anexos, que não estão mais disponíveis. Somente e-mails sem anexos podem ser reenviados."
 
 #. %1$s: filter name, %2$s: list of conflicting callbacks
-#: src/admin/plugin-page.php:370
+#: src/admin/queue-diagnostics.php:129
 #, php-format
 msgid "The following filter(s) on %1$s may interfere with email sending: %2$s. Consider deactivating conflicting email plugins when using SMTP accounts from Total Mail Queue."
 msgstr "Os seguintes filtros em %1$s podem interferir no envio de e-mails: %2$s. Considere desativar os plugins de e-mail conflitantes ao usar contas SMTP do Total Mail Queue."
 
-#: src/admin/faq-renderer.php:71
+#. %1$s: opening Settings link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:392
+#, php-format
+msgid "The From address used when no SMTP account is sending the email is configured in %1$sSettings → Default Sender%2$s. Precedence: SMTP account → Default Sender → WordPress core (admin_email + \"WordPress\")."
+msgstr "O endereço \"De\" usado quando nenhuma conta SMTP está enviando o e-mail é configurado em %1$sSettings → Remetente Padrão%2$s. Precedência: Conta SMTP → Remetente Padrão → Núcleo do WordPress (admin_email + \"WordPress\")."
+
+#: src/admin/faq-renderer.php:75
 msgid "The plugin has no impact at the moment, no Mails inside the Queue are going to be sent."
 msgstr "O plugin não tem impacto neste momento, nenhum e-mail na fila será enviado."
 
@@ -1554,32 +1629,36 @@ msgstr "O plugin não tem impacto neste momento, nenhum e-mail na fila será env
 msgid "The plugin is currently disabled and has no effect."
 msgstr "O plugin está atualmente desativado e não tem efeito."
 
-#: src/admin/pages/sources-page.php:117 src/admin/pages/templates-page.php:160
+#: src/admin/pages/sources-page.php:89 src/admin/pages/templates-page.php:160
 msgid "The plugin is currently disabled."
 msgstr "O plugin está atualmente desativado."
 
 #. %1$s: opening link tag, %2$s: closing link tag
-#: src/admin/plugin-page.php:322
+#: src/admin/queue-diagnostics.php:81
 #, php-format
 #| msgid "The plugin is currently disabled. Enable it in the %sSettings%s."
 msgid "The plugin is currently disabled. Enable it in the %1$sSettings%2$s."
 msgstr "O plugin está atualmente desativado. Ative-o em %1$sSettings%2$s."
 
-#: src/admin/faq-renderer.php:71
+#: src/admin/faq-renderer.php:75
 msgid "The plugin is disabled"
 msgstr "O plugin está desativado"
 
-#: src/admin/faq-renderer.php:59
+#: src/admin/faq-renderer.php:63
 msgid "The plugin is enabled"
 msgstr "O plugin está ativado."
 
+#: src/admin/faq-renderer.php:430
+msgid "The plugin's own queue drainer is the one cron caller exempted from interception (otherwise it would re-queue every row it sends)."
+msgstr "O próprio mecanismo de esvaziamento de fila do plugin é o único que o chamador cron isentou de interceptação (caso contrário, ele reenfileiraria cada linha enviada)."
+
 #. %s: human-readable time diff
-#: src/admin/plugin-page.php:426
+#: src/admin/pages/cron-info-page.php:74
 #, php-format
 msgid "The Queue hasn't been able to be executed since %s."
 msgstr "A fila não pôde ser executada desde %s."
 
-#: src/admin/faq-renderer.php:273
+#: src/admin/faq-renderer.php:315
 msgid "The Send Method setting controls how emails from the retention queue are delivered. There are three options:"
 msgstr "A configuração \"Método de Envio\" controla como os e-mails da fila de retenção são entregues. Existem três opções:"
 
@@ -1601,11 +1680,11 @@ msgstr "Temas"
 msgid "There was an error loading the message."
 msgstr "Ocorreu um erro ao carregar a mensagem."
 
-#: src/admin/export-import.php:164
+#: src/admin/export-import.php:169
 msgid "This file is not a valid Total Mail Queue export."
 msgstr "Este arquivo não é uma exportação válida do Total Mail Queue."
 
-#: src/admin/faq-renderer.php:162
+#: src/admin/faq-renderer.php:204
 msgid "This is a simple and effective way to improve the security of your WordPress installation."
 msgstr "Esta é uma forma simples e eficaz de melhorar a segurança da sua instalação do WordPress."
 
@@ -1626,11 +1705,11 @@ msgstr "Esta é uma mensagem importante do seu plugin %1$sTotal Mail Queue%2$s. 
 msgid "this is an important message from your WordPress website %s."
 msgstr "esta é uma mensagem importante do seu site WordPress %s."
 
-#: src/admin/plugin-page.php:252
+#: src/admin/plugin-page.php:259
 msgid "This is just a test email sent by the Total Mail Queue plugin."
 msgstr "Este é apenas um e-mail de teste enviado pelo plugin Total Mail Queue."
 
-#: src/admin/faq-renderer.php:275
+#: src/admin/faq-renderer.php:317
 msgid "This is the default. The plugin will first try to use an SMTP account configured in the SMTP Accounts tab. If no SMTP account is available (none configured or all have reached their limits), it will try to replay any captured SMTP configuration from other plugins. If neither is available, it falls back to the standard WordPress wp_mail() function."
 msgstr "Esta é a configuração padrão. O plugin primeiro tentará usar uma conta SMTP configurada na aba Contas SMTP. Se nenhuma conta SMTP estiver disponível (nenhuma configurada ou todas atingiram seus limites), ele tentará reproduzir qualquer configuração SMTP capturada de outros plugins. Se nenhuma estiver disponível, ele recorrerá à função padrão do WordPress, wp_mail()."
 
@@ -1646,11 +1725,11 @@ msgstr "Este plugin não é compatível quando usado em conjunto com plugins que
 msgid "This source is hardcoded as always-enabled and cannot be disabled."
 msgstr "Esta fonte está configurada para estar sempre ativada e não pode ser desativada."
 
-#: src/admin/plugin-page.php:201
+#: src/admin/plugin-page.php:208
 msgid "This will replace all current settings and SMTP accounts. Continue?"
 msgstr "Isso substituirá todas as configurações e contas SMTP atuais. Continuar?"
 
-#: src/admin/tables/log-table.php:115
+#: src/admin/tables/log-table.php:155
 msgid "Time"
 msgstr "Tempo"
 
@@ -1658,11 +1737,11 @@ msgstr "Tempo"
 msgid "time(s) before marking as error."
 msgstr "vez(es) antes de marcar como erro."
 
-#: src/admin/pages/smtp-page.php:255
+#: src/admin/pages/smtp-form-renderer.php:135
 msgid "TLS"
 msgstr "TLS"
 
-#: src/admin/pages/sources-page.php:375
+#: src/admin/pages/sources-list-renderer.php:71
 msgid "Toggle every source in group"
 msgstr "Alternar todas as fontes no grupo"
 
@@ -1683,13 +1762,17 @@ msgid "Total emails seen since this source was first detected"
 msgstr "Total de e-mails visualizados desde que esta fonte foi detectada pela primeira vez."
 
 #. Name of the plugin
-#: src/admin/plugin-page.php:114 src/sources/known-sources.php:155 src/sources/known-sources.php:180
+#: src/admin/plugin-page.php:121 src/sources/known-sources.php:155 src/sources/known-sources.php:180
 msgid "Total Mail Queue"
 msgstr "Total Mail Queue"
 
 #: src/sources/known-sources.php:103
 msgid "Total Mail Queue alert"
 msgstr "Alerta Total Mail Queue"
+
+#: src/admin/faq-renderer.php:428
+msgid "Total Mail Queue intercepts every wp_mail() call, including those triggered from inside a WP-Cron event by other plugins (deferred user-creation flows, abandoned-cart hooks, scheduled digests). They land in the queue / Sources catalog with the right source key just like a frontend send."
+msgstr "O Total Mail Queue intercepta todas as chamadas wp_mail(), incluindo aquelas disparadas dentro de um evento WP-Cron por outros plugins (fluxos de criação de usuário adiados, hooks de carrinho abandonado, resumos agendados). Elas chegam ao catálogo de filas/fontes com a chave de origem correta, assim como um envio do frontend."
 
 #: src/queue/mail-failed-handler.php:90
 msgid "Unknown"
@@ -1699,41 +1782,45 @@ msgstr "Desconhecido"
 msgid "Unknown source."
 msgstr "Fonte desconhecida."
 
-#: src/admin/pages/smtp-page.php:442 src/admin/pages/smtp-page.php:445
+#: src/admin/pages/smtp-list-renderer.php:84 src/admin/pages/smtp-list-renderer.php:87
 msgid "unlimited"
 msgstr "ilimitado"
 
-#: src/admin/pages/smtp-page.php:213
+#: src/admin/pages/smtp-form-renderer.php:93
 msgid "Unlock connection fields for editing"
 msgstr "Desbloqueie os campos de conexão para edição"
 
-#: src/admin/plugin-page.php:197
+#: src/admin/plugin-page.php:204
 msgid "Upload a previously exported XML file to restore settings and SMTP accounts. This will replace all current settings and SMTP accounts."
 msgstr "Faça o upload de um arquivo XML exportado anteriormente para restaurar as configurações e as contas SMTP. Isso substituirá todas as configurações e contas SMTP atuais."
+
+#: src/admin/faq-renderer.php:341
+msgid "Use cases: staging environments where you want to inspect what real WordPress would have emailed, security incident response (stop all outgoing email immediately), or migration drills."
+msgstr "Casos de uso: ambientes de teste onde se deseja inspecionar o que o WordPress real teria enviado por e-mail, resposta a incidentes de segurança (interromper imediatamente o envio de todos os e-mails) ou simulações de migração."
 
 #: src/admin/assets.php:82
 msgid "Use this image"
 msgstr "Use esta imagem"
 
-#: src/admin/pages/smtp-page.php:275 src/admin/pages/smtp-page.php:279
+#: src/admin/pages/smtp-form-renderer.php:155 src/admin/pages/smtp-form-renderer.php:159
 msgid "Username"
 msgstr "Nome de usuário"
 
 #. %s: message size in bytes
-#: src/admin/tables/log-table.php:353
+#: src/admin/tables/log-table.php:387
 #, php-format
 msgid "View message %s"
 msgstr "Visualizar mensagem %s"
 
-#: src/cron/batch-processor.php:186
+#: src/cron/batch-processor.php:188
 msgid "Waiting: no SMTP account available (check if accounts are enabled and limits are not exceeded)."
 msgstr "Aguardando: nenhuma conta SMTP disponível (verifique se as contas estão habilitadas e se os limites não foram excedidos)."
 
-#: src/admin/faq-renderer.php:289
+#: src/admin/faq-renderer.php:441
 msgid "Want to put a test email into the Queue?"
 msgstr "Deseja adicionar um e-mail de teste à fila?"
 
-#: src/admin/plugin-page.php:366
+#: src/admin/queue-diagnostics.php:125
 msgid "Warning: conflicting email plugin detected."
 msgstr "Aviso: foi detectado um plugin de e-mail conflitante."
 
@@ -1744,24 +1831,48 @@ msgstr "Aviso: foi detectado um plugin de e-mail conflitante."
 msgid "Warning: The following SMTP account(s) have a per-cycle limit higher than the global limit of %1$d: %2$s. The global limit will be applied as the ceiling."
 msgstr "Aviso: As seguintes contas SMTP têm um limite por ciclo superior ao limite global de %1$d: %2$s. O limite global será aplicado como teto."
 
-#: src/admin/faq-renderer.php:133
+#: src/admin/faq-renderer.php:175
 msgid "What about Proxy-Caching, e.g. NGINX?"
 msgstr "E quanto ao cache de proxy, por exemplo, o NGINX?"
 
-#: src/admin/faq-renderer.php:161
+#: src/admin/faq-renderer.php:203
 msgid "What are Queue alerts?"
 msgstr "O que são alertas de fila?"
 
-#: src/admin/faq-renderer.php:272
+#. %1$s: opening Templates link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:382
+#, php-format
+msgid "What does the %1$sTemplates%2$s engine do?"
+msgstr "O que faz o mecanismo %1$sTemplates%2$s?"
+
+#: src/admin/faq-renderer.php:332
+msgid "What is Block mode?"
+msgstr "O que é o modo de bloqueio?"
+
+#: src/admin/faq-renderer.php:314
 msgid "What is the \"Send Method\" setting?"
 msgstr "O que é a configuração \"Método de Envio\"?"
 
-#: src/admin/faq-renderer.php:210 src/admin/faq-renderer.php:250
+#. %1$s: opening Sources link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:362
+#, php-format
+msgid "What is the %1$sSources%2$s tab?"
+msgstr "O que é a aba %1$sSources%2$s?"
+
+#: src/admin/faq-renderer.php:252 src/admin/faq-renderer.php:292
 msgid "When editing a form in Contact Form 7 just add an additional line to the <i>`Additional Headers`</i> field under the <i>`Mail`</i> tab panel."
 msgstr "Ao editar um formulário no Contact Form 7, basta adicionar uma linha adicional ao campo <i>`Cabeçalhos Adicionais`</i> no painel da guia <i>`E-mail`</i>."
 
+#: src/admin/faq-renderer.php:387
+msgid "When enabled, every outgoing email is wrapped in a styled HTML envelope: header (with optional logo), body, and footer. Header / body / footer / wrapper colors, fonts, padding, and footer text are all configurable from the Templates tab. Plain-text bodies are auto-converted to HTML before wrapping."
+msgstr "Quando ativada, cada e-mail enviado é envolvido em um envelope HTML estilizado: cabeçalho (com logotipo opcional), corpo e rodapé. As cores, fontes, espaçamento e texto do cabeçalho, corpo, rodapé e envelope são configuráveis ​​na aba Modelos. Corpos de texto simples são convertidos automaticamente para HTML antes do envolvimento."
+
+#: src/admin/faq-renderer.php:427
+msgid "Why do my other plugin's scheduled emails show up in the queue?"
+msgstr "Por que os e-mails agendados do meu outro plugin aparecem na fila?"
+
 #. %1$s: opening Settings link tag, %2$s: closing tag
-#: src/admin/pages/smtp-page.php:309
+#: src/admin/pages/smtp-form-renderer.php:189
 #, php-format
 msgid "Wins over the global Default Sender configured in %1$sSettings%2$s when this SMTP account is sending the email. Leave blank to fall back to the Default Sender."
 msgstr "Prevalece sobre o remetente padrão global configurado em %1$sSettings%2$s quando esta conta SMTP estiver enviando o e-mail. Deixe em branco para usar o remetente padrão como alternativa."
@@ -1774,11 +1885,11 @@ msgstr "WooCommerce"
 msgid "WordPress Core"
 msgstr "Núcleo do WordPress"
 
-#: src/admin/faq-renderer.php:138
+#: src/admin/faq-renderer.php:180
 msgid "WordPress Cron"
 msgstr "Cron do WordPress"
 
-#: src/admin/faq-renderer.php:277
+#: src/admin/faq-renderer.php:319
 msgid "WordPress default"
 msgstr "Padrão do WordPress"
 
@@ -1786,17 +1897,21 @@ msgstr "Padrão do WordPress"
 msgid "WordPress default — Ignore plugin SMTP accounts, send via standard wp_mail()"
 msgstr "Configuração padrão do WordPress — Ignorar contas SMTP de plugins, enviar via wp_mail() padrão."
 
+#: src/admin/faq-renderer.php:157
+msgid "WordPress runs scheduled tasks (including the Queue drainer) by piggy-backing on regular page loads. Caching plugins that serve static HTML to anonymous visitors can prevent those page loads from reaching PHP, which means WP-Cron may run less often or stop running altogether — and queued emails would pile up."
+msgstr "O WordPress executa tarefas agendadas (incluindo o esvaziamento da fila) aproveitando-se dos carregamentos regulares de páginas. Plugins de cache que servem HTML estático para visitantes anônimos podem impedir que esses carregamentos de página cheguem ao PHP, o que significa que o WP-Cron pode ser executado com menos frequência ou parar de funcionar completamente — e os e-mails em fila se acumulariam."
+
 #. %s: WordPress default subject
-#: src/admin/pages/sources-page.php:274
+#: src/admin/pages/sources-edit-renderer.php:175
 #, php-format
 msgid "WP default: %s"
 msgstr "Padrão do WP: %s"
 
-#: src/admin/faq-renderer.php:121
-msgid "wp-cron file"
-msgstr "Arquivo wp-cron"
+#: src/admin/faq-renderer.php:164
+msgid "wp-cron.php"
+msgstr "wp-cron.php"
 
-#: src/cron/batch-processor.php:223
+#: src/cron/batch-processor.php:237
 msgid "wp_mail() returned false. Check for conflicting email plugins or server mail configuration."
 msgstr "A função wp_mail() retornou falso. Verifique se há conflitos com plugins de e-mail ou configurações de e-mail do servidor."
 
@@ -1820,24 +1935,34 @@ msgstr "Envolva todos os e-mails enviados em um envelope HTML estilizado."
 msgid "Wrapper"
 msgstr "Contêiner"
 
-#: src/admin/pages/smtp-page.php:476
+#: src/admin/pages/smtp-list-renderer.php:118
 msgid "Yes"
 msgstr "Sim"
 
-#: src/admin/faq-renderer.php:233
+#: src/admin/faq-renderer.php:156
+msgid "Yes — with one caveat about WP-Cron."
+msgstr "Sim — com uma ressalva sobre o WP-Cron."
+
+#: src/admin/faq-renderer.php:275
 msgid "Yes, this is possible (if you absolutely need to do this)."
 msgstr "Sim, isso é possível (se você realmente precisar fazer isso)."
 
-#: src/admin/faq-renderer.php:195
+#: src/admin/faq-renderer.php:237
 msgid "Yes, you can add the custom <i>`X-Mail-Queue-Prio`</i> header set to <i>`High`</i> to your email. High priority emails will be sent through the standard Total Mail Queue sending cycle but before all normal emails lacking a priority header in the queue."
 msgstr "Sim, você pode adicionar o cabeçalho personalizado <i>`X-Mail-Queue-Prio`</i> definido como <i>`High`</i> ao seu e-mail. E-mails de alta prioridade serão enviados pelo ciclo de envio padrão da fila Total Mail Queue, mas antes de todos os e-mails normais que não possuem um cabeçalho de prioridade na fila."
 
-#: src/admin/faq-renderer.php:150
+#. %1$s: opening Sources link tag, %2$s: closing tag
+#: src/admin/faq-renderer.php:410
+#, php-format
+msgid "Yes. Open %1$sSources%2$s, find one of the 11 supported WordPress-core templates (password_reset, new_user welcome / admin notification, password_change, email_change, admin_email_change_confirm, the privacy data templates, recovery_mode), click Edit and use the Subject and Body fields to override the WP defaults."
+msgstr "Sim. Abra %1$sSources%2$s, encontre um dos 11 modelos padrão do WordPress suportados (password_reset, new_user welcome / admin notification, password_change, email_change, admin_email_change_confirm, os modelos de dados de privacidade, recovery_mode), clique em Editar e use os campos Assunto e Corpo para substituir as configurações padrão do WordPress."
+
+#: src/admin/faq-renderer.php:192
 msgid "You are covered. All attachments are stored temporarily in the queue until they are sent along with their corresponding emails."
 msgstr "Você está coberto. Todos os anexos são armazenados temporariamente na fila até serem enviados juntamente com seus respectivos e-mails."
 
 #. %s: wp-cron.php URL
-#: src/admin/plugin-page.php:128
+#: src/admin/plugin-page.php:135
 #, php-format
 msgid "Your normal WP Cron is disabled. Please make sure you're running the Cron manually by calling %s every couple of minutes."
 msgstr "Seu WP Cron padrão está desativado. Certifique-se de executar o Cron manualmente chamando %s a cada poucos minutos."

@@ -96,7 +96,7 @@ final class FaqRenderer {
 		echo '<p>' . wp_kses_post(
 			sprintf(
 				/* translators: %1$s: opening bold tag, %2$s: closing bold tag, %3$s: wp_mail() link */
-				__( 'By default, no — the plugin only affects %1$sWHEN%2$s emails are sent. The Queue delays delivery, then forwards each row through the standard %3$s function so whatever transport you have in place (PHP mail, an SMTP plugin like WP Mail SMTP, an external service like Mailgun) keeps doing its job.', 'total-mail-queue' ),
+				__( 'One of the functions of 'total-mail-queue' is to queue and "delay" the delivery of emails, then forward each message through the method you define, which could be the standard WordPress %3$s function or an external SMTP server (private or Mailgun) of your choice. Note that this replaces SMTP plugins like "WP Mail SMTP".' ),
 				'<b>',
 				'</b>',
 				'<a target="_blank" href="https://developer.wordpress.org/reference/functions/wp_mail/"><i>wp_mail()</i></a>'
