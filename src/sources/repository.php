@@ -222,7 +222,7 @@ final class Repository {
 		$table = Schema::sourcesTable();
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY `group_label` ASC, `source_key` ASC", ARRAY_A );
-		return is_array( $rows ) ? $rows : array();
+		return is_array( $rows ) ? array_values( $rows ) : array();
 	}
 
 	/**
