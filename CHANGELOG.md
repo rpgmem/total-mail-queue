@@ -5,6 +5,39 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2] - 2026-04-29
+
+> Settings sanitizer hardening, FAQ accuracy corrections, admin UI polish (postman banner moved to FAQ, H1 icon dropped, dark code blocks), and a major internal refactor pass — admin-page split-up, single coordinated reset for per-request static state, PHPStan strictness raised from level 5 to level 8, and the analyser itself bumped from 1.12 to 2.1 (with `szepeviktor/phpstan-wordpress` 1.3 → 2.0).
+
+### Fixed
+
+- **`Settings\Sanitizer` rejects malformed addresses for `email` / `from_email`.** Both keys now run through `sanitize_email()` instead of `sanitize_text_field()`. Malformed input (`"not an email"`, `<garbage>`, etc.) collapses to an empty string at save time, so the alert recipient and the Default Sender no longer ship as broken `From:` headers downstream. New `EMAIL_KEYS` constant carries the per-field type metadata; new tests pin the regression.
+- **FAQ — "Does this plugin change HOW emails are sent?"** rewritten. The previous answer claimed the plugin only ever affects WHEN, never HOW — that stopped being true once SMTP Accounts, the Template engine, and per-source enforcement landed. Now reads "by default, no" + a bullet list of the three opt-in features that genuinely change the send path, with deep links to each tab.
+- **FAQ — W3 Total Cache entry** stops over-prescribing manual external cron. Caching plugins (W3 Total Cache among them) ship built-in WP-Cron triggers; the answer now points at the caching plugin's own setting first and falls back to "external cron job" only if there isn't one.
+
+### Changed
+
+- **Postman illustration moved from a corner background on the Settings form to a centered hero banner at the top of the FAQ tab.** The 1408×768 raster is properly proportioned for a banner; the previous `background-image` placement squashed it into a 20rem corner. The Settings tab no longer carries the orphaned background and the H1 icon `::before` was dropped (the wordmark is enough; the GIF files stay in `assets/img/` for external uses such as the WP.org plugin directory).
+- **FAQ code-sample styling:** inline `<code>` (single tokens) gets a soft gray chip; `<pre><code>` (multi-line PHP snippets in the priority-header sections) gets a dark theme so the example code separates visually from the surrounding help text. New `.tmq-faq-bullets` helper for the bullet list introduced in the HOW-emails-are-sent answer.
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.6.2**.
+
+### Refactored
+
+- **Admin pages split.** `SmtpPage` (483 → 48 LOC) split into router + `SmtpActions` + `SmtpFormRenderer` + `SmtpListRenderer`. `SourcesPage` (508 → 98 LOC) split into router + `SourcesActions` + `SourcesEditRenderer` + `SourcesListRenderer`. `PluginPage` (441 → 283 LOC) extracts diagnostic notices into `Admin\QueueDiagnostics` and the Cron Information tab into `Admin\Pages\CronInfoPage`.
+- **`MailInterceptor::handle()` deepest nest extracted** into `applyCoreTemplateOverride()` so the orchestrator reads as a linear pipeline.
+- **`MailInterceptor::willHandle()`** centralizes the "will the interceptor catch the next `wp_mail()` call?" predicate; `Templates\Engine::register()` now asks via that single named call instead of re-deriving from `MainOptions` directly.
+- **`LogTable` mode injection.** `MODE_LOG` / `MODE_QUEUE` constants + a new constructor parameter replace three `$_GET['page']` sniffs; `PluginPage` and the `BulkActions` test pass the mode explicitly.
+- **`Support\RuntimeState::reset()`** consolidates the five per-request static-state resets (`BatchProcessor`, `Detector`, `PhpMailerCapturer`, `Tracker`, `WooCommerceTokens`). Test base classes now call one method instead of catalog-tracking each static individually; new `PhpMailerCapturer::reset()` added so `RuntimeState` has a uniform contract.
+- **PHPStan strictness raised from level 5 to level 8.** Surfaced 14 typing gaps total (return types on WP_List_Table overrides, value-type hints on `array<int,string>` `$headers` parameters in `MailInterceptor`, `string|false` returns from `Serializer::encode` and `Encryption::decrypt` collapsed to always-string).
+- **PHPStan analyser bumped from 1.12 to 2.1** (and `szepeviktor/phpstan-wordpress` from 1.3 to 2.0). Level 8 stays clean under the stricter 2.x rules; 9 additional typing gaps surfaced by the upgrade fixed (`identical.alwaysFalse` redundant comparisons in `LogTable::bulk_resend` / `bulk_force_resend`, by-ref out-params in `MailInterceptor::scanPriorityHeaders` narrowed from `?bool` to `bool`, `list<>` returns enforced via `array_values()` wraps in `QueueRepository::pendingIds` and `Sources\Repository::all`, redundant `method_exists()` guard dropped in `Smtp\Configurator::apply`).
+
+### Tests
+
+- New `SanitizeSettingsTest` cases: `test_email_keys_are_validated_with_sanitize_email`, `test_garbage_in_email_keys_collapses_to_empty_string`, plus an updated `test_text_keys_are_passed_through_sanitize_text_field` that no longer fakes `email` as plain text.
+- `EncryptionTest::test_decrypt_returns_empty_string_for_payload_tampered_with_garbage_ciphertext` updated for the new `string`-only return type (was `false`).
+
+---
+
 ## [2.6.1] - 2026-04-28
 
 > Hotfix on top of 2.6.0. The per-source `skip_template_wrap` checkbox introduced in 2.6.0 was honored at intercept time but the Engine on the `wp_mail` filter @100 silently re-wrapped queued rows at cron drain time, so admins ticking the box still received styled emails.
