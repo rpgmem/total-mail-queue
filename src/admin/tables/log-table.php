@@ -487,7 +487,7 @@ final class LogTable extends WP_List_Table {
 				++$skip_queue;
 				continue;
 			}
-			if ( ! $row->attachments || '' === $row->attachments ) {
+			if ( ! $row->attachments ) {
 				++$resend;
 				$data = array(
 					'timestamp'   => current_time( 'mysql', false ),
@@ -552,7 +552,7 @@ final class LogTable extends WP_List_Table {
 				++$errors;
 				continue;
 			}
-			if ( ! $row->attachments || '' === $row->attachments ) {
+			if ( ! $row->attachments ) {
 				++$count;
 				$data = array(
 					'timestamp'   => current_time( 'mysql', false ),

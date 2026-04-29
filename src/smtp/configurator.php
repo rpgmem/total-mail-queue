@@ -31,9 +31,7 @@ final class Configurator {
 	 */
 	public static function apply( PHPMailer $phpmailer, array $smtp_account ): void {
 		// Close any existing SMTP connection so we start fresh.
-		if ( method_exists( $phpmailer, 'smtpClose' ) ) {
-			$phpmailer->smtpClose();
-		}
+		$phpmailer->smtpClose();
 		$phpmailer->isSMTP();
 		$phpmailer->Host       = $smtp_account['host'];
 		$phpmailer->Port       = intval( $smtp_account['port'] );

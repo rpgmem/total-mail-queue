@@ -91,7 +91,7 @@ final class QueueRepository {
 		$table = Schema::queueTable();
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT `id` FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT %d", $limit ) );
-		return array_map( 'intval', is_array( $ids ) ? $ids : array() );
+		return array_values( array_map( 'intval', is_array( $ids ) ? $ids : array() ) );
 	}
 
 	/**

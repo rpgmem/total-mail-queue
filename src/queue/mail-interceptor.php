@@ -128,8 +128,10 @@ final class MailInterceptor {
 		$attachments = $atts['attachments'];
 		$status      = 'queue';
 
-		$headers = self::normaliseHeaders( $headers );
-		$status  = self::scanPriorityHeaders( $headers, $status, (string) $options['enabled'], $has_content_type, $has_from );
+		$headers          = self::normaliseHeaders( $headers );
+		$has_content_type = false;
+		$has_from         = false;
+		$status           = self::scanPriorityHeaders( $headers, $status, (string) $options['enabled'], $has_content_type, $has_from );
 
 		// Per-source enforcement: a disabled source overrides the priority
 		// headers (Instant included — otherwise a third-party plugin could
@@ -340,11 +342,11 @@ final class MailInterceptor {
 	 * @param array<int,string> $headers          Headers — modified in place.
 	 * @param string            $status           Current status guess.
 	 * @param string            $enabled          Plugin mode (`0`/`1`/`2`).
-	 * @param bool|null         $has_content_type Out param.
-	 * @param bool|null         $has_from         Out param.
+	 * @param bool              $has_content_type Out param. Caller initializes to false.
+	 * @param bool              $has_from         Out param. Caller initializes to false.
 	 * @return string Resolved status (`queue` / `high` / `instant`).
 	 */
-	private static function scanPriorityHeaders( array &$headers, string $status, string $enabled, ?bool &$has_content_type, ?bool &$has_from ): string {
+	private static function scanPriorityHeaders( array &$headers, string $status, string $enabled, bool &$has_content_type, bool &$has_from ): string {
 		$has_content_type = false;
 		$has_from         = false;
 		foreach ( $headers as $index => $val ) {
