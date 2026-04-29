@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -180,14 +180,12 @@ Please make sure that your WP Cron is running reliably.
 
 The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
 
+= 2.6.2 =
+* Default Sender (`from_email`) and alert recipient (`email`) settings now reject malformed addresses and collapse them to an empty string at save time, so junk like `not an email` no longer ships as a valid `From:` header.
+* FAQ corrections: the "Does this plugin change HOW emails are sent?" answer now lists the SMTP / Templates / Sources opt-ins that genuinely change the send path; the W3 Total Cache entry points users at their caching plugin's built-in WP-Cron trigger instead of always demanding a manual cron job.
+* Admin UI polish: postman illustration moved to the top of the FAQ tab as a centered hero banner, redundant H1 icon dropped, and inline / multi-line code samples in the FAQ get a light-chip / dark-block treatment respectively.
+* Internal: `Plugin::VERSION` and plugin header bumped to 2.6.2; PHPStan analyser bumped from 1.12 to 2.1 with strictness at level 8 across `src/`; admin-page renderers split into focused router + actions + view classes; per-request static state coordinated through a single `Support\RuntimeState::reset()`.
+
 = 2.6.1 =
 * Hotfix: per-source `Skip template wrapper` checkbox introduced in 2.6.0 was honored at intercept time but the Engine on `wp_mail` filter @100 silently re-wrapped queued rows at cron drain time. Now skipped end-to-end.
-
-= 2.6.0 =
-* Per-source body & subject overrides for 11 WordPress core emails (password reset, new user welcome, password change, email change, admin email change confirm, privacy data confirm/export/erasure, recovery mode). Edit in Sources tab → row → Edit, with token substitution, "Reset to WP default", and a per-template "Send preview" button.
-* `Skip template wrapper` per template (raw delivery, bypasses the global HTML envelope).
-* Token registry extended: `{subject}` + `{message_original}` for prefix/suffix overrides; `{username}`, `{reset_url}`, etc. captured automatically per-call from WP-core filters.
-* Sender override moved from Templates tab → Settings tab as `Default Sender`. One-shot migration on upgrade copies legacy `from_email` / `from_name` and documents the precedence: SMTP account → Default Sender → WordPress core.
-* Admin notice when WordPress is upgraded between requests, prompting a re-check of the wp_core baseline.
-* Schema: `subject_override` + `body_override` + `skip_template_wrap` columns on `{$prefix}total_mail_queue_sources` (added via dbDelta on upgrade).
 
