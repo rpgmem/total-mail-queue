@@ -12,8 +12,9 @@ use TotalMailQueue\Admin\Notices;
  */
 final class WorkerStalledTest extends TestCase {
 
-    private const NOW      = 1_700_000_000;
-    private const INTERVAL = 600; // 10 minutes.
+    private const NOW       = 1_700_000_000;
+    private const INTERVAL  = 600; // 10 minutes.
+    private const TWO_HOURS = 2 * HOUR_IN_SECONDS;
 
     public function test_no_warning_when_queue_is_empty(): void {
         self::assertFalse(
@@ -21,52 +22,60 @@ final class WorkerStalledTest extends TestCase {
         );
     }
 
-    public function test_no_warning_when_worker_has_never_run(): void {
-        // last_run = 0 (fresh install): no evidence of a stall yet.
+    public function test_no_warning_when_nothing_has_ever_been_sent(): void {
+        // last_send = 0 (brand-new setup): no delivery history to judge against.
         self::assertFalse(
             Notices::isWorkerStalled( self::NOW, 5, null, self::INTERVAL, 0 )
         );
     }
 
-    public function test_no_warning_when_worker_ran_recently(): void {
+    public function test_no_warning_when_a_send_happened_within_the_window(): void {
+        // Sent 30 minutes ago — well inside the 2-hour window — even with a
+        // long-overdue event, delivery is clearly still progressing.
         self::assertFalse(
-            Notices::isWorkerStalled( self::NOW, 5, self::NOW, self::INTERVAL, self::NOW - 60 )
+            Notices::isWorkerStalled( self::NOW, 5, self::NOW - DAY_IN_SECONDS, self::INTERVAL, self::NOW - ( 30 * 60 ) )
         );
     }
 
     public function test_no_warning_during_intentional_future_deferral(): void {
-        // Next run parked well into the future (e.g. every SMTP account capped),
-        // even though the last run is ancient.
+        // Quiet for 3 hours (every account capped), but the next run is parked
+        // in the future on purpose — the worker is still set to act.
         $next = self::NOW + ( 45 * 60 );
         self::assertFalse(
-            Notices::isWorkerStalled( self::NOW, 5, $next, self::INTERVAL, self::NOW - 99999 )
+            Notices::isWorkerStalled( self::NOW, 5, $next, self::INTERVAL, self::NOW - ( 3 * HOUR_IN_SECONDS ) )
         );
     }
 
-    public function test_warns_when_pending_and_worker_is_stale(): void {
-        // 30 minutes since the last run, well past the 2x-interval / 15-min floor.
-        self::assertTrue(
-            Notices::isWorkerStalled( self::NOW, 3, self::NOW - ( 30 * 60 ), self::INTERVAL, self::NOW - ( 30 * 60 ) )
-        );
-    }
-
-    public function test_warns_when_overdue_event_is_in_the_near_past(): void {
-        // An overdue (past) scheduled event does not count as a deferral.
-        self::assertTrue(
-            Notices::isWorkerStalled( self::NOW, 1, self::NOW - 120, self::INTERVAL, self::NOW - ( 25 * 60 ) )
-        );
-    }
-
-    public function test_threshold_floor_is_fifteen_minutes_for_short_intervals(): void {
-        // 1-minute interval: 2x interval is tiny, so the 15-minute floor applies.
-        $short = 60;
+    public function test_no_warning_when_a_freshly_armed_event_has_not_run_yet(): void {
+        // The dominant false positive: idle for hours (last send old), then
+        // mail arrives and an immediate event is armed at ~now. The event is
+        // not overdue, so the queue is about to process — no warning.
         self::assertFalse(
-            Notices::isWorkerStalled( self::NOW, 2, self::NOW, $short, self::NOW - ( 10 * 60 ) ),
-            '10 minutes stale must not warn under the 15-minute floor.'
+            Notices::isWorkerStalled( self::NOW, 8, self::NOW, self::INTERVAL, self::NOW - ( 5 * HOUR_IN_SECONDS ) )
         );
+    }
+
+    public function test_warns_when_quiet_for_over_two_hours_with_an_overdue_event(): void {
+        // Mail waiting, nothing sent for 3 hours, and the scheduled event is
+        // well in the past — WP-Cron isn't firing it.
+        $overdue = self::NOW - ( 40 * 60 );
         self::assertTrue(
-            Notices::isWorkerStalled( self::NOW, 2, self::NOW, $short, self::NOW - ( 20 * 60 ) ),
-            '20 minutes stale must warn.'
+            Notices::isWorkerStalled( self::NOW, 3, $overdue, self::INTERVAL, self::NOW - ( 3 * HOUR_IN_SECONDS ) )
+        );
+    }
+
+    public function test_warns_when_quiet_for_over_two_hours_and_no_event_is_armed(): void {
+        self::assertTrue(
+            Notices::isWorkerStalled( self::NOW, 3, null, self::INTERVAL, self::NOW - ( self::TWO_HOURS + 60 ) )
+        );
+    }
+
+    public function test_overdue_grace_tolerates_normal_cron_tick_spacing(): void {
+        // Quiet > 2h, but the event is only a couple of minutes past due — within
+        // the grace for an external cron's tick spacing, so not yet a stall.
+        $slightly_late = self::NOW - 120;
+        self::assertFalse(
+            Notices::isWorkerStalled( self::NOW, 3, $slightly_late, self::INTERVAL, self::NOW - ( 3 * HOUR_IN_SECONDS ) )
         );
     }
 }

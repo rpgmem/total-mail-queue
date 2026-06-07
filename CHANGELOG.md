@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The "queue may not be processing" notice no longer cries wolf.** The notice keyed off the last *worker run* with a 15-minute threshold, so it surfaced during healthy operation: the worker keeps running (and saving diagnostics) even while every account is capped or the queue idles, and a mail enqueued after a quiet spell tripped it instantly because the last run was stale. It now keys off the last *individual send* — it appears only when mail is waiting, nothing has been sent for **over two hours**, AND the worker isn't scheduled to act (no event armed, or an overdue one, which is the real signature of WP-Cron not firing). A future-scheduled run (normal cadence or an intentional quota deferral) and a just-armed event both keep it quiet. Backed by the new `Diagnostics::lastSendTimestamp()` / `Diagnostics::recordSend()` and the `wp_tmq_last_send` option; the unused `lastRunTimestamp()` is removed.
+
+---
+
+## [2.8.0] - 2026-06-07
+
 ### Added
 
 - **Persistent per-email error log with optional SMTP debug.** Failed sends now accumulate a full, untruncated history on the queue row — each attempt stamped with the time and the complete error message — instead of only the latest 255-character `info` summary. The history is shown as an expandable *"Error details"* block in the Log table and is cleared automatically the moment the email later sends successfully, so a row that recovers keeps no stale errors. A new **SMTP Debug Log** toggle in Settings (off by default) additionally captures the entire client/server SMTP conversation for each send into that log, making it possible to see exactly where a send broke (authentication, TLS, greylisting…). Backed by a new `error_log` column on the queue table and the `smtp_debug` setting.
