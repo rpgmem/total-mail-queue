@@ -59,6 +59,7 @@ final class SmtpListRenderer {
 		echo '<th>' . esc_html__( 'Monthly Limit', 'total-mail-queue' ) . '</th>';
 		echo '<th>' . esc_html__( 'Interval', 'total-mail-queue' ) . '</th>';
 		echo '<th>' . esc_html__( 'Per Cycle', 'total-mail-queue' ) . '</th>';
+		echo '<th>' . esc_html__( 'Last Sent', 'total-mail-queue' ) . '</th>';
 		echo '<th>' . esc_html__( 'Enabled', 'total-mail-queue' ) . '</th>';
 		echo '<th>' . esc_html__( 'Actions', 'total-mail-queue' ) . '</th>';
 		echo '</tr>';
@@ -98,7 +99,13 @@ final class SmtpListRenderer {
 		);
 
 		$interval_display = 0 === intval( $acct['send_interval'] ) ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( (string) $acct['send_interval'] ) . ' min';
-		$bulk_display     = 0 === intval( $acct['send_bulk'] ) ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( (string) $acct['send_bulk'] );
+
+		// Per-cycle cell shows current usage / limit, mirroring the daily and
+		// monthly columns so the operator can see how full the active cycle is.
+		$cycle_used   = esc_html( (string) intval( $acct['cycle_sent'] ) ) . ' / ';
+		$bulk_display = $cycle_used . ( 0 === intval( $acct['send_bulk'] ) ? esc_html__( 'global', 'total-mail-queue' ) : esc_html( (string) $acct['send_bulk'] ) );
+
+		$last_sent_display = self::renderLastSent( (string) $acct['last_sent_at'] );
 
 		echo '<tr>';
 		echo '<td>#' . esc_html( (string) $acct['id'] ) . '</td>';
@@ -115,11 +122,34 @@ final class SmtpListRenderer {
 		echo '<td>' . $interval_display . '</td>';
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $bulk_display is pre-escaped with esc_html().
 		echo '<td>' . $bulk_display . '</td>';
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $last_sent_display is pre-escaped with esc_html().
+		echo '<td>' . $last_sent_display . '</td>';
 		echo '<td>' . ( intval( $acct['enabled'] ) ? '<span class="tmq-ok">' . esc_html__( 'Yes', 'total-mail-queue' ) . '</span>' : esc_html__( 'No', 'total-mail-queue' ) ) . '</td>';
 		echo '<td>';
 		echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Edit', 'total-mail-queue' ) . '</a> | ';
 		echo '<a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Are you sure you want to delete this SMTP account?', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Delete', 'total-mail-queue' ) . '</a>';
 		echo '</td>';
 		echo '</tr>';
+	}
+
+	/**
+	 * Format the `last_sent_at` column for display: a human-readable "x ago"
+	 * relative time with the absolute timestamp in the tooltip, or a muted
+	 * "Never" for accounts that have not sent yet (the schema sentinel
+	 * `2000-01-01 00:00:00`).
+	 *
+	 * @param string $last_sent_at Datetime as stored (site-local time).
+	 * @return string Pre-escaped HTML for the cell.
+	 */
+	private static function renderLastSent( string $last_sent_at ): string {
+		$timestamp = strtotime( $last_sent_at );
+		if ( false === $timestamp || $timestamp <= strtotime( '2000-01-02 00:00:00' ) ) {
+			return '<span class="description">' . esc_html__( 'Never', 'total-mail-queue' ) . '</span>';
+		}
+
+		/* translators: %s: human-readable time difference, e.g. "5 mins". */
+		$relative = sprintf( __( '%s ago', 'total-mail-queue' ), human_time_diff( $timestamp, (int) current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+		return '<span title="' . esc_attr( $last_sent_at ) . '">' . esc_html( $relative ) . '</span>';
 	}
 }
