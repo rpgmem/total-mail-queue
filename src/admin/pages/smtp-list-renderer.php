@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
+
 /**
  * Renders the SMTP-account index: the action toolbar (Add / Reset Counters)
  * plus the read-only listing table. Pulled out of {@see SmtpPage} so the row
@@ -18,14 +20,9 @@ final class SmtpListRenderer {
 
 	/**
 	 * Render the SMTP-account list.
-	 *
-	 * @param string $smtp_table Fully prefixed SMTP table name.
 	 */
-	public static function render( string $smtp_table ): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
+	public static function render(): void {
+		$accounts = SmtpRepository::all();
 
 		echo '<div class="tmq-box">';
 		echo '<h3>' . esc_html__( 'SMTP Accounts', 'total-mail-queue' ) . '</h3>';

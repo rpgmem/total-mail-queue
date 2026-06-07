@@ -309,6 +309,132 @@ final class Repository {
 	}
 
 	/**
+	 * Every SMTP account, ordered by priority then name — the admin listing
+	 * and the settings export both consume the full catalog.
+	 *
+	 * @return list<array<string,mixed>>
+	 */
+	public static function all(): array {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( "SELECT * FROM `$smtp_table` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
+		return is_array( $rows ) ? array_values( $rows ) : array();
+	}
+
+	/**
+	 * Fetch a single account by id.
+	 *
+	 * @param int $smtp_id Account id.
+	 * @return array<string,mixed>|null Row, or null when not found.
+	 */
+	public static function findById( int $smtp_id ): ?array {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtp_table` WHERE `id` = %d", $smtp_id ), ARRAY_A );
+		return is_array( $row ) ? $row : null;
+	}
+
+	/**
+	 * Insert a new account row, returning its id (0 on failure).
+	 *
+	 * @param array<string,mixed> $data Column => value map.
+	 */
+	public static function insert( array $data ): int {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$inserted = $wpdb->insert( $smtp_table, $data );
+		return false === $inserted ? 0 : (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Update an existing account row by id.
+	 *
+	 * @param int                 $smtp_id Account id.
+	 * @param array<string,mixed> $data    Column => value map.
+	 */
+	public static function update( int $smtp_id, array $data ): void {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $smtp_table, $data, array( 'id' => $smtp_id ), null, array( '%d' ) );
+	}
+
+	/**
+	 * Delete an account by id.
+	 *
+	 * @param int $smtp_id Account id.
+	 */
+	public static function delete( int $smtp_id ): void {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete( $smtp_table, array( 'id' => $smtp_id ), array( '%d' ) );
+	}
+
+	/**
+	 * Zero the cumulative `daily_sent` / `monthly_sent` counters on every
+	 * account. Backs the admin "Reset Counters" button (distinct from
+	 * {@see Repository::resetCounters()}, which only rolls counters over when
+	 * their period actually elapses).
+	 */
+	public static function zeroSentCounters(): void {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( "UPDATE `$smtp_table` SET `daily_sent` = 0, `monthly_sent` = 0" );
+	}
+
+	/**
+	 * Column names of the SMTP table — used by the XML import to discard
+	 * unknown fields before inserting.
+	 *
+	 * @return list<string>
+	 */
+	public static function tableColumns(): array {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$columns = $wpdb->get_col( "DESCRIBE `$smtp_table`", 0 );
+		return is_array( $columns ) ? array_values( array_map( 'strval', $columns ) ) : array();
+	}
+
+	/**
+	 * Empty the SMTP table — used by the XML import before re-inserting the
+	 * imported accounts.
+	 */
+	public static function truncate(): void {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query( "TRUNCATE TABLE `$smtp_table`" );
+	}
+
+	/**
+	 * Enabled accounts whose per-cycle bulk exceeds the global queue amount —
+	 * surfaced as a Settings-tab warning that the global limit caps them.
+	 *
+	 * @param int $global_amount The global per-run queue amount.
+	 * @return list<array<string,mixed>> Rows with `name` and `send_bulk`.
+	 */
+	public static function accountsExceedingBulk( int $global_amount ): array {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from Schema::smtpTable()
+				"SELECT `name`, `send_bulk` FROM `$smtp_table` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0",
+				$global_amount
+			),
+			ARRAY_A
+		);
+		return is_array( $rows ) ? array_values( $rows ) : array();
+	}
+
+	/**
 	 * Look up the encrypted password column for the given account id.
 	 *
 	 * Used by the connection-tester admin endpoint when the form has an

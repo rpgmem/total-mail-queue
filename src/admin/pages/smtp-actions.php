@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Cron\Scheduler;
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Support\Encryption;
 
 /**
@@ -31,15 +32,14 @@ final class SmtpActions {
 	 * Delete does the same; the Reset Counters handler is a side effect
 	 * that doesn't change the routing.
 	 *
-	 * @param string $smtp_table Fully prefixed SMTP table name.
-	 * @param string $action     Current `smtp-action` value.
-	 * @param int    $edit_id    Current `smtp-id` value.
+	 * @param string $action  Current `smtp-action` value.
+	 * @param int    $edit_id Current `smtp-id` value.
 	 * @return array{action:string,edit_id:int}
 	 */
-	public static function handle( string $smtp_table, string $action, int $edit_id ): array {
+	public static function handle( string $action, int $edit_id ): array {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- handleSave() verifies the nonce.
 		if ( isset( $_POST['wp_tmq_smtp_save'] ) ) {
-			self::handleSave( $smtp_table );
+			self::handleSave();
 			return array(
 				'action'  => '',
 				'edit_id' => 0,
@@ -47,7 +47,7 @@ final class SmtpActions {
 		}
 
 		if ( 'delete' === $action && 0 < $edit_id ) {
-			self::handleDelete( $smtp_table, $edit_id );
+			self::handleDelete( $edit_id );
 			return array(
 				'action'  => '',
 				'edit_id' => 0,
@@ -56,7 +56,7 @@ final class SmtpActions {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- handleResetCounters() verifies the nonce.
 		if ( isset( $_POST['wp_tmq_smtp_reset_counters'] ) ) {
-			self::handleResetCounters( $smtp_table );
+			self::handleResetCounters();
 		}
 
 		return array(
@@ -67,12 +67,8 @@ final class SmtpActions {
 
 	/**
 	 * Save handler — Add or Edit depending on whether `smtp_id` is set.
-	 *
-	 * @param string $smtp_table Fully prefixed SMTP table name.
 	 */
-	private static function handleSave( string $smtp_table ): void {
-		global $wpdb;
-
+	private static function handleSave(): void {
 		if ( ! isset( $_POST['wp_tmq_smtp_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wp_tmq_smtp_nonce'] ) ), 'wp_tmq_smtp_save' ) ) {
 			wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
 		}
@@ -108,8 +104,7 @@ final class SmtpActions {
 		}
 
 		if ( $save_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $smtp_table, $data, array( 'id' => $save_id ), null, '%d' );
+			SmtpRepository::update( $save_id, $data );
 			Scheduler::reschedule();
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account updated.', 'total-mail-queue' ) . '</p></div>';
 			return;
@@ -118,8 +113,7 @@ final class SmtpActions {
 		if ( ! isset( $data['password'] ) ) {
 			$data['password'] = '';
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->insert( $smtp_table, $data );
+		SmtpRepository::insert( $data );
 		Scheduler::reschedule();
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account added.', 'total-mail-queue' ) . '</p></div>';
 	}
@@ -127,34 +121,25 @@ final class SmtpActions {
 	/**
 	 * Delete handler.
 	 *
-	 * @param string $smtp_table Fully prefixed SMTP table name.
-	 * @param int    $edit_id    Account being deleted.
+	 * @param int $edit_id Account being deleted.
 	 */
-	private static function handleDelete( string $smtp_table, int $edit_id ): void {
-		global $wpdb;
-
+	private static function handleDelete( int $edit_id ): void {
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_smtp_delete_' . $edit_id ) ) {
 			wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( $smtp_table, array( 'id' => $edit_id ), '%d' );
+		SmtpRepository::delete( $edit_id );
 		Scheduler::reschedule();
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account deleted.', 'total-mail-queue' ) . '</p></div>';
 	}
 
 	/**
 	 * Reset Counters handler — zeros `daily_sent` and `monthly_sent` on every row.
-	 *
-	 * @param string $smtp_table Fully prefixed SMTP table name.
 	 */
-	private static function handleResetCounters( string $smtp_table ): void {
-		global $wpdb;
-
+	private static function handleResetCounters(): void {
 		if ( ! isset( $_POST['wp_tmq_smtp_reset_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wp_tmq_smtp_reset_nonce'] ) ), 'wp_tmq_smtp_reset_counters' ) ) {
 			wp_die( esc_html__( 'Security check failed!', 'total-mail-queue' ) );
 		}
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( "UPDATE `$smtp_table` SET `daily_sent` = 0, `monthly_sent` = 0" );
+		SmtpRepository::zeroSentCounters();
 		Scheduler::reschedule();
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'All sending counters have been reset.', 'total-mail-queue' ) . '</p></div>';
 	}

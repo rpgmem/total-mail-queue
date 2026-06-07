@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
+
 /**
  * Renders the big SMTP-account form (Add or Edit). Pulled out of {@see SmtpPage}
  * so the page itself stays a thin router; the connection-lock toggle and
@@ -46,19 +48,15 @@ final class SmtpFormRenderer {
 	/**
 	 * Render the Add or Edit form.
 	 *
-	 * @param string $smtp_table Fully prefixed SMTP table name.
-	 * @param string $action     `add` or `edit`.
-	 * @param int    $edit_id    Account being edited (0 for `add`).
+	 * @param string $action  `add` or `edit`.
+	 * @param int    $edit_id Account being edited (0 for `add`).
 	 */
-	public static function render( string $smtp_table, string $action, int $edit_id ): void {
-		global $wpdb;
-
+	public static function render( string $action, int $edit_id ): void {
 		$account = self::defaultAccount();
 
 		if ( 'edit' === $action && 0 < $edit_id ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtp_table` WHERE `id` = %d", $edit_id ), ARRAY_A );
-			if ( $row ) {
+			$row = SmtpRepository::findById( $edit_id );
+			if ( null !== $row ) {
 				$account = $row;
 			}
 		}

@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
-use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use DOMDocument;
 use SimpleXMLElement;
 
@@ -90,11 +90,7 @@ final class ExportImport {
 	 * Extracted so it can be unit-tested without triggering header()/exit().
 	 */
 	public static function buildExportXml(): string {
-		global $wpdb;
-
-		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$smtp_accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table`", ARRAY_A );
+		$smtp_accounts = SmtpRepository::all();
 
 		if ( $smtp_accounts ) {
 			foreach ( $smtp_accounts as &$account ) {
@@ -147,8 +143,6 @@ final class ExportImport {
 	 * `wp_tmq_import` nonce before invoking this method.
 	 */
 	public static function handleImport(): string {
-		global $wpdb;
-
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- nonce verified by caller.
 		if ( ! isset( $_FILES['wp_tmq_import_file'] ) || ! isset( $_FILES['wp_tmq_import_file']['error'] ) || UPLOAD_ERR_OK !== $_FILES['wp_tmq_import_file']['error'] ) {
 			return '<div class="notice notice-error"><p>' . esc_html__( 'Error uploading file. Please try again.', 'total-mail-queue' ) . '</p></div>';
@@ -186,12 +180,8 @@ final class ExportImport {
 		}
 
 		if ( isset( $xml->smtp_accounts ) ) {
-			$smtp_table = Schema::smtpTable();
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$columns = $wpdb->get_col( "DESCRIBE `$smtp_table`", 0 );
-
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->query( "TRUNCATE TABLE `$smtp_table`" );
+			$columns = SmtpRepository::tableColumns();
+			SmtpRepository::truncate();
 
 			foreach ( $xml->smtp_accounts->account as $account_node ) {
 				$account = array();
@@ -201,8 +191,7 @@ final class ExportImport {
 				unset( $account['id'] );
 				$account = array_intersect_key( $account, array_flip( $columns ) );
 				if ( ! empty( $account ) ) {
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->insert( $smtp_table, $account );
+					SmtpRepository::insert( $account );
 				}
 			}
 		}
