@@ -65,6 +65,7 @@ final class Schema {
 		headers text NOT NULL,
 		attachments text NOT NULL,
 		info varchar(255) DEFAULT '' NOT NULL,
+		error_log longtext NOT NULL,
 		retry_count smallint(5) DEFAULT 0 NOT NULL,
 		smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
 		source_key varchar(120) DEFAULT '' NOT NULL,

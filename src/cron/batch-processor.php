@@ -18,6 +18,7 @@ use TotalMailQueue\Smtp\Configurator;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Sources\CoreTemplates;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
+use TotalMailQueue\Support\DebugCapture;
 use TotalMailQueue\Support\Encryption;
 use TotalMailQueue\Support\Serializer;
 
@@ -186,6 +187,10 @@ final class BatchProcessor {
 
 		Tracker::set( $mail_id );
 
+		// Start each send with a clean SMTP debug buffer so a failure logs only
+		// this row's transcript (a no-op when smtp_debug is off).
+		DebugCapture::reset();
+
 		// Strip any X-TMQ-PHPMailer-Config header and decode it.
 		$captured = self::extractCapturedConfig( $headers );
 
@@ -198,7 +203,7 @@ final class BatchProcessor {
 		if ( 'smtp' === $send_method && ! $smtp_to_use ) {
 			QueueRepository::update(
 				$mail_id,
-				array( 'info' => __( 'Waiting: no SMTP account available (check if accounts are enabled and limits are not exceeded).', 'total-mail-queue' ) ),
+				array( 'info' => SmtpRepository::blockSummary( (int) $options['queue_interval'] ) ),
 				array( '%s' )
 			);
 			return 'smtp_unavailable';
@@ -232,9 +237,10 @@ final class BatchProcessor {
 					'timestamp'       => current_time( 'mysql', false ),
 					'status'          => 'sent',
 					'info'            => '',
+					'error_log'       => '',
 					'smtp_account_id' => $sent_smtp_id,
 				),
-				array( '%s', '%s', '%s', '%d' )
+				array( '%s', '%s', '%s', '%s', '%d' )
 			);
 			if ( $smtp_to_use ) {
 				SmtpRepository::incrementCounter( $smtp_to_use['id'] );

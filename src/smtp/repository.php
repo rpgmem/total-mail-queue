@@ -259,6 +259,83 @@ final class Repository {
 	}
 
 	/**
+	 * Human-readable explanation of why no SMTP account can send right now,
+	 * used to fill a waiting row's `info` so the operator can see exactly which
+	 * limit is holding the queue (per-cycle / daily / monthly) and roughly when
+	 * each account recovers — instead of a bare "no account available".
+	 *
+	 * Always contains the phrase "no SMTP account available" so any code (or
+	 * habit) that scans for it keeps working.
+	 *
+	 * @param int $queue_interval Cron interval in seconds (recovery horizon for global-cycle accounts).
+	 */
+	public static function blockSummary( int $queue_interval ): string {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1 ORDER BY `priority` ASC, `id` ASC", ARRAY_A );
+
+		if ( empty( $accounts ) ) {
+			return __( 'Waiting: no SMTP account available — no account is enabled. Add or enable one on the SMTP tab.', 'total-mail-queue' );
+		}
+
+		$now   = time();
+		$parts = array();
+		foreach ( $accounts as $acct ) {
+			$reason = self::accountBlockReason( $acct, $now, $queue_interval );
+			if ( null !== $reason ) {
+				$parts[] = $reason;
+			}
+		}
+
+		if ( empty( $parts ) ) {
+			// Every account reports capacity yet none was usable (e.g. a
+			// transient race against the snapshot) — fall back to the generic
+			// hint rather than claiming a limit that isn't set.
+			return __( 'Waiting: no SMTP account available (check that accounts are enabled and limits are not exceeded).', 'total-mail-queue' );
+		}
+
+		return __( 'Waiting: no SMTP account available — every account is at a limit.', 'total-mail-queue' ) . ' ' . implode( ' | ', $parts );
+	}
+
+	/**
+	 * One-line reason an account can't send, plus roughly when it recovers — or
+	 * null when the account actually has capacity. Mirrors the limit checks in
+	 * {@see Repository::hasCapacity()} but renders them for humans.
+	 *
+	 * @param array<string,mixed> $acct           Account row.
+	 * @param int                 $now            Current UTC unix timestamp.
+	 * @param int                 $queue_interval Cron interval in seconds.
+	 */
+	private static function accountBlockReason( array $acct, int $now, int $queue_interval ): ?string {
+		$reasons = array();
+
+		$bulk = intval( $acct['send_bulk'] );
+		if ( $bulk > 0 && intval( $acct['cycle_sent'] ) >= $bulk ) {
+			/* translators: %1$d: emails sent this cycle, %2$d: per-cycle limit */
+			$reasons[] = sprintf( __( 'per-cycle quota reached (%1$d/%2$d)', 'total-mail-queue' ), intval( $acct['cycle_sent'] ), $bulk );
+		}
+		$daily_limit = intval( $acct['daily_limit'] );
+		if ( $daily_limit > 0 && intval( $acct['daily_sent'] ) >= $daily_limit ) {
+			/* translators: %1$d: emails sent today, %2$d: daily limit */
+			$reasons[] = sprintf( __( 'daily limit reached (%1$d/%2$d)', 'total-mail-queue' ), intval( $acct['daily_sent'] ), $daily_limit );
+		}
+		$monthly_limit = intval( $acct['monthly_limit'] );
+		if ( $monthly_limit > 0 && intval( $acct['monthly_sent'] ) >= $monthly_limit ) {
+			/* translators: %1$d: emails sent this month, %2$d: monthly limit */
+			$reasons[] = sprintf( __( 'monthly limit reached (%1$d/%2$d)', 'total-mail-queue' ), intval( $acct['monthly_sent'] ), $monthly_limit );
+		}
+
+		if ( empty( $reasons ) ) {
+			return null;
+		}
+
+		$when = wp_date( 'Y-m-d H:i', self::accountFreeAt( $acct, $now, $queue_interval ) );
+		/* translators: %1$s: account name, %2$s: comma-separated limit reasons, %3$s: recovery date/time */
+		return sprintf( __( '%1$s: %2$s, resumes ~%3$s', 'total-mail-queue' ), (string) ( $acct['name'] ?? '' ), implode( ', ', $reasons ), $when );
+	}
+
+	/**
 	 * Compute when a single account regains capacity: the latest reset among
 	 * the limits it is currently capped on (cycle / daily / monthly), or now
 	 * if it isn't capped at all.

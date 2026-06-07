@@ -268,6 +268,7 @@ final class LogTable extends WP_List_Table {
 	private static function renderInfoColumn( array $item ): string {
 		$info        = isset( $item['info'] ) && $item['info'] ? $item['info'] : '';
 		$retry_count = isset( $item['retry_count'] ) ? intval( $item['retry_count'] ) : 0;
+		$error_log   = isset( $item['error_log'] ) ? (string) $item['error_log'] : '';
 		$parts       = array();
 		if ( $retry_count > 0 ) {
 			/* translators: %d: number of retry attempts */
@@ -275,6 +276,11 @@ final class LogTable extends WP_List_Table {
 		}
 		if ( $info ) {
 			$parts[] = esc_html( $info );
+		}
+		if ( '' !== trim( $error_log ) ) {
+			$parts[] = '<details class="tmq-error-log"><summary>' . esc_html__( 'Error details', 'total-mail-queue' ) . '</summary>'
+				. '<pre style="white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;margin:.5em 0 0;">'
+				. esc_html( trim( $error_log ) ) . '</pre></details>';
 		}
 		return implode( '<br>', $parts );
 	}

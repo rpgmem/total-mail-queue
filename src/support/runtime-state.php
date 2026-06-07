@@ -26,6 +26,7 @@ use TotalMailQueue\Templates\WooCommerceTokens;
  * What is reset:
  * - {@see BatchProcessor}      — invocation guard + drainer flag.
  * - {@see CronLock}            — the in-process lock token + deadline.
+ * - {@see DebugCapture}        — the in-flight SMTP debug transcript.
  * - {@see Detector}            — current source marker + per-call context
  *                               + listener-registration idempotency guard.
  * - {@see PhpMailerCapturer}   — the `$capturing` flag (in case a capture
@@ -47,6 +48,7 @@ final class RuntimeState {
 	public static function reset(): void {
 		BatchProcessor::reset();
 		CronLock::reset();
+		DebugCapture::reset();
 		Detector::reset();
 		PhpMailerCapturer::reset();
 		Tracker::reset();

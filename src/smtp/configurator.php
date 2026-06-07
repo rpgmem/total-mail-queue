@@ -11,6 +11,7 @@ namespace TotalMailQueue\Smtp;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Support\DebugCapture;
 use TotalMailQueue\Support\Encryption;
 
 /**
@@ -53,6 +54,17 @@ final class Configurator {
 		$smtp_timeout = intval( $options['smtp_timeout'] );
 		if ( $smtp_timeout > 0 ) {
 			$phpmailer->Timeout = $smtp_timeout;
+		}
+
+		// When debug logging is on, capture the full client/server SMTP
+		// conversation into the in-process buffer so the failure handler can
+		// attach it to the row's error log. DEBUG_SERVER (2) records both
+		// sides of the exchange — enough to see where a send broke.
+		if ( '1' === (string) $options['smtp_debug'] ) {
+			$phpmailer->SMTPDebug   = 2;
+			$phpmailer->Debugoutput = static function ( $str ): void {
+				DebugCapture::append( (string) $str );
+			};
 		}
 	}
 }
