@@ -19,6 +19,17 @@ if ( ! defined( 'OBJECT' ) ) {
     define( 'OBJECT', 'OBJECT' );
 }
 
+// WordPress time constants (wp-includes/default-constants.php).
+if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
+    define( 'MINUTE_IN_SECONDS', 60 );
+}
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
+    define( 'HOUR_IN_SECONDS', 60 * MINUTE_IN_SECONDS );
+}
+if ( ! defined( 'DAY_IN_SECONDS' ) ) {
+    define( 'DAY_IN_SECONDS', 24 * HOUR_IN_SECONDS );
+}
+
 if ( ! function_exists( 'wp_salt' ) ) {
     function wp_salt( $scheme = 'auth' ): string {
         // Deterministic per-scheme salt so encryption round-trips are stable.
