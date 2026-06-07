@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
+use TotalMailQueue\Cron\Diagnostics;
+use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
 
@@ -47,7 +49,79 @@ final class Notices {
 			self::renderLastErrorNotice( $last_mail );
 		}
 
+		self::maybeRenderCronStalledNotice( $options );
 		self::maybeRenderConflictNotice();
+	}
+
+	/**
+	 * Decide whether the queue worker looks stalled — i.e. mail is waiting but
+	 * WP-Cron isn't firing the queue hook. Pure so the policy is unit-testable;
+	 * {@see Notices::maybeRenderCronStalledNotice()} feeds it the live values.
+	 *
+	 * Guards against two legitimate "old but fine" cases:
+	 * - A fresh site whose worker has never run yet ($last_run = 0).
+	 * - An intentional deferral, where the worker has parked its next run in
+	 *   the future on purpose (e.g. every SMTP account is capped).
+	 *
+	 * @param int      $now            Current UTC unix timestamp.
+	 * @param int      $pending        Rows waiting in the queue.
+	 * @param int|null $next_scheduled Timestamp of the next queue event, or null.
+	 * @param int      $interval       Queue interval in seconds.
+	 * @param int      $last_run       UTC unix timestamp of the last worker run (0 = never).
+	 */
+	public static function isWorkerStalled( int $now, int $pending, ?int $next_scheduled, int $interval, int $last_run ): bool {
+		if ( $pending <= 0 || $last_run <= 0 ) {
+			return false;
+		}
+		$interval = max( 60, $interval );
+		// Intentional deferral: the next run is parked in the future on purpose.
+		if ( null !== $next_scheduled && $next_scheduled > $now + $interval ) {
+			return false;
+		}
+		$threshold = max( 2 * $interval, 15 * MINUTE_IN_SECONDS );
+		return ( $now - $last_run ) > $threshold;
+	}
+
+	/**
+	 * Warn manage_options users when mail is piling up but the worker hasn't
+	 * run in a while — the classic symptom of WP-Cron only firing while an
+	 * admin is logged in (cached front-end / low traffic). Works whether or
+	 * not `DISABLE_WP_CRON` is set, unlike the Cron Information tab.
+	 *
+	 * @param array<string,mixed> $options Plugin options snapshot.
+	 */
+	private static function maybeRenderCronStalledNotice( array $options ): void {
+		if ( '1' !== (string) $options['enabled'] || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$next    = wp_next_scheduled( Scheduler::HOOK );
+		$stalled = self::isWorkerStalled(
+			time(),
+			QueueRepository::pendingCount(),
+			false === $next ? null : (int) $next,
+			(int) $options['queue_interval'],
+			Diagnostics::lastRunTimestamp()
+		);
+		if ( ! $stalled ) {
+			return;
+		}
+
+		$cron_doc = 'https://developer.wordpress.org/plugins/cron/hooking-wp-cron-into-the-system-task-scheduler/';
+
+		$notice  = '<div class="notice notice-warning is-dismissible">';
+		$notice .= '<p><strong>' . esc_html__( 'Total Mail Queue: the queue may not be processing.', 'total-mail-queue' ) . '</strong></p>';
+		$notice .= '<p>' . esc_html__( 'Emails are waiting in the queue, but the worker has not run for a while. This usually means WP-Cron is only triggered while you are logged in — for example because the front-end is cached or gets little traffic — so the queue stalls once you log out.', 'total-mail-queue' ) . '</p>';
+		$notice .= '<p>' . wp_kses_post(
+			sprintf(
+				/* translators: 1: opening link tag, 2: closing link tag */
+				__( 'To process the queue around the clock, set up a real server cron that calls %1$swp-cron.php%2$s on a schedule.', 'total-mail-queue' ),
+				'<a href="' . esc_url( $cron_doc ) . '" target="_blank" rel="noopener noreferrer">',
+				'</a>'
+			)
+		) . '</p>';
+		$notice .= '</div>';
+		echo wp_kses_post( $notice );
 	}
 
 	/**

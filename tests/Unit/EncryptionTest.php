@@ -56,6 +56,26 @@ final class EncryptionTest extends TestCase {
         self::assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( $bogus ) );
     }
 
+    public function test_decrypt_handles_iv_containing_the_separator_bytes(): void {
+        // Regression: openssl_random_pseudo_bytes() can return an IV that
+        // contains "::" (or ends in ":"). Exploding the envelope on "::" then
+        // truncated the IV below 16 bytes and openssl_decrypt() failed
+        // intermittently. The decoder must split by the fixed IV length.
+        $cipher    = 'aes-256-cbc';
+        $key       = wp_salt( 'auth' );
+        $plain     = 'colliding-iv-password';
+        $iv_length = openssl_cipher_iv_length( $cipher );
+
+        // A 16-byte IV that both contains and ends with the separator bytes.
+        $iv = str_repeat( 'A', $iv_length - 4 ) . '::::';
+        self::assertSame( $iv_length, strlen( $iv ) );
+
+        $ciphertext = openssl_encrypt( $plain, $cipher, $key, 0, $iv );
+        $envelope   = base64_encode( $iv . '::' . $ciphertext );
+
+        self::assertSame( $plain, \TotalMailQueue\Support\Encryption::decrypt( $envelope ) );
+    }
+
     public function test_decrypt_returns_empty_string_for_payload_tampered_with_garbage_ciphertext(): void {
         // Valid structure (iv::ciphertext) but the ciphertext part is not a real openssl_encrypt output.
         $iv      = str_repeat( 'A', openssl_cipher_iv_length( 'aes-256-cbc' ) );

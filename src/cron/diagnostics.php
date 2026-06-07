@@ -74,4 +74,20 @@ final class Diagnostics {
 	public function save(): void {
 		update_option( self::OPTION_NAME, $this->entries, false );
 	}
+
+	/**
+	 * UTC unix timestamp of the most recent cron invocation (the `time` field
+	 * of the saved snapshot, stored as a site-local mysql string), or 0 when
+	 * the worker has never run.
+	 *
+	 * Used by the admin "worker stalled" notice to tell whether WP-Cron is
+	 * actually firing the queue hook.
+	 */
+	public static function lastRunTimestamp(): int {
+		$snapshot = get_option( self::OPTION_NAME );
+		if ( ! is_array( $snapshot ) || empty( $snapshot['time'] ) ) {
+			return 0;
+		}
+		return (int) get_gmt_from_date( (string) $snapshot['time'], 'U' );
+	}
 }

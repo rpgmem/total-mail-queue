@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Lifecycle;
 
+use TotalMailQueue\Cron\CronLock;
 use TotalMailQueue\Database\Migrator;
 use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Support\Paths;
@@ -34,6 +35,7 @@ final class Uninstaller {
 		delete_option( 'wp_tmq_settings' );
 		delete_option( Migrator::VERSION_OPTION );
 		delete_option( 'wp_tmq_last_cron' );
+		delete_option( CronLock::OPTION );
 
 		// Tables.
 		Schema::drop();

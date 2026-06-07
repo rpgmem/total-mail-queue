@@ -124,7 +124,15 @@ final class BatchProcessor {
 			$diag->set( 'sent', 0 );
 			$diag->set( 'errors', 0 );
 
+			$lock_ttl = (int) $options['cron_lock_ttl'];
 			foreach ( $pending_ids as $mail_id ) {
+				// Extend our hold while we make progress, and stop if a newer
+				// batch took the lock (ours lapsed because a send hung) — that
+				// batch now owns these rows, so continuing would double-send.
+				if ( ! CronLock::keepalive( $lock_ttl ) ) {
+					$diag->set( 'result', 'aborted: lock taken over by a newer batch' );
+					break;
+				}
 				$loop_result = self::sendOne( $mail_id, $options, $smtp_accounts, $diag );
 				if ( 'smtp_unavailable' === $loop_result ) {
 					$diag->set( 'result', 'smtp_unavailable' );
