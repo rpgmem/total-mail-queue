@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
-use TotalMailQueue\Database\Schema;
-
 /**
  * Router for the "SMTP Accounts" tab.
  *
@@ -27,22 +25,20 @@ final class SmtpPage {
 	 * already verified.
 	 */
 	public static function render(): void {
-		$smtp_table = Schema::smtpTable();
-
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing parameters, action handlers verify their own nonces.
 		$action = isset( $_GET['smtp-action'] ) ? sanitize_key( wp_unslash( $_GET['smtp-action'] ) ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same as above.
 		$edit_id = isset( $_GET['smtp-id'] ) ? intval( $_GET['smtp-id'] ) : 0;
 
-		$action_state = SmtpActions::handle( $smtp_table, $action, $edit_id );
+		$action_state = SmtpActions::handle( $action, $edit_id );
 		$action       = $action_state['action'];
 		$edit_id      = $action_state['edit_id'];
 
 		if ( 'add' === $action || 'edit' === $action ) {
-			SmtpFormRenderer::render( $smtp_table, $action, $edit_id );
+			SmtpFormRenderer::render( $action, $edit_id );
 			return;
 		}
 
-		SmtpListRenderer::render( $smtp_table );
+		SmtpListRenderer::render();
 	}
 }

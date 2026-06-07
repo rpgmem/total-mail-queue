@@ -155,4 +155,106 @@ final class QueueRepository {
 			'status'      => (string) $row['status'],
 		);
 	}
+
+	/**
+	 * Delete a row by id.
+	 *
+	 * @param int $id Row id.
+	 */
+	public static function delete( int $id ): void {
+		global $wpdb;
+		$table = Schema::queueTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
+	}
+
+	/**
+	 * Statuses that count as "log" rows (everything that has left the queue).
+	 * Used to validate the admin status filter so an arbitrary value can't be
+	 * spliced into the WHERE clause.
+	 */
+	private const LOG_STATUSES = array( 'sent', 'error', 'alert', 'blocked_by_source' );
+
+	/**
+	 * Build the WHERE fragment for the Log view: an optional exact-status
+	 * filter (falling back to "anything not still pending") plus an optional
+	 * source filter. Both dynamic values go through `$wpdb->prepare`.
+	 *
+	 * @param string $status_filter Optional status to match exactly.
+	 * @param string $source_filter Optional `source_key` to match exactly.
+	 */
+	private static function logWhere( string $status_filter, string $source_filter ): string {
+		global $wpdb;
+		if ( '' !== $status_filter && in_array( $status_filter, self::LOG_STATUSES, true ) ) {
+			$base = $wpdb->prepare( '`status` = %s', $status_filter );
+		} else {
+			$base = "`status` != 'queue' AND `status` != 'high'";
+		}
+		if ( '' !== $source_filter ) {
+			$base .= ' AND ' . $wpdb->prepare( '`source_key` = %s', $source_filter );
+		}
+		return $base;
+	}
+
+	/**
+	 * Count Log rows matching the status / source filter.
+	 *
+	 * @param string $status_filter Optional status filter.
+	 * @param string $source_filter Optional source filter.
+	 */
+	public static function logCount( string $status_filter, string $source_filter ): int {
+		global $wpdb;
+		$table = Schema::queueTable();
+		$where = self::logWhere( $status_filter, $source_filter );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
+	}
+
+	/**
+	 * Fetch a page of Log rows (newest first) matching the filter.
+	 *
+	 * @param string $status_filter Optional status filter.
+	 * @param string $source_filter Optional source filter.
+	 * @param int    $per_page      Page size.
+	 * @param int    $offset        Row offset.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function logPage( string $status_filter, string $source_filter, int $per_page, int $offset ): array {
+		global $wpdb;
+		$table = Schema::queueTable();
+		$where = self::logWhere( $status_filter, $source_filter );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Fetch a page of pending rows in send order (priority, then retries, then id).
+	 *
+	 * @param int $per_page Page size.
+	 * @param int $offset   Row offset.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function queuePage( int $per_page, int $offset ): array {
+		global $wpdb;
+		$table = Schema::queueTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * The most recent non-pending row (sent / error / alert / blocked), or
+	 * null when the log is empty. Backs the "WordPress can't send email"
+	 * admin notice.
+	 *
+	 * @return array<string,mixed>|null
+	 */
+	public static function lastLogRow(): ?array {
+		global $wpdb;
+		$table = Schema::queueTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row = $wpdb->get_row( "SELECT * FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `id` DESC", ARRAY_A );
+		return is_array( $row ) ? $row : null;
+	}
 }

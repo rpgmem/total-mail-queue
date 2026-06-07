@@ -5,6 +5,14 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Refactored
+
+- **All database access moved behind the repository layer.** The admin tabs and the REST controller used to issue their own `$wpdb` queries against the queue and SMTP tables — the Save/Delete/Reset SMTP actions, the list/form renderers, the Settings bulk-limit warning, the XML export/import, the Log/Retention list table (counts, paging, bulk delete/resend/force-resend, the SMTP-name lookup), the "email failed" admin notice, the "add test mail" link, and the message-preview REST endpoint. They now call `Queue\QueueRepository` and `Smtp\Repository` instead. New repository methods back the moved queries (`QueueRepository::delete/logCount/logPage/queuePage/lastLogRow`, `Smtp\Repository::all/findById/insert/update/delete/zeroSentCounters/tableColumns/truncate/namesById/accountsExceedingBulk`), and the prefixed table name is no longer threaded through `SmtpPage` → actions/renderers. The only direct `$wpdb` use that remains is where it must: the schema/migrator DDL, the three repositories, the retention sweep, and the `GET_LOCK` cron mutex. No behavior change.
+
+---
+
 ## [2.7.0] - 2026-06-07
 
 > Smarter multi-account delivery and a unified queue priority. SMTP accounts are now chosen round-robin so every enabled account shares the load and covers more of the hour; the worker runs on demand instead of on a fixed heartbeat; and a single numeric priority scale replaces the old binary "high" status, configurable per source.

@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
-use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Settings\Sanitizer;
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
 /**
  * Registers the `wp_tmq_settings` setting plus every field rendered on the
@@ -123,18 +123,8 @@ final class SettingsApi {
 		echo ' ' . wp_kses_post( sprintf( __( 'by %1$sWP Cron%2$s.', 'total-mail-queue' ), '<i><a href="https://developer.wordpress.org/plugins/cron/" target="_blank">', '</a></i>' ) ) . ' ';
 
 		// Warn when any SMTP account has a per-cycle bulk higher than the global queue amount.
-		global $wpdb;
-		$smtp_table    = Schema::smtpTable();
 		$global_amount = intval( $options['queue_amount'] );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$exceeding = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from Schema::smtpTable()
-				"SELECT `name`, `send_bulk` FROM `$smtp_table` WHERE `enabled` = 1 AND `send_bulk` > %d AND `send_bulk` > 0",
-				$global_amount
-			),
-			ARRAY_A
-		);
+		$exceeding     = SmtpRepository::accountsExceedingBulk( $global_amount );
 		if ( ! empty( $exceeding ) ) {
 			$names = array_map(
 				static function ( $a ) {

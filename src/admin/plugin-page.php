@@ -14,8 +14,8 @@ use TotalMailQueue\Admin\Pages\SmtpPage;
 use TotalMailQueue\Admin\Pages\SourcesPage;
 use TotalMailQueue\Admin\Pages\TemplatesPage;
 use TotalMailQueue\Admin\Tables\LogTable;
-use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
 
 /**
@@ -249,18 +249,16 @@ final class PluginPage {
 		// "Put a test mail" link target (FAQ tab carries the nonce'd link).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked just below.
 		if ( isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_addtestmail' ) ) {
-			global $wpdb;
-			$table = Schema::queueTable();
-			$data  = array(
-				'timestamp' => current_time( 'mysql', false ),
-				'recipient' => (string) $options['email'],
-				/* translators: %s: timestamp */
-				'subject'   => sprintf( __( 'Testmail #%s', 'total-mail-queue' ), time() ),
-				'message'   => __( 'This is just a test email sent by the Total Mail Queue plugin.', 'total-mail-queue' ),
-				'status'    => 'queue',
+			QueueRepository::insert(
+				array(
+					'timestamp' => current_time( 'mysql', false ),
+					'recipient' => (string) $options['email'],
+					/* translators: %s: timestamp */
+					'subject'   => sprintf( __( 'Testmail #%s', 'total-mail-queue' ), time() ),
+					'message'   => __( 'This is just a test email sent by the Total Mail Queue plugin.', 'total-mail-queue' ),
+					'status'    => 'queue',
+				)
 			);
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( $table, $data );
 		}
 
 		QueueDiagnostics::renderModeNotice( $options );

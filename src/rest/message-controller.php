@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Rest;
 
-use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Support\HtmlPreview;
 use TotalMailQueue\Support\Serializer;
 use WP_Error;
@@ -63,13 +63,9 @@ final class MessageController {
 	 * @return array{status:string,data:array{html:string}}|WP_Error
 	 */
 	public static function getMessage( WP_REST_Request $request ) {
-		global $wpdb;
-		$table = Schema::queueTable();
-		$id    = (int) $request['id'];
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE `id` = %d", $id ), ARRAY_A );
-		if ( ! $row ) {
+		$id  = (int) $request['id'];
+		$row = QueueRepository::findById( $id );
+		if ( null === $row ) {
 			return new WP_Error( 'no_message', __( 'Message not found', 'total-mail-queue' ), array( 'status' => 404 ) );
 		}
 

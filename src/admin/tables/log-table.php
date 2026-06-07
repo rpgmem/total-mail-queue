@@ -9,8 +9,9 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Tables;
 
-use TotalMailQueue\Database\Schema;
 use TotalMailQueue\Queue\Priority;
+use TotalMailQueue\Queue\QueueRepository;
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Support\Serializer;
 use WP_List_Table;
 
@@ -70,36 +71,13 @@ final class LogTable extends WP_List_Table {
 	}
 
 	/**
-	 * Build the WHERE clause used by the log queries.
-	 *
-	 * @param string $status_filter Optional `sent`/`error`/`alert` filter.
-	 * @param string $source_filter Optional `source_key` filter.
-	 */
-	protected function get_log_where( string $status_filter = '', string $source_filter = '' ): string {
-		global $wpdb;
-		if ( $status_filter && in_array( $status_filter, array( 'sent', 'error', 'alert', 'blocked_by_source' ), true ) ) {
-			$base = $wpdb->prepare( '`status` = %s', $status_filter );
-		} else {
-			$base = "`status` != 'queue' AND `status` != 'high'";
-		}
-		if ( '' !== $source_filter ) {
-			$base .= ' AND ' . $wpdb->prepare( '`source_key` = %s', $source_filter );
-		}
-		return $base;
-	}
-
-	/**
 	 * Count rows matching the log filter.
 	 *
 	 * @param string $status_filter Status filter.
 	 * @param string $source_filter Source filter.
 	 */
 	protected function get_log_count( string $status_filter = '', string $source_filter = '' ): int {
-		global $wpdb;
-		$table = Schema::queueTable();
-		$where = $this->get_log_where( $status_filter, $source_filter );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
+		return QueueRepository::logCount( $status_filter, $source_filter );
 	}
 
 	/**
@@ -112,22 +90,14 @@ final class LogTable extends WP_List_Table {
 	 * @return array<int,array<string,mixed>>
 	 */
 	protected function get_log( string $status_filter = '', string $source_filter = '', int $per_page = 50, int $offset = 0 ): array {
-		global $wpdb;
-		$table = Schema::queueTable();
-		$where = $this->get_log_where( $status_filter, $source_filter );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
-		return is_array( $rows ) ? $rows : array();
+		return QueueRepository::logPage( $status_filter, $source_filter, $per_page, $offset );
 	}
 
 	/**
 	 * Count pending queue rows.
 	 */
 	protected function get_queue_count(): int {
-		global $wpdb;
-		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE `status` = 'queue' OR `status` = 'high'" );
+		return QueueRepository::pendingCount();
 	}
 
 	/**
@@ -138,11 +108,7 @@ final class LogTable extends WP_List_Table {
 	 * @return array<int,array<string,mixed>>
 	 */
 	protected function get_queue( int $per_page = 50, int $offset = 0 ): array {
-		global $wpdb;
-		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
-		return is_array( $rows ) ? $rows : array();
+		return QueueRepository::queuePage( $per_page, $offset );
 	}
 
 	/**
@@ -355,14 +321,7 @@ final class LogTable extends WP_List_Table {
 		}
 		static $smtp_names = null;
 		if ( null === $smtp_names ) {
-			global $wpdb;
-			$smtp_table = Schema::smtpTable();
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$rows       = $wpdb->get_results( "SELECT `id`, `name` FROM `$smtp_table`", ARRAY_A );
-			$smtp_names = array();
-			foreach ( (array) $rows as $r ) {
-				$smtp_names[ intval( $r['id'] ) ] = $r['name'];
-			}
+			$smtp_names = SmtpRepository::namesById();
 		}
 		$name = $smtp_names[ $acct_id ] ?? __( 'Deleted', 'total-mail-queue' );
 		return '<span title="#' . esc_attr( (string) $acct_id ) . '">#' . esc_html( (string) $acct_id ) . ' ' . esc_html( (string) $name ) . '</span>';
@@ -465,11 +424,8 @@ final class LogTable extends WP_List_Table {
 	 * @param array<int,int> $ids Row ids.
 	 */
 	private function bulk_delete( array $ids ): void {
-		global $wpdb;
-		$table = Schema::queueTable();
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->delete( $table, array( 'id' => intval( $id ) ), '%d' );
+			QueueRepository::delete( intval( $id ) );
 		}
 	}
 
@@ -479,44 +435,39 @@ final class LogTable extends WP_List_Table {
 	 * @param array<int,int> $ids Row ids.
 	 */
 	private function bulk_resend( array $ids ): void {
-		global $wpdb;
-		$table      = Schema::queueTable();
 		$resend     = 0;
 		$errors     = 0;
 		$skip_sent  = 0;
 		$skip_queue = 0;
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE `id` = %d", intval( $id ) ) );
-			if ( ! $row ) {
+			$row = QueueRepository::findById( intval( $id ) );
+			if ( null === $row ) {
 				continue;
 			}
-			if ( 'sent' === $row->status ) {
+			if ( 'sent' === $row['status'] ) {
 				++$skip_sent;
 				continue;
 			}
-			if ( in_array( $row->status, array( 'queue', 'high' ), true ) ) {
+			if ( in_array( $row['status'], array( 'queue', 'high' ), true ) ) {
 				++$skip_queue;
 				continue;
 			}
-			if ( ! $row->attachments ) {
+			if ( ! $row['attachments'] ) {
 				++$resend;
 				$data = array(
 					'timestamp'   => current_time( 'mysql', false ),
-					'recipient'   => $row->recipient,
-					'subject'     => $row->subject,
-					'message'     => $row->message,
+					'recipient'   => $row['recipient'],
+					'subject'     => $row['subject'],
+					'message'     => $row['message'],
 					'status'      => 'queue',
 					'attachments' => '',
-					'headers'     => $row->headers,
+					'headers'     => $row['headers'],
 				);
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->insert( $table, $data );
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->delete( $table, array( 'id' => intval( $id ) ), '%d' );
+				QueueRepository::insert( $data );
+				QueueRepository::delete( intval( $id ) );
 			} else {
 				++$errors;
-				echo wp_kses_post( self::attachmentMissingNotice( $row->recipient ) );
+				echo wp_kses_post( self::attachmentMissingNotice( (string) $row['recipient'] ) );
 			}
 		}
 		self::renderSkipNotices( $skip_sent, $skip_queue );
@@ -540,51 +491,46 @@ final class LogTable extends WP_List_Table {
 	 * @param array<int,int> $ids Row ids.
 	 */
 	private function bulk_force_resend( array $ids ): void {
-		global $wpdb;
-		$table      = Schema::queueTable();
 		$count      = 0;
 		$errors     = 0;
 		$skip_sent  = 0;
 		$skip_queue = 0;
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE `id` = %d", intval( $id ) ) );
-			if ( ! $row ) {
+			$row = QueueRepository::findById( intval( $id ) );
+			if ( null === $row ) {
 				continue;
 			}
-			if ( 'sent' === $row->status ) {
+			if ( 'sent' === $row['status'] ) {
 				++$skip_sent;
 				continue;
 			}
-			if ( in_array( $row->status, array( 'queue', 'high' ), true ) ) {
+			if ( in_array( $row['status'], array( 'queue', 'high' ), true ) ) {
 				++$skip_queue;
 				continue;
 			}
-			if ( 'error' !== $row->status ) {
+			if ( 'error' !== $row['status'] ) {
 				++$errors;
 				continue;
 			}
-			if ( ! $row->attachments ) {
+			if ( ! $row['attachments'] ) {
 				++$count;
 				$data = array(
 					'timestamp'   => current_time( 'mysql', false ),
-					'recipient'   => $row->recipient,
-					'subject'     => $row->subject,
-					'message'     => $row->message,
+					'recipient'   => $row['recipient'],
+					'subject'     => $row['subject'],
+					'message'     => $row['message'],
 					'status'      => 'queue',
 					'attachments' => '',
-					'headers'     => $row->headers,
+					'headers'     => $row['headers'],
 					'retry_count' => 0,
 					/* translators: %s: original error info */
-					'info'        => sprintf( __( 'Force resent — Original: %s', 'total-mail-queue' ), $row->info ),
+					'info'        => sprintf( __( 'Force resent — Original: %s', 'total-mail-queue' ), $row['info'] ),
 				);
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->insert( $table, $data );
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->delete( $table, array( 'id' => intval( $id ) ), '%d' );
+				QueueRepository::insert( $data );
+				QueueRepository::delete( intval( $id ) );
 			} else {
 				++$errors;
-				echo wp_kses_post( self::attachmentMissingNotice( $row->recipient ) );
+				echo wp_kses_post( self::attachmentMissingNotice( (string) $row['recipient'] ) );
 			}
 		}
 		self::renderSkipNotices( $skip_sent, $skip_queue );
