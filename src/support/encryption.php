@@ -60,12 +60,20 @@ final class Encryption {
 		if ( false === $data ) {
 			return '';
 		}
-		$parts = explode( '::', $data, 2 );
-		if ( 2 !== count( $parts ) ) {
+
+		// The envelope is `<iv><::><ciphertext>` with a fixed-length binary IV.
+		// We must split by that known length, NOT by exploding on `::`: the
+		// random IV can itself contain the bytes `::` (or end in `:`), which
+		// would truncate it to 15 bytes and make openssl_decrypt() fail
+		// intermittently. The base64 ciphertext never contains `:`, so the
+		// only `::` we can trust is the separator right after the IV.
+		$iv_length = (int) openssl_cipher_iv_length( self::CIPHER );
+		if ( strlen( $data ) < $iv_length + 2 || '::' !== substr( $data, $iv_length, 2 ) ) {
 			return '';
 		}
-		[ $iv, $encrypted ] = $parts;
-		$plain              = openssl_decrypt( $encrypted, self::CIPHER, $key, 0, $iv );
+		$iv        = substr( $data, 0, $iv_length );
+		$encrypted = substr( $data, $iv_length + 2 );
+		$plain     = openssl_decrypt( $encrypted, self::CIPHER, $key, 0, $iv );
 		return false === $plain ? '' : $plain;
 	}
 }

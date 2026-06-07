@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **SMTP passwords no longer fail to decrypt intermittently.** `Support\Encryption` stored credentials as `base64(iv::ciphertext)` and split them back apart by exploding on `::`. But the 16-byte IV is random binary and can itself contain the bytes `::` (or end in `:`), which truncated the IV below 16 bytes and made `openssl_decrypt()` fail for roughly 0.4% of stored passwords — surfacing as a random "couldn't send" on an otherwise valid SMTP account. Decoding now splits by the known fixed IV length instead of the delimiter; existing ciphertexts decode unchanged.
 - **The queue no longer freezes when a send hangs.** The cron lock was a MySQL `GET_LOCK()` tied to the database connection: it released when a worker process *died*, but a process that *hung* mid-batch (e.g. on a slow SMTP socket) held it indefinitely and froze the whole queue until killed — the advertised `cron_lock_ttl` "safety timeout" was never actually enforced. `Cron\CronLock` now uses a timestamped option with a real, self-expiring TTL: a hung holder's claim lapses after `cron_lock_ttl` and the next cron run reclaims it automatically. A per-row keepalive extends the deadline while a batch is progressing (so legitimately long batches don't expire early) and makes a revived hung worker stop instead of double-sending rows a newer batch has taken over. Claims are confirmed with a cache-bypassing read so two simultaneous cron runs can't both proceed.
 
 ### Refactored
