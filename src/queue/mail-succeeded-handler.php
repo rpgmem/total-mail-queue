@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Queue;
 
+use TotalMailQueue\Cron\Diagnostics;
+
 /**
  * For "instant" priority emails — the only ones that flow through both
  * `MailInterceptor::handle()` (which records the row id) AND `wp_mail()`'s
@@ -35,7 +37,10 @@ final class MailSucceededHandler {
 		if ( 0 === $mail_id ) {
 			return;
 		}
+		// Queue-worker sends are recorded by the batch processor; only the
+		// "instant" path (which doesn't go through it) needs to stamp here.
 		if ( 'instant' === QueueRepository::statusFor( $mail_id ) ) {
+			Diagnostics::recordSend();
 			QueueRepository::update(
 				$mail_id,
 				array(

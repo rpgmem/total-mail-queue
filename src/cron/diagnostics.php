@@ -24,6 +24,13 @@ final class Diagnostics {
 	public const OPTION_NAME = 'wp_tmq_last_cron';
 
 	/**
+	 * Option key that stores the time of the most recent individual send, as a
+	 * site-local mysql datetime string. Updated on every successful send (queue
+	 * worker and instant) and read by the "queue may not be processing" notice.
+	 */
+	public const LAST_SEND_OPTION = 'wp_tmq_last_send';
+
+	/**
 	 * Accumulated entries for the current batch.
 	 *
 	 * @var array<string,mixed>
@@ -76,18 +83,25 @@ final class Diagnostics {
 	}
 
 	/**
-	 * UTC unix timestamp of the most recent cron invocation (the `time` field
-	 * of the saved snapshot, stored as a site-local mysql string), or 0 when
-	 * the worker has never run.
-	 *
-	 * Used by the admin "worker stalled" notice to tell whether WP-Cron is
-	 * actually firing the queue hook.
+	 * Stamp "an email was just sent" with the current site-local time. Called
+	 * from every successful send path so {@see Diagnostics::lastSendTimestamp()}
+	 * reflects real delivery activity, not merely that the worker ran.
 	 */
-	public static function lastRunTimestamp(): int {
-		$snapshot = get_option( self::OPTION_NAME );
-		if ( ! is_array( $snapshot ) || empty( $snapshot['time'] ) ) {
+	public static function recordSend(): void {
+		update_option( self::LAST_SEND_OPTION, current_time( 'mysql', false ), false );
+	}
+
+	/**
+	 * UTC unix timestamp of the most recent individual send, or 0 when nothing
+	 * has ever been sent. Used by the stalled-queue notice so it keys off real
+	 * delivery progress rather than worker invocations (which keep happening
+	 * even while every account is capped or the queue is just idling).
+	 */
+	public static function lastSendTimestamp(): int {
+		$stamp = get_option( self::LAST_SEND_OPTION );
+		if ( ! is_string( $stamp ) || '' === $stamp ) {
 			return 0;
 		}
-		return (int) get_gmt_from_date( (string) $snapshot['time'], 'U' );
+		return (int) get_gmt_from_date( $stamp, 'U' );
 	}
 }

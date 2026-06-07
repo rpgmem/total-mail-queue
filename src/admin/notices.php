@@ -54,32 +54,48 @@ final class Notices {
 	}
 
 	/**
-	 * Decide whether the queue worker looks stalled — i.e. mail is waiting but
-	 * WP-Cron isn't firing the queue hook. Pure so the policy is unit-testable;
-	 * {@see Notices::maybeRenderCronStalledNotice()} feeds it the live values.
+	 * How long the queue may sit with mail waiting and nothing actually sent
+	 * before the "may not be processing" notice appears.
+	 */
+	private const STALE_AFTER = 2 * HOUR_IN_SECONDS;
+
+	/**
+	 * Decide whether the queue is genuinely stalled — mail is waiting, nothing
+	 * has been sent for a long time, and the worker isn't scheduled to act.
+	 * Pure so the policy is unit-testable; {@see Notices::maybeRenderCronStalledNotice()}
+	 * feeds it the live values.
 	 *
-	 * Guards against two legitimate "old but fine" cases:
-	 * - A fresh site whose worker has never run yet ($last_run = 0).
-	 * - An intentional deferral, where the worker has parked its next run in
-	 *   the future on purpose (e.g. every SMTP account is capped).
+	 * The staleness clock is the **last individual send**, not the last worker
+	 * run: the worker keeps running (and saving diagnostics) even while every
+	 * account is capped or the queue idles, so keying off runs produced false
+	 * alarms while delivery was actually fine. A send within the window, a
+	 * future-scheduled run (normal cadence or an intentional quota deferral),
+	 * or a site that has never sent are all treated as "not stalled".
 	 *
 	 * @param int      $now            Current UTC unix timestamp.
 	 * @param int      $pending        Rows waiting in the queue.
 	 * @param int|null $next_scheduled Timestamp of the next queue event, or null.
 	 * @param int      $interval       Queue interval in seconds.
-	 * @param int      $last_run       UTC unix timestamp of the last worker run (0 = never).
+	 * @param int      $last_send      UTC unix timestamp of the last individual send (0 = never sent).
 	 */
-	public static function isWorkerStalled( int $now, int $pending, ?int $next_scheduled, int $interval, int $last_run ): bool {
-		if ( $pending <= 0 || $last_run <= 0 ) {
+	public static function isWorkerStalled( int $now, int $pending, ?int $next_scheduled, int $interval, int $last_send ): bool {
+		if ( $pending <= 0 || $last_send <= 0 ) {
 			return false;
 		}
-		$interval = max( 60, $interval );
-		// Intentional deferral: the next run is parked in the future on purpose.
-		if ( null !== $next_scheduled && $next_scheduled > $now + $interval ) {
+		// Only suspicious once delivery has actually gone quiet with mail waiting.
+		if ( ( $now - $last_send ) <= self::STALE_AFTER ) {
 			return false;
 		}
-		$threshold = max( 2 * $interval, 15 * MINUTE_IN_SECONDS );
-		return ( $now - $last_run ) > $threshold;
+		// It's been quiet and mail is waiting. A worker event scheduled for the
+		// future (normal cadence or a deliberate quota deferral) means it's
+		// still set to run, so the quiet is expected — not a stall. Only warn
+		// when no event is armed at all, or the armed event is overdue, which is
+		// the signature of WP-Cron not firing on a cached / low-traffic site.
+		if ( null === $next_scheduled ) {
+			return true;
+		}
+		$grace = max( 2 * max( 60, $interval ), 10 * MINUTE_IN_SECONDS );
+		return $next_scheduled < ( $now - $grace );
 	}
 
 	/**
@@ -101,7 +117,7 @@ final class Notices {
 			QueueRepository::pendingCount(),
 			false === $next ? null : (int) $next,
 			(int) $options['queue_interval'],
-			Diagnostics::lastRunTimestamp()
+			Diagnostics::lastSendTimestamp()
 		);
 		if ( ! $stalled ) {
 			return;
@@ -111,7 +127,7 @@ final class Notices {
 
 		$notice  = '<div class="notice notice-warning is-dismissible">';
 		$notice .= '<p><strong>' . esc_html__( 'Total Mail Queue: the queue may not be processing.', 'total-mail-queue' ) . '</strong></p>';
-		$notice .= '<p>' . esc_html__( 'Emails are waiting in the queue, but the worker has not run for a while. This usually means WP-Cron is only triggered while you are logged in — for example because the front-end is cached or gets little traffic — so the queue stalls once you log out.', 'total-mail-queue' ) . '</p>';
+		$notice .= '<p>' . esc_html__( 'Emails are waiting in the queue, but none have been sent in over two hours and the worker is not scheduled to run. This usually means WP-Cron is only triggered while you are logged in — for example because the front-end is cached or gets little traffic — so the queue stalls once you log out.', 'total-mail-queue' ) . '</p>';
 		$notice .= '<p>' . wp_kses_post(
 			sprintf(
 				/* translators: 1: opening link tag, 2: closing link tag */

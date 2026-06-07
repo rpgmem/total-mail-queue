@@ -35,6 +35,7 @@ final class Uninstaller {
 		delete_option( 'wp_tmq_settings' );
 		delete_option( Migrator::VERSION_OPTION );
 		delete_option( 'wp_tmq_last_cron' );
+		delete_option( 'wp_tmq_last_send' );
 		delete_option( CronLock::OPTION );
 
 		// Tables.

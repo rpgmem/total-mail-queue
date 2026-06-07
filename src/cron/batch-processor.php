@@ -246,6 +246,7 @@ final class BatchProcessor {
 				SmtpRepository::incrementCounter( $smtp_to_use['id'] );
 				SmtpRepository::bumpMemoryCounter( $smtp_accounts, $smtp_to_use['id'] );
 			}
+			Diagnostics::recordSend();
 			$diag->increment( 'sent' );
 		} else {
 			$diag->increment( 'errors' );
