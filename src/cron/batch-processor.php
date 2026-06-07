@@ -139,6 +139,11 @@ final class BatchProcessor {
 			CronLock::release();
 		}
 
+		// Adapt the schedule to what's left: sleep if the queue drained empty,
+		// defer to the next cycle/quota window if SMTP-only work is stuck with
+		// every account capped, or keep the normal cadence otherwise.
+		Scheduler::adjustSchedule( $options );
+
 		if ( ! $diag->has( 'result' ) ) {
 			$diag->set( 'result', 'ok' );
 		}
@@ -238,6 +243,15 @@ final class BatchProcessor {
 					array( '%s' )
 				);
 			}
+		}
+
+		// Rotate the account we just used to the back of the in-memory list
+		// (success or failure) so the next row in this batch reaches for a
+		// different account — this is what turns the priority-ordered snapshot
+		// into round-robin delivery and keeps a flaky account from being
+		// retried for every row.
+		if ( $smtp_to_use ) {
+			SmtpRepository::markUsed( $smtp_accounts, $smtp_to_use['id'] );
 		}
 
 		AttachmentStore::releaseFor( $attachments );

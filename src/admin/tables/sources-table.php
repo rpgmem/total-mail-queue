@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Tables;
 
+use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
 use WP_List_Table;
@@ -44,6 +45,7 @@ final class SourcesTable extends WP_List_Table {
 			'label'        => __( 'Label', 'total-mail-queue' ),
 			'source_key'   => __( 'Source key', 'total-mail-queue' ),
 			'group_label'  => __( 'Group', 'total-mail-queue' ),
+			'priority'     => __( 'Priority', 'total-mail-queue' ),
 			'total_count'  => __( 'Total emails', 'total-mail-queue' ),
 			'last_seen_at' => __( 'Last seen', 'total-mail-queue' ),
 			'actions'      => __( 'Actions', 'total-mail-queue' ),
@@ -164,6 +166,8 @@ final class SourcesTable extends WP_List_Table {
 				return '<code>' . esc_html( (string) $item['source_key'] ) . '</code>';
 			case 'group_label':
 				return self::renderGroupColumn( $item );
+			case 'priority':
+				return self::renderPriorityColumn( $item );
 			case 'total_count':
 				return '<span title="' . esc_attr__( 'Total emails seen since this source was first detected', 'total-mail-queue' ) . '">' . esc_html( number_format_i18n( (int) $item['total_count'] ) ) . '</span>';
 			case 'last_seen_at':
@@ -173,6 +177,23 @@ final class SourcesTable extends WP_List_Table {
 			default:
 				return esc_html( (string) ( $item[ $column_name ] ?? '' ) );
 		}
+	}
+
+	/**
+	 * Send-priority cell: the numeric value, flagged when it sits above the
+	 * normal baseline (lower number = more urgent).
+	 *
+	 * @param array<string,mixed> $item Row data.
+	 */
+	private static function renderPriorityColumn( array $item ): string {
+		$priority = isset( $item['priority'] ) ? (int) $item['priority'] : Priority::NORMAL;
+		if ( $priority < Priority::NORMAL ) {
+			return '<span class="tmq-status tmq-status-high" title="' . esc_attr__( 'Sent ahead of normal mail', 'total-mail-queue' ) . '">' . esc_html( (string) $priority ) . '</span>';
+		}
+		if ( $priority > Priority::NORMAL ) {
+			return '<span class="description" title="' . esc_attr__( 'Sent after normal mail', 'total-mail-queue' ) . '">' . esc_html( (string) $priority ) . '</span>';
+		}
+		return esc_html( (string) $priority );
 	}
 
 	/**

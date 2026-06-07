@@ -86,6 +86,10 @@ final class SourcesActions {
 		$group = isset( $_POST['group_override'] ) ? sanitize_text_field( wp_unslash( $_POST['group_override'] ) ) : '';
 		SourcesRepository::updateOverrides( $source_id, $label, $group );
 
+		if ( isset( $_POST['priority'] ) ) {
+			SourcesRepository::updatePriority( $source_id, (int) $_POST['priority'] );
+		}
+
 		// Template override fields (only relevant for wp_core sources).
 		$row = SourcesRepository::findById( $source_id );
 		if ( null !== $row && CoreTemplates::isCoreTemplate( (string) $row['source_key'] ) ) {

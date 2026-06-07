@@ -68,7 +68,13 @@ final class Repository {
 
 	/**
 	 * Return enabled SMTP accounts whose daily/monthly/cycle limits aren't
-	 * exhausted, ordered by priority.
+	 * exhausted, **least-recently-used first**.
+	 *
+	 * The ordering is what spreads load across accounts over time: the
+	 * account idle the longest sorts to the front, so a batch rotates through
+	 * every enabled account instead of draining the highest-priority one
+	 * first. `priority` is only a tie-breaker (e.g. when two accounts have
+	 * never sent, or share the same `last_sent_at`).
 	 *
 	 * Note: `send_interval` is intentionally NOT checked here — it only
 	 * controls when {@see Repository::resetCounters()} clears `cycle_sent`,
@@ -80,25 +86,27 @@ final class Repository {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1 AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`) AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`) AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`) ORDER BY `priority` ASC", ARRAY_A );
+		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1 AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`) AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`) AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`) ORDER BY `last_sent_at` ASC, `priority` ASC, `id` ASC", ARRAY_A );
 		return $accounts ? $accounts : array();
 	}
 
 	/**
-	 * Pick the first account in $accounts whose `cycle_sent` is below
-	 * `send_bulk` (or whose `send_bulk` is 0, meaning unlimited).
+	 * Pick the next account to send through: the first one in $accounts (the
+	 * list is kept in least-recently-used order, front to back) that still
+	 * has capacity on every limit — per-cycle bulk, daily, and monthly.
 	 *
 	 * Pure / database-free — operates on the in-memory list returned by
-	 * {@see Repository::available()} so a single batch can iterate without
-	 * re-querying.
+	 * {@see Repository::available()}. After a send the caller bumps the
+	 * counters with {@see Repository::bumpMemoryCounter()} and rotates the
+	 * account to the back with {@see Repository::markUsed()}, so repeated
+	 * calls within one batch hand out different accounts in rotation.
 	 *
-	 * @param list<array<string,mixed>> $accounts Candidates in priority order.
+	 * @param list<array<string,mixed>> $accounts Candidates, least-recently-used first.
 	 * @return array<string,mixed>|null Selected row, or null when all are exhausted.
 	 */
 	public static function pickAvailable( array $accounts ): ?array {
 		foreach ( $accounts as $acct ) {
-			$bulk = intval( $acct['send_bulk'] );
-			if ( 0 === $bulk || intval( $acct['cycle_sent'] ) < $bulk ) {
+			if ( self::hasCapacity( $acct ) ) {
 				return $acct;
 			}
 		}
@@ -106,19 +114,75 @@ final class Repository {
 	}
 
 	/**
-	 * Increment `cycle_sent` for the account matching $smtp_id in the
-	 * in-memory $accounts list. No DB hit.
+	 * Whether an in-memory account row still has room on every configured
+	 * limit. A limit of 0 means "unlimited" and never blocks.
+	 *
+	 * @param array<string,mixed> $acct Account row (possibly partial in tests).
+	 */
+	private static function hasCapacity( array $acct ): bool {
+		$daily_limit = intval( $acct['daily_limit'] ?? 0 );
+		if ( $daily_limit > 0 && intval( $acct['daily_sent'] ?? 0 ) >= $daily_limit ) {
+			return false;
+		}
+		$monthly_limit = intval( $acct['monthly_limit'] ?? 0 );
+		if ( $monthly_limit > 0 && intval( $acct['monthly_sent'] ?? 0 ) >= $monthly_limit ) {
+			return false;
+		}
+		$bulk = intval( $acct['send_bulk'] ?? 0 );
+		if ( $bulk > 0 && intval( $acct['cycle_sent'] ?? 0 ) >= $bulk ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Increment the in-memory usage counters (`cycle_sent`, `daily_sent`,
+	 * `monthly_sent`) for the account matching $smtp_id. No DB hit — mirrors
+	 * the persisted bump in {@see Repository::incrementCounter()} so the
+	 * within-batch capacity checks in {@see Repository::hasCapacity()} stay
+	 * accurate and a single account can't blow past its daily / monthly cap
+	 * mid-batch.
 	 *
 	 * @param list<array<string,mixed>> $accounts In-memory account list, modified by reference.
-	 * @param int|string                $smtp_id  ID of the account whose counter should bump.
+	 * @param int|string                $smtp_id  ID of the account whose counters should bump.
 	 */
 	public static function bumpMemoryCounter( array &$accounts, $smtp_id ): void {
 		$target_id = intval( $smtp_id );
 		foreach ( $accounts as $key => $acct ) {
 			if ( intval( $acct['id'] ) === $target_id ) {
-				$accounts[ $key ]['cycle_sent'] = intval( $acct['cycle_sent'] ) + 1;
+				$accounts[ $key ]['cycle_sent']   = intval( $acct['cycle_sent'] ?? 0 ) + 1;
+				$accounts[ $key ]['daily_sent']   = intval( $acct['daily_sent'] ?? 0 ) + 1;
+				$accounts[ $key ]['monthly_sent'] = intval( $acct['monthly_sent'] ?? 0 ) + 1;
 				break;
 			}
+		}
+	}
+
+	/**
+	 * Move the account matching $smtp_id to the back of the in-memory list so
+	 * the next {@see Repository::pickAvailable()} hands out a different
+	 * account. This is the rotation that turns the priority-ordered snapshot
+	 * into round-robin delivery: callers invoke it after every send attempt
+	 * (success or failure) so a flaky account doesn't get hammered for the
+	 * whole batch either.
+	 *
+	 * @param list<array<string,mixed>> $accounts In-memory account list, modified by reference.
+	 * @param int|string                $smtp_id  ID of the account that was just used.
+	 */
+	public static function markUsed( array &$accounts, $smtp_id ): void {
+		$target_id = intval( $smtp_id );
+		$moved     = null;
+		$remaining = array();
+		foreach ( $accounts as $acct ) {
+			if ( null === $moved && intval( $acct['id'] ) === $target_id ) {
+				$moved = $acct;
+				continue;
+			}
+			$remaining[] = $acct;
+		}
+		if ( null !== $moved ) {
+			$remaining[] = $moved;
+			$accounts    = $remaining;
 		}
 	}
 
@@ -140,6 +204,108 @@ final class Repository {
 				intval( $smtp_id )
 			)
 		);
+	}
+
+	/**
+	 * Earliest moment (UTC unix timestamp) at which some enabled account will
+	 * regain capacity, given that none can send right now. Used by the
+	 * scheduler to defer the queue worker to the next cycle/quota window
+	 * instead of waking it every interval while every account is capped.
+	 *
+	 * Returns null when there are no enabled accounts at all — there is then
+	 * no time-based recovery to wait for (the admin must enable one, which
+	 * re-arms the worker through {@see \TotalMailQueue\Cron\Scheduler::reschedule()}).
+	 *
+	 * @param int $queue_interval The configured cron interval in seconds — used
+	 *                            as the recovery horizon for global-cycle
+	 *                            accounts, which reset at the next worker run.
+	 * @return int|null Unix timestamp, or null when no enabled account exists.
+	 */
+	public static function nextAvailableAt( int $queue_interval ): ?int {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1", ARRAY_A );
+		if ( empty( $accounts ) ) {
+			return null;
+		}
+
+		$now      = time();
+		$earliest = null;
+		foreach ( $accounts as $acct ) {
+			$free = self::accountFreeAt( $acct, $now, $queue_interval );
+			if ( null === $earliest || $free < $earliest ) {
+				$earliest = $free;
+			}
+		}
+		return $earliest;
+	}
+
+	/**
+	 * Compute when a single account regains capacity: the latest reset among
+	 * the limits it is currently capped on (cycle / daily / monthly), or now
+	 * if it isn't capped at all.
+	 *
+	 * @param array<string,mixed> $acct           Account row.
+	 * @param int                 $now            Current UTC unix timestamp.
+	 * @param int                 $queue_interval Cron interval in seconds.
+	 * @return int Unix timestamp at which the account can send again.
+	 */
+	private static function accountFreeAt( array $acct, int $now, int $queue_interval ): int {
+		$free = $now;
+
+		$bulk = intval( $acct['send_bulk'] );
+		if ( $bulk > 0 && intval( $acct['cycle_sent'] ) >= $bulk ) {
+			$interval = intval( $acct['send_interval'] );
+			if ( $interval > 0 ) {
+				$last = (int) get_gmt_from_date( (string) $acct['last_sent_at'], 'U' );
+				$free = max( $free, $last + ( $interval * MINUTE_IN_SECONDS ) );
+			} else {
+				// Global-cycle accounts reset at the top of the next worker run.
+				$free = max( $free, $now + $queue_interval );
+			}
+		}
+
+		$daily_limit = intval( $acct['daily_limit'] );
+		if ( $daily_limit > 0 && intval( $acct['daily_sent'] ) >= $daily_limit ) {
+			$free = max( $free, self::nextLocalMidnight( $now ) );
+		}
+
+		$monthly_limit = intval( $acct['monthly_limit'] );
+		if ( $monthly_limit > 0 && intval( $acct['monthly_sent'] ) >= $monthly_limit ) {
+			$free = max( $free, self::nextLocalMonthStart( $now ) );
+		}
+
+		return $free;
+	}
+
+	/**
+	 * UTC unix timestamp of the next local-midnight rollover — when daily
+	 * counters reset.
+	 *
+	 * @param int $now Current UTC unix timestamp.
+	 */
+	private static function nextLocalMidnight( int $now ): int {
+		$tomorrow_local = wp_date( 'Y-m-d', $now + DAY_IN_SECONDS );
+		return (int) get_gmt_from_date( $tomorrow_local . ' 00:00:00', 'U' );
+	}
+
+	/**
+	 * UTC unix timestamp of the first local day of next month — when monthly
+	 * counters reset.
+	 *
+	 * @param int $now Current UTC unix timestamp.
+	 */
+	private static function nextLocalMonthStart( int $now ): int {
+		$year  = (int) wp_date( 'Y', $now );
+		$month = (int) wp_date( 'n', $now );
+		++$month;
+		if ( $month > 12 ) {
+			$month = 1;
+			++$year;
+		}
+		$local = sprintf( '%04d-%02d-01 00:00:00', $year, $month );
+		return (int) get_gmt_from_date( $local, 'U' );
 	}
 
 	/**

@@ -63,8 +63,8 @@ final class CronFlowTest extends FunctionalTestCase {
     public function test_high_priority_emails_are_sent_before_normal_queue(): void {
         $this->setPluginOptions( array( 'enabled' => '1', 'queue_amount' => 1 ) );
 
-        $normal = $this->insertQueueItem( array( 'status' => 'queue', 'subject' => 'normal' ) );
-        $high   = $this->insertQueueItem( array( 'status' => 'high',  'subject' => 'urgent' ) );
+        $normal = $this->insertQueueItem( array( 'status' => 'queue', 'priority' => \TotalMailQueue\Queue\Priority::NORMAL, 'subject' => 'normal' ) );
+        $high   = $this->insertQueueItem( array( 'status' => 'queue', 'priority' => \TotalMailQueue\Queue\Priority::HIGH, 'subject' => 'urgent' ) );
 
         \TotalMailQueue\Cron\BatchProcessor::run();
 

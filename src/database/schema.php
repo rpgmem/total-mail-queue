@@ -68,8 +68,10 @@ final class Schema {
 		retry_count smallint(5) DEFAULT 0 NOT NULL,
 		smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
 		source_key varchar(120) DEFAULT '' NOT NULL,
+		priority smallint(5) DEFAULT 50 NOT NULL,
 		PRIMARY KEY  (id),
 		KEY idx_status_retry (status, retry_count, id),
+		KEY idx_status_priority (status, priority, retry_count, id),
 		KEY idx_status_timestamp (status, timestamp),
 		KEY idx_source_key (source_key)
 		) $charset_collate;";
@@ -110,6 +112,7 @@ final class Schema {
 		subject_override varchar(255) DEFAULT '' NOT NULL,
 		body_override longtext NOT NULL,
 		skip_template_wrap tinyint(1) DEFAULT 0 NOT NULL,
+		priority smallint(5) DEFAULT 50 NOT NULL,
 		enabled tinyint(1) DEFAULT 1 NOT NULL,
 		detected_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		last_seen_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,

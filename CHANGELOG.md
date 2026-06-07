@@ -5,6 +5,33 @@ All notable changes to **Total Mail Queue** are documented in this file.
 The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-06-07
+
+> Smarter multi-account delivery and a unified queue priority. SMTP accounts are now chosen round-robin so every enabled account shares the load and covers more of the hour; the worker runs on demand instead of on a fixed heartbeat; and a single numeric priority scale replaces the old binary "high" status, configurable per source.
+
+### Added
+
+- **Per-source send priority.** A new numeric `priority` on each source (Sources tab → Edit) decides how soon its mail leaves the queue — lower number = sent sooner, `1` most urgent, `50` normal. Pin password resets to `1` and they jump ahead of newsletters. Shown as a column in the Sources list and as a badge on pending rows in the Log.
+- **Last-sent visibility.** The SMTP Accounts panel now shows when each account last sent (relative "x ago", absolute timestamp on hover, "Never" until the first send) and the live per-cycle usage (`cycle_sent / limit`) alongside the existing daily / monthly counters.
+
+### Changed
+
+- **SMTP account selection is round-robin (least-recently-used) instead of greedy-by-priority.** The worker used to drain the whole batch through the top-priority account before touching the next; now it rotates through every enabled account, spreading load across the hour so a freshly queued mail is far likelier to find an account with capacity. `priority` becomes a tie-breaker; the picker also enforces daily and monthly caps in-memory within a single batch.
+- **The queue worker runs on demand.** It sleeps when the queue is empty and wakes the instant a mail is enqueued; in SMTP-only mode with every account capped it defers to the next cycle/quota window instead of firing every interval for nothing.
+- **Queue urgency unified onto one numeric scale.** The `X-Mail-Queue-Prio: High` header and the configurable per-source priority now feed the same `priority` column (the row stays a normal `queue` status). The legacy binary `high` row status is migrated to `Priority::HIGH` on upgrade.
+- **Activating/deactivating or editing an SMTP account takes effect on the next request.** Saving an account (or the settings) re-arms the cycle immediately, removing the need to toggle Operation Mode to "block" and back.
+- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.7.0**.
+
+### Database
+
+- Queue table: new `priority` column + `idx_status_priority` index. Sources table: new `priority` column. Applied via `dbDelta()`; legacy `status = 'high'` rows folded into `priority` on upgrade.
+
+### Tests
+
+- New `PriorityTest`, `SchedulerStateTest`, and round-robin / multi-limit / rotation cases in `SmtpHelpersTest`. `PreWpMailTest`, `CronFlowTest`, and `ActivationTest` updated for the unified priority model.
+
+---
+
 ## [2.6.2] - 2026-04-29
 
 > Settings sanitizer hardening, FAQ accuracy corrections, admin UI polish (postman banner moved to FAQ, H1 icon dropped, dark code blocks), and a major internal refactor pass — admin-page split-up, single coordinated reset for per-request static state, PHPStan strictness raised from level 5 to level 8, and the analyser itself bumped from 1.12 to 2.1 (with `szepeviktor/phpstan-wordpress` 1.3 → 2.0).

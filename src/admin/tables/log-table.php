@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Tables;
 
 use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Support\Serializer;
 use WP_List_Table;
 
@@ -140,7 +141,7 @@ final class LogTable extends WP_List_Table {
 		global $wpdb;
 		$table = Schema::queueTable();
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
 	}
 
@@ -328,7 +329,18 @@ final class LogTable extends WP_List_Table {
 		);
 		$raw    = $item['status'];
 		$label  = $labels[ $raw ] ?? esc_html( $raw );
-		return '<span class="tmq-status tmq-status-' . sanitize_title( $raw ) . '">' . esc_html( $label ) . '</span>';
+		$html   = '<span class="tmq-status tmq-status-' . sanitize_title( $raw ) . '">' . esc_html( $label ) . '</span>';
+
+		// Surface elevated urgency on pending rows now that "High" rides the
+		// numeric priority column instead of a distinct status.
+		$priority = isset( $item['priority'] ) ? (int) $item['priority'] : Priority::NORMAL;
+		if ( in_array( $raw, array( 'queue', 'high' ), true ) && $priority < Priority::NORMAL ) {
+			$html .= ' <span class="tmq-status tmq-status-high" title="' . esc_attr(
+				/* translators: %d: numeric priority value (lower = more urgent). */
+				sprintf( __( 'Priority %d', 'total-mail-queue' ), $priority )
+			) . '">' . esc_html__( 'High', 'total-mail-queue' ) . '</span>';
+		}
+		return $html;
 	}
 
 	/**

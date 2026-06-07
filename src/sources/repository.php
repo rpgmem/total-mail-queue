@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Sources;
 
 use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Queue\Priority;
 
 /**
  * Read/write access to the `{$prefix}total_mail_queue_sources` table.
@@ -157,6 +158,48 @@ final class Repository {
 			return true;
 		}
 		return 1 === (int) $row['enabled'];
+	}
+
+	/**
+	 * The configured send-priority for a source, on the unified
+	 * {@see Priority} scale (lower = more urgent). Unknown keys fall back to
+	 * {@see Priority::NORMAL} so a brand-new source behaves like ordinary mail
+	 * until the admin pins it.
+	 *
+	 * @param string $source_key Canonical key.
+	 */
+	public static function priorityFor( string $source_key ): int {
+		if ( '' === $source_key ) {
+			return Priority::NORMAL;
+		}
+		$row = self::findByKey( $source_key );
+		if ( null === $row || ! isset( $row['priority'] ) ) {
+			return Priority::NORMAL;
+		}
+		return Priority::clamp( (int) $row['priority'] );
+	}
+
+	/**
+	 * Persist a source's send-priority. The value is clamped to the valid
+	 * {@see Priority} range before it lands in the catalog.
+	 *
+	 * @param int $id       Row id.
+	 * @param int $priority Desired priority (clamped to [Priority::MIN, Priority::MAX]).
+	 */
+	public static function updatePriority( int $id, int $priority ): void {
+		if ( $id <= 0 ) {
+			return;
+		}
+		global $wpdb;
+		$table = Schema::sourcesTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$table,
+			array( 'priority' => Priority::clamp( $priority ) ),
+			array( 'id' => $id ),
+			array( '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
