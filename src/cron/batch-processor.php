@@ -139,6 +139,11 @@ final class BatchProcessor {
 			CronLock::release();
 		}
 
+		// Adapt the schedule to what's left: sleep if the queue drained empty,
+		// defer to the next cycle/quota window if SMTP-only work is stuck with
+		// every account capped, or keep the normal cadence otherwise.
+		Scheduler::adjustSchedule( $options );
+
 		if ( ! $diag->has( 'result' ) ) {
 			$diag->set( 'result', 'ok' );
 		}

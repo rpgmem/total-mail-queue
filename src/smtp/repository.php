@@ -207,6 +207,108 @@ final class Repository {
 	}
 
 	/**
+	 * Earliest moment (UTC unix timestamp) at which some enabled account will
+	 * regain capacity, given that none can send right now. Used by the
+	 * scheduler to defer the queue worker to the next cycle/quota window
+	 * instead of waking it every interval while every account is capped.
+	 *
+	 * Returns null when there are no enabled accounts at all — there is then
+	 * no time-based recovery to wait for (the admin must enable one, which
+	 * re-arms the worker through {@see \TotalMailQueue\Cron\Scheduler::reschedule()}).
+	 *
+	 * @param int $queue_interval The configured cron interval in seconds — used
+	 *                            as the recovery horizon for global-cycle
+	 *                            accounts, which reset at the next worker run.
+	 * @return int|null Unix timestamp, or null when no enabled account exists.
+	 */
+	public static function nextAvailableAt( int $queue_interval ): ?int {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1", ARRAY_A );
+		if ( empty( $accounts ) ) {
+			return null;
+		}
+
+		$now      = time();
+		$earliest = null;
+		foreach ( $accounts as $acct ) {
+			$free = self::accountFreeAt( $acct, $now, $queue_interval );
+			if ( null === $earliest || $free < $earliest ) {
+				$earliest = $free;
+			}
+		}
+		return $earliest;
+	}
+
+	/**
+	 * Compute when a single account regains capacity: the latest reset among
+	 * the limits it is currently capped on (cycle / daily / monthly), or now
+	 * if it isn't capped at all.
+	 *
+	 * @param array<string,mixed> $acct           Account row.
+	 * @param int                 $now            Current UTC unix timestamp.
+	 * @param int                 $queue_interval Cron interval in seconds.
+	 * @return int Unix timestamp at which the account can send again.
+	 */
+	private static function accountFreeAt( array $acct, int $now, int $queue_interval ): int {
+		$free = $now;
+
+		$bulk = intval( $acct['send_bulk'] );
+		if ( $bulk > 0 && intval( $acct['cycle_sent'] ) >= $bulk ) {
+			$interval = intval( $acct['send_interval'] );
+			if ( $interval > 0 ) {
+				$last = (int) get_gmt_from_date( (string) $acct['last_sent_at'], 'U' );
+				$free = max( $free, $last + ( $interval * MINUTE_IN_SECONDS ) );
+			} else {
+				// Global-cycle accounts reset at the top of the next worker run.
+				$free = max( $free, $now + $queue_interval );
+			}
+		}
+
+		$daily_limit = intval( $acct['daily_limit'] );
+		if ( $daily_limit > 0 && intval( $acct['daily_sent'] ) >= $daily_limit ) {
+			$free = max( $free, self::nextLocalMidnight( $now ) );
+		}
+
+		$monthly_limit = intval( $acct['monthly_limit'] );
+		if ( $monthly_limit > 0 && intval( $acct['monthly_sent'] ) >= $monthly_limit ) {
+			$free = max( $free, self::nextLocalMonthStart( $now ) );
+		}
+
+		return $free;
+	}
+
+	/**
+	 * UTC unix timestamp of the next local-midnight rollover — when daily
+	 * counters reset.
+	 *
+	 * @param int $now Current UTC unix timestamp.
+	 */
+	private static function nextLocalMidnight( int $now ): int {
+		$tomorrow_local = wp_date( 'Y-m-d', $now + DAY_IN_SECONDS );
+		return (int) get_gmt_from_date( $tomorrow_local . ' 00:00:00', 'U' );
+	}
+
+	/**
+	 * UTC unix timestamp of the first local day of next month — when monthly
+	 * counters reset.
+	 *
+	 * @param int $now Current UTC unix timestamp.
+	 */
+	private static function nextLocalMonthStart( int $now ): int {
+		$year  = (int) wp_date( 'Y', $now );
+		$month = (int) wp_date( 'n', $now );
+		++$month;
+		if ( $month > 12 ) {
+			$month = 1;
+			++$year;
+		}
+		$local = sprintf( '%04d-%02d-01 00:00:00', $year, $month );
+		return (int) get_gmt_from_date( $local, 'U' );
+	}
+
+	/**
 	 * Look up the encrypted password column for the given account id.
 	 *
 	 * Used by the connection-tester admin endpoint when the form has an

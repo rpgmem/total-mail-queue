@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Queue;
 
 use TotalMailQueue\Cron\BatchProcessor;
+use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\PhpMailerCapturer;
 use TotalMailQueue\Sources\CoreTemplates;
@@ -230,6 +231,12 @@ final class MailInterceptor {
 		if ( 0 === $insert_id ) {
 			return false; // No DB entry, email cannot be sent — wp_mail() returns false.
 		}
+		// Wake the worker so the row is drained promptly instead of waiting out
+		// a fixed heartbeat. Blocked rows never send, so they don't wake it.
+		if ( 'blocked_by_source' !== $status ) {
+			Scheduler::ensureScheduled();
+		}
+
 		// `blocked_by_source` shares the queue/high return path: the caller
 		// sees a successful enqueue, the message just never leaves the row.
 		return true;
