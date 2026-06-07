@@ -132,7 +132,16 @@ final class MailInterceptor {
 		$headers          = self::normaliseHeaders( $headers );
 		$has_content_type = false;
 		$has_from         = false;
-		$status           = self::scanPriorityHeaders( $headers, $status, (string) $options['enabled'], $has_content_type, $has_from );
+		$is_high          = false;
+		$status           = self::scanPriorityHeaders( $headers, $status, (string) $options['enabled'], $has_content_type, $has_from, $is_high );
+
+		// Resolve the row's place on the unified priority scale: the more
+		// urgent of the source's configured priority and the High header
+		// (when present). Lower = sent sooner.
+		$priority = Priority::mostUrgent(
+			SourcesRepository::priorityFor( $source['key'] ),
+			$is_high ? Priority::HIGH : Priority::NORMAL
+		);
 
 		// Per-source enforcement: a disabled source overrides the priority
 		// headers (Instant included — otherwise a third-party plugin could
@@ -158,7 +167,7 @@ final class MailInterceptor {
 		// engine wraps via the `wp_mail` filter), `blocked_by_source` (no
 		// point — the row is never sent), and per-source skip_template_wrap
 		// (admin chose to keep this template raw).
-		if ( ! $skip_template_wrap && ( 'queue' === $status || 'high' === $status ) ) {
+		if ( ! $skip_template_wrap && 'queue' === $status ) {
 			$wrapped = TemplateEngine::apply(
 				array(
 					'to'          => $to,
@@ -196,6 +205,7 @@ final class MailInterceptor {
 			'status'      => $status,
 			'attachments' => '',
 			'source_key'  => $source['key'],
+			'priority'    => $priority,
 		);
 		if ( ! empty( $headers ) ) {
 			$data['headers'] = Serializer::encode( $headers );
@@ -351,11 +361,13 @@ final class MailInterceptor {
 	 * @param string            $enabled          Plugin mode (`0`/`1`/`2`).
 	 * @param bool              $has_content_type Out param. Caller initializes to false.
 	 * @param bool              $has_from         Out param. Caller initializes to false.
-	 * @return string Resolved status (`queue` / `high` / `instant`).
+	 * @param bool              $is_high          Out param. Set true when the row carries the `High` header.
+	 * @return string Resolved status (`queue` / `instant`).
 	 */
-	private static function scanPriorityHeaders( array &$headers, string $status, string $enabled, bool &$has_content_type, bool &$has_from ): string {
+	private static function scanPriorityHeaders( array &$headers, string $status, string $enabled, bool &$has_content_type, bool &$has_from, bool &$is_high ): string {
 		$has_content_type = false;
 		$has_from         = false;
+		$is_high          = false;
 		foreach ( $headers as $index => $val ) {
 			$val = trim( $val );
 			if ( preg_match( '#^X-Mail-Queue-Prio: +Instant *$#i', $val ) ) {
@@ -366,7 +378,11 @@ final class MailInterceptor {
 			}
 			if ( preg_match( '#^X-Mail-Queue-Prio: +High *$#i', $val ) ) {
 				array_splice( $headers, $index, 1 );
-				return 'high';
+				// Urgency now rides the numeric priority column, not a distinct
+				// status — the row stays `queue` and the caller bumps it to
+				// Priority::HIGH.
+				$is_high = true;
+				return 'queue';
 			}
 			if ( preg_match( '#^Content-Type:#i', $val ) ) {
 				$has_content_type = true;

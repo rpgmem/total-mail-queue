@@ -36,7 +36,7 @@ final class ActivationTest extends FunctionalTestCase {
         $table = $this->queueTable();
         $columns = $wpdb->get_col( "SHOW COLUMNS FROM `$table`" );
 
-        $required = array( 'id', 'timestamp', 'status', 'recipient', 'subject', 'message', 'headers', 'attachments', 'info', 'retry_count', 'smtp_account_id' );
+        $required = array( 'id', 'timestamp', 'status', 'recipient', 'subject', 'message', 'headers', 'attachments', 'info', 'retry_count', 'smtp_account_id', 'source_key', 'priority' );
         foreach ( $required as $col ) {
             self::assertContains( $col, $columns, "Queue table is missing the `$col` column." );
         }
@@ -48,6 +48,7 @@ final class ActivationTest extends FunctionalTestCase {
         $indexes = $wpdb->get_col( "SHOW INDEXES FROM `$table`", 2 ); // column 2 = Key_name
 
         self::assertContains( 'idx_status_retry', $indexes, 'Activation must create idx_status_retry on the queue table.' );
+        self::assertContains( 'idx_status_priority', $indexes, 'Activation must create idx_status_priority on the queue table.' );
         self::assertContains( 'idx_status_timestamp', $indexes, 'Activation must create idx_status_timestamp on the queue table.' );
     }
 

@@ -51,7 +51,7 @@ final class PreWpMailTest extends IntegrationTestCase {
         self::assertFalse( $result );
     }
 
-    public function test_high_priority_header_is_stripped_and_status_becomes_high(): void {
+    public function test_high_priority_header_is_stripped_and_row_gets_high_priority(): void {
         $this->wpdb->will_return( 'insert', 1 );
 
         $atts = $this->basicAtts();
@@ -59,8 +59,12 @@ final class PreWpMailTest extends IntegrationTestCase {
 
         \TotalMailQueue\Queue\MailInterceptor::handle( null, $atts );
 
+        // Urgency is unified onto the numeric priority column — the row stays a
+        // normal 'queue' status but is pinned to Priority::HIGH so it drains
+        // ahead of ordinary mail.
         $data = $this->wpdb->call( 'insert' )['args'][1];
-        self::assertSame( 'high', $data['status'] );
+        self::assertSame( 'queue', $data['status'] );
+        self::assertSame( \TotalMailQueue\Queue\Priority::HIGH, $data['priority'] );
         self::assertStringNotContainsString( 'X-Mail-Queue-Prio', $data['headers'] );
     }
 

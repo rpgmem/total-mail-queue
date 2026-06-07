@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Sources\CoreTemplates;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -109,6 +110,21 @@ final class SourcesEditRenderer {
 			}
 			echo '</p>';
 		}
+		echo '</td></tr>';
+
+		// Priority row — where this source sits on the queue's send order.
+		$priority = isset( $row['priority'] ) ? (int) $row['priority'] : Priority::NORMAL;
+		echo '<tr><th scope="row"><label for="tmq-source-priority">' . esc_html__( 'Priority', 'total-mail-queue' ) . '</label></th><td>';
+		echo '<input type="number" id="tmq-source-priority" name="priority" class="small-text" value="' . esc_attr( (string) $priority ) . '" min="' . esc_attr( (string) Priority::MIN ) . '" max="' . esc_attr( (string) Priority::MAX ) . '" step="1" />';
+		echo '<p class="description">' . esc_html(
+			sprintf(
+				/* translators: 1: lowest priority number, 2: highest priority number, 3: default priority number. */
+				__( 'Lower number = sent sooner. Range %1$d (most urgent) to %2$d; %3$d is normal. Messages from this source jump ahead of higher-numbered ones in the queue.', 'total-mail-queue' ),
+				Priority::MIN,
+				Priority::MAX,
+				Priority::NORMAL
+			)
+		) . '</p>';
 		echo '</td></tr>';
 
 		echo '</table>';

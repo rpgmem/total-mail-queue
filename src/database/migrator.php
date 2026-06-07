@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Database;
 
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Sources\KnownSources;
 
 /**
@@ -43,7 +44,30 @@ final class Migrator {
 		Schema::install();
 		KnownSources::seed();
 		self::migrateSenderToSettings();
+		self::migrateHighStatusToPriority();
 		update_option( self::VERSION_OPTION, Plugin::VERSION, true );
+	}
+
+	/**
+	 * V2.7.0 migration: the binary `high` row status is folded into the
+	 * unified numeric `priority` column. Legacy pending rows that were stored
+	 * with `status = 'high'` become ordinary `queue` rows carrying
+	 * {@see \TotalMailQueue\Queue\Priority::HIGH}, so they keep jumping ahead
+	 * of normal mail under the new ordering.
+	 *
+	 * Idempotent: after the first pass no `high` rows remain, so re-runs on
+	 * later version bumps are a no-op.
+	 */
+	private static function migrateHighStatusToPriority(): void {
+		global $wpdb;
+		$queue_table = Schema::queueTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE `$queue_table` SET `priority` = %d, `status` = 'queue' WHERE `status` = 'high'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				Priority::HIGH
+			)
+		);
 	}
 
 	/**

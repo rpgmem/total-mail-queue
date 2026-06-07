@@ -79,9 +79,10 @@ final class QueueRepository {
 	}
 
 	/**
-	 * IDs of the next batch to process. High-priority rows always come first;
-	 * low retry counts before high (so newly-queued mails go ahead of repeated
-	 * failures), then by id.
+	 * IDs of the next batch to process, in send order: most urgent first on the
+	 * unified {@see Priority} scale (lower number wins), then low retry counts
+	 * before high (so newly-queued mails go ahead of repeated failures), then
+	 * by id.
 	 *
 	 * @param int $limit Maximum number of ids to return.
 	 * @return list<int>
@@ -90,7 +91,7 @@ final class QueueRepository {
 		global $wpdb;
 		$table = Schema::queueTable();
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT `id` FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `status` ASC, `retry_count` ASC, `id` ASC LIMIT %d", $limit ) );
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT `id` FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d", $limit ) );
 		return array_values( array_map( 'intval', is_array( $ids ) ? $ids : array() ) );
 	}
 
