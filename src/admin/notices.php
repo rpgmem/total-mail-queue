@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
-use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
 
 /**
@@ -41,10 +41,7 @@ final class Notices {
 			return;
 		}
 
-		global $wpdb;
-		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$last_mail = $wpdb->get_row( "SELECT * FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `id` DESC", 'ARRAY_A' );
+		$last_mail = QueueRepository::lastLogRow();
 
 		if ( $last_mail && 'error' === $last_mail['status'] ) {
 			self::renderLastErrorNotice( $last_mail );

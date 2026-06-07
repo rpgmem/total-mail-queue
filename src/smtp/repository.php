@@ -323,6 +323,24 @@ final class Repository {
 	}
 
 	/**
+	 * Map of account id => display name, for resolving the SMTP column in the
+	 * Log table without loading every column.
+	 *
+	 * @return array<int,string>
+	 */
+	public static function namesById(): array {
+		global $wpdb;
+		$smtp_table = Schema::smtpTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( "SELECT `id`, `name` FROM `$smtp_table`", ARRAY_A );
+		$map  = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$map[ (int) $row['id'] ] = (string) $row['name'];
+		}
+		return $map;
+	}
+
+	/**
 	 * Fetch a single account by id.
 	 *
 	 * @param int $smtp_id Account id.
