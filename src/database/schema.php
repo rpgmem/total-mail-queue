@@ -99,6 +99,7 @@ final class Schema {
 		send_bulk int(11) DEFAULT 0 NOT NULL,
 		last_sent_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		cycle_sent int(11) DEFAULT 0 NOT NULL,
+		last_cycle_reset datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		PRIMARY KEY  (id)
 		) $charset_collate;";
 

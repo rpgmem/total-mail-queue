@@ -26,7 +26,12 @@ final class Repository {
 	 *
 	 * - `cycle_sent` is reset every cron run for accounts with
 	 *   `send_interval = 0` (global cycle), and only after the configured
-	 *   interval has elapsed for accounts with `send_interval > 0`.
+	 *   interval has elapsed since the current cycle *began* for accounts with
+	 *   `send_interval > 0`. The cycle start is tracked in `last_cycle_reset`,
+	 *   stamped by {@see Repository::incrementCounter()} on the first send of a
+	 *   cycle — NOT in `last_sent_at`, which advances on every send and would
+	 *   slide the window forward indefinitely, so a steadily-trickling account
+	 *   would never roll its cycle over and would eventually stick at the cap.
 	 * - `daily_sent` rolls over when the calendar day changes.
 	 * - `monthly_sent` rolls over when the calendar month changes.
 	 */
@@ -41,10 +46,13 @@ final class Repository {
 		$wpdb->query(
 			"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` = 0" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
+		// Interval accounts roll over once the window measured from the cycle's
+		// start (`last_cycle_reset`) has elapsed. The next send re-anchors the
+		// window via incrementCounter(), so the start is left untouched here.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_sent_at`, INTERVAL `send_interval` MINUTE) <= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_cycle_reset`, INTERVAL `send_interval` MINUTE) <= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$now
 			)
 		);
@@ -190,6 +198,14 @@ final class Repository {
 	 * Persist a successful send for the given account: bump daily, monthly
 	 * and cycle counters and record `last_sent_at`.
 	 *
+	 * On the first send of a cycle (i.e. while `cycle_sent` is still 0) the
+	 * send also stamps `last_cycle_reset` to anchor the cycle window at the
+	 * moment sending began. {@see Repository::resetCounters()} measures the
+	 * `send_interval` rollover from that anchor, so the window is fixed to the
+	 * cycle start rather than sliding forward with every subsequent send. The
+	 * `last_cycle_reset` assignment is ordered before the `cycle_sent` bump so
+	 * its `IF` still sees the pre-increment value.
+	 *
 	 * @param int|string $smtp_id Account id.
 	 */
 	public static function incrementCounter( $smtp_id ): void {
@@ -199,7 +215,8 @@ final class Repository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$smtp_table` SET `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$smtp_table` SET `last_cycle_reset` = IF(`cycle_sent` = 0, %s, `last_cycle_reset`), `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$now,
 				$now,
 				intval( $smtp_id )
 			)
@@ -258,8 +275,11 @@ final class Repository {
 		if ( $bulk > 0 && intval( $acct['cycle_sent'] ) >= $bulk ) {
 			$interval = intval( $acct['send_interval'] );
 			if ( $interval > 0 ) {
-				$last = (int) get_gmt_from_date( (string) $acct['last_sent_at'], 'U' );
-				$free = max( $free, $last + ( $interval * MINUTE_IN_SECONDS ) );
+				// Recovery is measured from the cycle's start, mirroring the
+				// rollover in resetCounters(); last_sent_at would defer the
+				// wake-up too late on accounts that kept sending mid-cycle.
+				$cycle_start = (int) get_gmt_from_date( (string) $acct['last_cycle_reset'], 'U' );
+				$free        = max( $free, $cycle_start + ( $interval * MINUTE_IN_SECONDS ) );
 			} else {
 				// Global-cycle accounts reset at the top of the next worker run.
 				$free = max( $free, $now + $queue_interval );
