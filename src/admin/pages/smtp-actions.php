@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Support\Encryption;
 
 /**
@@ -109,6 +110,7 @@ final class SmtpActions {
 		if ( $save_id > 0 ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update( $smtp_table, $data, array( 'id' => $save_id ), null, '%d' );
+			Scheduler::reschedule();
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account updated.', 'total-mail-queue' ) . '</p></div>';
 			return;
 		}
@@ -118,6 +120,7 @@ final class SmtpActions {
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert( $smtp_table, $data );
+		Scheduler::reschedule();
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account added.', 'total-mail-queue' ) . '</p></div>';
 	}
 
@@ -135,6 +138,7 @@ final class SmtpActions {
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->delete( $smtp_table, array( 'id' => $edit_id ), '%d' );
+		Scheduler::reschedule();
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'SMTP account deleted.', 'total-mail-queue' ) . '</p></div>';
 	}
 
@@ -151,6 +155,7 @@ final class SmtpActions {
 		}
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( "UPDATE `$smtp_table` SET `daily_sent` = 0, `monthly_sent` = 0" );
+		Scheduler::reschedule();
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'All sending counters have been reset.', 'total-mail-queue' ) . '</p></div>';
 	}
 }

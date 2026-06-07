@@ -38,6 +38,14 @@ final class Scheduler {
 		add_filter( 'cron_schedules', array( self::class, 'addInterval' ) );
 		add_action( self::HOOK, array( BatchProcessor::class, 'run' ) );
 
+		// Re-arm the cycle whenever the plugin settings change. The custom
+		// interval is read from the options inside addInterval(), so an edited
+		// interval (or a flipped operation mode) only takes effect once the
+		// event is rescheduled — without this the old cadence lingers until the
+		// next manual mode toggle.
+		add_action( 'update_option_' . Options::OPTION_NAME, array( self::class, 'reschedule' ) );
+		add_action( 'add_option_' . Options::OPTION_NAME, array( self::class, 'reschedule' ) );
+
 		// Schedule / unschedule based on the current plugin mode.
 		// Run on init so options + cron table are loaded.
 		self::syncSchedule();
@@ -77,6 +85,27 @@ final class Scheduler {
 		if ( $next_run && ! $is_enabled ) {
 			wp_unschedule_event( $next_run, self::HOOK );
 		} elseif ( ! $next_run && $is_enabled ) {
+			wp_schedule_event( time(), self::INTERVAL_SLUG, self::HOOK );
+		}
+	}
+
+	/**
+	 * Drop any existing queue event and re-arm a fresh one due immediately
+	 * (when the plugin is in queue mode). This is what manually flipping the
+	 * operation mode to "block" and back used to do by side effect — callers
+	 * invoke it directly after mutating SMTP accounts or settings so the very
+	 * next request picks up the new account set / interval instead of waiting
+	 * out the previously scheduled tick.
+	 *
+	 * Safe to call when not in queue mode: the stale event is cleared and no
+	 * new one is armed, mirroring {@see Scheduler::syncSchedule()}.
+	 */
+	public static function reschedule(): void {
+		$next_run = wp_next_scheduled( self::HOOK );
+		if ( $next_run ) {
+			wp_unschedule_event( $next_run, self::HOOK );
+		}
+		if ( '1' === (string) Options::get()['enabled'] ) {
 			wp_schedule_event( time(), self::INTERVAL_SLUG, self::HOOK );
 		}
 	}
