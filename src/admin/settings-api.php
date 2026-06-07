@@ -60,6 +60,7 @@ final class SettingsApi {
 			'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
 			'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
 			'wp_tmq_smtp_timeout'   => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
+			'wp_tmq_smtp_debug'     => array( __( 'SMTP Debug Log', 'total-mail-queue' ), 'renderSmtpDebug' ),
 			'wp_tmq_cron_lock_ttl'  => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
 			'wp_tmq_alert_status'   => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
 			'wp_tmq_sensitivity'    => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
@@ -179,6 +180,21 @@ final class SettingsApi {
 		echo '<p class="description">';
 		/* translators: %s: recommended value */
 		echo wp_kses_post( sprintf( __( 'Maximum time to wait for a response from the SMTP server per email. If the server does not respond within this time, the email is marked as failed and the batch continues to the next email. Recommended: %s seconds. Minimum: 5 seconds.', 'total-mail-queue' ), '<strong>30</strong>' ) );
+		echo '</p>';
+	}
+
+	/**
+	 * SMTP debug logging toggle. When on, the full SMTP conversation for a
+	 * send is captured and appended to that row's error log, which makes it
+	 * possible to see exactly where a send failed (auth, TLS, greylisting…).
+	 */
+	public static function renderSmtpDebug(): void {
+		$options = Options::get();
+		$checked = '1' === (string) $options['smtp_debug'] ? ' checked' : '';
+		echo '<label><input type="checkbox" name="wp_tmq_settings[smtp_debug]" value="1"' . esc_attr( $checked ) . ' /> ';
+		echo esc_html__( 'Record the full SMTP conversation for each send into its error log.', 'total-mail-queue' ) . '</label>';
+		echo '<p class="description">';
+		echo esc_html__( 'Useful for diagnosing why sends fail (authentication, TLS, rejections). The transcript is stored in the Log entry and cleared automatically when an email later sends successfully. Leave off for normal operation — it adds detail to the log on every SMTP send.', 'total-mail-queue' );
 		echo '</p>';
 	}
 

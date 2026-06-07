@@ -29,6 +29,12 @@ final class QueueRepository {
 	public static function insert( array $data ): int {
 		global $wpdb;
 		$table = Schema::queueTable();
+		// `error_log` is `longtext NOT NULL`, and TEXT columns can't carry a SQL
+		// default — so guarantee a value here rather than in every caller, which
+		// keeps inserts working under MySQL strict mode.
+		if ( ! array_key_exists( 'error_log', $data ) ) {
+			$data['error_log'] = '';
+		}
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$inserted = $wpdb->insert( $table, $data );
 		if ( false === $inserted ) {
@@ -121,6 +127,41 @@ final class QueueRepository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$info = $wpdb->get_var( $wpdb->prepare( "SELECT `info` FROM `$table` WHERE `id` = %d", $id ) );
 		return is_string( $info ) ? $info : '';
+	}
+
+	/**
+	 * Read the `error_log` column for the given row, or '' when the row is gone.
+	 *
+	 * @param int $id Row id.
+	 */
+	public static function errorLogFor( int $id ): string {
+		global $wpdb;
+		$table = Schema::queueTable();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$log = $wpdb->get_var( $wpdb->prepare( "SELECT `error_log` FROM `$table` WHERE `id` = %d", $id ) );
+		return is_string( $log ) ? $log : '';
+	}
+
+	/**
+	 * Append an entry to a row's persistent `error_log`, keeping the history of
+	 * every failed attempt. Done as an atomic `CONCAT` so concurrent cron runs
+	 * can't clobber each other's appends. The log is cleared (set to '') by the
+	 * success paths, so a row that eventually sends keeps no stale errors.
+	 *
+	 * @param int    $id    Row id.
+	 * @param string $entry Text to append (a trailing newline is added).
+	 */
+	public static function appendErrorLog( int $id, string $entry ): void {
+		global $wpdb;
+		$table = Schema::queueTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE `$table` SET `error_log` = CONCAT(`error_log`, %s) WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$entry . "\n",
+				$id
+			)
+		);
 	}
 
 	/**

@@ -43,6 +43,7 @@ final class Options {
 			'max_retries'         => '3',   // 0=no retries, >0=auto-retry failed emails up to N times.
 			'cron_lock_ttl'       => '300', // seconds — safety timeout for the cross-process cron lock.
 			'smtp_timeout'        => '30',  // seconds — per-connection SMTP timeout during queue sending.
+			'smtp_debug'          => '0',   // 0=off, 1=capture the full SMTP conversation into each row's error log.
 			'tableName'           => 'total_mail_queue',
 			'smtpTableName'       => 'total_mail_queue_smtp',
 			'triggercount'        => 0,

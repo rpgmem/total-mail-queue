@@ -65,6 +65,7 @@ final class Schema {
 		headers text NOT NULL,
 		attachments text NOT NULL,
 		info varchar(255) DEFAULT '' NOT NULL,
+		error_log longtext NOT NULL,
 		retry_count smallint(5) DEFAULT 0 NOT NULL,
 		smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
 		source_key varchar(120) DEFAULT '' NOT NULL,
@@ -99,6 +100,7 @@ final class Schema {
 		send_bulk int(11) DEFAULT 0 NOT NULL,
 		last_sent_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		cycle_sent int(11) DEFAULT 0 NOT NULL,
+		last_cycle_reset datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		PRIMARY KEY  (id)
 		) $charset_collate;";
 

@@ -76,6 +76,7 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
             'headers'     => '',
             'attachments' => '',
             'info'        => '',
+            'error_log'   => '',
             'retry_count' => 0,
         );
         $wpdb->insert( $this->queueTable(), array_merge( $defaults, $data ) );

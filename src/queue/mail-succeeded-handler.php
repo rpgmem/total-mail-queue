@@ -42,8 +42,9 @@ final class MailSucceededHandler {
 					'timestamp' => current_time( 'mysql', false ),
 					'status'    => 'sent',
 					'info'      => '',
+					'error_log' => '',
 				),
-				array( '%s', '%s', '%s' )
+				array( '%s', '%s', '%s', '%s' )
 			);
 		}
 		Tracker::reset();

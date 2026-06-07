@@ -251,6 +251,17 @@ if ( ! function_exists( 'sanitize_email' ) ) {
     }
 }
 
+if ( ! function_exists( 'wp_strip_all_tags' ) ) {
+    function wp_strip_all_tags( $text, $remove_breaks = false ): string {
+        $text = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $text );
+        $text = strip_tags( $text );
+        if ( $remove_breaks ) {
+            $text = preg_replace( '/[\r\n\t ]+/', ' ', $text );
+        }
+        return trim( $text );
+    }
+}
+
 if ( ! function_exists( 'sanitize_key' ) ) {
     function sanitize_key( $key ): string {
         return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $key ) );

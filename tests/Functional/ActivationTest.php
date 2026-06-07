@@ -36,7 +36,7 @@ final class ActivationTest extends FunctionalTestCase {
         $table = $this->queueTable();
         $columns = $wpdb->get_col( "SHOW COLUMNS FROM `$table`" );
 
-        $required = array( 'id', 'timestamp', 'status', 'recipient', 'subject', 'message', 'headers', 'attachments', 'info', 'retry_count', 'smtp_account_id', 'source_key', 'priority' );
+        $required = array( 'id', 'timestamp', 'status', 'recipient', 'subject', 'message', 'headers', 'attachments', 'info', 'error_log', 'retry_count', 'smtp_account_id', 'source_key', 'priority' );
         foreach ( $required as $col ) {
             self::assertContains( $col, $columns, "Queue table is missing the `$col` column." );
         }
@@ -61,7 +61,7 @@ final class ActivationTest extends FunctionalTestCase {
             'id', 'name', 'host', 'port', 'encryption', 'auth', 'username', 'password',
             'from_email', 'from_name', 'priority', 'daily_limit', 'monthly_limit',
             'daily_sent', 'monthly_sent', 'enabled', 'send_interval', 'send_bulk',
-            'cycle_sent', 'last_sent_at',
+            'cycle_sent', 'last_sent_at', 'last_cycle_reset',
         );
         foreach ( $required as $col ) {
             self::assertContains( $col, $columns, "SMTP table is missing the `$col` column." );
