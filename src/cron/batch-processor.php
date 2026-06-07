@@ -240,6 +240,15 @@ final class BatchProcessor {
 			}
 		}
 
+		// Rotate the account we just used to the back of the in-memory list
+		// (success or failure) so the next row in this batch reaches for a
+		// different account — this is what turns the priority-ordered snapshot
+		// into round-robin delivery and keeps a flaky account from being
+		// retried for every row.
+		if ( $smtp_to_use ) {
+			SmtpRepository::markUsed( $smtp_accounts, $smtp_to_use['id'] );
+		}
+
 		AttachmentStore::releaseFor( $attachments );
 		return $send_status ? 'sent' : 'failed';
 	}
