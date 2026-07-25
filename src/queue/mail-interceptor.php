@@ -112,16 +112,6 @@ final class MailInterceptor {
 
 		$options = Options::get();
 
-		// Resolve the source: prefer the marker a primary listener set; fall
-		// back to the call stack. The source decides two things: which
-		// `source_key` to persist, and whether the admin has disabled this
-		// source — in which case the message is stored as
-		// `blocked_by_source` instead of being scheduled.
-		$source = Detector::consume();
-		if ( null === $source ) {
-			$source = Detector::inferFromBacktrace();
-		}
-
 		$to          = $atts['to'];
 		$subject     = $atts['subject'];
 		$message     = $atts['message'];
@@ -129,7 +119,26 @@ final class MailInterceptor {
 		$attachments = $atts['attachments'];
 		$status      = 'queue';
 
-		$headers          = self::normaliseHeaders( $headers );
+		$headers = self::normaliseHeaders( $headers );
+
+		// Resolve the source, highest priority first. The source decides two
+		// things: which `source_key` to persist, and whether the admin has
+		// disabled this source — in which case the message is stored as
+		// `blocked_by_source` instead of being scheduled.
+		//   1. Explicit `X-TMQ-Source-*` headers the sending plugin set (read
+		//      and stripped here) — lets a plugin whose mail all funnels through
+		//      one wrapper label each feature distinctly, which the backtrace
+		//      fallback cannot.
+		//   2. The marker a primary listener stashed for a WP-core email.
+		//   3. The call stack.
+		// `consume()` is always called (even when a header wins) so a stale
+		// marker never carries over to the next email.
+		$source = self::extractExplicitSource( $headers );
+		$marker = Detector::consume();
+		if ( null === $source ) {
+			$source = ( null !== $marker ) ? $marker : Detector::inferFromBacktrace();
+		}
+
 		$has_content_type = false;
 		$has_from         = false;
 		$is_high          = false;
@@ -348,6 +357,42 @@ final class MailInterceptor {
 			return array_values( $headers );
 		}
 		return explode( "\n", str_replace( "\r\n", "\n", (string) $headers ) );
+	}
+
+	/**
+	 * Pull the `X-TMQ-Source-Key` / `X-TMQ-Source-Label` control headers a
+	 * sending plugin may have set, STRIP them from the outgoing headers (they
+	 * are internal routing metadata, never delivered to the recipient), and
+	 * resolve them to a source descriptor.
+	 *
+	 * Mirrors {@see scanPriorityHeaders()}: the interceptor owns header
+	 * mutation, while {@see Detector::fromExplicitKey()} owns key validation
+	 * and grouping. Both control headers are stripped even when the key is
+	 * absent or malformed, so our routing metadata never leaks into the sent
+	 * message.
+	 *
+	 * @param array<int,string> $headers Headers — modified in place.
+	 * @return array{key:string,label:string,group:string}|null Descriptor, or null when no valid key header is present.
+	 */
+	private static function extractExplicitSource( array &$headers ): ?array {
+		$key     = '';
+		$label   = '';
+		$touched = false;
+		foreach ( $headers as $index => $val ) {
+			if ( preg_match( '#^\s*X-TMQ-Source-Key:\s*(.+?)\s*$#i', (string) $val, $matches ) ) {
+				$key = $matches[1];
+				unset( $headers[ $index ] );
+				$touched = true;
+			} elseif ( preg_match( '#^\s*X-TMQ-Source-Label:\s*(.+?)\s*$#i', (string) $val, $matches ) ) {
+				$label = $matches[1];
+				unset( $headers[ $index ] );
+				$touched = true;
+			}
+		}
+		if ( $touched ) {
+			$headers = array_values( $headers );
+		}
+		return '' === $key ? null : Detector::fromExplicitKey( $key, $label );
 	}
 
 	/**

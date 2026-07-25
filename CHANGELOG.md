@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Plugins can now label each of their emails as a distinct source via headers.** A new highest-priority detection strategy reads an `X-TMQ-Source-Key` (and optional `X-TMQ-Source-Label`) header off the outgoing message and uses it as the source — ahead of the primary listeners and the backtrace fallback. This lets a plugin whose mail all funnels through a single wrapper (so the backtrace can only ever see one `plugin:<slug>` frame) split its emails into per-feature sources, e.g. `plugin:ffcertificate_certificate` vs `plugin:ffcertificate_scheduling`. Only the `plugin:` / `mu_plugin:` / `theme:` namespaces are accepted (a header can never claim a `wp_core:` source), and both control headers are stripped before the message is stored or sent, so they never reach the recipient — exactly like the existing `X-Mail-Queue-Prio` header. Backed by `Detector::fromExplicitKey()`.
+
 ### Fixed
 
 - **The "queue may not be processing" notice no longer cries wolf.** The notice keyed off the last *worker run* with a 15-minute threshold, so it surfaced during healthy operation: the worker keeps running (and saving diagnostics) even while every account is capped or the queue idles, and a mail enqueued after a quiet spell tripped it instantly because the last run was stale. It now keys off the last *individual send* — it appears only when mail is waiting, nothing has been sent for **over two hours**, AND the worker isn't scheduled to act (no event armed, or an overdue one, which is the real signature of WP-Cron not firing). A future-scheduled run (normal cadence or an intentional quota deferral) and a just-armed event both keep it quiet. Backed by the new `Diagnostics::lastSendTimestamp()` / `Diagnostics::recordSend()` and the `wp_tmq_last_send` option; the unused `lastRunTimestamp()` is removed.
