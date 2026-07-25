@@ -203,6 +203,50 @@ final class Repository {
 	}
 
 	/**
+	 * The SMTP account a source is pinned to send through, or 0 when it has
+	 * no preference (the default) or the key is unknown. The sender treats
+	 * this as a *preference*: it is only honoured when the account is enabled
+	 * and still has quota, otherwise the normal round-robin flow is used
+	 * (see {@see \TotalMailQueue\Smtp\Repository::pickPreferredOrAvailable()}).
+	 *
+	 * @param string $source_key Canonical key.
+	 * @return int Preferred SMTP account id, or 0 for "no preference".
+	 */
+	public static function preferredAccountFor( string $source_key ): int {
+		if ( '' === $source_key ) {
+			return 0;
+		}
+		$row = self::findByKey( $source_key );
+		if ( null === $row || ! isset( $row['preferred_smtp_account_id'] ) ) {
+			return 0;
+		}
+		return max( 0, (int) $row['preferred_smtp_account_id'] );
+	}
+
+	/**
+	 * Persist a source's preferred SMTP account. Pass 0 to clear the
+	 * preference (fall back to the normal account-selection flow).
+	 *
+	 * @param int $id         Row id.
+	 * @param int $account_id Preferred SMTP account id (0 = no preference).
+	 */
+	public static function updatePreferredAccount( int $id, int $account_id ): void {
+		if ( $id <= 0 ) {
+			return;
+		}
+		global $wpdb;
+		$table = Schema::sourcesTable();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$table,
+			array( 'preferred_smtp_account_id' => max( 0, $account_id ) ),
+			array( 'id' => $id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+	}
+
+	/**
 	 * Toggle the `enabled` flag for a single source. System sources
 	 * (see {@see isSystem()}) silently refuse to flip — they're hardcoded
 	 * to always-enabled so the admin can't accidentally silence the

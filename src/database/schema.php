@@ -115,6 +115,7 @@ final class Schema {
 		body_override longtext NOT NULL,
 		skip_template_wrap tinyint(1) DEFAULT 0 NOT NULL,
 		priority smallint(5) DEFAULT 50 NOT NULL,
+		preferred_smtp_account_id mediumint(9) DEFAULT 0 NOT NULL,
 		enabled tinyint(1) DEFAULT 1 NOT NULL,
 		detected_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,
 		last_seen_at datetime DEFAULT '2000-01-01 00:00:00' NOT NULL,

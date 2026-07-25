@@ -202,4 +202,42 @@ final class SourcesRepositoryTest extends IntegrationTestCase {
         // literal `total_mail_queue:` prefix followed by anything.
         self::assertStringContainsString( 'total\\_mail\\_queue:%', $query['args'][0] );
     }
+
+    public function test_preferred_account_for_returns_zero_for_unknown_key(): void {
+        $this->wpdb->will_return( 'get_row', null );
+        self::assertSame( 0, Repository::preferredAccountFor( 'plugin:ffcertificate_certificate' ) );
+    }
+
+    public function test_preferred_account_for_returns_zero_for_empty_key_without_db_hit(): void {
+        self::assertSame( 0, Repository::preferredAccountFor( '' ) );
+        self::assertNull( $this->wpdb->call( 'get_row' ) );
+    }
+
+    public function test_preferred_account_for_reads_and_ints_the_column(): void {
+        $this->wpdb->will_return( 'get_row', array( 'id' => '5', 'preferred_smtp_account_id' => '3' ) );
+        self::assertSame( 3, Repository::preferredAccountFor( 'plugin:ffcertificate_certificate' ) );
+    }
+
+    public function test_update_preferred_account_writes_the_expected_update(): void {
+        Repository::updatePreferredAccount( 9, 3 );
+
+        $update = $this->wpdb->call( 'update' );
+        self::assertNotNull( $update );
+        self::assertSame( 'wp_total_mail_queue_sources', $update['args'][0] );
+        self::assertSame( array( 'preferred_smtp_account_id' => 3 ), $update['args'][1] );
+        self::assertSame( array( 'id' => 9 ), $update['args'][2] );
+    }
+
+    public function test_update_preferred_account_clamps_negatives_to_zero(): void {
+        Repository::updatePreferredAccount( 9, -4 );
+
+        $update = $this->wpdb->call( 'update' );
+        self::assertNotNull( $update );
+        self::assertSame( array( 'preferred_smtp_account_id' => 0 ), $update['args'][1] );
+    }
+
+    public function test_update_preferred_account_is_a_no_op_for_non_positive_ids(): void {
+        Repository::updatePreferredAccount( 0, 3 );
+        self::assertNull( $this->wpdb->call( 'update' ) );
+    }
 }

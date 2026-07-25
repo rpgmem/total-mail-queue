@@ -197,7 +197,10 @@ final class BatchProcessor {
 		$send_method = $options['send_method'];
 		$smtp_to_use = null;
 		if ( 'php' !== $send_method && ! empty( $smtp_accounts ) ) {
-			$smtp_to_use = SmtpRepository::pickAvailable( $smtp_accounts );
+			// Honour the source's preferred SMTP account when it is enabled and
+			// still has quota; otherwise fall back to the normal round-robin.
+			$preferred_id = SourcesRepository::preferredAccountFor( (string) ( $item['source_key'] ?? '' ) );
+			$smtp_to_use  = SmtpRepository::pickPreferredOrAvailable( $smtp_accounts, $preferred_id );
 		}
 
 		if ( 'smtp' === $send_method && ! $smtp_to_use ) {

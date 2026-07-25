@@ -90,6 +90,10 @@ final class SourcesActions {
 			SourcesRepository::updatePriority( $source_id, (int) $_POST['priority'] );
 		}
 
+		if ( isset( $_POST['preferred_smtp_account_id'] ) ) {
+			SourcesRepository::updatePreferredAccount( $source_id, (int) $_POST['preferred_smtp_account_id'] );
+		}
+
 		// Template override fields (only relevant for wp_core sources).
 		$row = SourcesRepository::findById( $source_id );
 		if ( null !== $row && CoreTemplates::isCoreTemplate( (string) $row['source_key'] ) ) {
