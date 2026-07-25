@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Queue\Priority;
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Sources\CoreTemplates;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -125,6 +126,25 @@ final class SourcesEditRenderer {
 				Priority::NORMAL
 			)
 		) . '</p>';
+		echo '</td></tr>';
+
+		// Preferred SMTP account row — pin this source to a specific account.
+		$accounts     = SmtpRepository::all();
+		$preferred_id = isset( $row['preferred_smtp_account_id'] ) ? (int) $row['preferred_smtp_account_id'] : 0;
+		echo '<tr><th scope="row"><label for="tmq-source-smtp">' . esc_html__( 'Preferred SMTP account', 'total-mail-queue' ) . '</label></th><td>';
+		if ( empty( $accounts ) ) {
+			echo '<p class="description">' . esc_html__( 'No SMTP accounts configured yet — add one on the SMTP tab to pin this source to a specific account.', 'total-mail-queue' ) . '</p>';
+		} else {
+			echo '<select id="tmq-source-smtp" name="preferred_smtp_account_id">';
+			echo '<option value="0"' . selected( $preferred_id, 0, false ) . '>' . esc_html__( '— No preference (normal rotation) —', 'total-mail-queue' ) . '</option>';
+			foreach ( $accounts as $acct ) {
+				$aid   = (int) ( $acct['id'] ?? 0 );
+				$aname = '' !== (string) ( $acct['name'] ?? '' ) ? (string) $acct['name'] : '#' . $aid;
+				echo '<option value="' . esc_attr( (string) $aid ) . '"' . selected( $preferred_id, $aid, false ) . '>' . esc_html( $aname ) . '</option>';
+			}
+			echo '</select>';
+			echo '<p class="description">' . esc_html__( 'Send this source through the chosen account when it is enabled and under quota; otherwise the normal account rotation is used. Applies only in SMTP send mode.', 'total-mail-queue' ) . '</p>';
+		}
 		echo '</td></tr>';
 
 		echo '</table>';

@@ -122,6 +122,33 @@ final class Repository {
 	}
 
 	/**
+	 * Like {@see pickAvailable()}, but honour a source's preferred account
+	 * when it is present in the snapshot and still has capacity. Falls back to
+	 * the normal round-robin pick when the preference is 0 (none), the account
+	 * is absent from the snapshot (disabled, or already over a persisted
+	 * limit, so `available()` excluded it), or it has exhausted its in-batch
+	 * capacity. A preference therefore never blocks or delays a send — the
+	 * worst case is the ordinary flow.
+	 *
+	 * Pure / database-free — operates on the same in-memory list as
+	 * {@see pickAvailable()}.
+	 *
+	 * @param list<array<string,mixed>> $accounts     Candidates, least-recently-used first.
+	 * @param int                       $preferred_id Preferred account id (0 = no preference).
+	 * @return array<string,mixed>|null Selected row, or null when all are exhausted.
+	 */
+	public static function pickPreferredOrAvailable( array $accounts, int $preferred_id ): ?array {
+		if ( $preferred_id > 0 ) {
+			foreach ( $accounts as $acct ) {
+				if ( intval( $acct['id'] ?? 0 ) === $preferred_id && self::hasCapacity( $acct ) ) {
+					return $acct;
+				}
+			}
+		}
+		return self::pickAvailable( $accounts );
+	}
+
+	/**
 	 * Whether an in-memory account row still has room on every configured
 	 * limit. A limit of 0 means "unlimited" and never blocks.
 	 *
