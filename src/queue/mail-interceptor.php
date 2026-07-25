@@ -121,18 +121,16 @@ final class MailInterceptor {
 
 		$headers = self::normaliseHeaders( $headers );
 
-		// Resolve the source, highest priority first. The source decides two
-		// things: which `source_key` to persist, and whether the admin has
-		// disabled this source — in which case the message is stored as
-		// `blocked_by_source` instead of being scheduled.
-		//   1. Explicit `X-TMQ-Source-*` headers the sending plugin set (read
-		//      and stripped here) — lets a plugin whose mail all funnels through
-		//      one wrapper label each feature distinctly, which the backtrace
-		//      fallback cannot.
-		//   2. The marker a primary listener stashed for a WP-core email.
-		//   3. The call stack.
-		// `consume()` is always called (even when a header wins) so a stale
-		// marker never carries over to the next email.
+		// Resolve the source, highest priority first. The source decides which
+		// `source_key` to persist and whether the admin has disabled it (the
+		// message is then stored as `blocked_by_source` instead of scheduled).
+		// Priority order:
+		// (1) explicit `X-TMQ-Source-*` headers the sending plugin set — read
+		// and stripped here — which let a plugin whose mail all funnels through
+		// one wrapper label each feature distinctly, where the backtrace cannot;
+		// (2) the marker a primary listener stashed for a WP-core email;
+		// (3) the call stack. `consume()` runs even when a header wins, so a
+		// stale marker never carries over to the next email.
 		$source = self::extractExplicitSource( $headers );
 		$marker = Detector::consume();
 		if ( null === $source ) {
