@@ -149,6 +149,46 @@ final class Detector {
 	}
 
 	/**
+	 * Build a source descriptor from an explicit key a sending plugin declared
+	 * via the `X-TMQ-Source-*` headers (read + stripped by
+	 * {@see \TotalMailQueue\Queue\MailInterceptor::handle()}).
+	 *
+	 * The highest-priority strategy: a plugin that funnels every email through
+	 * one wrapper — so the backtrace fallback can't tell its features apart —
+	 * can label each message itself (e.g. `plugin:ffcertificate_certificate`
+	 * vs `plugin:ffcertificate_scheduling`).
+	 *
+	 * Only the `plugin:` / `mu_plugin:` / `theme:` namespaces are accepted, so
+	 * an outgoing email can never claim a `wp_core:` (or any other) key —
+	 * third-party mail cannot impersonate a WordPress-core source. Returns
+	 * null for an empty or malformed key.
+	 *
+	 * @param string $key   Declared source key.
+	 * @param string $label Optional human label; falls back to the key's slug.
+	 * @return array{key:string,label:string,group:string}|null
+	 */
+	public static function fromExplicitKey( string $key, string $label = '' ): ?array {
+		$key = trim( $key );
+		if ( ! preg_match( '#^(plugin|mu_plugin|theme):[A-Za-z0-9_.\-]+$#', $key ) ) {
+			return null;
+		}
+
+		$group = 0 === strpos( $key, 'theme:' ) ? 'Themes' : 'Plugins';
+
+		$label = trim( $label );
+		if ( '' === $label ) {
+			$slug  = substr( $key, strpos( $key, ':' ) + 1 );
+			$label = ( 'Themes' === $group ? 'Theme: ' : 'Plugin: ' ) . $slug;
+		}
+
+		return array(
+			'key'   => $key,
+			'label' => $label,
+			'group' => $group,
+		);
+	}
+
+	/**
 	 * Walk `debug_backtrace()` to find the caller. Used by
 	 * {@see \TotalMailQueue\Queue\MailInterceptor} when {@see consume()}
 	 * returns null.

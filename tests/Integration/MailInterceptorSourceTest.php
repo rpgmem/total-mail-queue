@@ -105,6 +105,69 @@ final class MailInterceptorSourceTest extends IntegrationTestCase {
         self::assertSame( array( 'key' => 'plugin:bogus', 'label' => 'Bogus', 'group' => 'Plugins' ), Detector::consume() );
     }
 
+    public function test_explicit_source_headers_win_over_marker_and_are_stripped(): void {
+        // A primary listener marker is present, but the sending plugin also
+        // declared an explicit source via headers — the header must win.
+        Detector::setCurrent( 'wp_core:password_reset', 'Password reset', 'WordPress Core' );
+
+        $this->wpdb->will_return( 'insert', 1 );
+        $this->wpdb->will_return( 'get_row', null );
+        $this->wpdb->will_return( 'insert', 7 );
+
+        MailInterceptor::handle(
+            null,
+            $this->attsWithHeaders(
+                array(
+                    'Content-Type: text/html; charset=UTF-8',
+                    'X-TMQ-Source-Key: plugin:ffcertificate_certificate',
+                    'X-TMQ-Source-Label: FFCertificate — Certificado',
+                )
+            )
+        );
+
+        $inserts = $this->wpdb->callsTo( 'insert' );
+        self::assertCount( 2, $inserts );
+
+        // Queue + catalog rows carry the header-declared source, not the marker.
+        self::assertSame( 'plugin:ffcertificate_certificate', $inserts[0]['args'][1]['source_key'] );
+        self::assertSame( 'plugin:ffcertificate_certificate', $inserts[1]['args'][1]['source_key'] );
+        self::assertSame( 'FFCertificate — Certificado', $inserts[1]['args'][1]['label'] );
+        self::assertSame( 'Plugins', $inserts[1]['args'][1]['group_label'] );
+
+        // The control headers must be stripped from the stored (and thus sent) headers.
+        self::assertArrayHasKey( 'headers', $inserts[0]['args'][1] );
+        self::assertStringNotContainsString( 'X-TMQ-Source', $inserts[0]['args'][1]['headers'] );
+
+        // The marker was consumed even though the header won — nothing carries over.
+        self::assertNull( Detector::consume() );
+    }
+
+    public function test_invalid_explicit_key_is_ignored_but_headers_still_stripped(): void {
+        // A header may not claim a wp_core: source; the row falls back to the
+        // backtrace, but our control headers are stripped regardless so they
+        // never reach the recipient.
+        $this->wpdb->will_return( 'insert', 1 );
+        $this->wpdb->will_return( 'get_row', null );
+        $this->wpdb->will_return( 'insert', 1 );
+
+        MailInterceptor::handle(
+            null,
+            $this->attsWithHeaders(
+                array(
+                    'Content-Type: text/plain',
+                    'X-TMQ-Source-Key: wp_core:password_reset',
+                    'X-TMQ-Source-Label: Spoofed',
+                )
+            )
+        );
+
+        $inserts = $this->wpdb->callsTo( 'insert' );
+        // Backtrace fallback from PHPUnit's frames lands on wp_core:unknown.
+        self::assertSame( 'wp_core:unknown', $inserts[0]['args'][1]['source_key'] );
+        self::assertArrayHasKey( 'headers', $inserts[0]['args'][1] );
+        self::assertStringNotContainsString( 'X-TMQ-Source', $inserts[0]['args'][1]['headers'] );
+    }
+
     /**
      * @return array{to:string,subject:string,message:string,headers:array<int,string>,attachments:array<int,string>}
      */
@@ -116,5 +179,15 @@ final class MailInterceptorSourceTest extends IntegrationTestCase {
             'headers'     => array(),
             'attachments' => array(),
         );
+    }
+
+    /**
+     * @param array<int,string> $headers
+     * @return array{to:string,subject:string,message:string,headers:array<int,string>,attachments:array<int,string>}
+     */
+    private function attsWithHeaders( array $headers ): array {
+        $atts            = $this->basicAtts();
+        $atts['headers'] = $headers;
+        return $atts;
     }
 }
