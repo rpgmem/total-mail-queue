@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.8.1
+Stable tag: 2.9.0
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -180,12 +180,12 @@ Please make sure that your WP Cron is running reliably.
 
 The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
 
-= 2.6.2 =
-* Default Sender (`from_email`) and alert recipient (`email`) settings now reject malformed addresses and collapse them to an empty string at save time, so junk like `not an email` no longer ships as a valid `From:` header.
-* FAQ corrections: the "Does this plugin change HOW emails are sent?" answer now lists the SMTP / Templates / Sources opt-ins that genuinely change the send path; the W3 Total Cache entry points users at their caching plugin's built-in WP-Cron trigger instead of always demanding a manual cron job.
-* Admin UI polish: postman illustration moved to the top of the FAQ tab as a centered hero banner, redundant H1 icon dropped, and inline / multi-line code samples in the FAQ get a light-chip / dark-block treatment respectively.
-* Internal: `Plugin::VERSION` and plugin header bumped to 2.6.2; PHPStan analyser bumped from 1.12 to 2.1 with strictness at level 8 across `src/`; admin-page renderers split into focused router + actions + view classes; per-request static state coordinated through a single `Support\RuntimeState::reset()`.
+= 2.9.0 =
+* New: plugins can label each of their emails as a distinct source by setting an `X-TMQ-Source-Key` (and optional `X-TMQ-Source-Label`) header. The queue reads it as the highest-priority source strategy — ahead of the built-in listeners and the caller backtrace — and strips both headers before delivery, so a plugin whose mail all flows through one wrapper can still split its emails into per-feature sources. Only `plugin:` / `mu_plugin:` / `theme:` keys are accepted.
+* New: any source can be pinned to a preferred SMTP account on the Sources → edit screen. The queue sends through that account when it is enabled and under quota, and transparently falls back to the normal account rotation when it is capped, disabled, or removed — a preference never blocks or delays a send.
+* Fixed: the "queue may not be processing" admin notice no longer fires during healthy operation — it now keys off the last successful send (over two hours idle) with the worker not scheduled to act, instead of the last worker run.
 
-= 2.6.1 =
-* Hotfix: per-source `Skip template wrapper` checkbox introduced in 2.6.0 was honored at intercept time but the Engine on `wp_mail` filter @100 silently re-wrapped queued rows at cron drain time. Now skipped end-to-end.
+= 2.8.0 =
+* New: a persistent per-email error log with an optional full SMTP debug transcript, a specific "why is the queue waiting?" message when every account is capped, and a proactive "queue may not be processing" admin notice for cached / low-traffic sites.
+* Fixed: per-cycle SMTP quotas no longer get stuck; SMTP passwords no longer fail to decrypt intermittently; the queue no longer freezes when a send hangs (the cron lock now has a real self-expiring TTL).
 
