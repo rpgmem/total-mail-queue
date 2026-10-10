@@ -29,11 +29,13 @@ final class QueueRepository {
 	public static function insert( array $data ): int {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// `error_log` is `longtext NOT NULL`, and TEXT columns can't carry a SQL
+		// `recipient` and `error_log` are TEXT columns, which can't carry a SQL
 		// default — so guarantee a value here rather than in every caller, which
 		// keeps inserts working under MySQL strict mode.
-		if ( ! array_key_exists( 'error_log', $data ) ) {
-			$data['error_log'] = '';
+		foreach ( array( 'recipient', 'error_log' ) as $text_column ) {
+			if ( ! array_key_exists( $text_column, $data ) ) {
+				$data[ $text_column ] = '';
+			}
 		}
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$inserted = $wpdb->insert( $table, $data );

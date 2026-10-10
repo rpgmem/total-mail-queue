@@ -35,6 +35,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Resend and Force Resend keep the source and priority** (#81). The resent copy lost both, and with them the source's preferred SMTP account.
 - **Attachment staging is all or nothing** (#81). A failed copy no longer queues a broken attachment, two files with the same name no longer overwrite each other, and an unavailable filesystem no longer breaks the page that sent the email.
 - **No more orphaned attachment folders** (#81). Deleting a queued email removes its files, emails blocked by their source no longer stage any, and only folders inside the staging directory are ever deleted.
+- **Emails to long recipient lists are stored whole** (#82). The recipient column held 255 characters, so a longer list was cut off and the email reached only part of it, or failed. The column is now `text`, widened in place on upgrade.
 
 ## [2.9.0] (2026-07-25) — `bee76b0`
 
