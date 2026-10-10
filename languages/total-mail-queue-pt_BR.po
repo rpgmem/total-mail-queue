@@ -2101,3 +2101,27 @@ msgstr "🔴 Alerta de fila de e-mails do WordPress Total - %s"
 #: src/update/github-updater.php:197
 msgid "Update package integrity check (SHA-256) failed. Installation aborted."
 msgstr "A verificação de integridade (SHA-256) do pacote de atualização falhou. Instalação cancelada."
+
+#: src/admin/plugin-page.php:187
+msgid "Total Mail Queue sections"
+msgstr "Seções do Total Mail Queue"
+
+#: src/admin/settings-api.php:68
+msgid "Dark Mode"
+msgstr "Modo escuro"
+
+#: src/admin/settings-api.php:281
+msgid "Off"
+msgstr "Desligado"
+
+#: src/admin/settings-api.php:282
+msgid "On"
+msgstr "Ligado"
+
+#: src/admin/settings-api.php:283
+msgid "Follow the operating system"
+msgstr "Seguir o sistema operacional"
+
+#: src/admin/settings-api.php:290
+msgid "Applies to the Total Mail Queue screens only."
+msgstr "Vale apenas para as telas do Total Mail Queue."

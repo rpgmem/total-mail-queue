@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin;
 
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\ConnectionTester;
 use TotalMailQueue\Templates\TestEmailSender;
 
@@ -37,6 +38,13 @@ final class Assets {
 		}
 		$base = plugin_dir_url( Plugin::container()->get( 'plugin.file' ) );
 		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin.css', array(), Plugin::VERSION );
+
+		// The theme class must be on <html> before the page paints, or a dark
+		// screen flashes light first: an inline script in the head, with no
+		// file behind it.
+		wp_register_script( 'wp_tmq_theme', false, array(), Plugin::VERSION, false );
+		wp_enqueue_script( 'wp_tmq_theme' );
+		wp_add_inline_script( 'wp_tmq_theme', self::darkModeScript( (string) Options::get()['dark_mode'] ) );
 		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin.js', array( 'jquery' ), Plugin::VERSION, true );
 		wp_add_inline_script( 'wp_tmq_script', self::inlineConfig(), 'before' );
 
@@ -82,5 +90,27 @@ final class Assets {
 		$d .= 'tmq.i18n.mediaButton = "' . esc_js( __( 'Use this image', 'total-mail-queue' ) ) . '";';
 		$d .= '}) ( this );';
 		return $d;
+	}
+
+	/**
+	 * The script that puts `tmq-dark-mode` on <html>.
+	 *
+	 * "on" and "off" are decided here; only "auto" asks the operating system,
+	 * and it keeps listening, so switching the system theme repaints the open
+	 * page. An unknown value is treated as "off".
+	 *
+	 * @param string $mode The stored `dark_mode` setting.
+	 */
+	public static function darkModeScript( string $mode ): string {
+		if ( ! in_array( $mode, Options::DARK_MODES, true ) ) {
+			$mode = 'off';
+		}
+		return '(function(mode){'
+			. 'var root=document.documentElement;'
+			. 'var query=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;'
+			. 'function apply(){root.classList.toggle("tmq-dark-mode",mode==="on"||(mode==="auto"&&!!query&&query.matches));}'
+			. 'apply();'
+			. 'if(mode==="auto"&&query&&query.addEventListener){query.addEventListener("change",apply);}'
+			. '})(' . wp_json_encode( $mode ) . ');';
 	}
 }

@@ -2091,3 +2091,27 @@ msgstr ""
 #: src/update/github-updater.php:197
 msgid "Update package integrity check (SHA-256) failed. Installation aborted."
 msgstr ""
+
+#: src/admin/plugin-page.php:187
+msgid "Total Mail Queue sections"
+msgstr ""
+
+#: src/admin/settings-api.php:68
+msgid "Dark Mode"
+msgstr ""
+
+#: src/admin/settings-api.php:281
+msgid "Off"
+msgstr ""
+
+#: src/admin/settings-api.php:282
+msgid "On"
+msgstr ""
+
+#: src/admin/settings-api.php:283
+msgid "Follow the operating system"
+msgstr ""
+
+#: src/admin/settings-api.php:290
+msgid "Applies to the Total Mail Queue screens only."
+msgstr ""

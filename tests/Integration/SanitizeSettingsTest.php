@@ -109,4 +109,28 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
             $result
         );
     }
+
+    /**
+     * @dataProvider darkModeValues
+     */
+    public function test_dark_mode_keeps_only_a_known_value( $input, string $expected ): void {
+        $out = \TotalMailQueue\Settings\Sanitizer::sanitize( array( 'dark_mode' => $input ) );
+
+        self::assertSame( $expected, $out['dark_mode'] );
+    }
+
+    /**
+     * @return array<string,array{0:mixed,1:string}>
+     */
+    public function darkModeValues(): array {
+        return array(
+            'off'          => array( 'off', 'off' ),
+            'on'           => array( 'on', 'on' ),
+            'auto'         => array( 'auto', 'auto' ),
+            'unknown word' => array( 'dark', 'off' ),
+            'wrong case'   => array( 'ON', 'off' ),
+            'markup'       => array( '<script>on</script>', 'off' ),
+            'array'        => array( array( 'on' ), 'off' ),
+        );
+    }
 }

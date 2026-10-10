@@ -24,6 +24,12 @@ final class Options {
 	public const OPTION_NAME = 'wp_tmq_settings';
 
 	/**
+	 * Values the `dark_mode` setting accepts: never, always, or whatever the
+	 * operating system prefers.
+	 */
+	public const DARK_MODES = array( 'off', 'on', 'auto' );
+
+	/**
 	 * Default values for every setting.
 	 *
 	 * @return array<string,mixed>
@@ -49,6 +55,7 @@ final class Options {
 			'triggercount'        => 0,
 			'from_email'          => '',
 			'from_name'           => '',
+			'dark_mode'           => 'off', // off|on|auto — the plugin's admin screens only.
 		);
 	}
 

@@ -1,89 +1,412 @@
+/*
+ * Total Mail Queue — admin stylesheet.
+ *
+ * Every colour this sheet paints comes from a `--tmq-*` token declared in the
+ * two blocks below. The dark theme is the light theme overridden: its block
+ * redefines colour tokens only, and `:root.tmq-dark-mode` is added to <html>
+ * by the inline script in `Admin\Assets` from the plugin's own Dark Mode
+ * setting. There is no `prefers-color-scheme` here on purpose — the operating
+ * system is consulted by that script, and only when the setting is "auto", so
+ * a media query can never outrank the administrator's choice.
+ *
+ * The sheet loads on the plugin's own screens only, so the WordPress chrome
+ * it repaints in dark mode (forms, list tables, notices, buttons) is never a
+ * core screen's.
+ *
+ * `ColorTokensTest` fails on a colour literal outside the two token blocks and
+ * measures every text/background pair below against WCAG AA in both themes.
+ */
 
-.wrap summary {
-	cursor: pointer; }
-.tmq-box, .toplevel_page_wp_tmq_mail_queue form[action="options.php"] {
-	padding: 2rem;
-	background-color: #fff; }
+/* ==========================================================================
+   TOKENS — light
+   ========================================================================== */
+:root {
+	--tmq-primary: #2271b1;
+	--tmq-primary-hover: #135e96;
+	--tmq-primary-light: #e7f3ff;
+	--tmq-text-on-primary: #fff;
+
+	--tmq-bg: #f0f0f1;
+	--tmq-bg-alt: #f6f7f7;
+	--tmq-bg-card: #fff;
+	--tmq-bg-input: #fff;
+
+	--tmq-text: #1d2327;
+	--tmq-text-secondary: #3c434a;
+	--tmq-text-muted: #646970;
+
+	--tmq-border: #c3c4c7;
+	--tmq-border-light: #dcdcde;
+	--tmq-border-focus: #2271b1;
+
+	/* Solid signals: a light label on a saturated ground. */
+	--tmq-success: #00801e;
+	--tmq-danger: #b32d2e;
+	--tmq-danger-text: #b32d2e;
+	--tmq-text-on-signal: #fff;
+
+	/* Tinted badges: a dark label on a pale ground of the same hue. */
+	--tmq-success-bg: #e7f5ec;
+	--tmq-success-text: #00661a;
+	--tmq-warning-bg: #fff8e5;
+	--tmq-warning-text: #7a5a00;
+	--tmq-danger-bg: #fcf0f1;
+	--tmq-danger-badge-text: #a1191b;
+	--tmq-info-bg: #e5f5fa;
+	--tmq-info-text: #005a87;
+	--tmq-neutral-bg: #f0f0f1;
+	--tmq-neutral-text: #3c434a;
+	--tmq-inverse-bg: #1d2327;
+	--tmq-inverse-text: #fff;
+
+	/* The select arrow, drawn like core's. Only the dark theme paints it: core
+	   draws its own in light, in a grey that vanishes on a dark field. */
+	--tmq-select-arrow: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E");
+
+	/* A code sample: dark in both themes, like the editor it imitates. */
+	--tmq-code-block-bg: #1d2327;
+	--tmq-code-block-text: #f6f7f7;
+	--tmq-shadow: rgba(0, 0, 0, 0.15);
+
+	--tmq-radius: 4px;
+	--tmq-radius-lg: 6px;
+	--tmq-space-xs: 4px;
+	--tmq-space-sm: 8px;
+	--tmq-space-md: 12px;
+	--tmq-space-lg: 16px;
+	--tmq-space-xl: 24px;
+}
+
+/* ==========================================================================
+   TOKENS — dark (colour tokens only)
+   ========================================================================== */
+:root.tmq-dark-mode {
+	color-scheme: dark;
+
+	--tmq-primary: #5dabde;
+	--tmq-primary-hover: #7cbde8;
+	--tmq-primary-light: #1a2f42;
+	--tmq-text-on-primary: #10283a;
+
+	--tmq-bg: #1d2327;
+	--tmq-bg-alt: #23282d;
+	--tmq-bg-card: #2c3338;
+	--tmq-bg-input: #23282d;
+
+	--tmq-text: #e7e8ea;
+	--tmq-text-secondary: #c3c4c7;
+	--tmq-text-muted: #a7aaad;
+
+	--tmq-border: #6f7c89;
+	--tmq-border-light: #3c434a;
+	--tmq-border-focus: #5dabde;
+
+	--tmq-success: #4caf50;
+	--tmq-danger: #e88080;
+	--tmq-danger-text: #f29a9a;
+	--tmq-text-on-signal: #1d2327;
+
+	--tmq-success-bg: #1a2e1a;
+	--tmq-success-text: #81c784;
+	--tmq-warning-bg: #332b10;
+	--tmq-warning-text: #f0c76a;
+	--tmq-danger-bg: #2e1515;
+	--tmq-danger-badge-text: #f29a9a;
+	--tmq-info-bg: #0d2b3a;
+	--tmq-info-text: #7fd0f5;
+	--tmq-neutral-bg: #3c434a;
+	--tmq-neutral-text: #e7e8ea;
+	--tmq-inverse-bg: #e7e8ea;
+	--tmq-inverse-text: #1d2327;
+
+	--tmq-select-arrow: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23c3c4c7%22%2F%3E%3C%2Fsvg%3E");
+
+	--tmq-code-block-bg: #15191c;
+	--tmq-code-block-text: #e7e8ea;
+	--tmq-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   PAGE AND HEADER
+   ========================================================================== */
+.tmq-admin {
+	max-width: 1500px;
+}
+
+.tmq-admin summary {
+	cursor: pointer;
+}
+
+h1.tmq-title {
+	margin: 0;
+	padding: var(--tmq-space-lg) 0 var(--tmq-space-md);
+}
+
+.tmq-logo {
+	width: 11rem;
+	height: auto;
+}
+
+.tmq-logo--dark,
+:root.tmq-dark-mode .tmq-logo--light {
+	display: none;
+}
+
+:root.tmq-dark-mode .tmq-logo--dark {
+	display: inline;
+}
+
+/* ==========================================================================
+   VERTICAL TABS
+   One page per tab, as before: each tab is its own submenu slug, so links,
+   redirects and screen ids are unchanged. The submenus are hidden from the
+   sidebar by `Menu::menuStylesheet()` and this column is the navigation.
+   ========================================================================== */
+.tmq-tabs {
+	display: flex;
+	align-items: stretch;
+	margin-top: var(--tmq-space-sm);
+	background: var(--tmq-bg-card);
+	border: 1px solid var(--tmq-border-light);
+	border-radius: var(--tmq-radius);
+	box-shadow: 0 1px 3px var(--tmq-shadow);
+	overflow: hidden;
+}
+
+.tmq-tabs__nav {
+	flex: 0 0 200px;
+	padding: var(--tmq-space-sm) 0;
+	background: var(--tmq-bg-alt);
+	border-right: 1px solid var(--tmq-border-light);
+}
+
+.tmq-tabs__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.tmq-tabs__item {
+	margin: 0;
+}
+
+.tmq-tabs__tab {
+	display: block;
+	padding: var(--tmq-space-md) var(--tmq-space-lg);
+	color: var(--tmq-text);
+	text-decoration: none;
+	border-left: 4px solid transparent;
+	line-height: 1.3;
+}
+
+.tmq-tabs__tab:hover,
+.tmq-tabs__tab:focus {
+	color: var(--tmq-primary);
+	background: var(--tmq-primary-light);
+	box-shadow: none;
+}
+
+.tmq-tabs__tab:focus-visible {
+	outline: 2px solid var(--tmq-border-focus);
+	outline-offset: -2px;
+}
+
+.tmq-tabs__tab.is-active {
+	color: var(--tmq-primary);
+	background: var(--tmq-bg-card);
+	border-left-color: var(--tmq-primary);
+	font-weight: 600;
+}
+
+.tmq-tabs__panel {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: var(--tmq-space-sm) var(--tmq-space-xl) var(--tmq-space-xl);
+}
+
+/* Phones and narrow tablets: the column becomes a scrolling row. */
+@media screen and (max-width: 782px) {
+	.tmq-tabs {
+		flex-direction: column;
+	}
+
+	.tmq-tabs__nav {
+		flex: 0 0 auto;
+		overflow-x: auto;
+		padding: 0;
+		border-right: 0;
+		border-bottom: 1px solid var(--tmq-border-light);
+	}
+
+	.tmq-tabs__list {
+		display: flex;
+	}
+
+	.tmq-tabs__tab {
+		white-space: nowrap;
+		border-left: 0;
+		border-bottom: 3px solid transparent;
+	}
+
+	.tmq-tabs__tab.is-active {
+		border-bottom-color: var(--tmq-primary);
+	}
+
+	.tmq-tabs__panel {
+		padding: var(--tmq-space-sm) var(--tmq-space-md) var(--tmq-space-lg);
+	}
+}
+
+/* ==========================================================================
+   BOXES
+   ========================================================================== */
+.tmq-box {
+	padding: var(--tmq-space-xl);
+	color: var(--tmq-text);
+	background-color: var(--tmq-bg-card);
+	border: 1px solid var(--tmq-border-light);
+	border-radius: var(--tmq-radius);
+}
+
+.tmq-box h2 {
+	margin-top: 0.5em;
+	font-size: 2.5em;
+}
+
+.tmq-box p {
+	font-size: 1rem;
+}
+
+.tmq-export-import {
+	display: flex;
+	gap: var(--tmq-space-xl);
+	flex-wrap: wrap;
+}
+
+.tmq-export-import > .tmq-box {
+	flex: 1;
+	min-width: 300px;
+}
+
 /*
  * Hero banner shown at the top of the FAQ tab. Constrained to a sane
  * max-width so the 1408×768 source doesn't dominate the layout on wide
- * screens; height: auto preserves the 16:9 aspect ratio. Centered in
- * the tab via auto horizontal margins on the inner <img> so the
- * banner sits in the middle regardless of how wide the .wrap is.
+ * screens; height: auto preserves the aspect ratio.
  */
 .tmq-banner {
-	margin: 1rem 0 1.5rem;
-	text-align: center; }
+	margin: var(--tmq-space-lg) 0 var(--tmq-space-xl);
+	text-align: center;
+}
+
 .tmq-banner img {
 	display: block;
 	margin: 0 auto;
 	width: 100%;
 	max-width: 60rem;
 	height: auto;
-	border-radius: 6px; }
-.tmq-select-all {
-	margin-left: 0 !important; }
-h1.tmq-title {
-	padding: 1rem 0 1.25rem; margin: 0; }
-.tmq-logo {
-	width: 14rem;
-	height: auto; }
-.tmq-box + .tmq-box {
-	border-top: 1px solid #ddd; }
-.tmq-box h2 {
-	margin-top: .5em;
-	font-size: 2.5em; }
-.tmq-box p {
-	font-size: 1rem; }
+	border-radius: var(--tmq-radius-lg);
+}
+
+/* ==========================================================================
+   STATUS BADGES AND SIGNALS
+   ========================================================================== */
 span.tmq-status {
-	background: #ccc;
-	border-radius: 5px;
 	display: inline-block;
 	padding: 5px 10px;
-	line-height: 1; }
+	line-height: 1;
+	border-radius: 5px;
+	color: var(--tmq-neutral-text);
+	background: var(--tmq-neutral-bg);
+}
+
 span.tmq-status + span.tmq-status {
-	margin-left: 10px; }
-.tmq-ok, .tmq-warning {
-	padding: .25em .5em;
-	border-radius: .25em; }
-.tmq-ok {
-	background: green;
-	color: white; }
-/*
- * #b32d2e (darker than the WordPress signature red #d63638) keeps the
- * white text above the WCAG AA 4.5:1 contrast threshold.
- */
-.tmq-warning {
-	background: #b32d2e;
-	color: #fff; }
-span.tmq-status.tmq-status-high,
+	margin-left: 10px;
+}
+
 span.tmq-status.tmq-status-sent {
-	background: green;
-	color: white; }
+	color: var(--tmq-success-text);
+	background: var(--tmq-success-bg);
+}
+
+span.tmq-status.tmq-status-queue {
+	color: var(--tmq-info-text);
+	background: var(--tmq-info-bg);
+}
+
+span.tmq-status.tmq-status-high,
 span.tmq-status.tmq-status-instant {
-	background: orange;
-	color: white; }
-span.tmq-status.tmq-status-alert {
-	background: #1d2327;
-	color: white; }
+	color: var(--tmq-warning-text);
+	background: var(--tmq-warning-bg);
+}
+
+span.tmq-status.tmq-status-error,
 span.tmq-status.tmq-status-blocked-by-source {
-	background: #b32d2e;
-	color: white; }
-.column-timestamp {
-	width: 150px; }
-.column-status {
-	width: 80px; }
-.column-message {
-	width: 20%; }
+	color: var(--tmq-danger-badge-text);
+	background: var(--tmq-danger-bg);
+}
+
+span.tmq-status.tmq-status-alert {
+	color: var(--tmq-inverse-text);
+	background: var(--tmq-inverse-bg);
+}
+
+.tmq-ok,
+.tmq-warning {
+	padding: 0.25em 0.5em;
+	border-radius: 0.25em;
+	color: var(--tmq-text-on-signal);
+}
+
+.tmq-ok {
+	background: var(--tmq-success);
+}
+
+.tmq-warning {
+	background: var(--tmq-danger);
+}
+
+/*
+ * Inline danger text (no background — for short caution paragraphs).
+ * Deliberately NOT named .tmq-warning-block to avoid colliding with
+ * .tmq-warning (red banner); putting both on one element used to produce
+ * red-on-red.
+ */
+.tmq-text-danger {
+	color: var(--tmq-danger-text);
+}
+
+/* ==========================================================================
+   LIST TABLES
+   ========================================================================== */
+.tmq-select-all {
+	margin-left: 0 !important;
+}
+
+.tmq-admin .column-timestamp {
+	width: 150px;
+}
+
+.tmq-admin .column-status {
+	width: 80px;
+}
+
+.tmq-admin .column-message {
+	width: 20%;
+}
+
 .tmq-view-source {
-	position: relative; }
+	position: relative;
+}
+
 .tmq-view-source::after {
 	content: "";
 	position: absolute;
 	left: 0;
 	top: 100%;
 	width: 100%;
-	height: 10px; }
+	height: 10px;
+}
+
 .tmq-email-source {
 	position: relative;
 	left: 50%;
@@ -93,45 +416,54 @@ span.tmq-status.tmq-status-blocked-by-source {
 	max-width: 50em;
 	max-height: 50vh;
 	overflow-y: auto;
-	padding: .5rem;
-	border: 1px solid #ccc;
+	padding: 0.5rem;
 	margin: 1em 0;
 	font-family: monospace;
-	background-color: #fff;
-	color: #000;
-	box-shadow: 0 .5rem 4rem -1rem rgba(0,0,0,.15); }
+	color: var(--tmq-text);
+	background-color: var(--tmq-bg-card);
+	border: 1px solid var(--tmq-border);
+	box-shadow: 0 0.5rem 4rem -1rem var(--tmq-shadow);
+}
+
 .tmq-email-source-meta {
-	color: #50575e; }
+	color: var(--tmq-text-muted);
+}
+
 .tmq-email-source-meta summary {
-	font-weight: bold; }
+	font-weight: bold;
+}
+
 .tmq-email-source-meta summary + pre {
-	margin-top: .125rem; }
+	margin-top: 0.125rem;
+}
+
 .tmq-email-plain-text {
-	white-space: break-spaces; }
-/*
- * Inline danger text (no background — for short caution paragraphs).
- * Deliberately NOT named .tmq-warning-block to avoid colliding with
- * .tmq-warning (red banner with white text); putting both on the same
- * element used to win this rule on cascade and produced red-on-red.
- */
-.tmq-text-danger {
-	color: #d63638; }
+	white-space: break-spaces;
+}
+
+/* ==========================================================================
+   FORMS
+   ========================================================================== */
 .tmq-inline-form {
-	display: inline; }
-.tmq-export-import {
-	display: flex;
-	gap: 2em;
-	flex-wrap: wrap; }
-.tmq-export-import > .tmq-box {
-	flex: 1;
-	min-width: 300px; }
+	display: inline;
+}
+
 #tmq-test-smtp-result {
-	display: none; }
-.tmq-conn-row.tmq-conn-locked {
-	opacity: .5; }
+	display: none;
+}
+
+/* A locked connection row reads as inactive by its colour, not by fading. */
+.tmq-conn-row.tmq-conn-locked th,
+.tmq-conn-row.tmq-conn-locked td {
+	color: var(--tmq-text-muted);
+}
+
 .tmq-conn-field:disabled {
-	background-color: #f0f0f1;
-	cursor: not-allowed; }
+	color: var(--tmq-text-muted);
+	background-color: var(--tmq-bg-alt);
+	cursor: not-allowed;
+}
+
 /*
  * Off-screen decoy inputs that absorb browser autofill so the SMTP
  * username/password aren't pre-filled with the WordPress admin
@@ -142,35 +474,191 @@ span.tmq-status.tmq-status-blocked-by-source {
 	left: -9999px;
 	top: -9999px;
 	height: 0;
-	overflow: hidden; }
-/*
- * FAQ tab — code samples. Inline `<code>` (single tokens like header
- * names) renders as a soft chip; `<pre><code>` blocks (multi-line
- * snippets) get a dark theme so they stand apart from the surrounding
- * help text.
- */
+	overflow: hidden;
+}
+
+/* ==========================================================================
+   FAQ — code samples
+   Inline `<code>` renders as a soft chip; `<pre><code>` blocks get a dark
+   ground in both themes so they stand apart from the help text.
+   ========================================================================== */
 .tmq-box code {
-	background-color: #f0f0f1;
-	border: 1px solid #dcdcde;
 	padding: 1px 6px;
-	border-radius: 3px;
 	font-size: 13px;
-	color: #1d2327; }
+	color: var(--tmq-text);
+	background-color: var(--tmq-bg-alt);
+	border: 1px solid var(--tmq-border-light);
+	border-radius: 3px;
+}
+
 .tmq-box pre {
-	background-color: #1d2327;
-	color: #f6f7f7;
+	margin: 1em 0;
 	padding: 1em;
-	border-radius: 4px;
 	overflow-x: auto;
 	line-height: 1.5;
-	margin: 1em 0; }
+	color: var(--tmq-code-block-text);
+	background-color: var(--tmq-code-block-bg);
+	border-radius: var(--tmq-radius);
+}
+
 .tmq-box pre code {
+	padding: 0;
+	font-size: 13px;
+	color: inherit;
 	background: transparent;
 	border: 0;
-	padding: 0;
-	color: inherit;
-	font-size: 13px; }
+}
+
 .tmq-faq-bullets {
 	list-style: disc;
 	padding-left: 1.5em;
-	margin-top: 0.5em; }
+	margin-top: 0.5em;
+}
+
+/* ==========================================================================
+   DARK MODE — the WordPress chrome inside the plugin's screens
+   Core paints these light whatever the plugin does, so in dark mode each one
+   is repainted from the tokens. Light mode needs none of this.
+   ========================================================================== */
+:root.tmq-dark-mode body.wp-admin {
+	color: var(--tmq-text);
+	background-color: var(--tmq-bg);
+}
+
+:root.tmq-dark-mode .tmq-admin h1,
+:root.tmq-dark-mode .tmq-admin h2,
+:root.tmq-dark-mode .tmq-admin h3,
+:root.tmq-dark-mode .tmq-admin h4,
+:root.tmq-dark-mode .tmq-admin .form-table th,
+:root.tmq-dark-mode .tmq-admin .form-table td,
+:root.tmq-dark-mode .tmq-admin label,
+:root.tmq-dark-mode .tmq-admin legend {
+	color: var(--tmq-text);
+}
+
+:root.tmq-dark-mode .tmq-tabs__panel a:not(.button) {
+	color: var(--tmq-primary);
+}
+
+:root.tmq-dark-mode .tmq-tabs__panel a:not(.button):hover {
+	color: var(--tmq-primary-hover);
+}
+
+:root.tmq-dark-mode .tmq-admin .description,
+:root.tmq-dark-mode .tmq-admin .howto,
+:root.tmq-dark-mode .tmq-admin .displaying-num,
+:root.tmq-dark-mode .tmq-admin .subsubsub,
+:root.tmq-dark-mode .tmq-admin .subsubsub .count {
+	color: var(--tmq-text-muted);
+}
+
+:root.tmq-dark-mode .tmq-admin input[type="text"],
+:root.tmq-dark-mode .tmq-admin input[type="search"],
+:root.tmq-dark-mode .tmq-admin input[type="number"],
+:root.tmq-dark-mode .tmq-admin input[type="email"],
+:root.tmq-dark-mode .tmq-admin input[type="url"],
+:root.tmq-dark-mode .tmq-admin input[type="password"],
+:root.tmq-dark-mode .tmq-admin input[type="file"],
+:root.tmq-dark-mode .tmq-admin select,
+:root.tmq-dark-mode .tmq-admin textarea {
+	color: var(--tmq-text);
+	background-color: var(--tmq-bg-input);
+	border-color: var(--tmq-border);
+}
+
+:root.tmq-dark-mode .tmq-admin select {
+	background-image: var(--tmq-select-arrow);
+}
+
+:root.tmq-dark-mode .tmq-admin input:focus,
+:root.tmq-dark-mode .tmq-admin select:focus,
+:root.tmq-dark-mode .tmq-admin textarea:focus {
+	border-color: var(--tmq-border-focus);
+	box-shadow: 0 0 0 1px var(--tmq-border-focus);
+}
+
+:root.tmq-dark-mode .tmq-admin input[type="checkbox"],
+:root.tmq-dark-mode .tmq-admin input[type="radio"] {
+	background-color: var(--tmq-bg-input);
+	border-color: var(--tmq-border);
+}
+
+:root.tmq-dark-mode .tmq-admin .wp-list-table,
+:root.tmq-dark-mode .tmq-admin table.widefat {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-card);
+	border-color: var(--tmq-border-light);
+}
+
+/* Header and footer only: a body row's `th` (the checkbox, the primary
+   column) must take the row's own stripe. */
+:root.tmq-dark-mode .tmq-admin .wp-list-table thead th,
+:root.tmq-dark-mode .tmq-admin .wp-list-table thead td,
+:root.tmq-dark-mode .tmq-admin .wp-list-table tfoot th,
+:root.tmq-dark-mode .tmq-admin .wp-list-table tfoot td,
+:root.tmq-dark-mode .tmq-admin table.widefat thead th {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-alt);
+	border-color: var(--tmq-border-light);
+}
+
+:root.tmq-dark-mode .tmq-admin .wp-list-table td,
+:root.tmq-dark-mode .tmq-admin .wp-list-table tbody th,
+:root.tmq-dark-mode .tmq-admin table.widefat td {
+	color: var(--tmq-text);
+	border-color: var(--tmq-border-light);
+}
+
+:root.tmq-dark-mode .tmq-admin .striped > tbody > :nth-child(odd),
+:root.tmq-dark-mode .tmq-admin .alternate {
+	background-color: var(--tmq-bg-alt);
+}
+
+:root.tmq-dark-mode .tmq-admin .button,
+:root.tmq-dark-mode .tmq-admin .button-secondary {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-alt);
+	border-color: var(--tmq-border);
+}
+
+:root.tmq-dark-mode .tmq-admin .button:hover,
+:root.tmq-dark-mode .tmq-admin .button-secondary:hover {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-card);
+	border-color: var(--tmq-border-focus);
+}
+
+:root.tmq-dark-mode .tmq-admin .button-primary {
+	color: var(--tmq-text-on-primary);
+	background: var(--tmq-primary);
+	border-color: var(--tmq-primary);
+}
+
+:root.tmq-dark-mode .tmq-admin .button-primary:hover {
+	color: var(--tmq-text-on-primary);
+	background: var(--tmq-primary-hover);
+	border-color: var(--tmq-primary-hover);
+}
+
+:root.tmq-dark-mode .tmq-admin .notice,
+:root.tmq-dark-mode .tmq-admin div.updated,
+:root.tmq-dark-mode .tmq-admin div.error {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-card);
+}
+
+:root.tmq-dark-mode .tmq-admin .notice p,
+:root.tmq-dark-mode .tmq-admin .notice li,
+:root.tmq-dark-mode .tmq-admin .notice strong {
+	color: var(--tmq-text);
+}
+
+:root.tmq-dark-mode .tmq-admin code,
+:root.tmq-dark-mode .tmq-admin kbd {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-alt);
+}
+
+:root.tmq-dark-mode .tmq-admin hr {
+	border-color: var(--tmq-border-light);
+}

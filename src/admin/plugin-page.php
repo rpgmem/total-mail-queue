@@ -60,9 +60,11 @@ final class PluginPage {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual tabs verify their own nonces.
 		$tab = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::TAB_SETTINGS;
 
-		echo '<div class="wrap">';
+		echo '<div class="wrap tmq-admin">';
 		self::renderHeader( $tab );
+		echo '<div class="tmq-tabs">';
 		self::renderNav( $tab );
+		echo '<div class="tmq-tabs__panel">';
 
 		switch ( $tab ) {
 			case self::TAB_LOG:
@@ -92,7 +94,33 @@ final class PluginPage {
 				break;
 		}
 
-		echo '</div>';
+		echo '</div></div></div>';
+	}
+
+	/**
+	 * Every tab, in navigation order: slug => translated label.
+	 *
+	 * The one list both the menu registration and the tab column read, so the
+	 * two cannot disagree. Cron Information exists only while WP-Cron is
+	 * disabled, because it explains how to run the cron by hand.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function tabs(): array {
+		$tabs = array(
+			self::TAB_SETTINGS  => __( 'Settings', 'total-mail-queue' ),
+			self::TAB_LOG       => __( 'Log', 'total-mail-queue' ),
+			self::TAB_QUEUE     => __( 'Retention', 'total-mail-queue' ),
+			self::TAB_SMTP      => __( 'SMTP Accounts', 'total-mail-queue' ),
+			self::TAB_SOURCES   => __( 'Sources', 'total-mail-queue' ),
+			self::TAB_TEMPLATES => __( 'Templates', 'total-mail-queue' ),
+		);
+		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
+			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
+		}
+		$tabs[ self::TAB_FAQ ] = __( 'FAQ', 'total-mail-queue' );
+
+		return $tabs;
 	}
 
 	/**
@@ -117,8 +145,17 @@ final class PluginPage {
 	 * @param string $tab Active tab slug.
 	 */
 	private static function renderHeader( string $tab ): void {
-		$logo = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.png', Plugin::container()->get( 'plugin.file' ) );
-		echo '<h1 class="tmq-title"><img class="tmq-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="692" height="342" /></h1>';
+		// Two wordmarks, one per theme: the lettering is navy, which vanishes
+		// on the dark ground. CSS shows one; `loading="lazy"` keeps the hidden
+		// one from being fetched at all.
+		$file  = Plugin::container()->get( 'plugin.file' );
+		$alt   = esc_attr__( 'Total Mail Queue', 'total-mail-queue' );
+		$light = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.png', $file );
+		$dark  = plugins_url( 'assets/img/total-mail-queue-logo-wordmark-dark.png', $file );
+		echo '<h1 class="tmq-title">';
+		echo '<img class="tmq-logo tmq-logo--light" src="' . esc_url( $light ) . '" alt="' . $alt . '" width="692" height="342" loading="lazy" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $alt is esc_attr__() above.
+		echo '<img class="tmq-logo tmq-logo--dark" src="' . esc_url( $dark ) . '" alt="' . $alt . '" width="692" height="342" loading="lazy" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $alt is esc_attr__() above.
+		echo '</h1>';
 
 		if ( self::TAB_CRON_INFO === $tab ) {
 			return;
@@ -141,29 +178,19 @@ final class PluginPage {
 	}
 
 	/**
-	 * Tab navigation strip.
+	 * Vertical tab column. Each tab is a link to its own page, so the active
+	 * one is marked with `aria-current` rather than as a widget tab.
 	 *
 	 * @param string $tab Active tab slug.
 	 */
 	private static function renderNav( string $tab ): void {
-		$tabs = array(
-			self::TAB_SETTINGS  => __( 'Settings', 'total-mail-queue' ),
-			self::TAB_LOG       => __( 'Log', 'total-mail-queue' ),
-			self::TAB_QUEUE     => __( 'Retention', 'total-mail-queue' ),
-			self::TAB_SMTP      => __( 'SMTP Accounts', 'total-mail-queue' ),
-			self::TAB_SOURCES   => __( 'Sources', 'total-mail-queue' ),
-			self::TAB_TEMPLATES => __( 'Templates', 'total-mail-queue' ),
-		);
-		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
-			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
+		echo '<nav class="tmq-tabs__nav" aria-label="' . esc_attr__( 'Total Mail Queue sections', 'total-mail-queue' ) . '">';
+		echo '<ul class="tmq-tabs__list">';
+		foreach ( self::tabs() as $slug => $label ) {
+			$active = $tab === $slug;
+			echo '<li class="tmq-tabs__item"><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '" class="tmq-tabs__tab' . ( $active ? ' is-active' : '' ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
 		}
-		$tabs[ self::TAB_FAQ ] = __( 'FAQ', 'total-mail-queue' );
-
-		echo '<nav class="nav-tab-wrapper">';
-		foreach ( $tabs as $slug => $label ) {
-			$class = 'nav-tab' . ( $tab === $slug ? ' nav-tab-active' : '' );
-			echo '<a href="?page=' . esc_attr( $slug ) . '" class="' . esc_attr( $class ) . '">' . esc_html( $label ) . '</a>';
-		}
+		echo '</ul>';
 		echo '</nav>';
 	}
 
