@@ -2403,8 +2403,8 @@ msgid "Finding an email"
 msgstr "Encontrando um e-mail"
 
 #: src/admin/docs/log-and-retention.php:51
-msgid "Filter the log by status, or by source from the Sources tab (\"Filter log\"). Each row opens the message, its headers and its attachments in place."
-msgstr "Filtre o registro por status ou, pela aba Fontes (\"Filtrar log\"), por fonte. Cada linha abre ali mesmo a mensagem, os cabeçalhos e os anexos."
+msgid "Filter the log by status, by date and by text: the search matches the recipient and the subject, not the body. The Sources tab narrows it to one source (\"Filter log\"), and Retention has the same dates and search. The filters stay in the page address, so the next page and a bulk action keep them; Clear filters resets them all. Each row opens the message, its headers and its attachments in place."
+msgstr "Filtre o registro por status, por data e por texto: a busca procura no destinatário e no assunto, não no corpo. A aba Fontes restringe a uma fonte (\"Filtrar log\"), e a Retenção tem as mesmas datas e busca. Os filtros ficam no endereço da página, então a próxima página e uma ação em massa os mantêm; Limpar filtros desfaz todos. Cada linha abre a mensagem, os cabeçalhos e os anexos ali mesmo."
 
 #: src/admin/docs/log-and-retention.php:52
 msgid "Screen Options, at the top right of the page, chooses which columns you see. Headers and Attachments start hidden to leave room for the rest; your choice is saved for your user only."
@@ -2773,3 +2773,23 @@ msgstr "Buscar na documentação"
 #: src/admin/documentation.php:248
 msgid "No topic matches this search."
 msgstr "Nenhum tópico corresponde a esta busca."
+
+#: src/admin/tables/log-table.php
+msgid "Filter by status"
+msgstr "Filtrar por status"
+
+#: src/admin/tables/log-table.php
+msgid "to"
+msgstr "até"
+
+#: src/admin/tables/log-table.php
+msgid "Search emails"
+msgstr "Buscar e-mails"
+
+#: src/admin/tables/log-table.php
+msgid "Recipient or subject"
+msgstr "Destinatário ou assunto"
+
+#: src/admin/tables/log-table.php
+msgid "Clear filters"
+msgstr "Limpar filtros"

@@ -219,36 +219,54 @@ final class QueueRepository {
 	private const LOG_STATUSES = array( 'sent', 'error', 'alert', 'blocked_by_source' );
 
 	/**
-	 * Build the WHERE fragment for the Log view: an optional exact-status
-	 * filter (falling back to "anything not still pending") plus an optional
-	 * source filter. Both dynamic values go through `$wpdb->prepare`.
+	 * Build the WHERE fragment for a list: the Log (everything that has left
+	 * the queue, optionally one status) or the Retention queue (`queue` /
+	 * `high`), narrowed by the filter. Every dynamic value goes through
+	 * `$wpdb->prepare`, and the status only when it is a known log status.
 	 *
-	 * @param string $status_filter Optional status to match exactly.
-	 * @param string $source_filter Optional `source_key` to match exactly.
+	 * @param ListFilter $filter  The filters.
+	 * @param bool       $pending True for the Retention queue, false for the Log.
 	 */
-	private static function logWhere( string $status_filter, string $source_filter ): string {
+	private static function listWhere( ListFilter $filter, bool $pending ): string {
 		global $wpdb;
-		if ( '' !== $status_filter && in_array( $status_filter, self::LOG_STATUSES, true ) ) {
-			$base = $wpdb->prepare( '`status` = %s', $status_filter );
+		if ( $pending ) {
+			$where = "(`status` = 'queue' OR `status` = 'high')";
+		} elseif ( '' !== $filter->status && in_array( $filter->status, self::LOG_STATUSES, true ) ) {
+			$where = $wpdb->prepare( '`status` = %s', $filter->status );
 		} else {
-			$base = "`status` != 'queue' AND `status` != 'high'";
+			$where = "`status` != 'queue' AND `status` != 'high'";
 		}
-		if ( '' !== $source_filter ) {
-			$base .= ' AND ' . $wpdb->prepare( '`source_key` = %s', $source_filter );
+		if ( '' !== $filter->source ) {
+			$where .= ' AND ' . $wpdb->prepare( '`source_key` = %s', $filter->source );
 		}
-		return $base;
+		if ( '' !== $filter->search ) {
+			// The recipient column holds JSON, where an accented name or a
+			// slash is escaped (`Jo\u00e3o`), so the term is matched in both
+			// spellings. Bodies are not searched: lists never load them.
+			$like    = '%' . $wpdb->esc_like( $filter->search ) . '%';
+			$escaped = trim( (string) wp_json_encode( $filter->search ), '"' );
+			$json    = '%' . $wpdb->esc_like( $escaped ) . '%';
+			$where  .= ' AND ' . $wpdb->prepare( '(`subject` LIKE %s OR `recipient` LIKE %s OR `recipient` LIKE %s)', $like, $like, $json );
+		}
+		// `timestamp` is site-local wall time, like the dates an admin picks.
+		if ( '' !== $filter->from ) {
+			$where .= ' AND ' . $wpdb->prepare( '`timestamp` >= %s', $filter->from . ' 00:00:00' );
+		}
+		if ( '' !== $filter->to ) {
+			$where .= ' AND ' . $wpdb->prepare( '`timestamp` <= %s', $filter->to . ' 23:59:59' );
+		}
+		return $where;
 	}
 
 	/**
-	 * Count Log rows matching the status / source filter.
+	 * Count Log rows matching the filter.
 	 *
-	 * @param string $status_filter Optional status filter.
-	 * @param string $source_filter Optional source filter.
+	 * @param ListFilter $filter The filters.
 	 */
-	public static function logCount( string $status_filter, string $source_filter ): int {
+	public static function logCount( ListFilter $filter ): int {
 		global $wpdb;
 		$table = Schema::queueTable();
-		$where = self::logWhere( $status_filter, $source_filter );
+		$where = self::listWhere( $filter, false );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
 	}
@@ -256,33 +274,49 @@ final class QueueRepository {
 	/**
 	 * Fetch a page of Log rows (newest first) matching the filter.
 	 *
-	 * @param string $status_filter Optional status filter.
-	 * @param string $source_filter Optional source filter.
-	 * @param int    $per_page      Page size.
-	 * @param int    $offset        Row offset.
+	 * @param ListFilter $filter   The filters.
+	 * @param int        $per_page Page size.
+	 * @param int        $offset   Row offset.
 	 * @return array<int,array<string,mixed>>
 	 */
-	public static function logPage( string $status_filter, string $source_filter, int $per_page, int $offset ): array {
+	public static function logPage( ListFilter $filter, int $per_page, int $offset ): array {
 		global $wpdb;
 		$table = Schema::queueTable();
-		$where = self::logWhere( $status_filter, $source_filter );
+		$where = self::listWhere( $filter, false );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
 	}
 
 	/**
-	 * Fetch a page of pending rows in send order (priority, then retries, then id).
+	 * Count pending rows matching the filter. The status filter does not
+	 * apply: every row here is waiting.
 	 *
-	 * @param int $per_page Page size.
-	 * @param int $offset   Row offset.
-	 * @return array<int,array<string,mixed>>
+	 * @param ListFilter $filter The filters.
 	 */
-	public static function queuePage( int $per_page, int $offset ): array {
+	public static function queueCount( ListFilter $filter ): int {
 		global $wpdb;
 		$table = Schema::queueTable();
+		$where = self::listWhere( $filter, true );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
+	}
+
+	/**
+	 * Fetch a page of pending rows in send order (priority, then retries,
+	 * then id) matching the filter.
+	 *
+	 * @param ListFilter $filter   The filters.
+	 * @param int        $per_page Page size.
+	 * @param int        $offset   Row offset.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function queuePage( ListFilter $filter, int $per_page, int $offset ): array {
+		global $wpdb;
+		$table = Schema::queueTable();
+		$where = self::listWhere( $filter, true );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
 	}
 

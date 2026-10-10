@@ -15,6 +15,7 @@ use TotalMailQueue\Admin\Pages\SourcesPage;
 use TotalMailQueue\Admin\Pages\TemplatesPage;
 use TotalMailQueue\Admin\Tables\LogTable;
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Queue\ListFilter;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
 
@@ -245,6 +246,7 @@ final class PluginPage {
 	 * Log tab — wraps the {@see LogTable} subclass.
 	 */
 	private static function renderLogTab(): void {
+		LogTable::renderFilterForm( self::TAB_LOG );
 		echo '<form method="post" class="tmq-table-scroll">';
 		$logtable = new LogTable( LogTable::MODE_LOG );
 		$logtable->prepare_items();
@@ -293,7 +295,11 @@ final class PluginPage {
 		QueueDiagnostics::renderModeNotice( $options );
 		QueueDiagnostics::renderConflictNotice( $options );
 
-		echo '<form method="post" class="tmq-table-scroll" action="admin.php?page=' . esc_attr( self::TAB_QUEUE ) . '">';
+		// The bulk form posts to the list it shows, filters included, but
+		// never back to a one-shot `addtestmail` link.
+		LogTable::renderFilterForm( self::TAB_QUEUE );
+		$action = add_query_arg( array_merge( array( 'page' => self::TAB_QUEUE ), ListFilter::fromRequest()->queryArgs() ), admin_url( 'admin.php' ) );
+		echo '<form method="post" class="tmq-table-scroll" action="' . esc_url( $action ) . '">';
 		$queuetable = new LogTable( LogTable::MODE_QUEUE );
 		$queuetable->prepare_items();
 		$queuetable->display();

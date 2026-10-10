@@ -14,6 +14,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Dark mode and a redesigned admin** (#68). A Dark Mode setting (Off / On / Follow the system) restyles only the plugin's screens. The submenus become a vertical tab column that keeps every URL, and the menu icon follows the admin colour scheme.
 - **Deploy to the testes site** (#74). Every merge into `develop` is rsynced to the testes site Free Form Certificate also uses, then a smoke checks that the plugin is active, runs the deployed version and has its tables.
 - **The testes deploy checks its target before syncing** (#75). A `TESTES_REMOTE_PATH` that is not absolute or does not end in `/wp-content/plugins/total-mail-queue` stops the deploy before `rsync --delete` runs.
+- **Search and date range on the Log and Retention lists** (#83). Search matches recipient and subject, the dates select a range of days, and both combine with the status and source filters. The filters live in the page address, so pagination and bulk actions keep them.
 
 ### Changed
 

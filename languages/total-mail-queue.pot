@@ -2393,7 +2393,7 @@ msgid "Finding an email"
 msgstr ""
 
 #: src/admin/docs/log-and-retention.php:51
-msgid "Filter the log by status, or by source from the Sources tab (\"Filter log\"). Each row opens the message, its headers and its attachments in place."
+msgid "Filter the log by status, by date and by text: the search matches the recipient and the subject, not the body. The Sources tab narrows it to one source (\"Filter log\"), and Retention has the same dates and search. The filters stay in the page address, so the next page and a bulk action keep them; Clear filters resets them all. Each row opens the message, its headers and its attachments in place."
 msgstr ""
 
 #: src/admin/docs/log-and-retention.php:52
@@ -2762,4 +2762,24 @@ msgstr ""
 
 #: src/admin/documentation.php:248
 msgid "No topic matches this search."
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Filter by status"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "to"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Search emails"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Recipient or subject"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Clear filters"
 msgstr ""

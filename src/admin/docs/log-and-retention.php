@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </ul>
 
 <h3><?php esc_html_e( 'Finding an email', 'total-mail-queue' ); ?></h3>
-<p><?php esc_html_e( 'Filter the log by status, or by source from the Sources tab ("Filter log"). Each row opens the message, its headers and its attachments in place.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'Filter the log by status, by date and by text: the search matches the recipient and the subject, not the body. The Sources tab narrows it to one source ("Filter log"), and Retention has the same dates and search. The filters stay in the page address, so the next page and a bulk action keep them; Clear filters resets them all. Each row opens the message, its headers and its attachments in place.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'Screen Options, at the top right of the page, chooses which columns you see. Headers and Attachments start hidden to leave room for the rest; your choice is saved for your user only.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Clean-up', 'total-mail-queue' ); ?></h3>
