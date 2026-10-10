@@ -7,15 +7,12 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added
-
-- **README with screenshots** (#107). The repository now presents the plugin on GitHub, one section per feature with screenshots taken from a throwaway site with invented data; `.github/scripts/screenshots/` holds the two scripts that rebuild them. Nothing in the plugin changes.
-
 ## [2.11.0] (2026-10-10)
 
 ### Added
 
 - **Live preview on the Templates tab** (#104). A sample email with the settings on screen, header and footer included, updates beside the form as you edit, before saving. It is drawn by the same code that wraps real mail, in a sandboxed frame; nothing is stored or sent.
+- **README with screenshots** (#107). The repository now presents the plugin on GitHub, one section per feature with screenshots taken from a throwaway site with invented data; `.github/scripts/screenshots/` holds the two scripts that rebuild them. Nothing in the plugin changes.
 
 ## [2.10.0] (2026-10-10) — `d3c5898`
 
