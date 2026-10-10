@@ -86,7 +86,7 @@ final class DocumentationTest extends IntegrationTestCase {
         Functions\when( 'wp_nonce_url' )->returnArg();
 
         ob_start();
-        Documentation::render( 'https://example.test/banner.png' );
+        Documentation::render( 'https://example.test/banner.png', dirname( __DIR__, 2 ) . '/total-mail-queue.php' );
         $html = (string) ob_get_clean();
 
         self::assertStringContainsString( 'id="' . Documentation::INDEX_ANCHOR . '"', $html );
@@ -94,6 +94,16 @@ final class DocumentationTest extends IntegrationTestCase {
             self::assertStringContainsString( '<a href="#' . $topic['anchor'] . '">', $html, 'Missing from the index.' );
             self::assertStringContainsString( 'id="' . $topic['anchor'] . '"', $html, 'Missing topic card.' );
         }
+        self::assertStringContainsString( 'class="tmq-docs-credits"', $html );
         self::assertSame( count( Documentation::topics() ), substr_count( $html, 'href="#' . Documentation::INDEX_ANCHOR . '"' ), 'Every topic ends with a link back to the index.' );
+    }
+
+    public function test_credits_name_the_author_and_link_the_repository_from_the_plugin_header(): void {
+        $html = Documentation::credits( dirname( __DIR__, 2 ) . '/total-mail-queue.php' );
+
+        self::assertStringContainsString( '>Alex Meusburger</a>', $html );
+        self::assertStringContainsString( 'href="https://github.com/rpgmem"', $html );
+        self::assertStringContainsString( 'href="https://github.com/rpgmem/total-mail-queue"', $html );
+        self::assertStringContainsString( '>github.com/rpgmem/total-mail-queue</a>', $html );
     }
 }

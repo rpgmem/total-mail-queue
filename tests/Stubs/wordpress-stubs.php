@@ -323,3 +323,21 @@ if ( ! class_exists( 'WP_Error' ) ) {
         }
     }
 }
+
+if ( ! function_exists( 'get_file_data' ) ) {
+    /**
+     * Same reading as core: the first 8 KB, one `Name: value` line per header.
+     *
+     * @param string               $file    Path.
+     * @param array<string,string> $headers Key => header name.
+     * @return array<string,string>
+     */
+    function get_file_data( $file, $headers, $context = '' ): array {
+        $data = (string) file_get_contents( $file, false, null, 0, 8192 );
+        $out  = array();
+        foreach ( $headers as $key => $name ) {
+            $out[ $key ] = preg_match( '/^(?:[ \t]*<\?php)?[ \t\/*#@]*' . preg_quote( $name, '/' ) . ':(.*)$/mi', $data, $m ) ? trim( preg_replace( '/\s*(?:\*\/|\?>).*/', '', $m[1] ) ) : '';
+        }
+        return $out;
+    }
+}
