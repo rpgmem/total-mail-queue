@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Pushing a `v*` tag now builds `total-mail-queue-X.Y.Z.zip` through `.distignore` and publishes the GitHub Release from this file (#64).
 - **Updates from GitHub Releases.** WordPress now offers new versions on its normal update screen, using the built `total-mail-queue-X.Y.Z.zip` asset. The package is checked against its SHA-256 before install, and the compatibility fields and the upgrade notice come from the offered release's own `readme.txt`. Results are cached for 12h with ETag revalidation, and "Check again" refreshes them. Ported from Free Form Certificate (#66).
 - **Dark mode and a redesigned admin.** A new Dark Mode setting (Off / On / Follow the operating system) restyles the plugin's own screens and leaves the rest of wp-admin alone. The submenus become a vertical tab column; every tab keeps its URL, so bookmarks and links still work. The menu icon now follows the admin colour scheme (#68).
+- **Deploy to the testes site.** Every merge into `develop` is rsynced to the testes site that Free Form Certificate also uses, followed by a smoke check that the plugin is active, runs the deployed version and has its tables (#74).
 
 ### Changed
 
