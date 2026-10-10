@@ -40,6 +40,10 @@ final class Assets {
 		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin.css', array(), Plugin::VERSION );
 		wp_add_inline_style( 'wp_tmq_style', Icons::stylesheet() );
 
+		// Printed in the footer, at <body> level, so `position: fixed` is
+		// relative to the viewport and no ancestor can contain it.
+		add_action( 'admin_footer', array( self::class, 'printBackToTop' ) );
+
 		// The theme class must be on <html> before the page paints, or a dark
 		// screen flashes light first: an inline script in the head, with no
 		// file behind it.
@@ -113,5 +117,15 @@ final class Assets {
 			. 'apply();'
 			. 'if(mode==="auto"&&query&&query.addEventListener){query.addEventListener("change",apply);}'
 			. '})(' . wp_json_encode( $mode ) . ');';
+	}
+
+	/**
+	 * The floating "Back to top" link on the plugin's screens. A plain
+	 * anchor to the page wrapper: it works without JavaScript.
+	 */
+	public static function printBackToTop(): void {
+		echo '<a href="#tmq-top" class="tmq-back-to-top" title="' . esc_attr__( 'Back to top', 'total-mail-queue' ) . '">'
+			. Icons::tag( 'top' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
+			. '<span class="screen-reader-text">' . esc_html__( 'Back to top', 'total-mail-queue' ) . '</span></a>';
 	}
 }

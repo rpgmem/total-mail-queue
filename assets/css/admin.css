@@ -763,3 +763,106 @@ span.tmq-status.tmq-status-inline {
 :root.tmq-dark-mode #screen-meta h5 {
 	color: var(--tmq-text);
 }
+
+/* ==========================================================================
+   DOCUMENTATION
+   ========================================================================== */
+.tmq-docs-index__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: var(--tmq-space-xs) var(--tmq-space-xl);
+	margin: 0;
+	padding-left: 1.5em;
+}
+
+.tmq-docs-index__list a {
+	display: inline-flex;
+	align-items: center;
+	padding: var(--tmq-space-xs) 0;
+}
+
+/* An anchored topic lands below the admin bar, not under it. */
+.tmq-docs-topic,
+.tmq-docs-index {
+	scroll-margin-top: 48px;
+}
+
+.tmq-docs-topic h3 {
+	margin: 1.5em 0 0.5em;
+}
+
+/* One reading size for every block in a topic: the FAQ-era `.tmq-box p`
+   rule made paragraphs larger than the lists and tables beside them. */
+.tmq-docs-topic p,
+.tmq-docs-topic li,
+.tmq-docs-topic td,
+.tmq-docs-topic th {
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.tmq-docs-table th {
+	width: 28%;
+	font-weight: 600;
+	color: var(--tmq-text);
+}
+
+.tmq-docs-list {
+	list-style: disc;
+	padding-left: 1.5em;
+}
+
+.tmq-docs-steps li,
+.tmq-docs-list li {
+	margin-bottom: 0.5em;
+}
+
+.tmq-docs-back {
+	margin: var(--tmq-space-xl) 0 0;
+	text-align: right;
+}
+
+/* Floating "Back to top": an anchor to the page wrapper, no script. */
+.tmq-back-to-top {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	z-index: 9999;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 42px;
+	height: 42px;
+	color: var(--tmq-text-on-primary);
+	background: var(--tmq-primary);
+	border-radius: 50%;
+	box-shadow: 0 2px 8px var(--tmq-shadow);
+	text-decoration: none;
+}
+
+.tmq-back-to-top:hover,
+.tmq-back-to-top:focus {
+	color: var(--tmq-text-on-primary);
+	background: var(--tmq-primary-hover);
+}
+
+.tmq-back-to-top:focus-visible {
+	outline: 2px solid var(--tmq-border-focus);
+	outline-offset: 2px;
+}
+
+.tmq-back-to-top .tmq-icon {
+	width: 22px;
+	height: 22px;
+	margin: 0;
+}
+
+html:has(.tmq-back-to-top) {
+	scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html:has(.tmq-back-to-top) {
+		scroll-behavior: auto;
+	}
+}
