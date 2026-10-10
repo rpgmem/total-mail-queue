@@ -28,7 +28,7 @@ final class Plugin {
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
 	 */
-	public const REQUIRES_PHP = '7.4';
+	public const REQUIRES_PHP = '8.1';
 
 	/**
 	 * Minimum required WordPress version (mirrors readme.txt).

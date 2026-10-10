@@ -1,0 +1,51 @@
+# Files & directories excluded from the distribution zip.
+# Used by .github/workflows/release.yml (rsync --exclude-from).
+
+# VCS / project metadata
+/.git
+/.github
+/.gitignore
+/.gitattributes
+/.git-blame-ignore-revs
+/.distignore
+
+# Dev tooling (the plugin ships no Composer or npm runtime dependency:
+# the autoloader is inline in total-mail-queue.php and lib/ is vendored)
+/composer.json
+/composer.lock
+/vendor
+/package.json
+/package-lock.json
+/node_modules
+/eslint.config.mjs
+/.stylelintrc.json
+/phpcs.xml
+/phpcs.xml.dist
+/.phpcs.cache
+/phpstan.neon
+/phpstan.neon.dist
+/phpunit.xml
+/phpunit.xml.dist
+/phpunit.functional.xml
+/phpunit.functional.xml.dist
+/.phpunit.cache
+/.phpunit.result.cache
+/wp-tests-config.php
+/wordpress
+
+# Tests, scripts and docs not shipped to users
+/tests
+/bin
+/build
+/CHANGELOG.md
+/README.md
+/CLAUDE.md
+/.claude
+
+# Editor/OS junk
+*.swp
+*~
+.DS_Store
+Thumbs.db
+.vscode
+.idea
