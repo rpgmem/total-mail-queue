@@ -61,37 +61,38 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - **Per-email error history, with an optional SMTP debug log** (#58). Each failed attempt is kept in full on the queue row and shown as "Error details" in the Log, cleared when the email later sends. The SMTP Debug Log setting also records the whole SMTP conversation.
 - **The waiting row says why the queue waits** (#58). When every SMTP account is capped, it names the limit holding each account (per-cycle, daily or monthly) and roughly when it recovers.
-- **"Queue may not be processing" notice** (#58). Warns administrators when mail is waiting and the worker has not run for a while, the usual sign of WP-Cron not firing on a cached or quiet site.
+- **"Queue may not be processing" notice** (#57). Warns administrators when mail is waiting and the worker has not run for a while, the usual sign of WP-Cron not firing on a cached or quiet site.
 
 ### Changed
 
-- **All database access goes through the repositories** (#58). The admin tabs, the REST controller and the notices no longer query the tables themselves; only the schema, the repositories, the retention sweep and the cron lock touch `$wpdb`. No behaviour change.
+- **All database access goes through the repositories** (#56). The admin tabs, the REST controller and the notices no longer query the tables themselves; only the schema, the repositories, the retention sweep and the cron lock touch `$wpdb`. No behaviour change.
 
 ### Fixed
 
 - **Per-cycle SMTP quotas no longer get stuck** (#58). The cycle counter rolled over from the last send, so an account sending steadily never reset; it is now anchored to the cycle's first send.
-- **SMTP passwords no longer fail to decrypt intermittently** (#58). A random IV containing `::` broke about 0.4% of stored passwords; decoding now splits by the fixed IV length, and existing values decode unchanged.
-- **A hung send no longer freezes the queue** (#58). The cron lock is now a timestamped option with a real TTL, kept alive while a batch progresses, instead of a MySQL `GET_LOCK` that a hung process held forever.
+- **SMTP passwords no longer fail to decrypt intermittently** (#57). A random IV containing `::` broke about 0.4% of stored passwords; decoding now splits by the fixed IV length, and existing values decode unchanged.
+- **A hung send no longer freezes the queue** (#57). The cron lock is now a timestamped option with a real TTL, kept alive while a batch progresses, instead of a MySQL `GET_LOCK` that a hung process held forever.
 
-## [2.7.0] (2026-06-07) — `d7689ba`
+## [2.7.0] (2026-06-07) — `58bedbf`
 
 ### Added
 
-- **Per-source send priority** (#55–#57). Each source gets a numeric priority, `1` most urgent and `50` normal, shown in the Sources list and as a badge on pending Log rows.
-- **Last-sent time and cycle usage per SMTP account** (#55–#57), beside the daily and monthly counters.
+- **Per-source send priority** (#55). Each source gets a numeric priority, `1` most urgent and `50` normal, shown in the Sources list and as a badge on pending Log rows.
+- **Last-sent time and cycle usage per SMTP account** (#55), beside the daily and monthly counters.
 
 ### Changed
 
-- **SMTP accounts are picked round-robin** (#55–#57). Every enabled account shares the load instead of the batch draining through the top-priority one; daily and monthly caps are enforced within a batch.
-- **The worker runs on demand** (#55–#57). It sleeps on an empty queue, wakes when mail is queued, and defers to the next quota window when every account is capped.
-- **One numeric priority scale** (#55–#57). The `X-Mail-Queue-Prio: High` header and the per-source priority feed the same new `priority` column; legacy `high` rows are migrated on upgrade.
-- **Saving an SMTP account or the settings takes effect on the next request** (#55–#57), with no need to toggle the operation mode.
+- **SMTP accounts are picked round-robin** (#55). Every enabled account shares the load instead of the batch draining through the top-priority one; daily and monthly caps are enforced within a batch.
+- **The worker runs on demand** (#55). It sleeps on an empty queue, wakes when mail is queued, and defers to the next quota window when every account is capped.
+- **One numeric priority scale** (#55). The `X-Mail-Queue-Prio: High` header and the per-source priority feed the same new `priority` column; legacy `high` rows are migrated on upgrade.
+- **Saving an SMTP account or the settings takes effect on the next request** (#55), with no need to toggle the operation mode.
 
 ## [2.6.2] (2026-04-29) — `8c88eed`
 
 ### Changed
 
 - **The postman illustration moved to a banner on the FAQ tab** (#37–#54), and the dark code blocks set the FAQ's PHP samples apart from the text.
+- **The plugin's images are PNG and GIF instead of SVG** (#51).
 - **Admin pages split into router, actions and renderers** (#37–#54). `SmtpPage`, `SourcesPage` and `PluginPage` shrank to routers; per-request static state resets through one `RuntimeState::reset()`.
 - **PHPStan raised from level 5 to level 8, and from 1.12 to 2.1** (#37–#54), with the typing gaps it surfaced fixed.
 
@@ -181,6 +182,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - **The procedural admin files, the `wp_tmq_*` functions and the `$wp_tmq_*` globals** (#8–#18), replaced by the classes above.
 
+### Fixed
+
+- **No early text-domain notice on WordPress 6.7+** (#18). The cron schedule label is no longer translated, because WordPress asks for it before `init`.
+
 ### Security
 
 - **Hardened settings, import and endpoints** (#8–#18). Settings saves and XML imports go through a key whitelist, imports block external entities, the REST and AJAX endpoints require `manage_options`, and SMTP passwords are stored with AES-256-CBC and a per-record IV.
@@ -206,7 +211,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - **SMTP accounts are no longer blocked mid-cycle** by the `send_interval` check.
 
-## [2.2.0] (2026-02-01) — `10d5ca3`
+## [2.2.0] (2026-01-31) — `b182aae`
 
 ### Added
 
@@ -215,18 +220,26 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **A Send Method setting**: Automatic, plugin SMTP only, or WordPress default.
 - **Log improvements**: a status filter, an Info column with retries and errors, and a resend that replaces the original entry.
 - **Cron diagnostics** on the Retention tab, and detection of conflicting `pre_wp_mail` filters.
+- **Per-account send interval and per-cycle limit**, capped by the global queue limit, with a warning when an account's limit exceeds it.
+- **An SMTP column in the Log** naming the account that sent each email, and account IDs in the SMTP list.
+- **Connection fields locked when editing an SMTP account**, behind an unlock switch, so limits can change without touching credentials.
 
 ### Changed
 
 - **JSON storage instead of `serialize()`**, still reading legacy data.
 - **Paginated queries and one SMTP counter reset per run** instead of loading every row and resetting per email.
 - **Stricter code**: strict comparisons, consistent `wpdb` formats, styles moved to `admin.css`, cache-busted assets.
+- **Resend and Force Resend refuse emails already sent or still queued**, with a notice instead of skipping them silently.
+- **SMTP accounts are picked from in-memory counters**, not one query per email.
 
 ### Fixed
 
 - **Envelope sender set with the From header**, and instant emails record their result.
 - **Local time in SQL** instead of `NOW()`.
 - **Attachments stored under `uploads/tmq-attachments/`** behind `.htaccess`, in random subfolders.
+- **SMTP authentication no longer fails from the second email of a batch**: the connection is closed before each send.
+- **A per-account cycle counter survives cron runs shorter than its send interval**, so the per-cycle limit holds.
+- **The worker no longer re-adds its `pre_wp_mail` filter mid-batch**, which could queue an email again instead of sending it.
 
 ### Security
 
