@@ -2865,3 +2865,63 @@ msgstr "Você não tem permissão para alterar estas configurações."
 #: src/admin/settings-autosave.php
 msgid "This setting cannot be saved this way."
 msgstr "Esta configuração não pode ser salva desta forma."
+
+#: src/admin/docs/access.php
+msgid "Administrators always see and change everything. Settings → Access, which only administrators see, lets other roles in: switch on View or Manage for a role and it takes effect at once."
+msgstr "Administradores sempre veem e alteram tudo. Configurações → Acesso, que só administradores veem, dá entrada a outros papéis: ative Ver ou Gerenciar para um papel e passa a valer na hora."
+
+#: src/admin/docs/access.php
+msgid "View opens the Log, Retention, Sources and this documentation, read-only: no bulk actions, no changes to sources and no message bodies. Manage adds the Settings and Templates tabs, bulk actions, source changes and the message bodies, and includes View."
+msgstr "Ver abre o Registro, a Retenção, as Fontes e esta documentação, só para leitura: sem ações em massa, sem mudar fontes e sem o corpo das mensagens. Gerenciar acrescenta as abas Configurações e Modelos, as ações em massa, a edição de fontes e o corpo das mensagens, e inclui Ver."
+
+#: src/admin/docs/access.php
+msgid "SMTP accounts, Export / Import and the Access card stay with administrators. So do the bodies of the emails that carry a one-time account link (password reset, a new user's set-password email, email change, admin email change and privacy request confirmation): anyone who read them could sign in as the recipient. A manager still sees those rows, with a note where the body would be."
+msgstr "Contas SMTP, Exportar / Importar e o card Acesso ficam com os administradores. O mesmo vale para o corpo dos e-mails que trazem um link de conta de uso único (redefinição de senha, e-mail de criar senha de um novo usuário, troca de e-mail, troca do e-mail do admin e confirmação de pedido de privacidade): quem os lesse poderia entrar como o destinatário. Quem gerencia continua vendo essas linhas, com um aviso no lugar do corpo."
+
+#: src/admin/docs/access.php
+msgid "The permissions are stored on the roles themselves, as the capabilities tmq_view_mail_queue and tmq_manage_mail_queue, so a role editor plugin shows them too. Deleting the plugin removes them."
+msgstr "As permissões ficam nos próprios papéis, como as capacidades tmq_view_mail_queue e tmq_manage_mail_queue, então um plugin editor de papéis também as mostra. Excluir o plugin as remove."
+
+#: src/admin/documentation.php
+msgid "Access by role"
+msgstr "Acesso por papel"
+
+#: src/admin/access-settings.php
+msgid "Access"
+msgstr "Acesso"
+
+#: src/admin/access-settings.php
+msgid "Administrators always have full access. Other roles see the plugin only when allowed here. View opens the Log, Retention, Sources and the documentation, read-only. Manage also changes settings, sources and templates, runs bulk actions and shows message bodies. SMTP accounts, Export / Import and this card stay with administrators, and so do the bodies of the emails that carry a one-time account link, such as a password reset."
+msgstr "Administradores sempre têm acesso total. Outros papéis só veem o plugin quando liberados aqui. Ver abre o Registro, a Retenção, as Fontes e a documentação, só para leitura. Gerenciar também altera configurações, fontes e modelos, executa ações em massa e mostra o corpo das mensagens. Contas SMTP, Exportar / Importar e este card ficam com os administradores, assim como o corpo dos e-mails que trazem um link de conta de uso único, como a redefinição de senha."
+
+#: src/admin/access-settings.php
+msgid "There are no other roles on this site."
+msgstr "Não há outros papéis neste site."
+
+#: src/admin/access-settings.php
+msgid "Role"
+msgstr "Papel"
+
+#: src/admin/access-settings.php
+msgid "Can view"
+msgstr "Pode ver"
+
+#: src/admin/access-settings.php
+msgid "Can manage"
+msgstr "Pode gerenciar"
+
+#: src/admin/access-settings.php
+msgid "View"
+msgstr "Ver"
+
+#: src/admin/access-settings.php
+msgid "Manage"
+msgstr "Gerenciar"
+
+#: src/admin/tables/log-table.php
+msgid "This email carries a one-time account link, so its content is shown to administrators only."
+msgstr "Este e-mail traz um link de conta de uso único, por isso o conteúdo é mostrado só para administradores."
+
+#: src/admin/tables/log-table.php
+msgid "The content is shown to users who can manage the mail queue."
+msgstr "O conteúdo é mostrado a quem pode gerenciar a fila de e-mails."

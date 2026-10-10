@@ -61,7 +61,7 @@ final class ExportImport {
 		if ( ! isset( $_POST['wp_tmq_export'] ) ) {
 			return;
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Access::isAdmin() ) {
 			return;
 		}
 		if ( ! isset( $_POST['wp_tmq_export_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wp_tmq_export_nonce'] ) ), 'wp_tmq_export' ) ) {

@@ -46,10 +46,15 @@ final class AdminChromeTest extends IntegrationTestCase {
 
         Menu::addMenuItems();
 
-        self::assertSame( array( array( Menu::SLUG, 'manage_options', 'none' ) ), $menus );
+        self::assertSame( array( array( Menu::SLUG, \TotalMailQueue\Admin\Access::MANAGE, 'none' ) ), $menus );
         self::assertSame( array_merge( array_keys( PluginPage::tabs() ), array( PluginPage::TAB_FAQ ) ), array_keys( $submenus ), 'Every tab, plus the old FAQ slug kept as an alias.' );
+        $expected = array(
+            PluginPage::TAB_SETTINGS  => \TotalMailQueue\Admin\Access::MANAGE,
+            PluginPage::TAB_TEMPLATES => \TotalMailQueue\Admin\Access::MANAGE,
+            PluginPage::TAB_SMTP      => 'manage_options',
+        );
         foreach ( $submenus as $slug => $spec ) {
-            self::assertSame( array( Menu::SLUG, 'manage_options' ), $spec, $slug );
+            self::assertSame( array( Menu::SLUG, $expected[ $slug ] ?? \TotalMailQueue\Admin\Access::VIEW ), $spec, $slug );
         }
     }
 

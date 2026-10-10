@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Tables;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Queue\AttachmentStore;
 use TotalMailQueue\Queue\ListFilter;
 use TotalMailQueue\Queue\Priority;
@@ -78,7 +79,12 @@ final class LogTable extends WP_List_Table {
 	 * @return array<string,string>
 	 */
 	public function get_columns() {
-		return self::columnsFor( $this->mode );
+		$columns = self::columnsFor( $this->mode );
+		// Row selection exists for the bulk actions, which need MANAGE.
+		if ( ! Access::canManage() ) {
+			unset( $columns['cb'] );
+		}
+		return $columns;
 	}
 
 	/**
@@ -375,6 +381,9 @@ final class LogTable extends WP_List_Table {
 		if ( ! $message ) {
 			return '<em>' . esc_html__( 'Empty', 'total-mail-queue' ) . '</em>';
 		}
+		if ( ! Access::canReadBody( (string) ( $item['source_key'] ?? '' ) ) ) {
+			return '<em class="tmq-body-restricted">' . esc_html( self::restrictedBodyNotice( (string) ( $item['source_key'] ?? '' ) ) ) . '</em>';
+		}
 		$message_len = strlen( $message );
 		$out         = '<details>';
 		/* translators: %s: message size in bytes */
@@ -382,6 +391,18 @@ final class LogTable extends WP_List_Table {
 		$out .= '<div class="tmq-email-source" data-tmq-list-message-content>' . esc_html__( 'Loading...', 'total-mail-queue' ) . '</div>';
 		$out .= '</details>';
 		return $out;
+	}
+
+	/**
+	 * Why the current user cannot read a message body.
+	 *
+	 * @param string $source_key The row's source.
+	 */
+	public static function restrictedBodyNotice( string $source_key ): string {
+		if ( in_array( $source_key, Access::ADMIN_ONLY_BODIES, true ) && Access::canManage() ) {
+			return __( 'This email carries a one-time account link, so its content is shown to administrators only.', 'total-mail-queue' );
+		}
+		return __( 'The content is shown to users who can manage the mail queue.', 'total-mail-queue' );
 	}
 
 	/**
@@ -399,6 +420,9 @@ final class LogTable extends WP_List_Table {
 	 * @return array<string,string>
 	 */
 	public function get_bulk_actions() {
+		if ( ! Access::canManage() ) {
+			return array();
+		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page routing, not form processing
 		if ( isset( $_GET['page'] ) && 'wp_tmq_mail_queue-tab-queue' === sanitize_key( $_GET['page'] ) ) {
 			return array( 'delete' => __( 'Delete', 'total-mail-queue' ) );
@@ -414,7 +438,7 @@ final class LogTable extends WP_List_Table {
 	 * Dispatch the chosen bulk action.
 	 */
 	public function process_bulk_action(): void {
-		if ( ! $this->current_action() ) {
+		if ( ! $this->current_action() || ! Access::canManage() ) {
 			return;
 		}
 

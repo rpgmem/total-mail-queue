@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Tables;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -39,7 +40,7 @@ final class SourcesTable extends WP_List_Table {
 	 * @return array<string,string>
 	 */
 	public function get_columns() {
-		return array(
+		$columns = array(
 			'cb'           => '<label><span class="screen-reader-text">' . esc_html__( 'Select all', 'total-mail-queue' ) . '</span><input class="tmq-select-all" type="checkbox"></label>',
 			'enabled'      => __( 'Status', 'total-mail-queue' ),
 			'label'        => __( 'Label', 'total-mail-queue' ),
@@ -50,6 +51,11 @@ final class SourcesTable extends WP_List_Table {
 			'last_seen_at' => __( 'Last seen', 'total-mail-queue' ),
 			'actions'      => __( 'Actions', 'total-mail-queue' ),
 		);
+		// Selection exists for the bulk actions, which need MANAGE.
+		if ( ! Access::canManage() ) {
+			unset( $columns['cb'] );
+		}
+		return $columns;
 	}
 
 	/**
@@ -58,6 +64,9 @@ final class SourcesTable extends WP_List_Table {
 	 * @return array<string,string>
 	 */
 	public function get_bulk_actions() {
+		if ( ! Access::canManage() ) {
+			return array();
+		}
 		return array(
 			'enable'  => __( 'Enable', 'total-mail-queue' ),
 			'disable' => __( 'Disable', 'total-mail-queue' ),
@@ -279,6 +288,12 @@ final class SourcesTable extends WP_List_Table {
 		$key = (string) $item['source_key'];
 
 		$actions = array();
+		$log_url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log&source_filter=' . rawurlencode( $key ) );
+
+		// Read-only: the one action that changes nothing.
+		if ( ! Access::canManage() ) {
+			return '<a href="' . esc_url( $log_url ) . '">' . esc_html__( 'Filter log', 'total-mail-queue' ) . '</a>';
+		}
 
 		if ( SourcesRepository::isSystem( $key ) ) {
 			$actions[] = '<span class="description" title="' . esc_attr__( 'This source is hardcoded as always-enabled and cannot be disabled.', 'total-mail-queue' ) . '">' . esc_html__( 'system (always on)', 'total-mail-queue' ) . '</span>';
@@ -308,7 +323,6 @@ final class SourcesTable extends WP_List_Table {
 			$actions[] = '<a href="' . esc_url( $reset_url ) . '" title="' . esc_attr__( 'Drop the custom label/group; fall back to the translated default.', 'total-mail-queue' ) . '">' . esc_html__( 'Reset', 'total-mail-queue' ) . '</a>';
 		}
 
-		$log_url   = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log&source_filter=' . rawurlencode( $key ) );
 		$actions[] = '<a href="' . esc_url( $log_url ) . '">' . esc_html__( 'Filter log', 'total-mail-queue' ) . '</a>';
 
 		return implode( ' | ', $actions );

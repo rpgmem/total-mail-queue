@@ -16,8 +16,12 @@ use TotalMailQueue\Templates\Options as TemplateOptions;
  * AJAX endpoint behind the autosave toggles (`wp_ajax_tmq_update_setting`).
  *
  * Only the keys in {@see self::KEYS} can be written, each to the option it
- * belongs to, and only as a boolean. A write is a merge: it reads the stored
- * option, changes that one key and saves the whole thing back through the
+ * belongs to, and only as a boolean, by users who can manage the plugin.
+ * Keys of the form `access:<role>:view|manage` grant a role a capability
+ * ({@see Access}); only administrators may write those.
+ *
+ * A settings write is a merge: it reads the stored option, changes that one
+ * key and saves the whole thing back through the
  * same path the form uses — `update_option()` on the settings, whose
  * registered sanitizer and update hooks (worker reschedule, auto-block
  * marker) then run as on a form save; `TemplateOptions::update()` on the
@@ -65,12 +69,24 @@ final class SettingsAutosave {
 		if ( ! check_ajax_referer( self::NONCE, 'nonce', false ) ) {
 			wp_send_json_error( array( 'message' => __( 'Your session expired. Reload the page and try again.', 'total-mail-queue' ) ), 403 );
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'You are not allowed to change these settings.', 'total-mail-queue' ) ), 403 );
-		}
-
 		$key   = isset( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
 		$value = isset( $_POST['value'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['value'] ) ) ? '1' : '0';
+
+		$access = self::accessKey( $key );
+		if ( ! ( null !== $access ? Access::isAdmin() : Access::canManage() ) ) {
+			wp_send_json_error( array( 'message' => __( 'You are not allowed to change these settings.', 'total-mail-queue' ) ), 403 );
+		}
+		if ( null !== $access ) {
+			if ( ! Access::setRole( $access[0], $access[1], '1' === $value ) ) {
+				wp_send_json_error( array( 'message' => __( 'This setting cannot be saved this way.', 'total-mail-queue' ) ), 400 );
+			}
+			wp_send_json_success(
+				array(
+					'key'   => $key,
+					'value' => $value,
+				)
+			);
+		}
 		if ( ! isset( self::KEYS[ $key ] ) ) {
 			wp_send_json_error( array( 'message' => __( 'This setting cannot be saved this way.', 'total-mail-queue' ) ), 400 );
 		}
@@ -82,6 +98,20 @@ final class SettingsAutosave {
 				'value' => $value,
 			)
 		);
+	}
+
+	/**
+	 * The role and capability an `access:<role>:view|manage` key names, or
+	 * null when the key is not of that form.
+	 *
+	 * @param string $key Posted key.
+	 * @return array{0:string,1:string}|null
+	 */
+	public static function accessKey( string $key ): ?array {
+		if ( ! preg_match( '/^access:([a-z0-9_-]+):(view|manage)$/', $key, $m ) ) {
+			return null;
+		}
+		return array( $m[1], 'view' === $m[2] ? Access::VIEW : Access::MANAGE );
 	}
 
 	/**

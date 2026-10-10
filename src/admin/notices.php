@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Cron\AutoBlock;
 use TotalMailQueue\Cron\Diagnostics;
 use TotalMailQueue\Cron\Scheduler;
@@ -63,7 +64,7 @@ final class Notices {
 	 */
 	private static function maybeRenderAutoBlockNotice( array $options ): void {
 		$since = AutoBlock::activeSince();
-		if ( null === $since || '2' !== (string) $options['enabled'] || ! current_user_can( 'manage_options' ) ) {
+		if ( null === $since || '2' !== (string) $options['enabled'] || ! Access::canView() ) {
 			return;
 		}
 		echo '<div class="notice notice-error"><p>' . wp_kses_post(
@@ -131,7 +132,7 @@ final class Notices {
 	 * @param array<string,mixed> $options Plugin options snapshot.
 	 */
 	private static function maybeRenderCronStalledNotice( array $options ): void {
-		if ( '1' !== (string) $options['enabled'] || ! current_user_can( 'manage_options' ) ) {
+		if ( '1' !== (string) $options['enabled'] || ! Access::canView() ) {
 			return;
 		}
 
@@ -170,7 +171,7 @@ final class Notices {
 	 * @param array<string,mixed> $last_mail The most recent non-queued log row.
 	 */
 	private static function renderLastErrorNotice( array $last_mail ): void {
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( Access::canView() ) {
 			$notice  = '<div class="notice notice-error is-dismissible">';
 			$notice .= '<h1>' . esc_html__( 'Attention: Your website has problems sending e-mails', 'total-mail-queue' ) . '</h1>';
 			/* translators: %1$s: opening italic tag, %2$s: closing italic tag, %3$s: opening Mail Log link tag, %4$s: closing link tag */
