@@ -2737,3 +2737,11 @@ msgstr "Desativar e excluir"
 #: src/admin/docs/updates-and-data.php:26
 msgid "Deactivating stops the queue and keeps everything, so nothing is lost if you turn the plugin back on. Deleting it from the Plugins screen removes all of the above: the tables, the options and the attachments folder."
 msgstr "Desativar para a fila e mantém tudo, então nada se perde se você reativar o plugin. Excluí-lo pela tela de Plugins remove tudo o que foi listado acima: as tabelas, as opções e a pasta de anexos."
+
+#: src/admin/documentation.php:168
+msgid "Developed by %s."
+msgstr "Desenvolvido por %s."
+
+#: src/admin/documentation.php:170
+msgid "Source code and issue tracker: %s"
+msgstr "Código-fonte e relato de problemas: %s"

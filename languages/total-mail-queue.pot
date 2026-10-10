@@ -2727,3 +2727,11 @@ msgstr ""
 #: src/admin/docs/updates-and-data.php:26
 msgid "Deactivating stops the queue and keeps everything, so nothing is lost if you turn the plugin back on. Deleting it from the Plugins screen removes all of the above: the tables, the options and the attachments folder."
 msgstr ""
+
+#: src/admin/documentation.php:168
+msgid "Developed by %s."
+msgstr ""
+
+#: src/admin/documentation.php:170
+msgid "Source code and issue tracker: %s"
+msgstr ""

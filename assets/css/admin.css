@@ -773,6 +773,13 @@ span.tmq-status.tmq-status-inline {
 /* ==========================================================================
    DOCUMENTATION
    ========================================================================== */
+.tmq-docs-credits {
+	margin: var(--tmq-space-lg) 0 0;
+	padding-top: var(--tmq-space-md);
+	color: var(--tmq-text-secondary);
+	border-top: 1px solid var(--tmq-border-light);
+}
+
 .tmq-docs-index__list {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

@@ -109,9 +109,10 @@ final class Documentation {
 	/**
 	 * Print the tab: banner, index, then every topic.
 	 *
-	 * @param string $banner_url URL of the hero image shown above the index.
+	 * @param string $banner_url  URL of the hero image shown above the index.
+	 * @param string $plugin_file The plugin's main file, read for the credits line.
 	 */
-	public static function render( string $banner_url ): void {
+	public static function render( string $banner_url, string $plugin_file ): void {
 		echo '<div class="tmq-banner"><img src="' . esc_url( $banner_url ) . '" alt="" height="300" loading="lazy" /></div>';
 
 		echo '<div class="tmq-box tmq-docs-index" id="' . esc_attr( self::INDEX_ANCHOR ) . '">';
@@ -121,6 +122,7 @@ final class Documentation {
 			echo '<li><a href="#' . esc_attr( $topic['anchor'] ) . '">' . Icons::tag( $topic['icon'] ) . esc_html( $topic['title'] ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
 		}
 		echo '</ol>';
+		echo self::credits( $plugin_file ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- credits() escapes every part it prints.
 		echo '</div>';
 
 		foreach ( self::topics() as $topic ) {
@@ -130,6 +132,34 @@ final class Documentation {
 			echo '<p class="tmq-docs-back"><a href="#' . esc_attr( self::INDEX_ANCHOR ) . '">' . esc_html__( 'Back to the index', 'total-mail-queue' ) . '</a></p>';
 			echo '</section>';
 		}
+	}
+
+	/**
+	 * Who develops the plugin and where its code lives, read from the plugin
+	 * header: the same lines WordPress shows on the Plugins screen, so the two
+	 * cannot disagree.
+	 *
+	 * @param string $plugin_file The plugin's main file.
+	 */
+	public static function credits( string $plugin_file ): string {
+		$meta = get_file_data(
+			$plugin_file,
+			array(
+				'author'     => 'Author',
+				'author_uri' => 'Author URI',
+				'plugin_uri' => 'Plugin URI',
+			)
+		);
+
+		$author = '<a href="' . esc_url( $meta['author_uri'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $meta['author'] ) . '</a>';
+		$repo   = '<a href="' . esc_url( $meta['plugin_uri'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( (string) preg_replace( '#^https?://#', '', $meta['plugin_uri'] ) ) . '</a>';
+
+		return '<p class="tmq-docs-credits">'
+			/* translators: %s: plugin author's name, linked to the author's page */
+			. sprintf( esc_html__( 'Developed by %s.', 'total-mail-queue' ), $author ) . ' '
+			/* translators: %s: link to the plugin's source repository */
+			. sprintf( esc_html__( 'Source code and issue tracker: %s', 'total-mail-queue' ), $repo )
+			. '</p>';
 	}
 
 	/**

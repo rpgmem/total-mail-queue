@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation tab.** The plugin ships its own guide, written from scratch. This release covers getting started, modes and the queue, the log, SMTP accounts and sources, with an index, a link back to it from every topic, and the postman banner. Every plugin screen also gains a floating "Back to top" button (#71).
 - **The FAQ is now Troubleshooting, inside the documentation.** The guide gains topics on HTML templates, alerts, export and import, developers (headers, filters, REST) and stored data. The FAQ tab is gone: its old address opens the documentation, and the plugin's notices link to Troubleshooting, which keeps the "queue a test email" button (#71).
 - **Every screen uses the same cards and icon headings.** Templates, the SMTP account form, the source editor and Cron Information now group their fields in cards like the Settings tab, and every heading carries an icon, including the SMTP and Sources lists. A test keeps headings from shipping without one (#76).
+- **The documentation names its developer and links the repository**, read from the plugin header, the same lines the Plugins screen shows (#77).
 
 ### Fixed
 
