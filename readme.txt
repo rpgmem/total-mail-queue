@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.10.0
+Stable tag: 2.11.0
 Requires PHP: 8.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -182,6 +182,9 @@ Updates arrive through the normal WordPress update screen, straight from this pl
 
 The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
 
+= 2.11.0 =
+* New: a live preview on the Templates tab shows a sample email, header and footer included, with the settings on screen and updates as you edit, before saving.
+
 = 2.10.0 =
 * New: updates arrive from GitHub Releases on the normal WordPress update screen, each package checked against its SHA-256.
 * New: Settings → Access lets administrators choose which roles view and which manage the plugin; one-time account-link emails stay administrator-only.
@@ -190,12 +193,7 @@ The two most recent releases are summarised below. The full history of every rel
 * Changed: PHP 8.1 is now the minimum.
 * Fixed: retried emails keep their attachments, long recipient lists are stored whole, and deleting the plugin removes everything it wrote.
 
-= 2.9.0 =
-* New: plugins can label each of their emails as a distinct source by setting an `X-TMQ-Source-Key` (and optional `X-TMQ-Source-Label`) header. The queue reads it as the highest-priority source strategy — ahead of the built-in listeners and the caller backtrace — and strips both headers before delivery, so a plugin whose mail all flows through one wrapper can still split its emails into per-feature sources. Only `plugin:` / `mu_plugin:` / `theme:` keys are accepted.
-* New: any source can be pinned to a preferred SMTP account on the Sources → edit screen. The queue sends through that account when it is enabled and under quota, and transparently falls back to the normal account rotation when it is capped, disabled, or removed — a preference never blocks or delays a send.
-* Fixed: the "queue may not be processing" admin notice no longer fires during healthy operation — it now keys off the last successful send (over two hours idle) with the worker not scheduled to act, instead of the last worker run.
-
 == Upgrade Notice ==
 
-= 2.10.0 =
-Requires PHP 8.1. Adds updates from GitHub Releases, per-role access, Log search and date filters, Block on alert and dark mode, and fixes attachments lost on retry. Details and issues in CHANGELOG.md.
+= 2.11.0 =
+Adds a live preview of the email template on the Templates tab: header, body and footer update as you edit, before saving. Details and issues in CHANGELOG.md.
