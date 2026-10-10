@@ -169,6 +169,20 @@ Yes, but with limitations.
 
 Do not activate the Total Mail Queue for the whole network. Instead, please activate it for each site separately. Then it will work smoothly. In a future release we'll add full MultiSite support.
 
+== Screenshots ==
+
+The images live in the repository's `docs/screenshots/` folder and are shown in its README.
+
+1. Log of sent, failed and blocked emails, with search, status, source and date filters
+2. Retention list of queued and held emails
+3. SMTP accounts with priority and daily and monthly limits
+4. Sources detected on the site, with priority and preferred account
+5. HTML template settings with the live preview
+6. General settings: operation mode, queue pace and alerts
+7. Access: which roles view and which manage the plugin
+8. Built-in documentation
+9. Dark mode
+
 == Installation ==
 
 Upload the the plugin, activate it, and go to the Settings to enable the Queue. 
