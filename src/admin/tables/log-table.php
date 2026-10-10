@@ -117,6 +117,19 @@ final class LogTable extends WP_List_Table {
 	 * @return array<string,string>
 	 */
 	public function get_columns() {
+		return self::columnsFor( $this->mode );
+	}
+
+	/**
+	 * Columns of the table in a given mode.
+	 *
+	 * Static so the Screen Options panel can list them before the table
+	 * exists: WordPress asks for the columns while it builds the screen.
+	 *
+	 * @param string $mode One of self::MODE_LOG / self::MODE_QUEUE.
+	 * @return array<string,string>
+	 */
+	public static function columnsFor( string $mode ): array {
 		$columns = array(
 			'cb'              => '<label><span class="screen-reader-text">' . esc_html__( 'Select all', 'total-mail-queue' ) . '</span><input class="tmq-select-all" type="checkbox"></label>',
 			'timestamp'       => __( 'Time', 'total-mail-queue' ),
@@ -130,7 +143,7 @@ final class LogTable extends WP_List_Table {
 			'headers'         => __( 'Headers', 'total-mail-queue' ),
 			'attachments'     => __( 'Attachments', 'total-mail-queue' ),
 		);
-		if ( self::MODE_LOG !== $this->mode ) {
+		if ( self::MODE_LOG !== $mode ) {
 			unset( $columns['smtp_account_id'] );
 		}
 		return $columns;
@@ -190,8 +203,9 @@ final class LogTable extends WP_List_Table {
 	 * Populate {@see $items} based on the active tab.
 	 */
 	public function prepare_items(): void {
-		$columns               = $this->get_columns();
-		$hidden                = array();
+		$columns = $this->get_columns();
+		// The user's own choice from Screen Options, or the defaults above.
+		$hidden                = get_hidden_columns( $this->screen );
 		$sortable              = array();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 		$this->process_bulk_action();

@@ -102,6 +102,7 @@ final class Plugin {
 		Admin\SettingsApi::register();
 		Admin\Notices::register();
 		Admin\ExportImport::register();
+		Admin\LogColumns::register();
 
 		// REST API.
 		Rest\MessageController::register();

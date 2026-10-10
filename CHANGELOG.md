@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Admin screens laid out as cards.**
   - Settings is grouped into Sending, Log, Alerts, Advanced and Appearance, each a card with its own heading.
   - Tabs and headings carry icons drawn for the plugin.
-  - Log and Retention give every column a readable width and scroll sideways on narrow screens instead of squeezing the text.
+  - Log and Retention columns can be shown or hidden per user from WordPress's Screen Options. Headers and Attachments start hidden, every column gets a readable width, and with all columns shown the table scrolls sideways instead of squeezing the text.
   - The last inline styles on the plugin's screens moved into the stylesheet, so they follow the dark theme (#68).
 
 ## [2.9.0] - 2026-07-25

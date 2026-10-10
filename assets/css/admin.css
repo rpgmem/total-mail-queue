@@ -411,15 +411,16 @@ span.tmq-status.tmq-status-alert {
 	margin-left: 0 !important;
 }
 
-/* Log and Retention: eleven columns in a fixed-layout table, which do not
-   fit the panel of a common laptop screen. The table keeps a minimum width
-   and the form scrolls sideways instead of squeezing a column to a letter
-   a line. Every column but Message has a width; Message takes the rest. */
+/* Log and Retention: up to eleven columns in a fixed-layout table. Every
+   column but Message has a width; Message takes the rest. Headers and
+   Attachments start hidden (Screen Options brings them back); with both
+   shown the table keeps a minimum width and the form scrolls sideways,
+   instead of squeezing a column to a letter a line. */
 .tmq-table-scroll {
 	overflow-x: auto;
 }
 
-.tmq-table-scroll .wp-list-table {
+.tmq-table-scroll .wp-list-table:has(thead .column-headers:not(.hidden), thead .column-attachments:not(.hidden)) {
 	min-width: 1180px;
 }
 
@@ -747,4 +748,18 @@ span.tmq-status.tmq-status-inline {
 
 :root.tmq-dark-mode .tmq-admin hr {
 	border-color: var(--tmq-border-light);
+}
+
+/* Screen Options sits above the page wrapper, so it is named directly. */
+:root.tmq-dark-mode #screen-meta,
+:root.tmq-dark-mode #screen-meta-links .show-settings {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-card);
+	border-color: var(--tmq-border-light);
+}
+
+:root.tmq-dark-mode #screen-meta legend,
+:root.tmq-dark-mode #screen-meta label,
+:root.tmq-dark-mode #screen-meta h5 {
+	color: var(--tmq-text);
 }
