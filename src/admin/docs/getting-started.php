@@ -26,3 +26,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 </ol>
 
 <p><?php esc_html_e( 'Switching the plugin to Disabled loses nothing: emails already waiting stay in the queue and go out when you switch back to Queue.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'On/off switches in Settings and Templates save the moment you flip them, and a badge beside the switch says Saved. The other fields save with the Save button, which keeps the switches as they are.', 'total-mail-queue' ); ?></p>

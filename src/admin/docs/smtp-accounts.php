@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h3><?php esc_html_e( 'Connection', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'Host, port, encryption (none, TLS or SSL), and the user name and password if the server asks for them. The password is stored encrypted; leave the field blank when editing to keep the one already saved. Test Connection checks the settings without sending anything.', 'total-mail-queue' ); ?></p>
-<p><?php esc_html_e( 'When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Tick "Unlock connection fields for editing" to change them.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Switch on "Unlock connection fields for editing" to change them.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'From Email and From Name, when filled, win over the Default Sender in Settings for every email this account sends.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Limits', 'total-mail-queue' ); ?></h3>

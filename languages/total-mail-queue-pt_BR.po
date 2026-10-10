@@ -1749,8 +1749,8 @@ msgid "The Send Method setting controls how emails from the retention queue are 
 msgstr "A configuração \"Método de Envio\" controla como os e-mails da fila de retenção são entregues. Existem três opções:"
 
 #: src/admin/pages/templates-page.php:180
-msgid "The template engine is currently off — outgoing emails are sent as-is. Tick the box below to enable it."
-msgstr "O mecanismo de modelos está desativado no momento — os e-mails enviados são enviados sem alterações. Marque a caixa abaixo para ativá-lo."
+msgid "The template engine is currently off — outgoing emails are sent as-is. Switch it on below."
+msgstr "O mecanismo de modelos está desativado no momento — os e-mails enviados são enviados sem alterações. Ative-o abaixo."
 
 #. %s: number of emails in queue
 #: src/cron/alert-sender.php:104
@@ -2155,8 +2155,8 @@ msgid "Host, port, encryption (none, TLS or SSL), and the user name and password
 msgstr "Servidor, porta, criptografia (nenhuma, TLS ou SSL) e o usuário e a senha, se o servidor pedir. A senha é guardada criptografada; ao editar, deixe o campo em branco para manter a que já está salva. \"Testar Conexão\" confere os dados sem enviar nada."
 
 #: src/admin/docs/smtp-accounts.php:18
-msgid "When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Tick \"Unlock connection fields for editing\" to change them."
-msgstr "Ao editar uma conta, os campos de conexão começam travados, para você poder mudar os limites sem mexer em como ela se conecta. Marque \"Desbloqueie os campos de conexão para edição\" para alterá-los."
+msgid "When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Switch on \"Unlock connection fields for editing\" to change them."
+msgstr "Ao editar uma conta, os campos de conexão começam travados, para você poder mudar os limites sem mexer em como ela se conecta. Ative \"Desbloqueie os campos de conexão para edição\" para alterá-los."
 
 #: src/admin/docs/smtp-accounts.php:19
 msgid "From Email and From Name, when filled, win over the Default Sender in Settings for every email this account sends."
@@ -2295,8 +2295,8 @@ msgid "Block"
 msgstr "Bloquear"
 
 #: src/admin/docs/modes-and-queue.php:27
-msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; untick \"Password resets\" in Settings to hold them too."
-msgstr "Todo e-mail é guardado e nenhum é enviado, inclusive os que outros plugins enviam pelas próprias tarefas agendadas. Use numa cópia de homologação, durante um incidente de segurança ou numa migração. Voltar para Fila envia o que ficou retido. Redefinições de senha são a exceção e saem na hora, para ninguém ficar sem acesso; desmarque \"Redefinições de senha\" em Configurações para retê-las também."
+msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; switch off \"Password resets\" in Settings to hold them too."
+msgstr "Todo e-mail é guardado e nenhum é enviado, inclusive os que outros plugins enviam pelas próprias tarefas agendadas. Use numa cópia de homologação, durante um incidente de segurança ou numa migração. Voltar para Fila envia o que ficou retido. Redefinições de senha são a exceção e saem na hora, para ninguém ficar sem acesso; desligue \"Redefinições de senha\" em Configurações para retê-las também."
 
 #: src/admin/docs/modes-and-queue.php:32
 msgid "Pace"
@@ -2475,8 +2475,8 @@ msgid "Setting it up"
 msgstr "Como configurar"
 
 #: src/admin/docs/alerts.php:17
-msgid "In Settings → Alerts, tick \"Alert enabled\", then fill in \"Alert Sensitivity\": the address that receives the alert and how many waiting emails should trigger it."
-msgstr "Em Configurações → Alertas, marque \"Alerta ativado\" e preencha \"Sensibilidade de Alerta\": o endereço que recebe o alerta e quantos e-mails aguardando devem dispará-lo."
+msgid "In Settings → Alerts, switch on \"Alert enabled\", then fill in \"Alert Sensitivity\": the address that receives the alert and how many waiting emails should trigger it."
+msgstr "Em Configurações → Alertas, ative \"Alerta ativado\" e preencha \"Sensibilidade de Alerta\": o endereço que recebe o alerta e quantos e-mails aguardando devem dispará-lo."
 
 #: src/admin/docs/alerts.php:19
 msgid "How often"
@@ -2831,5 +2831,37 @@ msgid "Retention tab"
 msgstr "aba Retenção"
 
 #: src/admin/docs/alerts.php
-msgid "With \"Block on alert\" ticked, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
-msgstr "Com \"Bloquear no alerta\" marcado, o alerta também muda o Modo de Operação para Bloquear, e nada mais é enviado até você verificar. O e-mail de alerta avisa, e um aviso no topo do painel fica até o modo mudar. Bloquear guarda todo e-mail: com a fila limpa, volte o modo para Fila e o que ficou retido sai. Redefinições de senha continuam saindo, a menos que você tenha desligado isso."
+msgid "With \"Block on alert\" on, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
+msgstr "Com \"Bloquear no alerta\" ativado, o alerta também muda o Modo de Operação para Bloquear, e nada mais é enviado até você verificar. O e-mail de alerta avisa, e um aviso no topo do painel fica até o modo mudar. Bloquear guarda todo e-mail: com a fila limpa, volte o modo para Fila e o que ficou retido sai. Redefinições de senha continuam saindo, a menos que você tenha desligado isso."
+
+#: src/admin/docs/getting-started.php
+msgid "On/off switches in Settings and Templates save the moment you flip them, and a badge beside the switch says Saved. The other fields save with the Save button, which keeps the switches as they are."
+msgstr "As chaves liga/desliga em Configurações e Modelos salvam no momento em que você as aciona, e um selo ao lado avisa Salvo. Os demais campos salvam com o botão Salvar, que mantém as chaves como estão."
+
+#: src/admin/settings-api.php
+msgid "Email me when the queue grows past the threshold below."
+msgstr "Me avisar por e-mail quando a fila passar do limite abaixo."
+
+#: src/admin/assets.php
+msgid "Saving…"
+msgstr "Salvando…"
+
+#: src/admin/assets.php
+msgid "Saved"
+msgstr "Salvo"
+
+#: src/admin/assets.php
+msgid "Not saved"
+msgstr "Não salvo"
+
+#: src/admin/settings-autosave.php
+msgid "Your session expired. Reload the page and try again."
+msgstr "Sua sessão expirou. Recarregue a página e tente de novo."
+
+#: src/admin/settings-autosave.php
+msgid "You are not allowed to change these settings."
+msgstr "Você não tem permissão para alterar estas configurações."
+
+#: src/admin/settings-autosave.php
+msgid "This setting cannot be saved this way."
+msgstr "Esta configuração não pode ser salva desta forma."

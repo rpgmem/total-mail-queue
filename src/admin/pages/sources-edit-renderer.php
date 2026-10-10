@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Admin\Icons;
+use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Sources\CoreTemplates;
@@ -231,9 +232,15 @@ final class SourcesEditRenderer {
 
 		// Skip template wrap.
 		echo '<tr><th scope="row">' . esc_html__( 'Skip template wrapper', 'total-mail-queue' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="skip_template_wrap" value="1" ' . checked( $skip_wrap, true, false ) . ' /> ';
-		echo esc_html__( 'Send this email raw (bypass the global HTML envelope from the Templates tab).', 'total-mail-queue' );
-		echo '</label></td></tr>';
+		Toggle::render(
+			array(
+				'name'    => 'skip_template_wrap',
+				'id'      => 'skip_template_wrap',
+				'checked' => (bool) $skip_wrap,
+				'label'   => __( 'Send this email raw (bypass the global HTML envelope from the Templates tab).', 'total-mail-queue' ),
+			)
+		);
+		echo '</td></tr>';
 
 		// Reset row.
 		if ( '' !== $subject_override || '' !== $body_override || $skip_wrap ) {

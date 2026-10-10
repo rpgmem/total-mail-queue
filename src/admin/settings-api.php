@@ -146,37 +146,48 @@ final class SettingsApi {
 	}
 
 	/**
-	 * Alert-enabled checkbox.
+	 * Alert-enabled toggle.
 	 */
 	public static function renderAlertStatus(): void {
-		$options = Options::get();
-		$checked = '1' === (string) $options['alert_enabled'] ? ' checked' : '';
-		echo '<input type="checkbox" name="wp_tmq_settings[alert_enabled]" value="1"' . esc_attr( $checked ) . ' />';
+		self::settingToggle( 'alert_enabled', __( 'Email me when the queue grows past the threshold below.', 'total-mail-queue' ) );
+	}
+
+	/**
+	 * An on/off setting of `wp_tmq_settings` as a toggle that saves on flip.
+	 *
+	 * The hidden `0` keeps it a full field of the form: a checkbox posts
+	 * nothing when off, and the form's save replaces the whole option, so
+	 * without it the Save button would reset what autosave stored.
+	 *
+	 * @param string $key   Setting key, listed in {@see SettingsAutosave::KEYS}.
+	 * @param string $label Text beside the switch.
+	 */
+	private static function settingToggle( string $key, string $label ): void {
+		Toggle::render(
+			array(
+				'name'      => 'wp_tmq_settings[' . $key . ']',
+				'id'        => 'wp_tmq_' . $key,
+				'checked'   => '1' === (string) Options::get()[ $key ],
+				'label'     => $label,
+				'off_value' => '0',
+				'autosave'  => 'settings:' . $key,
+			)
+		);
 	}
 
 	/**
 	 * Block-on-alert toggle.
-	 *
-	 * A checkbox posts nothing when unticked, and the saved option replaces
-	 * the stored one, so the hidden `0` is what records "off".
 	 */
 	public static function renderAutoBlock(): void {
-		$options = Options::get();
-		echo '<input type="hidden" name="wp_tmq_settings[auto_block]" value="0" />';
-		echo '<label><input type="checkbox" name="wp_tmq_settings[auto_block]" value="1"' . checked( '1', (string) $options['auto_block'], false ) . ' /> ';
-		echo esc_html__( 'Switch to Block mode when the alert fires.', 'total-mail-queue' ) . '</label>';
+		self::settingToggle( 'auto_block', __( 'Switch to Block mode when the alert fires.', 'total-mail-queue' ) );
 		echo '<p class="description">' . esc_html__( 'Nothing more is sent until you set the Operation Mode back to Queue, which then sends what was held. Use it when a sudden flood is more likely an attack than real mail.', 'total-mail-queue' ) . '</p>';
 	}
 
 	/**
-	 * Password resets in Block mode toggle. On by default, hence the hidden
-	 * `0` for the unticked state.
+	 * Password resets in Block mode toggle. On by default.
 	 */
 	public static function renderBlockPasswordReset(): void {
-		$options = Options::get();
-		echo '<input type="hidden" name="wp_tmq_settings[block_password_reset]" value="0" />';
-		echo '<label><input type="checkbox" name="wp_tmq_settings[block_password_reset]" value="1"' . checked( '1', (string) $options['block_password_reset'], false ) . ' /> ';
-		echo esc_html__( 'Send password resets even in Block mode.', 'total-mail-queue' ) . '</label>';
+		self::settingToggle( 'block_password_reset', __( 'Send password resets even in Block mode.', 'total-mail-queue' ) );
 		echo '<p class="description">' . esc_html__( 'Otherwise a user who asks for a new password waits for as long as the block lasts. Disabling the Password reset source on the Sources tab still stops them.', 'total-mail-queue' ) . '</p>';
 	}
 
@@ -270,10 +281,7 @@ final class SettingsApi {
 	 * possible to see exactly where a send failed (auth, TLS, greylisting…).
 	 */
 	public static function renderSmtpDebug(): void {
-		$options = Options::get();
-		$checked = '1' === (string) $options['smtp_debug'] ? ' checked' : '';
-		echo '<label><input type="checkbox" name="wp_tmq_settings[smtp_debug]" value="1"' . esc_attr( $checked ) . ' /> ';
-		echo esc_html__( 'Record the full SMTP conversation for each send into its error log.', 'total-mail-queue' ) . '</label>';
+		self::settingToggle( 'smtp_debug', __( 'Record the full SMTP conversation for each send into its error log.', 'total-mail-queue' ) );
 		echo '<p class="description">';
 		echo esc_html__( 'Useful for diagnosing why sends fail (authentication, TLS, rejections). The transcript is stored in the Log entry and cleared automatically when an email later sends successfully. Leave off for normal operation — it adds detail to the log on every SMTP send.', 'total-mail-queue' );
 		echo '</p>';

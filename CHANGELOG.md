@@ -17,6 +17,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Search and date range on the Log and Retention lists** (#83). Search matches recipient and subject, the dates select a range of days, and both combine with the status and source filters. The filters live in the page address, so pagination and bulk actions keep them.
 - **Block on alert** (#84). An opt-in setting under Alerts switches the Operation Mode to Block when the queue alert fires, so a sudden flood stops leaving the site until someone has looked. The alert email says so, and an admin notice stays until the mode changes.
 - **Password resets go out in Block mode** (#84). Block holds every other email, but a held password reset locks its user out, so it is sent at once unless the new setting is turned off. A disabled Password reset source still stops it.
+- **On/off settings are toggle switches that save on flip** (#89). Alerts, Block on alert, Password resets, SMTP Debug Log and the two Templates switches save the moment they change, with a Saved badge; the SMTP account and source forms use the same switches and keep their Save button.
 
 ### Changed
 
