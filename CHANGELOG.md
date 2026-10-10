@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Deleting the plugin removes all of its settings.** The HTML template settings and the WordPress-version marker were left in the database after the plugin was deleted. A test now checks that every option the plugin writes is removed on uninstall (#71).
+- **Version history matches the releases.** The changelog gains the missing 2.0.0 and 2.8.1 entries; the 2.0.0, 2.1.0 and 2.2.0 entries list what each version actually shipped; every version has its real date; and each one links to its tag. The 1.x entries are marked as releases of the original Mail Queue (#79).
+
+---
 
 ## [2.9.0] - 2026-07-25
 
@@ -45,6 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Per-source preferred SMTP account (with quota fallback).** Any source can now be pinned to a specific SMTP account on the Sources → edit screen ("Preferred SMTP account"). When a queued message is sent, if its source has a preferred account that is **enabled and still under quota**, it goes through that account; otherwise the normal round-robin selection is used — a preference never blocks or delays a send, and a disabled/deleted/capped account transparently falls back. Especially useful with the per-function sources below (e.g. route `plugin:ffcertificate_certificate` through a dedicated high-deliverability account). New `preferred_smtp_account_id` column on the sources table (rolled forward via `dbDelta`), `Sources\Repository::preferredAccountFor()` / `updatePreferredAccount()`, and `Smtp\Repository::pickPreferredOrAvailable()`.
 - **Plugins can now label each of their emails as a distinct source via headers.** A new highest-priority detection strategy reads an `X-TMQ-Source-Key` (and optional `X-TMQ-Source-Label`) header off the outgoing message and uses it as the source — ahead of the primary listeners and the backtrace fallback. This lets a plugin whose mail all funnels through a single wrapper (so the backtrace can only ever see one `plugin:<slug>` frame) split its emails into per-feature sources, e.g. `plugin:ffcertificate_certificate` vs `plugin:ffcertificate_scheduling`. Only the `plugin:` / `mu_plugin:` / `theme:` namespaces are accepted (a header can never claim a `wp_core:` source), and both control headers are stripped before the message is stored or sent, so they never reach the recipient — exactly like the existing `X-Mail-Queue-Prio` header. Backed by `Detector::fromExplicitKey()`.
+
+---
+
+## [2.8.1] - 2026-06-07
 
 ### Fixed
 
@@ -406,7 +413,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.2.1] - 2026-01-XX
+## [2.2.1] - 2026-02-01
 
 ### Added
 
@@ -430,15 +437,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.2.0] - 2025-XX-XX
+## [2.2.0] - 2026-02-01
 
 ### Added
 
 - SMTP test connection button to verify credentials before sending.
 - Export/import plugin settings and SMTP accounts via XML.
 - Status filter on the log table (sent / error / alert).
-- Auto-retry failed emails with configurable retry limit.
-- Resend and force-resend actions that remove the original log entry.
+- Send Method setting: Automatic, Plugin SMTP only, or WordPress default.
+- Resending an email removes its original log entry, so it is not listed twice.
 - Cron diagnostics panel on the Retention tab.
 - Detection of conflicting `pre_wp_mail` filters from other plugins.
 - Info column in the log with retry count and error details.
@@ -473,25 +480,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.0]
+## [2.1.0] - 2026-01-31
 
 ### Added
 
-- SMTP accounts management with priority, daily and monthly sending limits.
-- Multiple send methods: `auto`, SMTP only, PHP default.
-- Capture and replay `phpmailer_init` configurations from other plugins.
-- Block mode: retain all emails without sending.
-- Log max records limit setting.
-- Database table for SMTP accounts.
-- Encrypted SMTP password storage (AES-256-CBC).
+- Log max-records limit: keep at most N log entries (0 = unlimited), alongside the age-based clean-up.
+- Auto-retry on send failure: a failed email returns to the queue up to `max_retries` times (default 3, 0 = off), and the Info column shows each attempt.
+- Force Resend bulk action for failed emails, ignoring the retry limit.
 
 ---
 
-## [1.5.0]
+## [2.0.0] - 2026-01-31
+
+### Added
+
+- Operation modes: Disabled, Queue, and Block, which retains every email without sending it.
+- SMTP accounts with priority, daily and monthly sending limits, and automatic fallback to the next account when a limit is reached, in a new database table.
+- Encrypted SMTP password storage (AES-256-CBC).
+- Retention tab, renamed from Queue, listing only the emails still waiting.
+- Capture and replay of `phpmailer_init` configurations from other plugins.
+
+---
+
+## [1.5.0] - 2026-01-30
 
 ### Added
 
 - Fork of *Mail Queue* by WDM. Renamed all prefixes and identifiers; new branding: **Total Mail Queue**.
+
+> The versions below are releases of *Mail Queue* by WDM, from before the fork. They are not in this repository's history, so they have no tags here.
 
 ---
 
@@ -588,8 +605,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/rpgmem/total-mail-queue/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/rpgmem/total-mail-queue/compare/v2.9.0...develop
+[2.9.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.8.1...v2.9.0
+[2.8.1]: https://github.com/rpgmem/total-mail-queue/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.6.2...v2.7.0
+[2.6.2]: https://github.com/rpgmem/total-mail-queue/compare/v2.6.1...v2.6.2
+[2.6.1]: https://github.com/rpgmem/total-mail-queue/compare/v2.6.0...v2.6.1
+[2.6.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.5.2...v2.6.0
+[2.5.2]: https://github.com/rpgmem/total-mail-queue/compare/v2.5.1...v2.5.2
+[2.5.1]: https://github.com/rpgmem/total-mail-queue/compare/v2.5.0...v2.5.1
+[2.5.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.4.1...v2.5.0
+[2.4.1]: https://github.com/rpgmem/total-mail-queue/compare/v2.4.0...v2.4.1
+[2.4.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/rpgmem/total-mail-queue/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.1.0...v2.2.0
-[2.1.0]: https://github.com/rpgmem/total-mail-queue/compare/v1.5.0...v2.1.0
+[2.1.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/rpgmem/total-mail-queue/compare/v1.5.0...v2.0.0
 [1.5.0]: https://github.com/rpgmem/total-mail-queue/releases/tag/v1.5.0
