@@ -37,6 +37,7 @@ final class Uninstaller {
 		delete_option( 'wp_tmq_last_cron' );
 		delete_option( 'wp_tmq_last_send' );
 		delete_option( CronLock::OPTION );
+		delete_site_transient( \TotalMailQueue\Update\GithubUpdater::CACHE_KEY );
 
 		// Tables.
 		Schema::drop();

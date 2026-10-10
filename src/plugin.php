@@ -105,6 +105,10 @@ final class Plugin {
 
 		// REST API.
 		Rest\MessageController::register();
+
+		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
+		// scans for plugin updates from cron.
+		Update\GithubUpdater::register();
 	}
 
 	/**

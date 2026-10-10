@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dependabot targeting `develop`.
 
   Pushing a `v*` tag now builds `total-mail-queue-X.Y.Z.zip` through `.distignore` and publishes the GitHub Release from this file (#64).
+- **Updates from GitHub Releases.** WordPress now offers new versions on its normal update screen, using the built `total-mail-queue-X.Y.Z.zip` asset. The package is checked against its SHA-256 before install, and the compatibility fields and the upgrade notice come from the offered release's own `readme.txt`. Results are cached for 12h with ETag revalidation, and "Check again" refreshes them. Ported from Free Form Certificate (#66).
 
 ### Changed
 

@@ -296,3 +296,30 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
         public function current_action() { return false; }
     }
 }
+
+if ( ! class_exists( 'WP_Error' ) ) {
+    /**
+     * Minimal stand-in for core's WP_Error: a code and a message.
+     */
+    class WP_Error {
+
+        /** @var string */
+        private $code;
+
+        /** @var string */
+        private $message;
+
+        public function __construct( $code = '', $message = '' ) {
+            $this->code    = (string) $code;
+            $this->message = (string) $message;
+        }
+
+        public function get_error_code() {
+            return $this->code;
+        }
+
+        public function get_error_message() {
+            return $this->message;
+        }
+    }
+}
