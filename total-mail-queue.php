@@ -5,7 +5,7 @@
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
  * Version:           2.9.0
  * Requires at least: 5.9
- * Requires PHP:      7.4
+ * Requires PHP:      8.1
  * Author:            Alex Meusburger
  * Author URI:        https://github.com/rpgmem
  * License:           GPLv3 or later

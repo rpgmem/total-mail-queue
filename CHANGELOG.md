@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Development workflow.** CI now runs on pushes to `main` and `develop` and on every PR:
+  - unit tests on PHP 8.1–8.4 and the functional suite on 8.1 and 8.4;
+  - a lint workflow with ESLint, Stylelint, `composer validate --strict` and `composer audit`;
+  - Dependabot targeting `develop`.
+
+  Pushing a `v*` tag now builds `total-mail-queue-X.Y.Z.zip` through `.distignore` and publishes the GitHub Release from this file (#64).
+
+### Changed
+
+- **Minimum PHP is now 8.1** (was 7.4) in the plugin header and `readme.txt`. Composer already required it, and PHP 7.4 and 8.0 are out of security support (#64).
+
 ## [2.9.0] - 2026-07-25
 
 ### Added

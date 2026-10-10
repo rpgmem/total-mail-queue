@@ -74,8 +74,8 @@
     </rule>
 
     <!-- PHP version compatibility for the runtime supported by the plugin.
-         Plugin header declares PHP 7.4+ as the minimum. -->
-    <config name="testVersion" value="7.4-"/>
+         Plugin header declares PHP 8.1+ as the minimum. -->
+    <config name="testVersion" value="8.1-"/>
     <rule ref="PHPCompatibilityWP"/>
 
     <!-- Minimum supported WP version (matches readme.txt "Requires at least") -->
