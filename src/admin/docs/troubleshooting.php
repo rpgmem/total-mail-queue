@@ -36,7 +36,7 @@ $wp_tmq_test_url = wp_nonce_url( admin_url( 'admin.php?page=' . PluginPage::TAB_
 <p><?php esc_html_e( 'That is expected. Emails another plugin sends from its own scheduled tasks, such as digests or abandoned-cart reminders, pass through wp_mail() like any other, so they are queued, and in Block mode they are held back as well.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Attachments', 'total-mail-queue' ); ?></h3>
-<p><?php esc_html_e( 'Attachments are copied when the email is queued and kept until it is sent, so a form that deletes its upload right away still delivers it.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'Attachments are copied when the email is queued and kept until it is sent or fails for good, so a retry still carries them and a form that deletes its upload right away still delivers it. If they cannot be copied, the email is queued without them and its Info column says so.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Testing the whole path', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'This button puts one test email into the queue, addressed to the alert address in Settings. Watch it on the Retention tab until the next run sends it, then find it in the Log.', 'total-mail-queue' ); ?></p>

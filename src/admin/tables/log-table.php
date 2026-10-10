@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Tables;
 
+use TotalMailQueue\Queue\AttachmentStore;
 use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
@@ -445,6 +446,12 @@ final class LogTable extends WP_List_Table {
 	 */
 	private function bulk_delete( array $ids ): void {
 		foreach ( $ids as $id ) {
+			// A queued row still owns its staged attachments; deleting it is
+			// the last chance to remove them.
+			$row = QueueRepository::findById( intval( $id ) );
+			if ( null !== $row && ! empty( $row['attachments'] ) ) {
+				AttachmentStore::releaseFor( Serializer::decode( (string) $row['attachments'] ) );
+			}
 			QueueRepository::delete( intval( $id ) );
 		}
 	}
@@ -482,6 +489,8 @@ final class LogTable extends WP_List_Table {
 					'status'      => 'queue',
 					'attachments' => '',
 					'headers'     => $row['headers'],
+					'source_key'  => $row['source_key'],
+					'priority'    => $row['priority'],
 				);
 				QueueRepository::insert( $data );
 				QueueRepository::delete( intval( $id ) );
@@ -542,6 +551,8 @@ final class LogTable extends WP_List_Table {
 					'status'      => 'queue',
 					'attachments' => '',
 					'headers'     => $row['headers'],
+					'source_key'  => $row['source_key'],
+					'priority'    => $row['priority'],
 					'retry_count' => 0,
 					/* translators: %s: original error info */
 					'info'        => sprintf( __( 'Force resent — Original: %s', 'total-mail-queue' ), $row['info'] ),
