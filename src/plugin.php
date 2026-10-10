@@ -88,6 +88,7 @@ final class Plugin {
 
 		// Cron worker — schedule + the actual queue-draining action.
 		Cron\Scheduler::register();
+		Cron\AutoBlock::register();
 
 		// Admin AJAX endpoints.
 		Smtp\ConnectionTester::register();

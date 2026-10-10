@@ -36,26 +36,28 @@ final class Options {
 	 */
 	public static function defaults(): array {
 		return array(
-			'enabled'             => '0',   // 0=disabled, 1=queue (retain+send), 2=block (retain only, no sending).
-			'alert_enabled'       => '0',
-			'email'               => get_option( 'admin_email' ),
-			'email_amount'        => '10',
-			'queue_amount'        => '1',
-			'queue_interval'      => '5',
-			'queue_interval_unit' => 'minutes',
-			'clear_queue'         => '14',
-			'log_max_records'     => '0',   // 0=unlimited, >0=max number of log entries to keep.
-			'send_method'         => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only.
-			'max_retries'         => '3',   // 0=no retries, >0=auto-retry failed emails up to N times.
-			'cron_lock_ttl'       => '300', // seconds — safety timeout for the cross-process cron lock.
-			'smtp_timeout'        => '30',  // seconds — per-connection SMTP timeout during queue sending.
-			'smtp_debug'          => '0',   // 0=off, 1=capture the full SMTP conversation into each row's error log.
-			'tableName'           => 'total_mail_queue',
-			'smtpTableName'       => 'total_mail_queue_smtp',
-			'triggercount'        => 0,
-			'from_email'          => '',
-			'from_name'           => '',
-			'dark_mode'           => 'off', // off|on|auto — the plugin's admin screens only.
+			'enabled'              => '0',   // 0=disabled, 1=queue (retain+send), 2=block (retain only, no sending).
+			'alert_enabled'        => '0',
+			'email'                => get_option( 'admin_email' ),
+			'email_amount'         => '10',
+			'queue_amount'         => '1',
+			'queue_interval'       => '5',
+			'queue_interval_unit'  => 'minutes',
+			'clear_queue'          => '14',
+			'log_max_records'      => '0',   // 0=unlimited, >0=max number of log entries to keep.
+			'send_method'          => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only.
+			'max_retries'          => '3',   // 0=no retries, >0=auto-retry failed emails up to N times.
+			'cron_lock_ttl'        => '300', // seconds — safety timeout for the cross-process cron lock.
+			'smtp_timeout'         => '30',  // seconds — per-connection SMTP timeout during queue sending.
+			'smtp_debug'           => '0',   // 0=off, 1=capture the full SMTP conversation into each row's error log.
+			'tableName'            => 'total_mail_queue',
+			'smtpTableName'        => 'total_mail_queue_smtp',
+			'triggercount'         => 0,
+			'from_email'           => '',
+			'from_name'            => '',
+			'dark_mode'            => 'off', // off|on|auto — the plugin's admin screens only.
+			'auto_block'           => '0',   // 1=switch to Block mode when the queue alert fires.
+			'block_password_reset' => '1',  // 1=password resets are sent even in Block mode.
 		);
 	}
 

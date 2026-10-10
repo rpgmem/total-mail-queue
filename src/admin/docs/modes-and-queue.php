@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Block', 'total-mail-queue' ); ?></th>
-			<td><?php esc_html_e( 'Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held.', 'total-mail-queue' ); ?></td>
+			<td><?php esc_html_e( 'Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; untick "Password resets" in Settings to hold them too.', 'total-mail-queue' ); ?></td>
 		</tr>
 	</tbody>
 </table>

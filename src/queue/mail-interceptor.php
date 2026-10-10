@@ -38,6 +38,12 @@ use TotalMailQueue\Templates\Tokens;
 final class MailInterceptor {
 
 	/**
+	 * Source of the WordPress password-reset email, which Block mode sends
+	 * anyway unless `block_password_reset` is off.
+	 */
+	public const PASSWORD_RESET_SOURCE = 'wp_core:password_reset';
+
+	/**
 	 * `pre_wp_mail` priority — intentionally near INT_MAX so we run
 	 * after every other filter that might already have decided to
 	 * short-circuit the send.
@@ -141,6 +147,15 @@ final class MailInterceptor {
 		$has_from         = false;
 		$is_high          = false;
 		$status           = self::scanPriorityHeaders( $headers, $status, (string) $options['enabled'], $has_content_type, $has_from, $is_high );
+
+		// Block mode holds every email, and a held password reset locks its
+		// user out for as long as the block lasts. Unless the administrator
+		// turned it off, a password reset goes out at once; a source the
+		// administrator disabled still wins, below.
+		if ( 'queue' === $status && '2' === (string) $options['enabled'] && self::PASSWORD_RESET_SOURCE === $source['key']
+			&& '1' === (string) ( $options['block_password_reset'] ?? '1' ) ) {
+			$status = 'instant';
+		}
 
 		// Resolve the row's place on the unified priority scale: the more
 		// urgent of the source's configured priority and the High header

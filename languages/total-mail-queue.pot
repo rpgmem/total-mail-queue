@@ -2285,7 +2285,7 @@ msgid "Block"
 msgstr ""
 
 #: src/admin/docs/modes-and-queue.php:27
-msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held."
+msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; untick \"Password resets\" in Settings to hold them too."
 msgstr ""
 
 #: src/admin/docs/modes-and-queue.php:32
@@ -2782,4 +2782,44 @@ msgstr ""
 
 #: src/admin/tables/log-table.php
 msgid "Clear filters"
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Password resets"
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Block on alert"
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Switch to Block mode when the alert fires."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Nothing more is sent until you set the Operation Mode back to Queue, which then sends what was held. Use it when a sudden flood is more likely an attack than real mail."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Send password resets even in Block mode."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Otherwise a user who asks for a new password waits for as long as the block lasts. Disabling the Password reset source on the Sources tab still stops them."
+msgstr ""
+
+#: src/cron/alert-sender.php
+msgid "Sending has been stopped automatically: the plugin switched to Block mode, which keeps every email and sends none. Once you have checked the queue, set the Operation Mode back to Queue to send what was held."
+msgstr ""
+
+#: src/admin/notices.php
+msgid "Total Mail Queue stopped sending on %1$s: the queue passed the alert threshold and the plugin switched itself to Block mode. Check the %2$s, then set the Operation Mode back to Queue in %3$s to send what was held."
+msgstr ""
+
+#: src/admin/notices.php
+msgid "Retention tab"
+msgstr ""
+
+#: src/admin/docs/alerts.php
+msgid "With \"Block on alert\" ticked, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
 msgstr ""
