@@ -100,6 +100,7 @@ final class Plugin {
 		Admin\PluginRowLinks::register();
 		Admin\Menu::register();
 		Admin\Assets::register();
+		Admin\Access::register();
 		Admin\SettingsApi::register();
 		Admin\SettingsAutosave::register();
 		Admin\Notices::register();

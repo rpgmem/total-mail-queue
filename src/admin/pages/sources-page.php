@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Settings\Options;
 
@@ -27,7 +28,7 @@ use TotalMailQueue\Settings\Options;
 final class SourcesPage {
 
 	/**
-	 * Entry point — invoked with `manage_options` already verified.
+	 * Entry point — invoked with VIEW already verified; changes need MANAGE.
 	 */
 	public static function render(): void {
 		SourcesActions::handle();
@@ -46,7 +47,7 @@ final class SourcesPage {
 		echo esc_html__( 'Every email passing through wp_mail() is tagged with a source — a stable identifier (key) plus a human-readable label and group. New sources are auto-detected and registered with delivery enabled. Disabling a source stores any further messages from it with the "Blocked by source" status and skips the actual send. System sources marked "always on" cannot be disabled (they protect the plugin\'s own monitoring email).', 'total-mail-queue' );
 		echo '</p>';
 
-		if ( 'edit' === $action && $edit_id > 0 ) {
+		if ( 'edit' === $action && $edit_id > 0 && Access::canManage() ) {
 			SourcesEditRenderer::render( $edit_id );
 			echo '</div>';
 			return;

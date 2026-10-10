@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Rest;
 
+use TotalMailQueue\Admin\Access;
+use TotalMailQueue\Admin\Tables\LogTable;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Support\HtmlPreview;
 use TotalMailQueue\Support\Serializer;
@@ -50,10 +52,11 @@ final class MessageController {
 	}
 
 	/**
-	 * Capability gate — only manage_options users can read raw message bodies.
+	 * Capability gate — reading bodies needs MANAGE; {@see getMessage()} then
+	 * refuses the administrator-only sources to everyone else.
 	 */
 	public static function permissionCheck(): bool {
-		return current_user_can( 'manage_options' );
+		return Access::canManage();
 	}
 
 	/**
@@ -67,6 +70,9 @@ final class MessageController {
 		$row = QueueRepository::findById( $id );
 		if ( null === $row ) {
 			return new WP_Error( 'no_message', __( 'Message not found', 'total-mail-queue' ), array( 'status' => 404 ) );
+		}
+		if ( ! Access::canReadBody( (string) ( $row['source_key'] ?? '' ) ) ) {
+			return new WP_Error( 'admin_only_message', LogTable::restrictedBodyNotice( (string) ( $row['source_key'] ?? '' ) ), array( 'status' => 403 ) );
 		}
 
 		$headers = Serializer::decode( (string) $row['headers'] );

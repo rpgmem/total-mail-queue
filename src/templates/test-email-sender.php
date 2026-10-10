@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Templates;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Sources\CoreTemplates;
 use TotalMailQueue\Sources\Detector;
 
@@ -48,7 +49,7 @@ final class TestEmailSender {
 	 * `wp_send_json_error`.
 	 */
 	public static function handle(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Access::canManage() ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'total-mail-queue' ) ), 403 );
 		}
 

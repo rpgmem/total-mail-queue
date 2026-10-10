@@ -74,6 +74,12 @@ final class Documentation {
 						'file'   => 'alerts.php',
 					),
 					array(
+						'anchor' => 'access',
+						'icon'   => 'access',
+						'title'  => __( 'Access by role', 'total-mail-queue' ),
+						'file'   => 'access.php',
+					),
+					array(
 						'anchor' => 'export-import',
 						'icon'   => 'export',
 						'title'  => __( 'Export and import', 'total-mail-queue' ),

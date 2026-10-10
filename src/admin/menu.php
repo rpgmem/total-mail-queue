@@ -51,14 +51,18 @@ final class Menu {
 		$render = array( PluginPage::class, 'render' );
 
 		// `none` leaves the icon slot empty; the stylesheet draws the glyph.
-		add_menu_page( 'Total Mail Queue', 'Total Mail Queue', 'manage_options', self::SLUG, $render, 'none' );
+		// The entry carries the Settings tab's capability. For a user who may
+		// only view, WordPress then points the entry at the first tab that
+		// user may open (the Log) instead of at a Settings page they would be
+		// refused; each tab asks for its own capability below.
+		add_menu_page( 'Total Mail Queue', 'Total Mail Queue', Access::tabCapability( PluginPage::TAB_SETTINGS ), self::SLUG, $render, 'none' );
 		foreach ( PluginPage::tabs() as $slug => $label ) {
-			add_submenu_page( self::SLUG, $label, $label, 'manage_options', $slug, $render );
+			add_submenu_page( self::SLUG, $label, $label, Access::tabCapability( $slug ), $slug, $render );
 		}
 		// The FAQ tab became the documentation; its slug stays registered so
 		// bookmarks and links in old emails still open a page.
 		$docs = __( 'Documentation', 'total-mail-queue' );
-		add_submenu_page( self::SLUG, $docs, $docs, 'manage_options', PluginPage::TAB_FAQ, $render );
+		add_submenu_page( self::SLUG, $docs, $docs, Access::VIEW, PluginPage::TAB_FAQ, $render );
 	}
 
 	/**

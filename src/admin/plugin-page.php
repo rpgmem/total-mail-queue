@@ -53,14 +53,16 @@ final class PluginPage {
 	 * Page entry point — invoked by every submenu the {@see Menu} registers.
 	 */
 	public static function render(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual tabs verify their own nonces.
+		$tab = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::TAB_SETTINGS;
+
+		// WordPress already refuses a tab its menu capability excludes; this
+		// is the same rule, for a callback reached any other way.
+		if ( ! current_user_can( Access::tabCapability( $tab ) ) ) {
 			return;
 		}
 
 		$import_notice = self::maybeHandleImport();
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual tabs verify their own nonces.
-		$tab = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::TAB_SETTINGS;
 
 		echo '<div class="wrap tmq-admin" id="tmq-top">';
 		self::renderHeader( $tab );
@@ -128,13 +130,26 @@ final class PluginPage {
 	}
 
 	/**
+	 * The tabs the current user may open, in the same order.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function visibleTabs(): array {
+		return array_filter(
+			self::tabs(),
+			static fn ( string $slug ): bool => current_user_can( Access::tabCapability( $slug ) ),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
 	 * Verify the import nonce + run the import, returning the notice HTML.
 	 *
 	 * Done early (before any output) so the form-handling round-trip stays
 	 * before the page chrome.
 	 */
 	private static function maybeHandleImport(): string {
-		if ( ! isset( $_POST['wp_tmq_import'] ) ) {
+		if ( ! isset( $_POST['wp_tmq_import'] ) || ! Access::isAdmin() ) {
 			return '';
 		}
 		if ( ! isset( $_POST['wp_tmq_import_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wp_tmq_import_nonce'] ) ), 'wp_tmq_import' ) ) {
@@ -190,7 +205,7 @@ final class PluginPage {
 	private static function renderNav( string $tab ): void {
 		echo '<nav class="tmq-tabs__nav" aria-label="' . esc_attr__( 'Total Mail Queue sections', 'total-mail-queue' ) . '">';
 		echo '<ul class="tmq-tabs__list">';
-		foreach ( self::tabs() as $slug => $label ) {
+		foreach ( self::visibleTabs() as $slug => $label ) {
 			$active = $tab === $slug || ( self::TAB_FAQ === $tab && self::TAB_DOCS === $slug );
 			echo '<li class="tmq-tabs__item"><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '" class="tmq-tabs__tab' . ( $active ? ' is-active' : '' ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>' . Icons::tag( Icons::TABS[ $slug ] ?? '' ) . esc_html( $label ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() escapes its one attribute and emits fixed markup.
 		}
@@ -209,6 +224,14 @@ final class PluginPage {
 		do_settings_sections( SettingsApi::PAGE );
 		submit_button();
 		echo '</form>';
+
+		// Who may use the plugin, and moving SMTP accounts between sites,
+		// stay with administrators.
+		if ( ! Access::isAdmin() ) {
+			return;
+		}
+
+		AccessSettings::render();
 
 		echo '<h2 class="tmq-section-title">' . esc_html__( 'Export / Import', 'total-mail-queue' ) . '</h2>';
 
@@ -279,7 +302,7 @@ final class PluginPage {
 
 		// "Queue a test email" link target (the Troubleshooting topic carries the nonce'd link).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked just below.
-		if ( isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_addtestmail' ) ) {
+		if ( Access::canManage() && isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_addtestmail' ) ) {
 			QueueRepository::insert(
 				array(
 					'timestamp' => current_time( 'mysql', false ),

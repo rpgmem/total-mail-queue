@@ -25,6 +25,7 @@ final class SettingsAutosaveTest extends WP_Ajax_UnitTestCase {
         delete_option( Options::OPTION_NAME );
         delete_option( TemplateOptions::OPTION_NAME );
         SettingsAutosave::register();
+        \TotalMailQueue\Admin\Access::register();
     }
 
     protected function tearDown(): void {
@@ -98,7 +99,7 @@ final class SettingsAutosaveTest extends WP_Ajax_UnitTestCase {
         self::assertFalse( get_option( Options::OPTION_NAME ) );
     }
 
-    public function test_a_user_without_manage_options_is_refused(): void {
+    public function test_a_user_who_cannot_manage_is_refused(): void {
         wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
 
         $payload = $this->post( 'settings:smtp_debug', '1' );
@@ -114,6 +115,47 @@ final class SettingsAutosaveTest extends WP_Ajax_UnitTestCase {
         $this->post( 'settings:smtp_debug', 'yes' );
 
         self::assertSame( '0', get_option( Options::OPTION_NAME )['smtp_debug'] );
+    }
+
+    public function test_an_administrator_grants_a_role_access(): void {
+        $this->asAdmin();
+
+        $payload = $this->post( 'access:editor:view', '1' );
+
+        self::assertTrue( $payload['success'] );
+        self::assertTrue( \TotalMailQueue\Admin\Access::roleHas( 'editor', \TotalMailQueue\Admin\Access::VIEW ) );
+
+        $this->post( 'access:editor:view', '0' );
+        self::assertFalse( \TotalMailQueue\Admin\Access::roleHas( 'editor', \TotalMailQueue\Admin\Access::VIEW ) );
+    }
+
+    public function test_a_manager_cannot_change_who_has_access(): void {
+        \TotalMailQueue\Admin\Access::setRole( 'editor', \TotalMailQueue\Admin\Access::MANAGE, true );
+        wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+
+        $payload = $this->post( 'access:author:manage', '1' );
+
+        self::assertFalse( $payload['success'] );
+        self::assertFalse( \TotalMailQueue\Admin\Access::roleHas( 'author', \TotalMailQueue\Admin\Access::MANAGE ) );
+        \TotalMailQueue\Admin\Access::revokeAll();
+    }
+
+    public function test_a_manager_saves_settings_toggles(): void {
+        \TotalMailQueue\Admin\Access::setRole( 'editor', \TotalMailQueue\Admin\Access::MANAGE, true );
+        wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+
+        $payload = $this->post( 'settings:alert_enabled', '1' );
+
+        self::assertTrue( $payload['success'] );
+        \TotalMailQueue\Admin\Access::revokeAll();
+    }
+
+    public function test_the_administrator_role_cannot_be_changed(): void {
+        $this->asAdmin();
+
+        $payload = $this->post( 'access:administrator:view', '0' );
+
+        self::assertFalse( $payload['success'] );
     }
 
     private function asAdmin(): void {

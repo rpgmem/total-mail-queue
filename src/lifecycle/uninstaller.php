@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Lifecycle;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Cron\AutoBlock;
 use TotalMailQueue\Cron\CronLock;
 use TotalMailQueue\Database\Migrator;
@@ -37,6 +38,8 @@ final class Uninstaller {
 		// Options.
 		delete_option( 'wp_tmq_settings' );
 		delete_option( AutoBlock::OPTION );
+		// The capabilities live on the roles, not in an option.
+		Access::revokeAll();
 		delete_option( Migrator::VERSION_OPTION );
 		delete_option( 'wp_tmq_last_cron' );
 		delete_option( 'wp_tmq_last_send' );
