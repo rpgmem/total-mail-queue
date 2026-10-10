@@ -2131,3 +2131,307 @@ msgstr ""
 #: src/admin/settings-api.php:119
 msgid "Appearance"
 msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:14
+msgid "An SMTP account is a mail server the plugin sends through: your provider's, a transactional service such as Mailgun, or your own. You can add several and let the plugin share the load between them."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:16
+msgid "Connection"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:17
+msgid "Host, port, encryption (none, TLS or SSL), and the user name and password if the server asks for them. The password is stored encrypted; leave the field blank when editing to keep the one already saved. Test Connection checks the settings without sending anything."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:18
+msgid "When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Tick \"Unlock connection fields for editing\" to change them."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:19
+msgid "From Email and From Name, when filled, win over the Default Sender in Settings for every email this account sends."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:21
+msgid "Limits"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:25
+msgid "Daily Limit, Monthly Limit"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:26
+msgid "The most this account sends in a calendar day or month. 0 means no limit. The counts start over when the day or the month changes."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:30
+msgid "The most it sends in one cycle. 0 uses the global pace from Settings, which is also the ceiling."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:33
+msgid "Send Interval"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:34
+msgid "How long, in minutes, this account's cycle lasts before its per-cycle count starts over. 0 follows the global interval."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:39
+msgid "Which account sends"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:40
+msgid "Among the enabled accounts that still have room under every limit, the one used least recently goes next, so the load is spread across all of them. Priority (lower first) only breaks a tie. A source can name a preferred account in the Sources tab; that account is used while it is enabled and under its limits, and the normal turn order takes over otherwise."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:41
+msgid "When every account is at its limit, what happens next depends on the Send Method: with \"Plugin SMTP only\" emails wait in the queue, with \"Automatic\" they fall back to WordPress's mailer."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:43
+msgid "Moving accounts to another site"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:44
+msgid "Settings → Export / Import carries the settings and the SMTP accounts in one XML file. Passwords travel encrypted and can only be read on a site with the same WordPress salt keys; elsewhere, enter them again after importing."
+msgstr ""
+
+#: src/admin/docs/sources.php:14
+msgid "A source is who sent an email. Every email is tagged with one: a WordPress core email such as wp_core:password_reset, a plugin such as plugin:woocommerce, or a theme. The Sources tab lists every source seen so far, plus common ones known in advance, so you can act on a source before it sends anything."
+msgstr ""
+
+#: src/admin/docs/sources.php:16
+msgid "How the source is found"
+msgstr ""
+
+#: src/admin/docs/sources.php:17
+msgid "For WordPress's own emails, the plugin listens to the filters core runs just before sending. For everything else it reads which plugin or theme made the call. A plugin can also name the source itself with a header, which lets it split its emails into several sources; see the developer topic."
+msgstr ""
+
+#: src/admin/docs/sources.php:19
+msgid "Turning a source off"
+msgstr ""
+
+#: src/admin/docs/sources.php:20
+msgid "Disable a source and its emails are kept in the log as \"Blocked by source\" and never sent, even with the Instant header. \"Toggle every source in group\" does the same for a whole group at once. The plugin's own alert email is a system source and stays on."
+msgstr ""
+
+#: src/admin/docs/sources.php:22
+msgid "Editing a source"
+msgstr ""
+
+#: src/admin/docs/sources.php:24
+msgid "Label and Group change how the source is shown. They do not change the source key."
+msgstr ""
+
+#: src/admin/docs/sources.php:25
+msgid "Priority places its emails in the queue order, from 1 (first) to 100. Give password resets a low number so they never wait behind a newsletter."
+msgstr ""
+
+#: src/admin/docs/sources.php:26
+msgid "Preferred SMTP account sends its emails through that account whenever it has room."
+msgstr ""
+
+#: src/admin/docs/sources.php:27
+msgid "For WordPress core emails, Subject and Body replace the text WordPress would send."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:17
+msgid "Total Mail Queue sits between WordPress and your mail server. Every email that WordPress, a plugin or a theme sends through wp_mail() can be held in a queue, sent at a pace you choose, through the SMTP accounts you choose, and recorded in a log you can search."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:19
+msgid "First setup"
+msgstr ""
+
+#: src/admin/docs/getting-started.php:21
+msgid "In %s, set Operation Mode to Queue. Until then the plugin only watches; nothing is held back."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:22
+msgid "Set the pace in the same card: how many emails go out per interval. Start low, for example 5 every minute, and raise it once you know what your mail server accepts."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:23
+msgid "Add an account in %s and press Test Connection. Without one, Send Method \"Automatic\" uses whatever WordPress would have used."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:24
+msgid "Watch it work: waiting emails are listed in %1$s and move to the %2$s once they are sent."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:25
+msgid "Make sure WP-Cron runs reliably, because it is what sends the queue. The next topic explains how."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:28
+msgid "Switching the plugin to Disabled loses nothing: emails already waiting stay in the queue and go out when you switch back to Queue."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:14
+msgid "Operation modes"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:19
+msgid "WordPress sends email as if the plugin were not there. Nothing is intercepted and the queue is not sent."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:23
+msgid "Every email is stored first and sent later by the cron worker, at the pace you set."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:26
+msgid "Block"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:27
+msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:32
+msgid "Pace"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:33
+msgid "\"Send max. N email(s) every X\" is how many emails one run of the worker sends and how often it runs. The interval cannot be shorter than 10 seconds. It is also a ceiling: an SMTP account with a higher per-cycle limit of its own is held to this number."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:35
+msgid "WP-Cron"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:36
+msgid "The worker runs on WP-Cron, and WP-Cron only runs when someone visits the site. On a quiet site, or one served from a full-page cache, emails can wait far longer than the interval says."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:37
+msgid "The reliable setup is a real cron job on the server that calls wp-cron.php every minute or two, with WP-Cron's visit trigger turned off (DISABLE_WP_CRON in wp-config.php). When that constant is set, a Cron Information tab appears with the address to call."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:39
+msgid "Order and priority"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:40
+msgid "Waiting emails leave in priority order, lower number first, from 1 to 100. Ordinary mail is 50. An email carrying the header X-Mail-Queue-Prio: High gets 10, and each source can be given its own priority in the Sources tab."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:41
+msgid "X-Mail-Queue-Prio: Instant skips the queue altogether: the email is sent at once and logged as \"instant\". It bypasses the pace you set, so keep it for the rare email that cannot wait. A source you disabled still blocks it."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:43
+msgid "Send method"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:48
+msgid "Uses one of your SMTP accounts when one has capacity. Otherwise it reuses the SMTP settings another plugin applied, and failing that, WordPress's own mailer."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:52
+msgid "Sends only through your SMTP accounts. When none has capacity, emails wait in the queue until one does."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:56
+msgid "Ignores your SMTP accounts and sends the way wp_mail() would, which may be PHP mail or another SMTP plugin."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:61
+msgid "Failures and retries"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:62
+msgid "A send that fails is tried again on later runs, up to the Auto-Retry count in Settings. After the last attempt the email is marked Error and stays in the log, with the server's answer under \"Error details\"."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:14
+msgid "Retention lists the emails still waiting to be sent. Log lists everything the plugin has handled: sent, failed, blocked and its own alerts."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:16
+msgid "Statuses"
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:21
+msgid "Waiting for its turn. A \"High\" badge beside it means it will go before ordinary mail."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:25
+msgid "Handed to the mail server, which accepted it. Delivery to the inbox is up to that server from here."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:29
+msgid "Every attempt failed. \"Error details\" in the Info column shows why; turn on SMTP Debug Log in Settings to record the whole conversation with the server."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:33
+msgid "Its source is disabled in the Sources tab, so it was kept and never sent."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:37
+msgid "An alert the plugin sent you because the queue grew past your threshold."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:44
+msgid "Resend puts a failed, blocked or alert email back in the queue as a new entry. Emails already sent, and emails still waiting, are skipped."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:45
+msgid "Force Resend is for emails marked Error: it queues them again with a fresh retry count and keeps the original error in the Info column."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:46
+msgid "An email that had attachments cannot be resent: attachments are kept only until the email is sent."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:47
+msgid "Delete removes the selected entries for good."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:50
+msgid "Finding an email"
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:51
+msgid "Filter the log by status, or by source from the Sources tab (\"Filter log\"). Each row opens the message, its headers and its attachments in place."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:52
+msgid "Screen Options, at the top right of the page, chooses which columns you see. Headers and Attachments start hidden to leave room for the rest; your choice is saved for your user only."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:54
+msgid "Clean-up"
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:55
+msgid "Settings → Log removes entries older than a number of days and can also cap the log at a number of entries (0 means no cap). Clean-up never touches emails that are still waiting."
+msgstr ""
+
+#: src/admin/documentation.php:37
+msgid "Getting started"
+msgstr ""
+
+#: src/admin/documentation.php:43
+msgid "Modes and the queue"
+msgstr ""
+
+#: src/admin/documentation.php:49
+msgid "Log and retention"
+msgstr ""
+
+#: src/admin/documentation.php:55
+msgid "SMTP accounts"
+msgstr ""
+
+#: src/admin/documentation.php:76
+msgid "Documentation"
+msgstr ""
+
+#: src/admin/documentation.php:88
+msgid "Back to the index"
+msgstr ""
+
+#: src/admin/assets.php:127
+msgid "Back to top"
+msgstr ""

@@ -32,6 +32,8 @@ final class Icons {
 		'smtp'      => '<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h2M7 16.5h2"/>',
 		'sources'   => '<path d="M3 12V4h8l10 10-7 7z"/><circle cx="7.5" cy="8" r="1.5"/>',
 		'templates' => '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/>',
+		'docs'      => '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V5.5M8 7h8M8 11h6"/>',
+		'top'       => '<path d="M6 15l6-6 6 6"/>',
 		'faq'       => '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 5 .4c0 1.7-2.5 2.2-2.5 3.6M12 17h.01"/>',
 		'cron'      => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 		'send'      => '<path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M10 13 21 3"/>',
@@ -53,6 +55,7 @@ final class Icons {
 		PluginPage::TAB_SOURCES   => 'sources',
 		PluginPage::TAB_TEMPLATES => 'templates',
 		PluginPage::TAB_CRON_INFO => 'cron',
+		PluginPage::TAB_DOCS      => 'docs',
 		PluginPage::TAB_FAQ       => 'faq',
 	);
 

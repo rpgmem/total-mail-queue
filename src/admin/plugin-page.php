@@ -46,6 +46,7 @@ final class PluginPage {
 	public const TAB_TEMPLATES = 'wp_tmq_mail_queue-tab-templates';
 	public const TAB_CRON_INFO = 'wp_tmq_mail_queue-tab-croninfo';
 	public const TAB_FAQ       = 'wp_tmq_mail_queue-tab-faq';
+	public const TAB_DOCS      = 'wp_tmq_mail_queue-tab-docs';
 
 	/**
 	 * Page entry point — invoked by every submenu the {@see Menu} registers.
@@ -60,7 +61,7 @@ final class PluginPage {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual tabs verify their own nonces.
 		$tab = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::TAB_SETTINGS;
 
-		echo '<div class="wrap tmq-admin">';
+		echo '<div class="wrap tmq-admin" id="tmq-top">';
 		self::renderHeader( $tab );
 		echo '<div class="tmq-tabs">';
 		self::renderNav( $tab );
@@ -84,6 +85,9 @@ final class PluginPage {
 				break;
 			case self::TAB_FAQ:
 				self::renderFaqTab();
+				break;
+			case self::TAB_DOCS:
+				Documentation::render( plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) ) );
 				break;
 			case self::TAB_CRON_INFO:
 				CronInfoPage::render();
@@ -118,7 +122,8 @@ final class PluginPage {
 		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
 			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
 		}
-		$tabs[ self::TAB_FAQ ] = __( 'FAQ', 'total-mail-queue' );
+		$tabs[ self::TAB_DOCS ] = __( 'Documentation', 'total-mail-queue' );
+		$tabs[ self::TAB_FAQ ]  = __( 'FAQ', 'total-mail-queue' );
 
 		return $tabs;
 	}
