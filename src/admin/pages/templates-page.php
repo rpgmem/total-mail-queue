@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Admin\Icons;
+use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Settings\Options as PluginOptions;
 use TotalMailQueue\Templates\Options;
 use TotalMailQueue\Templates\TestEmailSender;
@@ -179,14 +180,21 @@ final class TemplatesPage {
 		echo Icons::heading( 'templates', __( 'HTML Template Engine', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 
 		if ( ! $enabled ) {
-			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'The template engine is currently off — outgoing emails are sent as-is. Tick the box below to enable it.', 'total-mail-queue' ) . '</p></div>';
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'The template engine is currently off — outgoing emails are sent as-is. Switch it on below.', 'total-mail-queue' ) . '</p></div>';
 		}
 
 		echo '<table class="form-table"><tbody>';
 		echo '<tr><th scope="row">' . esc_html__( 'Enable HTML wrapping', 'total-mail-queue' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="tmq_template[enabled]" value="1" ' . checked( $enabled, true, false ) . ' /> ';
-		echo esc_html__( 'Wrap every outgoing email in a styled HTML envelope.', 'total-mail-queue' );
-		echo '</label></td></tr>';
+		Toggle::render(
+			array(
+				'name'     => 'tmq_template[enabled]',
+				'id'       => 'tmq_template_enabled',
+				'checked'  => $enabled,
+				'label'    => __( 'Wrap every outgoing email in a styled HTML envelope.', 'total-mail-queue' ),
+				'autosave' => 'template:enabled',
+			)
+		);
+		echo '</td></tr>';
 		echo '</tbody></table>';
 		echo '</div>';
 	}
@@ -273,9 +281,16 @@ final class TemplatesPage {
 		echo '</td></tr>';
 
 		echo '<tr><th scope="row">' . esc_html__( 'Powered-by line', 'total-mail-queue' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="tmq_template[footer_powered_by]" value="1" ' . checked( ! empty( $options['footer_powered_by'] ), true, false ) . ' /> ';
-		echo esc_html__( 'Show "Sent via Total Mail Queue" beneath the footer text.', 'total-mail-queue' );
-		echo '</label></td></tr>';
+		Toggle::render(
+			array(
+				'name'     => 'tmq_template[footer_powered_by]',
+				'id'       => 'tmq_template_footer_powered_by',
+				'checked'  => ! empty( $options['footer_powered_by'] ),
+				'label'    => __( 'Show "Sent via Total Mail Queue" beneath the footer text.', 'total-mail-queue' ),
+				'autosave' => 'template:footer_powered_by',
+			)
+		);
+		echo '</td></tr>';
 
 		echo '</tbody></table>';
 		echo '</div>';

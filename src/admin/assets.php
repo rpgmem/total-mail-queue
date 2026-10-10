@@ -52,6 +52,7 @@ final class Assets {
 		wp_add_inline_script( 'wp_tmq_theme', self::darkModeScript( (string) Options::get()['dark_mode'] ) );
 		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin.js', array( 'jquery' ), Plugin::VERSION, true );
 		wp_add_inline_script( 'wp_tmq_script', self::inlineConfig(), 'before' );
+		wp_enqueue_script( 'wp_tmq_autosave', $base . 'assets/js/tmq-autosave.js', array( 'wp_tmq_script' ), Plugin::VERSION, true );
 
 		// Templates tab carries its own asset bundle (color picker + media
 		// uploader + the test-email handler). Loaded only on that tab so the
@@ -96,6 +97,18 @@ final class Assets {
 		$d .= 'tmq.i18n.testFailed = "' . esc_js( __( 'Test email failed: ', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.i18n.mediaTitle = "' . esc_js( __( 'Choose a logo', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.i18n.mediaButton = "' . esc_js( __( 'Use this image', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.autosave = ' . wp_json_encode(
+			array(
+				'action'  => SettingsAutosave::ACTION,
+				'nonce'   => wp_create_nonce( SettingsAutosave::NONCE ),
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'i18n'    => array(
+					'saving' => __( 'Saving…', 'total-mail-queue' ),
+					'saved'  => __( 'Saved', 'total-mail-queue' ),
+					'error'  => __( 'Not saved', 'total-mail-queue' ),
+				),
+			)
+		) . ';';
 		$d .= '}) ( this );';
 		return $d;
 	}

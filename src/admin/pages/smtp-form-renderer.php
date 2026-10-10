@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Admin\Icons;
+use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
 /**
@@ -89,7 +90,15 @@ final class SmtpFormRenderer {
 		if ( $is_edit ) {
 			echo '<tr>';
 			echo '<th scope="row">' . esc_html__( 'Connection Settings', 'total-mail-queue' ) . '</th>';
-			echo '<td><label><input type="checkbox" id="tmq-unlock-conn" /> ' . esc_html__( 'Unlock connection fields for editing', 'total-mail-queue' ) . '</label>';
+			echo '<td>';
+			// A screen control, not a field: it has no name and is never saved.
+			Toggle::render(
+				array(
+					'name'  => 'tmq_unlock_conn',
+					'id'    => 'tmq-unlock-conn',
+					'label' => __( 'Unlock connection fields for editing', 'total-mail-queue' ),
+				)
+			);
 			echo ' <span class="description">' . esc_html__( 'Keep locked to safely change only limits and other options.', 'total-mail-queue' ) . '</span></td>';
 			echo '</tr>';
 		}
@@ -140,11 +149,11 @@ final class SmtpFormRenderer {
 		if ( $is_edit ) {
 			echo '<tr class="tmq-conn-row tmq-conn-locked">';
 			echo '<th scope="row"><label for="smtp_auth">' . esc_html__( 'Authentication', 'total-mail-queue' ) . '</label></th>';
-			echo '<td><input type="checkbox" id="smtp_auth" name="smtp_auth" value="1"' . checked( $account['auth'], 1, false ) . ' class="tmq-conn-field" disabled="disabled" /></td>';
+			echo '<td>' . self::authToggle( $account, true ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in Toggle::html().
 		} else {
 			echo '<tr class="tmq-conn-row">';
 			echo '<th scope="row"><label for="smtp_auth">' . esc_html__( 'Authentication', 'total-mail-queue' ) . '</label></th>';
-			echo '<td><input type="checkbox" id="smtp_auth" name="smtp_auth" value="1"' . checked( $account['auth'], 1, false ) . ' class="tmq-conn-field" /></td>';
+			echo '<td>' . self::authToggle( $account, false ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in Toggle::html().
 		}
 		echo '</tr>';
 
@@ -239,7 +248,15 @@ final class SmtpFormRenderer {
 		// Enabled.
 		echo '<tr>';
 		echo '<th scope="row"><label for="smtp_enabled">' . esc_html__( 'Enabled', 'total-mail-queue' ) . '</label></th>';
-		echo '<td><input type="checkbox" id="smtp_enabled" name="smtp_enabled" value="1"' . checked( $account['enabled'], 1, false ) . ' /></td>';
+		echo '<td>';
+		Toggle::render(
+			array(
+				'name'    => 'smtp_enabled',
+				'id'      => 'smtp_enabled',
+				'checked' => 1 === (int) $account['enabled'],
+			)
+		);
+		echo '</td>';
 		echo '</tr>';
 
 		echo '</table>';
@@ -251,5 +268,24 @@ final class SmtpFormRenderer {
 		echo '<div id="tmq-test-smtp-result"></div>';
 		echo '</form>';
 		echo '</div>';
+	}
+
+	/**
+	 * The Authentication switch. Part of the connection fields, which the
+	 * edit screen keeps locked until "Unlock connection fields" is on.
+	 *
+	 * @param array<string,mixed> $account The account being edited.
+	 * @param bool                $locked  Whether it starts disabled.
+	 */
+	private static function authToggle( array $account, bool $locked ): string {
+		return Toggle::html(
+			array(
+				'name'        => 'smtp_auth',
+				'id'          => 'smtp_auth',
+				'checked'     => 1 === (int) $account['auth'],
+				'disabled'    => $locked,
+				'input_class' => 'tmq-conn-field',
+			)
+		);
 	}
 }

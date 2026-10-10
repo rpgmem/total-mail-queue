@@ -1742,7 +1742,7 @@ msgid "The Send Method setting controls how emails from the retention queue are 
 msgstr ""
 
 #: src/admin/pages/templates-page.php:180
-msgid "The template engine is currently off — outgoing emails are sent as-is. Tick the box below to enable it."
+msgid "The template engine is currently off — outgoing emails are sent as-is. Switch it on below."
 msgstr ""
 
 #. %s: number of emails in queue
@@ -2145,7 +2145,7 @@ msgid "Host, port, encryption (none, TLS or SSL), and the user name and password
 msgstr ""
 
 #: src/admin/docs/smtp-accounts.php:18
-msgid "When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Tick \"Unlock connection fields for editing\" to change them."
+msgid "When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Switch on \"Unlock connection fields for editing\" to change them."
 msgstr ""
 
 #: src/admin/docs/smtp-accounts.php:19
@@ -2285,7 +2285,7 @@ msgid "Block"
 msgstr ""
 
 #: src/admin/docs/modes-and-queue.php:27
-msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; untick \"Password resets\" in Settings to hold them too."
+msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; switch off \"Password resets\" in Settings to hold them too."
 msgstr ""
 
 #: src/admin/docs/modes-and-queue.php:32
@@ -2465,7 +2465,7 @@ msgid "Setting it up"
 msgstr ""
 
 #: src/admin/docs/alerts.php:17
-msgid "In Settings → Alerts, tick \"Alert enabled\", then fill in \"Alert Sensitivity\": the address that receives the alert and how many waiting emails should trigger it."
+msgid "In Settings → Alerts, switch on \"Alert enabled\", then fill in \"Alert Sensitivity\": the address that receives the alert and how many waiting emails should trigger it."
 msgstr ""
 
 #: src/admin/docs/alerts.php:19
@@ -2821,5 +2821,37 @@ msgid "Retention tab"
 msgstr ""
 
 #: src/admin/docs/alerts.php
-msgid "With \"Block on alert\" ticked, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
+msgid "With \"Block on alert\" on, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
+msgstr ""
+
+#: src/admin/docs/getting-started.php
+msgid "On/off switches in Settings and Templates save the moment you flip them, and a badge beside the switch says Saved. The other fields save with the Save button, which keeps the switches as they are."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Email me when the queue grows past the threshold below."
+msgstr ""
+
+#: src/admin/assets.php
+msgid "Saving…"
+msgstr ""
+
+#: src/admin/assets.php
+msgid "Saved"
+msgstr ""
+
+#: src/admin/assets.php
+msgid "Not saved"
+msgstr ""
+
+#: src/admin/settings-autosave.php
+msgid "Your session expired. Reload the page and try again."
+msgstr ""
+
+#: src/admin/settings-autosave.php
+msgid "You are not allowed to change these settings."
+msgstr ""
+
+#: src/admin/settings-autosave.php
+msgid "This setting cannot be saved this way."
 msgstr ""

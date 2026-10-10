@@ -101,6 +101,7 @@ final class Plugin {
 		Admin\Menu::register();
 		Admin\Assets::register();
 		Admin\SettingsApi::register();
+		Admin\SettingsAutosave::register();
 		Admin\Notices::register();
 		Admin\ExportImport::register();
 		Admin\LogColumns::register();
