@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Tables;
 
 use TotalMailQueue\Queue\AttachmentStore;
+use TotalMailQueue\Queue\ListFilter;
 use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
@@ -72,47 +73,6 @@ final class LogTable extends WP_List_Table {
 	}
 
 	/**
-	 * Count rows matching the log filter.
-	 *
-	 * @param string $status_filter Status filter.
-	 * @param string $source_filter Source filter.
-	 */
-	protected function get_log_count( string $status_filter = '', string $source_filter = '' ): int {
-		return QueueRepository::logCount( $status_filter, $source_filter );
-	}
-
-	/**
-	 * Fetch a page of log rows.
-	 *
-	 * @param string $status_filter Status filter.
-	 * @param string $source_filter Source filter.
-	 * @param int    $per_page      Page size.
-	 * @param int    $offset        Row offset.
-	 * @return array<int,array<string,mixed>>
-	 */
-	protected function get_log( string $status_filter = '', string $source_filter = '', int $per_page = 50, int $offset = 0 ): array {
-		return QueueRepository::logPage( $status_filter, $source_filter, $per_page, $offset );
-	}
-
-	/**
-	 * Count pending queue rows.
-	 */
-	protected function get_queue_count(): int {
-		return QueueRepository::pendingCount();
-	}
-
-	/**
-	 * Fetch a page of queue rows.
-	 *
-	 * @param int $per_page Page size.
-	 * @param int $offset   Row offset.
-	 * @return array<int,array<string,mixed>>
-	 */
-	protected function get_queue( int $per_page = 50, int $offset = 0 ): array {
-		return QueueRepository::queuePage( $per_page, $offset );
-	}
-
-	/**
 	 * Define the visible columns. SMTP column appears only on the log tab.
 	 *
 	 * @return array<string,string>
@@ -151,51 +111,96 @@ final class LogTable extends WP_List_Table {
 	}
 
 	/**
-	 * Render the status filter on top of the log tab.
+	 * Id of the GET form the filters submit through. The table sits inside
+	 * the POST form of the bulk actions, and forms cannot nest, so the
+	 * filter fields name this form with the `form` attribute instead.
+	 */
+	public const FILTER_FORM = 'tmq-list-filter';
+
+	/**
+	 * Print the (empty) GET form the filter fields belong to. Call it
+	 * outside the bulk-action form, before the table.
+	 *
+	 * Filtering through GET keeps the filters in the URL, so pagination and
+	 * a bulk action, which posts back to the same URL, both keep them.
+	 *
+	 * @param string $page The admin page slug the form reloads.
+	 */
+	public static function renderFilterForm( string $page ): void {
+		echo '<form id="' . esc_attr( self::FILTER_FORM ) . '" method="get" action="' . esc_url( admin_url( 'admin.php' ) ) . '">';
+		echo '<input type="hidden" name="page" value="' . esc_attr( $page ) . '" />';
+		echo '</form>';
+	}
+
+	/**
+	 * Render the filters on top of the list: status (Log only), a date
+	 * range, and a search over recipient and subject.
 	 *
 	 * @param string $which `top` or `bottom`.
 	 */
 	protected function extra_tablenav( $which ): void {
-		if ( self::MODE_LOG !== $this->mode || 'top' !== $which ) {
+		if ( 'top' !== $which ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
-		$current  = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
-		$statuses = array(
-			''                  => __( 'All statuses', 'total-mail-queue' ),
-			'sent'              => __( 'Sent', 'total-mail-queue' ),
-			'error'             => __( 'Error', 'total-mail-queue' ),
-			'alert'             => __( 'Alert', 'total-mail-queue' ),
-			'blocked_by_source' => __( 'Blocked by source', 'total-mail-queue' ),
-		);
-		echo '<div class="alignleft actions">';
-		echo '<select name="status_filter">';
-		foreach ( $statuses as $value => $label ) {
-			printf(
-				'<option value="%s"%s>%s</option>',
-				esc_attr( $value ),
-				selected( $current, $value, false ),
-				esc_html( $label )
+		$filter = ListFilter::fromRequest();
+		$form   = ' form="' . esc_attr( self::FILTER_FORM ) . '"';
+
+		echo '<div class="alignleft actions tmq-list-filters">';
+		if ( self::MODE_LOG === $this->mode ) {
+			$statuses = array(
+				''                  => __( 'All statuses', 'total-mail-queue' ),
+				'sent'              => __( 'Sent', 'total-mail-queue' ),
+				'error'             => __( 'Error', 'total-mail-queue' ),
+				'alert'             => __( 'Alert', 'total-mail-queue' ),
+				'blocked_by_source' => __( 'Blocked by source', 'total-mail-queue' ),
 			);
+			echo '<label class="screen-reader-text" for="tmq-status-filter">' . esc_html__( 'Filter by status', 'total-mail-queue' ) . '</label>';
+			echo '<select name="status_filter" id="tmq-status-filter"' . $form . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $form is built from esc_attr() above.
+			foreach ( $statuses as $value => $label ) {
+				printf(
+					'<option value="%s"%s>%s</option>',
+					esc_attr( $value ),
+					selected( $filter->status, $value, false ),
+					esc_html( $label )
+				);
+			}
+			echo '</select>';
 		}
-		echo '</select>';
-		// Carry the active source_filter through the status-filter form so
-		// submitting "Filter" doesn't drop the source narrowing.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
-		$source_filter = isset( $_REQUEST['source_filter'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['source_filter'] ) ) : '';
-		if ( '' !== $source_filter ) {
-			echo '<input type="hidden" name="source_filter" value="' . esc_attr( $source_filter ) . '" />';
+
+		printf(
+			'<span class="tmq-list-filter-field"><label for="tmq-date-from">%1$s</label> <input type="date" name="date_from" id="tmq-date-from" value="%2$s"%4$s /></span> <span class="tmq-list-filter-field"><label for="tmq-date-to">%3$s</label> <input type="date" name="date_to" id="tmq-date-to" value="%5$s"%4$s /></span> ',
+			esc_html__( 'From', 'total-mail-queue' ),
+			esc_attr( $filter->from ),
+			esc_html__( 'to', 'total-mail-queue' ),
+			$form, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above.
+			esc_attr( $filter->to )
+		);
+		printf(
+			'<label class="screen-reader-text" for="tmq-list-search">%1$s</label><input type="search" name="s" id="tmq-list-search" value="%2$s" placeholder="%3$s"%4$s /> ',
+			esc_html__( 'Search emails', 'total-mail-queue' ),
+			esc_attr( $filter->search ),
+			esc_attr__( 'Recipient or subject', 'total-mail-queue' ),
+			$form // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above.
+		);
+		// A source filter arrives from a link on the Sources tab and has no
+		// field of its own; carry it so filtering again doesn't drop it.
+		if ( '' !== $filter->source ) {
+			echo '<input type="hidden" name="source_filter" value="' . esc_attr( $filter->source ) . '"' . $form . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above.
 		}
-		submit_button( __( 'Filter', 'total-mail-queue' ), '', 'filter_action', false );
-		if ( '' !== $source_filter ) {
-			$clear_url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log' . ( $current ? '&status_filter=' . rawurlencode( $current ) : '' ) );
+		submit_button( __( 'Filter', 'total-mail-queue' ), '', 'filter_action', false, array( 'form' => self::FILTER_FORM ) );
+
+		if ( '' !== $filter->source ) {
 			echo ' <span class="tmq-status tmq-status-alert tmq-status-inline">' . esc_html(
 				sprintf(
 					/* translators: %s: source key */
 					__( 'Source: %s', 'total-mail-queue' ),
-					$source_filter
+					$filter->source
 				)
-			) . '</span> <a href="' . esc_url( $clear_url ) . '">' . esc_html__( 'Clear source filter', 'total-mail-queue' ) . '</a>';
+			) . '</span>';
+		}
+		if ( $filter->isActive() ) {
+			$page = self::MODE_LOG === $this->mode ? 'wp_tmq_mail_queue-tab-log' : 'wp_tmq_mail_queue-tab-queue';
+			echo ' <a href="' . esc_url( admin_url( 'admin.php?page=' . $page ) ) . '">' . esc_html__( 'Clear filters', 'total-mail-queue' ) . '</a>';
 		}
 		echo '</div>';
 	}
@@ -216,16 +221,13 @@ final class LogTable extends WP_List_Table {
 		$total_items = 0;
 		$data        = array();
 
+		$filter = ListFilter::fromRequest();
 		if ( self::MODE_LOG === $this->mode ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
-			$status_filter = isset( $_REQUEST['status_filter'] ) ? sanitize_key( $_REQUEST['status_filter'] ) : '';
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- filter parameter, not destructive action
-			$source_filter = isset( $_REQUEST['source_filter'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['source_filter'] ) ) : '';
-			$total_items   = $this->get_log_count( $status_filter, $source_filter );
-			$data          = $this->get_log( $status_filter, $source_filter, $per_page, $offset );
+			$total_items = QueueRepository::logCount( $filter );
+			$data        = QueueRepository::logPage( $filter, $per_page, $offset );
 		} else {
-			$total_items = $this->get_queue_count();
-			$data        = $this->get_queue( $per_page, $offset );
+			$total_items = QueueRepository::queueCount( $filter );
+			$data        = QueueRepository::queuePage( $filter, $per_page, $offset );
 		}
 
 		$this->set_pagination_args(

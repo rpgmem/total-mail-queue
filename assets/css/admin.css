@@ -466,6 +466,43 @@ span.tmq-status.tmq-status-alert {
 	width: 85px;
 }
 
+/* Log / Retention filters: status, date range and search on one wrapping row. */
+.tmq-list-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.375rem;
+}
+
+.tmq-list-filter-field {
+	white-space: nowrap;
+}
+
+.tmq-list-filters label:not(.screen-reader-text) {
+	color: var(--tmq-text-muted);
+}
+
+/* The filters may wrap below the bulk actions; let the bar grow with them. */
+.tmq-admin .tablenav.top {
+	height: auto;
+}
+
+/* Core hides `.tablenav .actions` on phones; the filters stay, one per line. */
+@media screen and (max-width: 782px) {
+	.tablenav.top .actions.tmq-list-filters {
+		display: flex;
+		margin: 0.5rem 0;
+	}
+
+	.tmq-list-filters input[type="search"] {
+		flex: 1 1 100%;
+	}
+}
+
+:root.tmq-dark-mode .tmq-admin input[type="date"] {
+	color-scheme: dark;
+}
+
 span.tmq-status.tmq-status-inline {
 	margin-left: 0.5em;
 }
@@ -652,6 +689,7 @@ span.tmq-status.tmq-status-inline {
 
 :root.tmq-dark-mode .tmq-admin input[type="text"],
 :root.tmq-dark-mode .tmq-admin input[type="search"],
+:root.tmq-dark-mode .tmq-admin input[type="date"],
 :root.tmq-dark-mode .tmq-admin input[type="number"],
 :root.tmq-dark-mode .tmq-admin input[type="email"],
 :root.tmq-dark-mode .tmq-admin input[type="url"],
