@@ -7,42 +7,32 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.10.0] (2026-10-10)
+
 ### Added
 
-- **Development workflow** (#64). CI runs unit tests on PHP 8.1–8.4, the functional suite on 8.1 and 8.4, ESLint, Stylelint, `composer validate --strict` and `composer audit`; Dependabot targets `develop`. A `v*` tag builds the zip through `.distignore` and publishes the GitHub Release from this file.
 - **Updates from GitHub Releases** (#66). WordPress offers new versions on its normal update screen, checks the package's SHA-256 before installing it, and reads the compatibility fields and upgrade notice from the release's own `readme.txt`. Ported from Free Form Certificate.
-- **Dark mode and a redesigned admin** (#68). A Dark Mode setting (Off / On / Follow the system) restyles only the plugin's screens. The submenus become a vertical tab column that keeps every URL, and the menu icon follows the admin colour scheme.
-- **Deploy to the testes site** (#74). Every merge into `develop` is rsynced to the testes site Free Form Certificate also uses, then a smoke checks that the plugin is active, runs the deployed version and has its tables.
-- **The testes deploy checks its target before syncing** (#75). A `TESTES_REMOTE_PATH` that is not absolute or does not end in `/wp-content/plugins/total-mail-queue` stops the deploy before `rsync --delete` runs.
+- **Choose which roles view and manage the plugin** (#91). Settings → Access, for administrators only, grants a role View (read-only screens) or Manage (settings, sources, templates, bulk actions, message bodies). SMTP accounts, Export / Import and the bodies of one-time account-link emails stay administrator-only.
 - **Search and date range on the Log and Retention lists** (#83). Search matches recipient and subject, the dates select a range of days, and both combine with the status and source filters. The filters live in the page address, so pagination and bulk actions keep them.
 - **Block on alert** (#84). An opt-in setting under Alerts switches the Operation Mode to Block when the queue alert fires, so a sudden flood stops leaving the site until someone has looked. The alert email says so, and an admin notice stays until the mode changes.
 - **Password resets go out in Block mode** (#84). Block holds every other email, but a held password reset locks its user out, so it is sent at once unless the new setting is turned off. A disabled Password reset source still stops it.
-- **On/off settings are toggle switches that save on flip** (#89). Alerts, Block on alert, Password resets, SMTP Debug Log and the two Templates switches save the moment they change, with a Saved badge; the SMTP account and source forms use the same switches and keep their Save button.
-- **Choose which roles view and manage the plugin** (#91). Settings → Access, for administrators only, grants roles View (Log, Retention, Sources, docs, read-only) or Manage (settings, sources, templates, bulk actions, message bodies). SMTP accounts, Export / Import and the bodies of emails carrying one-time account links stay administrator-only.
-- **Releases for the tags cut before the release workflow** (#94). Release → Run workflow publishes an existing tag's zip and notes, never as the latest release, and every PR now builds the newest tag's zip so a broken package fails before a release.
+- **On/off settings are toggle switches that save on flip** (#89). Alerts, Block on alert, Password resets, SMTP Debug Log and the Templates switches save the moment they change, with a Saved badge; the SMTP account and source forms use the same switches and keep their Save button.
+- **Dark mode** (#68). Off, On or Follow the system, restyling only the plugin's screens. The submenus become a vertical tab column that keeps every URL, and the menu icon follows the admin colour scheme.
+- **A Documentation tab** (#71, #77, #78). The plugin ships its own guide, grouped by tab in menu order under a searchable navigation tree, with Troubleshooting in place of the FAQ and a "Back to top" button on every screen.
+- **Development workflow** (#64, #74, #75, #94). CI on PHP 8.1–8.4 with ESLint, Stylelint and Composer checks; `develop` deploys to the testes site behind a smoke check; a `v*` tag publishes the release zip, and older tags can be published by hand without becoming the latest.
 
 ### Changed
 
-- **Minimum PHP is now 8.1** (#64), was 7.4, in the plugin header and `readme.txt`. Composer already required it, and 7.4 and 8.0 are out of security support.
-- **Status badges are readable in both themes** (#68). Every admin colour comes from a token checked against WCAG AA; the orange "instant" badge was below the contrast floor.
-- **Admin screens laid out as cards** (#68). Settings is grouped into Sending, Log, Alerts, Advanced and Appearance, tabs and headings carry icons, and Log and Retention columns can be hidden from Screen Options. The last inline styles moved into the stylesheet so they follow the dark theme.
-- **Documentation tab** (#71). The plugin ships its own guide, covering getting started, modes and the queue, the log, SMTP accounts and sources. Every plugin screen gains a "Back to top" button.
-- **The FAQ is now Troubleshooting, inside the documentation** (#71). The guide adds HTML templates, alerts, export and import, developers and stored data. The FAQ tab's address opens the documentation, which keeps the "queue a test email" button.
-- **Every screen uses the same cards and icon headings** (#76). Templates, the SMTP account form, the source editor and Cron Information group their fields in cards; a test keeps headings from shipping without an icon.
-- **The documentation names its developer and links the repository** (#77), read from the plugin header like the Plugins screen.
-- **The documentation follows the menu, with a quick navigation like Free Form Certificate's** (#78). Topics are grouped by tab in menu order, under a sticky single-column tree with a search box.
-- **The changelog follows Free Form Certificate's format** (#80). Each heading carries its date and release commit, sections use only the Keep a Changelog headings, bullets are condensed and cite their PRs, and the pre-fork history credits the original plugin and its developer.
+- **Minimum PHP is now 8.1** (#64), was 7.4. Composer already required it, and 7.4 and 8.0 are out of security support.
+- **Admin screens laid out as cards with icon headings** (#68, #76). Settings is grouped into Sending, Log, Alerts, Advanced and Appearance, Log and Retention columns can be hidden from Screen Options, and every colour comes from a token checked against WCAG AA.
+- **The changelog follows Free Form Certificate's format** (#80, #79, #93). Every version carries its date and the commit its tag sits on, lists what that commit shipped, and the pre-fork history credits the original plugin and its developer.
 
 ### Fixed
 
-- **Deleting the plugin removes all of its settings** (#71). The HTML template settings and the WordPress-version marker were left behind; a test now checks that every option the plugin writes is removed on uninstall.
-- **Version history matches the releases** (#79). The missing 2.0.0 and 2.8.1 entries were added, 2.0.0 to 2.2.0 list what each version shipped, and every version carries its real date and its tag.
-- **A retried email keeps its attachments** (#81). A failed send waiting for a retry had its staged files deleted, so the retry went out without them and nothing said so. Files now go only when the email is sent, fails for good or is deleted.
-- **Resend and Force Resend keep the source and priority** (#81). The resent copy lost both, and with them the source's preferred SMTP account.
-- **Attachment staging is all or nothing** (#81). A failed copy no longer queues a broken attachment, two files with the same name no longer overwrite each other, and an unavailable filesystem no longer breaks the page that sent the email.
-- **No more orphaned attachment folders** (#81). Deleting a queued email removes its files, emails blocked by their source no longer stage any, and only folders inside the staging directory are ever deleted.
+- **A retried email keeps its attachments** (#81). Files staged for a failed send were deleted before the retry; they now go only when the email is sent, fails for good or is deleted. Resend and Force Resend keep the source and its priority.
+- **Attachment staging is all or nothing** (#81). A failed copy no longer queues a broken attachment, same-named files no longer overwrite each other, blocked emails stage nothing, and only folders inside the staging directory are ever deleted.
 - **Emails to long recipient lists are stored whole** (#82). The recipient column held 255 characters, so a longer list was cut off and the email reached only part of it, or failed. The column is now `text`, widened in place on upgrade.
-- **2.2.0 and 2.7.0 point at their release commits** (#93). Each heading named a later commit carrying changes recorded in the next version; 2.2.0 also gains six changes it shipped without an entry, and the 2.8.0 bullets cite the PRs that delivered them.
+- **Deleting the plugin removes everything it wrote** (#71, #84, #91). The template settings, the WordPress-version marker, the auto-block marker and the role capabilities are removed too, and a test checks every option the plugin writes.
 
 ## [2.9.0] (2026-07-25) — `bee76b0`
 

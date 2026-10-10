@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.9.0
+Stable tag: 2.10.0
 Requires PHP: 8.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -182,12 +182,20 @@ Updates arrive through the normal WordPress update screen, straight from this pl
 
 The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
 
+= 2.10.0 =
+* New: updates arrive from GitHub Releases on the normal WordPress update screen, each package checked against its SHA-256.
+* New: Settings → Access lets administrators choose which roles view and which manage the plugin; one-time account-link emails stay administrator-only.
+* New: search and a date range on the Log and Retention lists; an opt-in Block on alert; password resets still go out in Block mode.
+* New: on/off settings are switches that save on flip, a dark mode, card layouts and a built-in Documentation tab.
+* Changed: PHP 8.1 is now the minimum.
+* Fixed: retried emails keep their attachments, long recipient lists are stored whole, and deleting the plugin removes everything it wrote.
+
 = 2.9.0 =
 * New: plugins can label each of their emails as a distinct source by setting an `X-TMQ-Source-Key` (and optional `X-TMQ-Source-Label`) header. The queue reads it as the highest-priority source strategy — ahead of the built-in listeners and the caller backtrace — and strips both headers before delivery, so a plugin whose mail all flows through one wrapper can still split its emails into per-feature sources. Only `plugin:` / `mu_plugin:` / `theme:` keys are accepted.
 * New: any source can be pinned to a preferred SMTP account on the Sources → edit screen. The queue sends through that account when it is enabled and under quota, and transparently falls back to the normal account rotation when it is capped, disabled, or removed — a preference never blocks or delays a send.
 * Fixed: the "queue may not be processing" admin notice no longer fires during healthy operation — it now keys off the last successful send (over two hours idle) with the worker not scheduled to act, instead of the last worker run.
 
-= 2.8.0 =
-* New: a persistent per-email error log with an optional full SMTP debug transcript, a specific "why is the queue waiting?" message when every account is capped, and a proactive "queue may not be processing" admin notice for cached / low-traffic sites.
-* Fixed: per-cycle SMTP quotas no longer get stuck; SMTP passwords no longer fail to decrypt intermittently; the queue no longer freezes when a send hangs (the cron lock now has a real self-expiring TTL).
+== Upgrade Notice ==
 
+= 2.10.0 =
+Requires PHP 8.1. Adds updates from GitHub Releases, per-role access, Log search and date filters, Block on alert and dark mode, and fixes attachments lost on retry. Details and issues in CHANGELOG.md.
