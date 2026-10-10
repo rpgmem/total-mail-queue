@@ -36,7 +36,7 @@ final class SourcesPage {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
 		$edit_id = isset( $_GET['source-id'] ) ? (int) $_GET['source-id'] : 0;
 
-		echo '<div class="tmq-box">';
+		echo '<div class="tmq-section">';
 		echo '<h2>' . esc_html__( 'Sources', 'total-mail-queue' ) . '</h2>';
 
 		self::renderModeNotice();

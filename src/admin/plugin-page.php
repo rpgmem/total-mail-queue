@@ -188,7 +188,7 @@ final class PluginPage {
 		echo '<ul class="tmq-tabs__list">';
 		foreach ( self::tabs() as $slug => $label ) {
 			$active = $tab === $slug;
-			echo '<li class="tmq-tabs__item"><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '" class="tmq-tabs__tab' . ( $active ? ' is-active' : '' ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
+			echo '<li class="tmq-tabs__item"><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '" class="tmq-tabs__tab' . ( $active ? ' is-active' : '' ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>' . Icons::tag( Icons::TABS[ $slug ] ?? '' ) . esc_html( $label ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() escapes its one attribute and emits fixed markup.
 		}
 		echo '</ul>';
 		echo '</nav>';
@@ -206,8 +206,7 @@ final class PluginPage {
 		submit_button();
 		echo '</form>';
 
-		echo '<hr />';
-		echo '<h2>' . esc_html__( 'Export / Import', 'total-mail-queue' ) . '</h2>';
+		echo '<h2 class="tmq-section-title">' . esc_html__( 'Export / Import', 'total-mail-queue' ) . '</h2>';
 
 		if ( '' !== $import_notice ) {
 			echo wp_kses_post( $import_notice );
@@ -217,7 +216,7 @@ final class PluginPage {
 
 		// Export.
 		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'Export', 'total-mail-queue' ) . '</h3>';
+		echo '<h3 class="tmq-card-title">' . Icons::tag( 'export' ) . esc_html__( 'Export', 'total-mail-queue' ) . '</h3>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
 		echo '<p>' . esc_html__( 'Download an XML file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post">';
 		wp_nonce_field( 'wp_tmq_export', 'wp_tmq_export_nonce' );
@@ -227,7 +226,7 @@ final class PluginPage {
 
 		// Import.
 		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'Import', 'total-mail-queue' ) . '</h3>';
+		echo '<h3 class="tmq-card-title">' . Icons::tag( 'import' ) . esc_html__( 'Import', 'total-mail-queue' ) . '</h3>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
 		echo '<p>' . esc_html__( 'Upload a previously exported XML file to restore settings and SMTP accounts. This will replace all current settings and SMTP accounts.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post" enctype="multipart/form-data">';
 		wp_nonce_field( 'wp_tmq_import', 'wp_tmq_import_nonce' );
@@ -243,7 +242,7 @@ final class PluginPage {
 	 * Log tab — wraps the {@see LogTable} subclass.
 	 */
 	private static function renderLogTab(): void {
-		echo '<form method="post">';
+		echo '<form method="post" class="tmq-table-scroll">';
 		$logtable = new LogTable( LogTable::MODE_LOG );
 		$logtable->prepare_items();
 		$logtable->display();
@@ -291,7 +290,7 @@ final class PluginPage {
 		QueueDiagnostics::renderModeNotice( $options );
 		QueueDiagnostics::renderConflictNotice( $options );
 
-		echo '<form method="post" action="admin.php?page=' . esc_attr( self::TAB_QUEUE ) . '">';
+		echo '<form method="post" class="tmq-table-scroll" action="admin.php?page=' . esc_attr( self::TAB_QUEUE ) . '">';
 		$queuetable = new LogTable( LogTable::MODE_QUEUE );
 		$queuetable->prepare_items();
 		$queuetable->display();

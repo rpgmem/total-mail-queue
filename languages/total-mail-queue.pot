@@ -2115,3 +2115,19 @@ msgstr ""
 #: src/admin/settings-api.php:290
 msgid "Applies to the Total Mail Queue screens only."
 msgstr ""
+
+#: src/admin/settings-api.php:84
+msgid "Sending"
+msgstr ""
+
+#: src/admin/settings-api.php:102
+msgid "Alerts"
+msgstr ""
+
+#: src/admin/settings-api.php:110
+msgid "Advanced"
+msgstr ""
+
+#: src/admin/settings-api.php:119
+msgid "Appearance"
+msgstr ""

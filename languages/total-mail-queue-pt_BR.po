@@ -2125,3 +2125,19 @@ msgstr "Seguir o sistema operacional"
 #: src/admin/settings-api.php:290
 msgid "Applies to the Total Mail Queue screens only."
 msgstr "Vale apenas para as telas do Total Mail Queue."
+
+#: src/admin/settings-api.php:84
+msgid "Sending"
+msgstr "Envio"
+
+#: src/admin/settings-api.php:102
+msgid "Alerts"
+msgstr "Alertas"
+
+#: src/admin/settings-api.php:110
+msgid "Advanced"
+msgstr "Avançado"
+
+#: src/admin/settings-api.php:119
+msgid "Appearance"
+msgstr "Aparência"

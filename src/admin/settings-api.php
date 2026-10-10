@@ -46,31 +46,83 @@ final class SettingsApi {
 			)
 		);
 
-		add_settings_section(
-			'wp_tmq_settings_section',
-			'',
-			static function (): void {},
-			self::PAGE
-		);
-
-		$fields = array(
-			'wp_tmq_status'         => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
-			'wp_tmq_queue'          => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
-			'wp_tmq_log'            => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
-			'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
-			'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
-			'wp_tmq_smtp_timeout'   => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
-			'wp_tmq_smtp_debug'     => array( __( 'SMTP Debug Log', 'total-mail-queue' ), 'renderSmtpDebug' ),
-			'wp_tmq_cron_lock_ttl'  => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
-			'wp_tmq_alert_status'   => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
-			'wp_tmq_sensitivity'    => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
-			'wp_tmq_default_sender' => array( __( 'Default Sender', 'total-mail-queue' ), 'renderDefaultSender' ),
-			'wp_tmq_dark_mode'      => array( __( 'Dark Mode', 'total-mail-queue' ), 'renderDarkMode' ),
-		);
-
-		foreach ( $fields as $id => $spec ) {
-			add_settings_field( $id, $spec[0], array( self::class, $spec[1] ), self::PAGE, 'wp_tmq_settings_section' );
+		foreach ( self::sections() as $section_id => $section ) {
+			add_settings_section(
+				$section_id,
+				Icons::tag( $section['icon'] ) . esc_html( $section['title'] ),
+				static function (): void {},
+				self::PAGE,
+				array(
+					// Each section is a card. These arguments exist from
+					// WordPress 6.1; older versions render the same fields
+					// without the box.
+					'before_section' => '<div class="%s">',
+					'after_section'  => '</div>',
+					'section_class'  => 'tmq-box tmq-settings-card',
+				)
+			);
+			foreach ( $section['fields'] as $id => $spec ) {
+				$render = array( self::class, $spec[1] );
+				if ( is_callable( $render ) ) {
+					add_settings_field( $id, $spec[0], $render, self::PAGE, $section_id );
+				}
+			}
 		}
+	}
+
+	/**
+	 * The Settings tab, grouped by what an administrator comes to change.
+	 *
+	 * Field ids are unchanged from the single-section layout, so nothing that
+	 * addresses a row moves.
+	 *
+	 * @return array<string,array{title:string,icon:string,fields:array<string,array{0:string,1:string}>}>
+	 */
+	public static function sections(): array {
+		return array(
+			'wp_tmq_section_sending'    => array(
+				'title'  => __( 'Sending', 'total-mail-queue' ),
+				'icon'   => 'send',
+				'fields' => array(
+					'wp_tmq_status'         => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
+					'wp_tmq_queue'          => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
+					'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
+					'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
+					'wp_tmq_default_sender' => array( __( 'Default Sender', 'total-mail-queue' ), 'renderDefaultSender' ),
+				),
+			),
+			'wp_tmq_section_log'        => array(
+				'title'  => __( 'Log', 'total-mail-queue' ),
+				'icon'   => 'log',
+				'fields' => array(
+					'wp_tmq_log' => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
+				),
+			),
+			'wp_tmq_section_alerts'     => array(
+				'title'  => __( 'Alerts', 'total-mail-queue' ),
+				'icon'   => 'alert',
+				'fields' => array(
+					'wp_tmq_alert_status' => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
+					'wp_tmq_sensitivity'  => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
+				),
+			),
+			'wp_tmq_section_advanced'   => array(
+				'title'  => __( 'Advanced', 'total-mail-queue' ),
+				'icon'   => 'advanced',
+				'fields' => array(
+					'wp_tmq_smtp_timeout'  => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
+					'wp_tmq_smtp_debug'    => array( __( 'SMTP Debug Log', 'total-mail-queue' ), 'renderSmtpDebug' ),
+					'wp_tmq_cron_lock_ttl' => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
+				),
+			),
+			'wp_tmq_section_appearance' => array(
+				'title'  => __( 'Appearance', 'total-mail-queue' ),
+				'icon'   => 'theme',
+				'fields' => array(
+					'wp_tmq_dark_mode' => array( __( 'Dark Mode', 'total-mail-queue' ), 'renderDarkMode' ),
+				),
+			),
+		);
 	}
 
 	/**

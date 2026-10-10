@@ -38,6 +38,7 @@ final class Assets {
 		}
 		$base = plugin_dir_url( Plugin::container()->get( 'plugin.file' ) );
 		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin.css', array(), Plugin::VERSION );
+		wp_add_inline_style( 'wp_tmq_style', Icons::stylesheet() );
 
 		// The theme class must be on <html> before the page paints, or a dark
 		// screen flashes light first: an inline script in the head, with no
