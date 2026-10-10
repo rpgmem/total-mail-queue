@@ -2295,8 +2295,8 @@ msgid "Block"
 msgstr "Bloquear"
 
 #: src/admin/docs/modes-and-queue.php:27
-msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held."
-msgstr "Todo e-mail é guardado e nenhum é enviado, inclusive os que outros plugins enviam pelas próprias tarefas agendadas. Use numa cópia de homologação, durante um incidente de segurança ou numa migração. Voltar para Fila envia o que ficou retido."
+msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; untick \"Password resets\" in Settings to hold them too."
+msgstr "Todo e-mail é guardado e nenhum é enviado, inclusive os que outros plugins enviam pelas próprias tarefas agendadas. Use numa cópia de homologação, durante um incidente de segurança ou numa migração. Voltar para Fila envia o que ficou retido. Redefinições de senha são a exceção e saem na hora, para ninguém ficar sem acesso; desmarque \"Redefinições de senha\" em Configurações para retê-las também."
 
 #: src/admin/docs/modes-and-queue.php:32
 msgid "Pace"
@@ -2793,3 +2793,43 @@ msgstr "Destinatário ou assunto"
 #: src/admin/tables/log-table.php
 msgid "Clear filters"
 msgstr "Limpar filtros"
+
+#: src/admin/settings-api.php
+msgid "Password resets"
+msgstr "Redefinições de senha"
+
+#: src/admin/settings-api.php
+msgid "Block on alert"
+msgstr "Bloquear no alerta"
+
+#: src/admin/settings-api.php
+msgid "Switch to Block mode when the alert fires."
+msgstr "Mudar para o modo Bloquear quando o alerta disparar."
+
+#: src/admin/settings-api.php
+msgid "Nothing more is sent until you set the Operation Mode back to Queue, which then sends what was held. Use it when a sudden flood is more likely an attack than real mail."
+msgstr "Nada mais é enviado até você voltar o Modo de Operação para Fila, que então envia o que ficou retido. Use quando uma enxurrada repentina tem mais chance de ser um ataque do que e-mail legítimo."
+
+#: src/admin/settings-api.php
+msgid "Send password resets even in Block mode."
+msgstr "Enviar redefinições de senha mesmo no modo Bloquear."
+
+#: src/admin/settings-api.php
+msgid "Otherwise a user who asks for a new password waits for as long as the block lasts. Disabling the Password reset source on the Sources tab still stops them."
+msgstr "Do contrário, quem pede uma nova senha espera enquanto o bloqueio durar. Desativar a fonte Redefinição de senha na aba Fontes ainda as impede."
+
+#: src/cron/alert-sender.php
+msgid "Sending has been stopped automatically: the plugin switched to Block mode, which keeps every email and sends none. Once you have checked the queue, set the Operation Mode back to Queue to send what was held."
+msgstr "O envio foi interrompido automaticamente: o plugin mudou para o modo Bloquear, que guarda todo e-mail e não envia nenhum. Depois de verificar a fila, volte o Modo de Operação para Fila para enviar o que ficou retido."
+
+#: src/admin/notices.php
+msgid "Total Mail Queue stopped sending on %1$s: the queue passed the alert threshold and the plugin switched itself to Block mode. Check the %2$s, then set the Operation Mode back to Queue in %3$s to send what was held."
+msgstr "O Total Mail Queue parou de enviar em %1$s: a fila passou do limite de alerta e o plugin mudou sozinho para o modo Bloquear. Verifique a %2$s e depois volte o Modo de Operação para Fila em %3$s para enviar o que ficou retido."
+
+#: src/admin/notices.php
+msgid "Retention tab"
+msgstr "aba Retenção"
+
+#: src/admin/docs/alerts.php
+msgid "With \"Block on alert\" ticked, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
+msgstr "Com \"Bloquear no alerta\" marcado, o alerta também muda o Modo de Operação para Bloquear, e nada mais é enviado até você verificar. O e-mail de alerta avisa, e um aviso no topo do painel fica até o modo mudar. Bloquear guarda todo e-mail: com a fila limpa, volte o modo para Fila e o que ficou retido sai. Redefinições de senha continuam saindo, a menos que você tenha desligado isso."

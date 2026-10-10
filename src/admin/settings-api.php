@@ -85,6 +85,7 @@ final class SettingsApi {
 				'icon'   => 'send',
 				'fields' => array(
 					'wp_tmq_status'         => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
+					'wp_tmq_block_password' => array( __( 'Password resets', 'total-mail-queue' ), 'renderBlockPasswordReset' ),
 					'wp_tmq_queue'          => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
 					'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
 					'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
@@ -104,6 +105,7 @@ final class SettingsApi {
 				'fields' => array(
 					'wp_tmq_alert_status' => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
 					'wp_tmq_sensitivity'  => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
+					'wp_tmq_auto_block'   => array( __( 'Block on alert', 'total-mail-queue' ), 'renderAutoBlock' ),
 				),
 			),
 			'wp_tmq_section_advanced'   => array(
@@ -150,6 +152,32 @@ final class SettingsApi {
 		$options = Options::get();
 		$checked = '1' === (string) $options['alert_enabled'] ? ' checked' : '';
 		echo '<input type="checkbox" name="wp_tmq_settings[alert_enabled]" value="1"' . esc_attr( $checked ) . ' />';
+	}
+
+	/**
+	 * Block-on-alert toggle.
+	 *
+	 * A checkbox posts nothing when unticked, and the saved option replaces
+	 * the stored one, so the hidden `0` is what records "off".
+	 */
+	public static function renderAutoBlock(): void {
+		$options = Options::get();
+		echo '<input type="hidden" name="wp_tmq_settings[auto_block]" value="0" />';
+		echo '<label><input type="checkbox" name="wp_tmq_settings[auto_block]" value="1"' . checked( '1', (string) $options['auto_block'], false ) . ' /> ';
+		echo esc_html__( 'Switch to Block mode when the alert fires.', 'total-mail-queue' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Nothing more is sent until you set the Operation Mode back to Queue, which then sends what was held. Use it when a sudden flood is more likely an attack than real mail.', 'total-mail-queue' ) . '</p>';
+	}
+
+	/**
+	 * Password resets in Block mode toggle. On by default, hence the hidden
+	 * `0` for the unticked state.
+	 */
+	public static function renderBlockPasswordReset(): void {
+		$options = Options::get();
+		echo '<input type="hidden" name="wp_tmq_settings[block_password_reset]" value="0" />';
+		echo '<label><input type="checkbox" name="wp_tmq_settings[block_password_reset]" value="1"' . checked( '1', (string) $options['block_password_reset'], false ) . ' /> ';
+		echo esc_html__( 'Send password resets even in Block mode.', 'total-mail-queue' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Otherwise a user who asks for a new password waits for as long as the block lasts. Disabling the Password reset source on the Sources tab still stops them.', 'total-mail-queue' ) . '</p>';
 	}
 
 	/**

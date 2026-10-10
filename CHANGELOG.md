@@ -15,6 +15,8 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Deploy to the testes site** (#74). Every merge into `develop` is rsynced to the testes site Free Form Certificate also uses, then a smoke checks that the plugin is active, runs the deployed version and has its tables.
 - **The testes deploy checks its target before syncing** (#75). A `TESTES_REMOTE_PATH` that is not absolute or does not end in `/wp-content/plugins/total-mail-queue` stops the deploy before `rsync --delete` runs.
 - **Search and date range on the Log and Retention lists** (#83). Search matches recipient and subject, the dates select a range of days, and both combine with the status and source filters. The filters live in the page address, so pagination and bulk actions keep them.
+- **Block on alert** (#84). An opt-in setting under Alerts switches the Operation Mode to Block when the queue alert fires, so a sudden flood stops leaving the site until someone has looked. The alert email says so, and an admin notice stays until the mode changes.
+- **Password resets go out in Block mode** (#84). Block holds every other email, but a held password reset locks its user out, so it is sent at once unless the new setting is turned off. A disabled Password reset source still stops it.
 
 ### Changed
 

@@ -64,8 +64,8 @@ final class AdminIconsAndSectionsTest extends TestCase {
         }
 
         $expected = array(
-            'wp_tmq_status', 'wp_tmq_queue', 'wp_tmq_send_method', 'wp_tmq_retry', 'wp_tmq_default_sender',
-            'wp_tmq_log', 'wp_tmq_alert_status', 'wp_tmq_sensitivity',
+            'wp_tmq_status', 'wp_tmq_block_password', 'wp_tmq_queue', 'wp_tmq_send_method', 'wp_tmq_retry', 'wp_tmq_default_sender',
+            'wp_tmq_log', 'wp_tmq_alert_status', 'wp_tmq_sensitivity', 'wp_tmq_auto_block',
             'wp_tmq_smtp_timeout', 'wp_tmq_smtp_debug', 'wp_tmq_cron_lock_ttl', 'wp_tmq_dark_mode',
         );
         sort( $expected );

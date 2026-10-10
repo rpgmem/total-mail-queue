@@ -43,6 +43,8 @@ final class ExportImport {
 		'log_max_records',
 		'send_method',
 		'max_retries',
+		'auto_block',
+		'block_password_reset',
 	);
 
 	/**

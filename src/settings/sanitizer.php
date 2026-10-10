@@ -40,6 +40,8 @@ final class Sanitizer {
 		'from_email',
 		'from_name',
 		'dark_mode',
+		'auto_block',
+		'block_password_reset',
 	);
 
 	/**

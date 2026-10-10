@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
+use TotalMailQueue\Cron\AutoBlock;
 use TotalMailQueue\Cron\Diagnostics;
 use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Queue\QueueRepository;
@@ -51,6 +52,29 @@ final class Notices {
 
 		self::maybeRenderCronStalledNotice( $options );
 		self::maybeRenderConflictNotice();
+		self::maybeRenderAutoBlockNotice( $options );
+	}
+
+	/**
+	 * Say why nothing is being sent when the alert switched the plugin to
+	 * Block mode. Stays until the mode changes.
+	 *
+	 * @param array<string,mixed> $options Plugin options snapshot.
+	 */
+	private static function maybeRenderAutoBlockNotice( array $options ): void {
+		$since = AutoBlock::activeSince();
+		if ( null === $since || '2' !== (string) $options['enabled'] || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		echo '<div class="notice notice-error"><p>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: date and time, %2$s: link to the Retention tab, %3$s: link to Settings */
+				__( 'Total Mail Queue stopped sending on %1$s: the queue passed the alert threshold and the plugin switched itself to Block mode. Check the %2$s, then set the Operation Mode back to Queue in %3$s to send what was held.', 'total-mail-queue' ),
+				esc_html( (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $since ) ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-queue' ) ) . '">' . esc_html__( 'Retention tab', 'total-mail-queue' ) . '</a>',
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue' ) ) . '">' . esc_html__( 'Settings', 'total-mail-queue' ) . '</a>'
+			)
+		) . '</p></div>';
 	}
 
 	/**
