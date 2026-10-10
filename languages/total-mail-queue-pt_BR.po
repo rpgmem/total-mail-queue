@@ -2925,3 +2925,47 @@ msgstr "Este e-mail traz um link de conta de uso único, por isso o conteúdo é
 #: src/admin/tables/log-table.php
 msgid "The content is shown to users who can manage the mail queue."
 msgstr "O conteúdo é mostrado a quem pode gerenciar a fila de e-mails."
+
+#: src/templates/preview.php:91
+msgid "Template preview"
+msgstr "Pré-visualização do modelo"
+
+#: src/templates/preview.php:103
+msgid "Hello,"
+msgstr "Olá,"
+
+#: src/templates/preview.php:104
+msgid "This is how emails from this site look with the settings on this screen. The header, the footer and the colours update as you change them; save to apply them to real mail."
+msgstr "É assim que os e-mails deste site ficam com as configurações desta tela. O cabeçalho, o rodapé e as cores mudam conforme você edita; salve para aplicá-las aos e-mails de verdade."
+
+#: src/templates/preview.php:106
+msgid "Links take the link colour, like this one: %s"
+msgstr "Os links usam a cor de link, como este: %s"
+
+#: src/templates/preview.php:107
+msgid "Thank you."
+msgstr "Obrigado."
+
+#: src/admin/pages/templates-page.php:110
+msgid "Preview"
+msgstr "Pré-visualização"
+
+#: src/admin/pages/templates-page.php:111
+msgid "A sample email with the settings on this screen. It updates as you edit; save to apply them to real mail."
+msgstr "Um e-mail de exemplo com as configurações desta tela. Ele se atualiza enquanto você edita; salve para aplicá-las aos e-mails de verdade."
+
+#: src/admin/pages/templates-page.php:112
+msgid "Email preview"
+msgstr "Pré-visualização do e-mail"
+
+#: src/admin/assets.php:105
+msgid "Updating preview…"
+msgstr "Atualizando a pré-visualização…"
+
+#: src/admin/assets.php:106
+msgid "The preview could not be updated."
+msgstr "Não foi possível atualizar a pré-visualização."
+
+#: src/admin/docs/html-templates.php:27
+msgid "The Preview beside the form shows a sample email with the settings on screen, header and footer included, and updates as you change them, before anything is saved. It is drawn by the same code that wraps real mail."
+msgstr "A Pré-visualização ao lado do formulário mostra um e-mail de exemplo com as configurações da tela, incluindo cabeçalho e rodapé, e se atualiza conforme você as altera, antes de salvar. Ela é desenhada pelo mesmo código que formata os e-mails de verdade."

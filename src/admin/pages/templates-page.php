@@ -13,6 +13,7 @@ use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Settings\Options as PluginOptions;
 use TotalMailQueue\Templates\Options;
+use TotalMailQueue\Templates\Preview;
 use TotalMailQueue\Templates\TestEmailSender;
 
 /**
@@ -56,6 +57,7 @@ final class TemplatesPage {
 
 		self::renderModeNotice( $mode );
 
+		echo '<div class="tmq-templates-layout"><div class="tmq-templates-main">';
 		echo '<form method="post" action="admin.php?page=' . esc_attr( \TotalMailQueue\Admin\PluginPage::TAB_TEMPLATES ) . '" class="tmq-templates-form">';
 		wp_nonce_field( self::NONCE_SAVE, 'wp_tmq_templates_nonce' );
 
@@ -86,6 +88,36 @@ final class TemplatesPage {
 		echo '</form>';
 
 		self::renderTestEmailWidget();
+		echo '</div>';
+		self::renderPreview( $options );
+		echo '</div>';
+	}
+
+	/**
+	 * The live preview: a sample email wrapped with the options on screen.
+	 *
+	 * The first paint shows the saved options, so it works without
+	 * JavaScript; the script then re-renders it through {@see Preview} as
+	 * fields change. The frame is sandboxed with no permissions, so the
+	 * email's markup can neither run script nor navigate the admin.
+	 *
+	 * @param array<string,mixed> $options Saved options.
+	 */
+	private static function renderPreview( array $options ): void {
+		echo '<aside class="tmq-templates-preview">';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'preview', __( 'Preview', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
+		echo '<p class="description">' . esc_html__( 'A sample email with the settings on this screen. It updates as you edit; save to apply them to real mail.', 'total-mail-queue' ) . '</p>';
+		echo '<iframe class="tmq-templates-preview-frame" title="' . esc_attr__( 'Email preview', 'total-mail-queue' ) . '" sandbox=""'
+			. ' data-action="' . esc_attr( Preview::ACTION ) . '" data-nonce="' . esc_attr( wp_create_nonce( Preview::NONCE ) ) . '"'
+			// The email already holds entities (`&quot;` inside its style
+			// attributes). esc_attr() leaves existing entities alone, so the
+			// attribute would decode them into raw quotes and break the
+			// document; srcdoc needs every `&` encoded once more.
+			. ' srcdoc="' . htmlspecialchars( Preview::html( $options ), ENT_QUOTES, 'UTF-8', true ) . '"></iframe>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- encoded with double_encode on, see above.
+		echo '<p class="tmq-templates-preview-status" aria-live="polite"></p>';
+		echo '</div>';
+		echo '</aside>';
 	}
 
 	/**
