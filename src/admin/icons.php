@@ -42,6 +42,10 @@ final class Icons {
 		'theme'     => '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
 		'export'    => '<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>',
 		'import'    => '<path d="M12 20V9M7 14l5-5 5 5M4 4h16"/>',
+		'header'    => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M7 7h5"/>',
+		'body'      => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 12.5h10M7 16h6"/>',
+		'footer'    => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14.5h18M7 17h5"/>',
+		'wrapper'   => '<rect x="2.5" y="2.5" width="19" height="19" rx="3"/><rect x="7" y="7" width="10" height="10" rx="1"/>',
 	);
 
 	/**
@@ -69,6 +73,21 @@ final class Icons {
 			return '';
 		}
 		return '<span class="tmq-icon tmq-icon-' . esc_attr( $name ) . '" aria-hidden="true"></span>';
+	}
+
+	/**
+	 * A card or section heading: the icon, then the escaped title.
+	 *
+	 * Every heading the plugin prints on its screens goes through here, so
+	 * none ships without an icon; `AdminHeadingsTest` holds that.
+	 *
+	 * @param string $icon  A key of {@see Icons::PATHS}.
+	 * @param string $title Heading text, already translated.
+	 * @param string $tag   `h2` or `h3`.
+	 */
+	public static function heading( string $icon, string $title, string $tag = 'h2' ): string {
+		$tag = 'h3' === $tag ? 'h3' : 'h2';
+		return '<' . $tag . ' class="tmq-card-title">' . self::tag( $icon ) . esc_html( $title ) . '</' . $tag . '>';
 	}
 
 	/**

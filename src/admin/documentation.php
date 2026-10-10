@@ -115,7 +115,7 @@ final class Documentation {
 		echo '<div class="tmq-banner"><img src="' . esc_url( $banner_url ) . '" alt="" height="300" loading="lazy" /></div>';
 
 		echo '<div class="tmq-box tmq-docs-index" id="' . esc_attr( self::INDEX_ANCHOR ) . '">';
-		echo '<h2 class="tmq-card-title">' . Icons::tag( 'docs' ) . esc_html__( 'Documentation', 'total-mail-queue' ) . '</h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
+		echo Icons::heading( 'docs', __( 'Documentation', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<ol class="tmq-docs-index__list">';
 		foreach ( self::topics() as $topic ) {
 			echo '<li><a href="#' . esc_attr( $topic['anchor'] ) . '">' . Icons::tag( $topic['icon'] ) . esc_html( $topic['title'] ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
@@ -125,7 +125,7 @@ final class Documentation {
 
 		foreach ( self::topics() as $topic ) {
 			echo '<section class="tmq-box tmq-docs-topic" id="' . esc_attr( $topic['anchor'] ) . '">';
-			echo '<h2 class="tmq-card-title">' . Icons::tag( $topic['icon'] ) . esc_html( $topic['title'] ) . '</h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
+			echo Icons::heading( $topic['icon'], $topic['title'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 			require __DIR__ . '/docs/' . $topic['file'];
 			echo '<p class="tmq-docs-back"><a href="#' . esc_attr( self::INDEX_ANCHOR ) . '">' . esc_html__( 'Back to the index', 'total-mail-queue' ) . '</a></p>';
 			echo '</section>';

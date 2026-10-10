@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Settings\Options;
 
 /**
@@ -29,7 +30,7 @@ final class CronInfoPage {
 	public static function render(): void {
 		$options = Options::get();
 		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'Information: Your common WP Cron is disabled', 'total-mail-queue' ) . '</h3>';
+		echo Icons::heading( 'cron', __( 'Information: Your common WP Cron is disabled', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>' . wp_kses_post( __( 'It looks like you deactivated the WP Cron by <i>define( \'DISABLE_WP_CRON\', true )</i>.', 'total-mail-queue' ) ) . '</p>';
 		$url = esc_url( get_option( 'siteurl' ) . '/wp-cron.php' );
 		echo '<p>' . wp_kses_post(
@@ -66,7 +67,7 @@ final class CronInfoPage {
 		}
 
 		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'Attention: It seems that your WP Cron is not running. There are some jobs waiting to be completed.', 'total-mail-queue' ) . '</h3>';
+		echo Icons::heading( 'alert', __( 'Attention: It seems that your WP Cron is not running. There are some jobs waiting to be completed.', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		if ( $queue_task_in_past_at > 0 ) {
 			echo '<p><b>' . esc_html(
 				sprintf(

@@ -218,7 +218,7 @@ final class PluginPage {
 
 		// Export.
 		echo '<div class="tmq-box">';
-		echo '<h3 class="tmq-card-title">' . Icons::tag( 'export' ) . esc_html__( 'Export', 'total-mail-queue' ) . '</h3>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
+		echo Icons::heading( 'export', __( 'Export', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>' . esc_html__( 'Download an XML file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post">';
 		wp_nonce_field( 'wp_tmq_export', 'wp_tmq_export_nonce' );
@@ -228,7 +228,7 @@ final class PluginPage {
 
 		// Import.
 		echo '<div class="tmq-box">';
-		echo '<h3 class="tmq-card-title">' . Icons::tag( 'import' ) . esc_html__( 'Import', 'total-mail-queue' ) . '</h3>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
+		echo Icons::heading( 'import', __( 'Import', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>' . esc_html__( 'Upload a previously exported XML file to restore settings and SMTP accounts. This will replace all current settings and SMTP accounts.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post" enctype="multipart/form-data">';
 		wp_nonce_field( 'wp_tmq_import', 'wp_tmq_import_nonce' );
