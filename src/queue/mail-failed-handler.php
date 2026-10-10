@@ -38,6 +38,10 @@ final class MailFailedHandler {
 		if ( 0 === $mail_id ) {
 			return;
 		}
+		// The row is accounted for below, so nothing is in flight any more. Left
+		// set, the id would let a later failure in the same request, such as an
+		// instant email or another plugin's send, rewrite this row.
+		Tracker::reset();
 
 		$options       = Options::get();
 		$max_retries   = (int) $options['max_retries'];

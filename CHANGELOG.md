@@ -31,6 +31,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - **Deleting the plugin removes all of its settings** (#71). The HTML template settings and the WordPress-version marker were left behind; a test now checks that every option the plugin writes is removed on uninstall.
 - **Version history matches the releases** (#79). The missing 2.0.0 and 2.8.1 entries were added, 2.0.0 to 2.2.0 list what each version shipped, and every version carries its real date and its tag.
+- **A retried email keeps its attachments** (#81). A failed send waiting for a retry had its staged files deleted, so the retry went out without them and nothing said so. Files now go only when the email is sent, fails for good or is deleted.
+- **Resend and Force Resend keep the source and priority** (#81). The resent copy lost both, and with them the source's preferred SMTP account.
+- **Attachment staging is all or nothing** (#81). A failed copy no longer queues a broken attachment, two files with the same name no longer overwrite each other, and an unavailable filesystem no longer breaks the page that sent the email.
+- **No more orphaned attachment folders** (#81). Deleting a queued email removes its files, emails blocked by their source no longer stage any, and only folders inside the staging directory are ever deleted.
 
 ## [2.9.0] (2026-07-25) — `bee76b0`
 

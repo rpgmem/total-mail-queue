@@ -44,6 +44,25 @@ final class BulkActionsTest extends FunctionalTestCase {
         self::assertNotSame( (string) $error_id, $rows[0]['id'] );
     }
 
+    public function test_resend_and_force_resend_keep_source_and_priority(): void {
+        $resend = $this->insertQueueItem( array( 'status' => 'error', 'subject' => 'resend', 'source_key' => 'plugin:shop', 'priority' => 1 ) );
+        $force  = $this->insertQueueItem( array( 'status' => 'error', 'subject' => 'force', 'source_key' => 'plugin:crm', 'priority' => 7 ) );
+
+        $this->dispatchBulkAction( 'resend', array( $resend ) );
+        $this->dispatchBulkAction( 'force_resend', array( $force ) );
+
+        global $wpdb;
+        $rows = $wpdb->get_results( "SELECT subject, source_key, priority FROM `{$this->queueTable()}` WHERE status = 'queue' ORDER BY subject", ARRAY_A );
+        self::assertSame(
+            array(
+                array( 'subject' => 'force', 'source_key' => 'plugin:crm', 'priority' => '7' ),
+                array( 'subject' => 'resend', 'source_key' => 'plugin:shop', 'priority' => '1' ),
+            ),
+            $rows,
+            'A resent copy must keep its source, so its preferred SMTP account and priority still apply (#81).'
+        );
+    }
+
     public function test_resend_skips_emails_already_sent(): void {
         $sent_id = $this->insertQueueItem( array( 'status' => 'sent', 'subject' => 'already delivered' ) );
 

@@ -272,7 +272,13 @@ final class BatchProcessor {
 			SmtpRepository::markUsed( $smtp_accounts, $smtp_to_use['id'] );
 		}
 
-		AttachmentStore::releaseFor( $attachments );
+		// Staged files go only when the row is done with them. A failure that
+		// MailFailedHandler sent back to the queue for a retry still needs
+		// them: without the files the retry would go out without attachments,
+		// since wp_mail() skips an attachment it cannot read.
+		if ( $send_status || 'queue' !== QueueRepository::statusFor( $mail_id ) ) {
+			AttachmentStore::releaseFor( $attachments );
+		}
 		return $send_status ? 'sent' : 'failed';
 	}
 

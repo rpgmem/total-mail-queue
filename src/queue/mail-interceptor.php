@@ -218,7 +218,8 @@ final class MailInterceptor {
 			$data['headers'] = Serializer::encode( $headers );
 		}
 
-		if ( ! empty( $attachments ) ) {
+		// A blocked row is never sent, so its attachments are never needed.
+		if ( ! empty( $attachments ) && 'blocked_by_source' !== $status ) {
 			$staged = AttachmentStore::stage( $attachments );
 			if ( null === $staged ) {
 				$data['info'] = __( 'Error: Could not store attachments', 'total-mail-queue' );

@@ -2681,7 +2681,7 @@ msgid "That is expected. Emails another plugin sends from its own scheduled task
 msgstr ""
 
 #: src/admin/docs/troubleshooting.php:39
-msgid "Attachments are copied when the email is queued and kept until it is sent, so a form that deletes its upload right away still delivers it."
+msgid "Attachments are copied when the email is queued and kept until it is sent or fails for good, so a retry still carries them and a form that deletes its upload right away still delivers it. If they cannot be copied, the email is queued without them and its Info column says so."
 msgstr ""
 
 #: src/admin/docs/troubleshooting.php:41
