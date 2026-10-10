@@ -1742,7 +1742,7 @@ msgid "The Send Method setting controls how emails from the retention queue are 
 msgstr ""
 
 #: src/admin/pages/templates-page.php:180
-msgid "The template engine is currently off — outgoing emails are sent as-is. Tick the box below to enable it."
+msgid "The template engine is currently off — outgoing emails are sent as-is. Switch it on below."
 msgstr ""
 
 #. %s: number of emails in queue
@@ -2086,4 +2086,832 @@ msgstr ""
 #: src/cron/alert-sender.php:89
 #, php-format
 msgid "🔴 WordPress Total Mail Queue Alert - %s"
+msgstr ""
+
+#: src/update/github-updater.php:197
+msgid "Update package integrity check (SHA-256) failed. Installation aborted."
+msgstr ""
+
+#: src/admin/plugin-page.php:187
+msgid "Total Mail Queue sections"
+msgstr ""
+
+#: src/admin/settings-api.php:68
+msgid "Dark Mode"
+msgstr ""
+
+#: src/admin/settings-api.php:281
+msgid "Off"
+msgstr ""
+
+#: src/admin/settings-api.php:282
+msgid "On"
+msgstr ""
+
+#: src/admin/settings-api.php:283
+msgid "Follow the operating system"
+msgstr ""
+
+#: src/admin/settings-api.php:290
+msgid "Applies to the Total Mail Queue screens only."
+msgstr ""
+
+#: src/admin/settings-api.php:84
+msgid "Sending"
+msgstr ""
+
+#: src/admin/settings-api.php:102
+msgid "Alerts"
+msgstr ""
+
+#: src/admin/settings-api.php:110
+msgid "Advanced"
+msgstr ""
+
+#: src/admin/settings-api.php:119
+msgid "Appearance"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:14
+msgid "An SMTP account is a mail server the plugin sends through: your provider's, a transactional service such as Mailgun, or your own. You can add several and let the plugin share the load between them."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:16
+msgid "Connection"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:17
+msgid "Host, port, encryption (none, TLS or SSL), and the user name and password if the server asks for them. The password is stored encrypted; leave the field blank when editing to keep the one already saved. Test Connection checks the settings without sending anything."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:18
+msgid "When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Switch on \"Unlock connection fields for editing\" to change them."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:19
+msgid "From Email and From Name, when filled, win over the Default Sender in Settings for every email this account sends."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:21
+msgid "Limits"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:25
+msgid "Daily Limit, Monthly Limit"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:26
+msgid "The most this account sends in a calendar day or month. 0 means no limit. The counts start over when the day or the month changes."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:30
+msgid "The most it sends in one cycle. 0 uses the global pace from Settings, which is also the ceiling."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:33
+msgid "Send Interval"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:34
+msgid "How long, in minutes, this account's cycle lasts before its per-cycle count starts over. 0 follows the global interval."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:39
+msgid "Which account sends"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:40
+msgid "Among the enabled accounts that still have room under every limit, the one used least recently goes next, so the load is spread across all of them. Priority (lower first) only breaks a tie. A source can name a preferred account in the Sources tab; that account is used while it is enabled and under its limits, and the normal turn order takes over otherwise."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:41
+msgid "When every account is at its limit, what happens next depends on the Send Method: with \"Plugin SMTP only\" emails wait in the queue, with \"Automatic\" they fall back to WordPress's mailer."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:43
+msgid "Moving accounts to another site"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:44
+msgid "Settings → Export / Import carries the settings and the SMTP accounts in one XML file. Passwords travel encrypted and can only be read on a site with the same WordPress salt keys; elsewhere, enter them again after importing."
+msgstr ""
+
+#: src/admin/docs/sources.php:14
+msgid "A source is who sent an email. Every email is tagged with one: a WordPress core email such as wp_core:password_reset, a plugin such as plugin:woocommerce, or a theme. The Sources tab lists every source seen so far, plus common ones known in advance, so you can act on a source before it sends anything."
+msgstr ""
+
+#: src/admin/docs/sources.php:16
+msgid "How the source is found"
+msgstr ""
+
+#: src/admin/docs/sources.php:17
+msgid "For WordPress's own emails, the plugin listens to the filters core runs just before sending. For everything else it reads which plugin or theme made the call. A plugin can also name the source itself with a header, which lets it split its emails into several sources; see the developer topic."
+msgstr ""
+
+#: src/admin/docs/sources.php:19
+msgid "Turning a source off"
+msgstr ""
+
+#: src/admin/docs/sources.php:20
+msgid "Disable a source and its emails are kept in the log as \"Blocked by source\" and never sent, even with the Instant header. \"Toggle every source in group\" does the same for a whole group at once. The plugin's own alert email is a system source and stays on."
+msgstr ""
+
+#: src/admin/docs/sources.php:22
+msgid "Editing a source"
+msgstr ""
+
+#: src/admin/docs/sources.php:24
+msgid "Label and Group change how the source is shown. They do not change the source key."
+msgstr ""
+
+#: src/admin/docs/sources.php:25
+msgid "Priority places its emails in the queue order, from 1 (first) to 100. Give password resets a low number so they never wait behind a newsletter."
+msgstr ""
+
+#: src/admin/docs/sources.php:26
+msgid "Preferred SMTP account sends its emails through that account whenever it has room."
+msgstr ""
+
+#: src/admin/docs/sources.php:27
+msgid "For WordPress core emails, Subject and Body replace the text WordPress would send."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:17
+msgid "Total Mail Queue sits between WordPress and your mail server. Every email that WordPress, a plugin or a theme sends through wp_mail() can be held in a queue, sent at a pace you choose, through the SMTP accounts you choose, and recorded in a log you can search."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:19
+msgid "First setup"
+msgstr ""
+
+#: src/admin/docs/getting-started.php:21
+msgid "In %s, set Operation Mode to Queue. Until then the plugin only watches; nothing is held back."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:22
+msgid "Set the pace in the same card: how many emails go out per interval. Start low, for example 5 every minute, and raise it once you know what your mail server accepts."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:23
+msgid "Add an account in %s and press Test Connection. Without one, Send Method \"Automatic\" uses whatever WordPress would have used."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:24
+msgid "Watch it work: waiting emails are listed in %1$s and move to the %2$s once they are sent."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:25
+msgid "Make sure WP-Cron runs reliably, because it is what sends the queue. The next topic explains how."
+msgstr ""
+
+#: src/admin/docs/getting-started.php:28
+msgid "Switching the plugin to Disabled loses nothing: emails already waiting stay in the queue and go out when you switch back to Queue."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:14
+msgid "Operation modes"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:19
+msgid "WordPress sends email as if the plugin were not there. Nothing is intercepted and the queue is not sent."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:23
+msgid "Every email is stored first and sent later by the cron worker, at the pace you set."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:26
+msgid "Block"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:27
+msgid "Every email is stored and none is sent, including the ones other plugins send from their own scheduled tasks. Use it on a staging copy, during a security incident or while migrating. Switching to Queue sends what was held. Password resets are the exception and go out at once, so nobody is locked out; switch off \"Password resets\" in Settings to hold them too."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:32
+msgid "Pace"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:33
+msgid "\"Send max. N email(s) every X\" is how many emails one run of the worker sends and how often it runs. The interval cannot be shorter than 10 seconds. It is also a ceiling: an SMTP account with a higher per-cycle limit of its own is held to this number."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:35
+msgid "WP-Cron"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:36
+msgid "The worker runs on WP-Cron, and WP-Cron only runs when someone visits the site. On a quiet site, or one served from a full-page cache, emails can wait far longer than the interval says."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:37
+msgid "The reliable setup is a real cron job on the server that calls wp-cron.php every minute or two, with WP-Cron's visit trigger turned off (DISABLE_WP_CRON in wp-config.php). When that constant is set, a Cron Information tab appears with the address to call."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:39
+msgid "Order and priority"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:40
+msgid "Waiting emails leave in priority order, lower number first, from 1 to 100. Ordinary mail is 50. An email carrying the header X-Mail-Queue-Prio: High gets 10, and each source can be given its own priority in the Sources tab."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:41
+msgid "X-Mail-Queue-Prio: Instant skips the queue altogether: the email is sent at once and logged as \"instant\". It bypasses the pace you set, so keep it for the rare email that cannot wait. A source you disabled still blocks it."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:43
+msgid "Send method"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:48
+msgid "Uses one of your SMTP accounts when one has capacity. Otherwise it reuses the SMTP settings another plugin applied, and failing that, WordPress's own mailer."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:52
+msgid "Sends only through your SMTP accounts. When none has capacity, emails wait in the queue until one does."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:56
+msgid "Ignores your SMTP accounts and sends the way wp_mail() would, which may be PHP mail or another SMTP plugin."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:61
+msgid "Failures and retries"
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:62
+msgid "A send that fails is tried again on later runs, up to the Auto-Retry count in Settings. After the last attempt the email is marked Error and stays in the log, with the server's answer under \"Error details\"."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:14
+msgid "Retention lists the emails still waiting to be sent. Log lists everything the plugin has handled: sent, failed, blocked and its own alerts."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:16
+msgid "Statuses"
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:21
+msgid "Waiting for its turn. A \"High\" badge beside it means it will go before ordinary mail."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:25
+msgid "Handed to the mail server, which accepted it. Delivery to the inbox is up to that server from here."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:29
+msgid "Every attempt failed. \"Error details\" in the Info column shows why; turn on SMTP Debug Log in Settings to record the whole conversation with the server."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:33
+msgid "Its source is disabled in the Sources tab, so it was kept and never sent."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:37
+msgid "An alert the plugin sent you because the queue grew past your threshold."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:44
+msgid "Resend puts a failed, blocked or alert email back in the queue as a new entry. Emails already sent, and emails still waiting, are skipped."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:45
+msgid "Force Resend is for emails marked Error: it queues them again with a fresh retry count and keeps the original error in the Info column."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:46
+msgid "An email that had attachments cannot be resent: attachments are kept only until the email is sent."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:47
+msgid "Delete removes the selected entries for good."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:50
+msgid "Finding an email"
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:51
+msgid "Filter the log by status, by date and by text: the search matches the recipient and the subject, not the body. The Sources tab narrows it to one source (\"Filter log\"), and Retention has the same dates and search. The filters stay in the page address, so the next page and a bulk action keep them; Clear filters resets them all. Each row opens the message, its headers and its attachments in place."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:52
+msgid "Screen Options, at the top right of the page, chooses which columns you see. Headers and Attachments start hidden to leave room for the rest; your choice is saved for your user only."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:54
+msgid "Clean-up"
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:55
+msgid "Settings → Log removes entries older than a number of days and can also cap the log at a number of entries (0 means no cap). Clean-up never touches emails that are still waiting."
+msgstr ""
+
+#: src/admin/documentation.php:37
+msgid "Getting started"
+msgstr ""
+
+#: src/admin/documentation.php:43
+msgid "Modes and the queue"
+msgstr ""
+
+#: src/admin/documentation.php:49
+msgid "Log and retention"
+msgstr ""
+
+#: src/admin/documentation.php:55
+msgid "SMTP accounts"
+msgstr ""
+
+#: src/admin/documentation.php:76
+msgid "Documentation"
+msgstr ""
+
+#: src/admin/documentation.php:88
+msgid "Back to the index"
+msgstr ""
+
+#: src/admin/assets.php:127
+msgid "Back to top"
+msgstr ""
+
+#: src/admin/documentation.php:73
+msgid "HTML templates"
+msgstr ""
+
+#: src/admin/documentation.php:85
+msgid "Export and import"
+msgstr ""
+
+#: src/admin/documentation.php:91
+msgid "For developers"
+msgstr ""
+
+#: src/admin/documentation.php:97
+msgid "Updates, stored data and uninstall"
+msgstr ""
+
+#: src/admin/documentation.php:103
+msgid "Troubleshooting"
+msgstr ""
+
+#: src/admin/docs/alerts.php:14
+msgid "An alert is an email the plugin sends you when more emails are waiting in the queue than you expect. A queue that suddenly fills up is often the first sign that something on the site is sending mail it should not, such as spam from a compromised form, and the queue holding it back gives you time to look."
+msgstr ""
+
+#: src/admin/docs/alerts.php:16
+msgid "Setting it up"
+msgstr ""
+
+#: src/admin/docs/alerts.php:17
+msgid "In Settings → Alerts, switch on \"Alert enabled\", then fill in \"Alert Sensitivity\": the address that receives the alert and how many waiting emails should trigger it."
+msgstr ""
+
+#: src/admin/docs/alerts.php:19
+msgid "How often"
+msgstr ""
+
+#: src/admin/docs/alerts.php:20
+msgid "At most one alert every six hours, however long the queue stays above the threshold. Each alert also appears in the log with the Alert status."
+msgstr ""
+
+#: src/admin/docs/alerts.php:21
+msgid "The alert has a source of its own that cannot be disabled, so turning sources off can never silence it."
+msgstr ""
+
+#: src/admin/docs/developers.php:15
+msgid "Everything below works through wp_mail(): add a header to the email, or hook a filter. Neither needs this plugin to be active to be safe; without it, the headers are ordinary headers."
+msgstr ""
+
+#: src/admin/docs/developers.php:17
+msgid "Priority and instant sending"
+msgstr ""
+
+#: src/admin/docs/developers.php:18
+msgid "X-Mail-Queue-Prio: High sends an email before ordinary mail. X-Mail-Queue-Prio: Instant skips the queue and sends at once. Both headers are removed before the email leaves."
+msgstr ""
+
+#: src/admin/docs/developers.php:20
+msgid "In a plugin that builds its own headers, add the line to them. For WooCommerce:"
+msgstr ""
+
+#: src/admin/docs/developers.php:30
+msgid "In Contact Form 7, add the header as a line in the form's \"Additional Headers\" field, under the Mail panel."
+msgstr ""
+
+#: src/admin/docs/developers.php:32
+msgid "Naming the source"
+msgstr ""
+
+#: src/admin/docs/developers.php:33
+msgid "When all of a plugin's emails go through one function, the plugin shows up as a single source. X-TMQ-Source-Key splits it: each kind of email can carry its own key, and X-TMQ-Source-Label gives it a readable name. Keys must start with plugin:, mu_plugin: or theme:, so an email can never pose as a WordPress core one. Both headers are removed before the email is stored or sent."
+msgstr ""
+
+#: src/admin/docs/developers.php:39
+msgid "Template filters"
+msgstr ""
+
+#: src/admin/docs/developers.php:44
+msgid "Return true to send one email without the HTML layout. Receives the wp_mail() arguments."
+msgstr ""
+
+#: src/admin/docs/developers.php:48
+msgid "Add your own {tokens}: return the map of token name to value."
+msgstr ""
+
+#: src/admin/docs/developers.php:52
+msgid "Change the message body before it is wrapped."
+msgstr ""
+
+#: src/admin/docs/developers.php:56
+msgid "Change the finished HTML just before it is sent."
+msgstr ""
+
+#: src/admin/docs/developers.php:60
+msgid "Change the template settings in code, over what the Templates tab saved."
+msgstr ""
+
+#: src/admin/docs/developers.php:64
+msgid "Actions that run around the wrapping of each email."
+msgstr ""
+
+#: src/admin/docs/developers.php:69
+msgid "Updates"
+msgstr ""
+
+#: src/admin/docs/developers.php:70
+msgid "wp_tmq_github_updater_enabled returns false to stop the plugin from checking GitHub for updates; wp_tmq_github_updater_repo points the check at a fork."
+msgstr ""
+
+#: src/admin/docs/developers.php:72
+msgid "REST"
+msgstr ""
+
+#: src/admin/docs/developers.php:73
+msgid "GET /wp-json/tmq/v1/message/{id} returns one stored message for display. It is what the log uses to open a message, and it answers only users who can manage options."
+msgstr ""
+
+#: src/admin/docs/export-import.php:14
+msgid "Settings → Export / Import moves the plugin's configuration between sites, or keeps a copy before a big change."
+msgstr ""
+
+#: src/admin/docs/export-import.php:16
+msgid "What the file carries"
+msgstr ""
+
+#: src/admin/docs/export-import.php:18
+msgid "Every setting from the Settings tab."
+msgstr ""
+
+#: src/admin/docs/export-import.php:19
+msgid "Every SMTP account, with its password still encrypted."
+msgstr ""
+
+#: src/admin/docs/export-import.php:21
+msgid "It does not carry the queue, the log, the sources or the HTML template."
+msgstr ""
+
+#: src/admin/docs/export-import.php:23
+msgid "Importing"
+msgstr ""
+
+#: src/admin/docs/export-import.php:24
+msgid "Importing replaces all current settings and all SMTP accounts with the ones in the file; nothing is merged. Passwords can only be decrypted on a site with the same WordPress salt keys. On any other site the accounts arrive without a usable password: open each one and enter it again."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:14
+msgid "The Templates tab wraps every outgoing email in one styled HTML layout: a header with your logo or site title, the message, and a footer. You set the colours, the alignment, the padding and the footer text once, and every email from every plugin looks like it came from the same site."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:16
+msgid "What gets wrapped"
+msgstr ""
+
+#: src/admin/docs/html-templates.php:18
+msgid "Plain-text emails are turned into HTML first, keeping their paragraphs and line breaks."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:19
+msgid "An email that is already a complete HTML document is sent as it is, so newsletters and page-builder emails keep their own design."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:20
+msgid "Nothing is wrapped while \"Enable HTML wrapping\" is off."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:23
+msgid "Tokens"
+msgstr ""
+
+#: src/admin/docs/html-templates.php:24
+msgid "The footer text can use {site_title}, {site_url}, {home_url}, {admin_email}, {recipient}, {date} and {year}. Each is replaced when the email is sent."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:26
+msgid "Trying it"
+msgstr ""
+
+#: src/admin/docs/html-templates.php:27
+msgid "Save your changes, then use \"Send test email\" at the bottom of the tab to receive a sample at any address. \"Reset to Defaults\" puts every template setting back as it shipped."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:29
+msgid "Rewriting WordPress's own emails"
+msgstr ""
+
+#: src/admin/docs/html-templates.php:30
+msgid "The welcome, password-reset, email-change and privacy emails that WordPress itself sends can be rewritten from the Sources tab: open one of the wp_core sources and fill in Subject and Body. Each one lists the tokens it accepts, such as {username} or {reset_url}, and two work in all of them: {subject}, the subject WordPress would have used, and {message_original}, its body. Use the second to add text before or after the original without losing the link it carries."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:31
+msgid "\"Skip template wrapper\" sends that email without the HTML layout, for an override written as plain text. \"Send preview test\" sends the saved override, filled with sample values, to the address you choose."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:32
+msgid "Emails from other plugins are edited in those plugins; only WordPress core emails are editable here."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:21
+msgid "Emails wait in the queue and are never sent"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:22
+msgid "The queue is emptied by WP-Cron, and WP-Cron only runs when someone loads a page of the site. On a site with little traffic, or one whose pages are served from a cache, it may run rarely or only while you are logged in. When emails have been waiting for more than two hours with nothing sent and nothing scheduled, the plugin shows a warning at the top of the admin."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:23
+msgid "The fix is a real server cron that calls wp-cron.php every few minutes. Caching plugins and proxy caches such as NGINX cause the same symptom, and some caching plugins have a WP-Cron option of their own; look for it before adding the server cron."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:24
+msgid "Check the Operation Mode too: in Block mode nothing is ever sent, by design, and a red notice on the Retention tab says so."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:26
+msgid "The admin says the site has problems sending emails"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:27
+msgid "That notice appears when the last attempt failed, and it quotes the error. Open the Log, find the failed emails and read the Info column. Errors from an SMTP account usually mean a wrong password, port or encryption setting: use Test Connection on the account. Once the cause is fixed, select the failed emails and use Force Resend."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:29
+msgid "A warning about a conflicting email plugin"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:30
+msgid "Another plugin is also hooked into how WordPress sends mail, usually an SMTP plugin. When the emails go out through this plugin's SMTP accounts, the two can fight over the same message. Deactivate the other plugin, or leave the sending to it by choosing WordPress default as the Send Method."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:32
+msgid "An email never shows up in the queue or the log"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:33
+msgid "The plugin sees only email sent through wp_mail(), the WordPress function nearly every plugin uses. A plugin that talks to a mail server directly bypasses it, and the plugin warns you when it recognises one. Emails sent with the Instant header skip the queue but still appear in the log."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:35
+msgid "Another plugin's scheduled emails appear in the queue"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:36
+msgid "That is expected. Emails another plugin sends from its own scheduled tasks, such as digests or abandoned-cart reminders, pass through wp_mail() like any other, so they are queued, and in Block mode they are held back as well."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:39
+msgid "Attachments are copied when the email is queued and kept until it is sent or fails for good, so a retry still carries them and a form that deletes its upload right away still delivers it. If they cannot be copied, the email is queued without them and its Info column says so."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:41
+msgid "Testing the whole path"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:42
+msgid "This button puts one test email into the queue, addressed to the alert address in Settings. Watch it on the Retention tab until the next run sends it, then find it in the Log."
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:48
+msgid "Queue a test email to %s"
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:15
+msgid "New versions are published as GitHub releases and appear on WordPress's usual update screen, with their notes under \"View details\". Every package is checked against its published SHA-256 before it is installed, and an update that does not match is refused. To have updates installed automatically, use WordPress's own \"Enable auto-updates\" link on the Plugins screen."
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:17
+msgid "What the plugin stores"
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:19
+msgid "Three database tables: the queue and log, the SMTP accounts, and the sources."
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:20
+msgid "Its settings, its HTML template and a few working records (the last run, the last send, the lock that keeps two runs apart) as WordPress options."
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:21
+msgid "Attachments of waiting emails, in a folder under wp-content/uploads, removed once each email is sent."
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:23
+msgid "The log holds full emails: recipients, subjects and bodies. Keep its clean-up settings in line with your privacy policy."
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:25
+msgid "Deactivating and deleting"
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:26
+msgid "Deactivating stops the queue and keeps everything, so nothing is lost if you turn the plugin back on. Deleting it from the Plugins screen removes all of the above: the tables, the options and the attachments folder."
+msgstr ""
+
+#: src/admin/documentation.php:168
+msgid "Developed by %s."
+msgstr ""
+
+#: src/admin/documentation.php:170
+msgid "Source code and issue tracker: %s"
+msgstr ""
+
+#: src/admin/documentation.php:150
+msgid "Reference and help"
+msgstr ""
+
+#: src/admin/documentation.php:205
+msgid " and "
+msgstr ""
+
+#: src/admin/documentation.php:216
+msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic below; the navigation stays at the top while you read."
+msgstr ""
+
+#: src/admin/documentation.php:222
+msgid "Quick navigation"
+msgstr ""
+
+#: src/admin/documentation.php:224
+msgid "Search the documentation…"
+msgstr ""
+
+#: src/admin/documentation.php:224
+msgid "Search the documentation"
+msgstr ""
+
+#: src/admin/documentation.php:248
+msgid "No topic matches this search."
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Filter by status"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "to"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Search emails"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Recipient or subject"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "Clear filters"
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Password resets"
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Block on alert"
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Switch to Block mode when the alert fires."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Nothing more is sent until you set the Operation Mode back to Queue, which then sends what was held. Use it when a sudden flood is more likely an attack than real mail."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Send password resets even in Block mode."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Otherwise a user who asks for a new password waits for as long as the block lasts. Disabling the Password reset source on the Sources tab still stops them."
+msgstr ""
+
+#: src/cron/alert-sender.php
+msgid "Sending has been stopped automatically: the plugin switched to Block mode, which keeps every email and sends none. Once you have checked the queue, set the Operation Mode back to Queue to send what was held."
+msgstr ""
+
+#: src/admin/notices.php
+msgid "Total Mail Queue stopped sending on %1$s: the queue passed the alert threshold and the plugin switched itself to Block mode. Check the %2$s, then set the Operation Mode back to Queue in %3$s to send what was held."
+msgstr ""
+
+#: src/admin/notices.php
+msgid "Retention tab"
+msgstr ""
+
+#: src/admin/docs/alerts.php
+msgid "With \"Block on alert\" on, the alert also switches the Operation Mode to Block, so nothing more is sent until you have looked. The alert email says so, and a notice at the top of the admin stays until the mode changes. Block keeps every email: once the queue is clean, set the mode back to Queue and what was held goes out. Password resets still go out, unless you turned that off."
+msgstr ""
+
+#: src/admin/docs/getting-started.php
+msgid "On/off switches in Settings and Templates save the moment you flip them, and a badge beside the switch says Saved. The other fields save with the Save button, which keeps the switches as they are."
+msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Email me when the queue grows past the threshold below."
+msgstr ""
+
+#: src/admin/assets.php
+msgid "Saving…"
+msgstr ""
+
+#: src/admin/assets.php
+msgid "Saved"
+msgstr ""
+
+#: src/admin/assets.php
+msgid "Not saved"
+msgstr ""
+
+#: src/admin/settings-autosave.php
+msgid "Your session expired. Reload the page and try again."
+msgstr ""
+
+#: src/admin/settings-autosave.php
+msgid "You are not allowed to change these settings."
+msgstr ""
+
+#: src/admin/settings-autosave.php
+msgid "This setting cannot be saved this way."
+msgstr ""
+
+#: src/admin/docs/access.php
+msgid "Administrators always see and change everything. Settings → Access, which only administrators see, lets other roles in: switch on View or Manage for a role and it takes effect at once."
+msgstr ""
+
+#: src/admin/docs/access.php
+msgid "View opens the Log, Retention, Sources and this documentation, read-only: no bulk actions, no changes to sources and no message bodies. Manage adds the Settings and Templates tabs, bulk actions, source changes and the message bodies, and includes View."
+msgstr ""
+
+#: src/admin/docs/access.php
+msgid "SMTP accounts, Export / Import and the Access card stay with administrators. So do the bodies of the emails that carry a one-time account link (password reset, a new user's set-password email, email change, admin email change and privacy request confirmation): anyone who read them could sign in as the recipient. A manager still sees those rows, with a note where the body would be."
+msgstr ""
+
+#: src/admin/docs/access.php
+msgid "The permissions are stored on the roles themselves, as the capabilities tmq_view_mail_queue and tmq_manage_mail_queue, so a role editor plugin shows them too. Deleting the plugin removes them."
+msgstr ""
+
+#: src/admin/documentation.php
+msgid "Access by role"
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "Access"
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "Administrators always have full access. Other roles see the plugin only when allowed here. View opens the Log, Retention, Sources and the documentation, read-only. Manage also changes settings, sources and templates, runs bulk actions and shows message bodies. SMTP accounts, Export / Import and this card stay with administrators, and so do the bodies of the emails that carry a one-time account link, such as a password reset."
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "There are no other roles on this site."
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "Role"
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "Can view"
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "Can manage"
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "View"
+msgstr ""
+
+#: src/admin/access-settings.php
+msgid "Manage"
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "This email carries a one-time account link, so its content is shown to administrators only."
+msgstr ""
+
+#: src/admin/tables/log-table.php
+msgid "The content is shown to users who can manage the mail queue."
 msgstr ""

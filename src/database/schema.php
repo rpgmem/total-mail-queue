@@ -59,7 +59,7 @@ final class Schema {
 		id mediumint(9) NOT NULL AUTO_INCREMENT,
 		timestamp TIMESTAMP NOT NULL,
 		status varchar(55) DEFAULT '' NOT NULL,
-		recipient varchar(255) DEFAULT '' NOT NULL,
+		recipient text NOT NULL,
 		subject varchar(255) DEFAULT '' NOT NULL,
 		message mediumtext NOT NULL,
 		headers text NOT NULL,

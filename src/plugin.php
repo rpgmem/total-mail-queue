@@ -23,12 +23,12 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '2.9.0';
+	public const VERSION = '2.10.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
 	 */
-	public const REQUIRES_PHP = '7.4';
+	public const REQUIRES_PHP = '8.1';
 
 	/**
 	 * Minimum required WordPress version (mirrors readme.txt).
@@ -88,6 +88,7 @@ final class Plugin {
 
 		// Cron worker — schedule + the actual queue-draining action.
 		Cron\Scheduler::register();
+		Cron\AutoBlock::register();
 
 		// Admin AJAX endpoints.
 		Smtp\ConnectionTester::register();
@@ -99,12 +100,19 @@ final class Plugin {
 		Admin\PluginRowLinks::register();
 		Admin\Menu::register();
 		Admin\Assets::register();
+		Admin\Access::register();
 		Admin\SettingsApi::register();
+		Admin\SettingsAutosave::register();
 		Admin\Notices::register();
 		Admin\ExportImport::register();
+		Admin\LogColumns::register();
 
 		// REST API.
 		Rest\MessageController::register();
+
+		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
+		// scans for plugin updates from cron.
+		Update\GithubUpdater::register();
 	}
 
 	/**

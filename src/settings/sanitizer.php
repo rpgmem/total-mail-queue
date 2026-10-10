@@ -39,6 +39,9 @@ final class Sanitizer {
 		'smtp_debug',
 		'from_email',
 		'from_name',
+		'dark_mode',
+		'auto_block',
+		'block_password_reset',
 	);
 
 	/**
@@ -57,7 +60,8 @@ final class Sanitizer {
 	/**
 	 * `register_setting()` `sanitize_callback`. Drops unknown keys and applies
 	 * the right sanitizer per field type — `sanitize_email()` for address
-	 * fields, `sanitize_text_field()` for everything else.
+	 * fields, an allowlist for `dark_mode`, `sanitize_text_field()` for
+	 * everything else.
 	 *
 	 * @param mixed $input Raw input from `$_POST` (typically array, may be anything).
 	 * @return array<string,string> Sanitized settings, ready to merge into the option.
@@ -73,6 +77,8 @@ final class Sanitizer {
 			}
 			if ( in_array( $key, self::EMAIL_KEYS, true ) ) {
 				$sanitized[ $key ] = sanitize_email( (string) $value );
+			} elseif ( 'dark_mode' === $key ) {
+				$sanitized[ $key ] = in_array( $value, Options::DARK_MODES, true ) ? $value : 'off';
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $value );
 			}

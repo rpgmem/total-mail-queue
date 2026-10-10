@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Icons;
+use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Sources\CoreTemplates;
@@ -41,19 +43,19 @@ final class SourcesEditRenderer {
 		$is_system  = SourcesRepository::isSystem( (string) $row['source_key'] );
 		$cancel_url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-sources' );
 
-		echo '<h3>' . esc_html(
-			sprintf(
-				/* translators: %s: source key */
-				__( 'Edit source: %s', 'total-mail-queue' ),
-				(string) $row['source_key']
-			)
-		) . '</h3>';
-		echo '<p class="description">' . esc_html__( 'Leave a field empty to fall back to the translated default. The override only affects what you see in the admin — the source_key, detection and enforcement stay identical.', 'total-mail-queue' ) . '</p>';
-
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-sources' ) ) . '">';
 		wp_nonce_field( 'wp_tmq_source_edit_' . $source_id, 'wp_tmq_source_edit_nonce' );
 		echo '<input type="hidden" name="page" value="wp_tmq_mail_queue-tab-sources" />';
 		echo '<input type="hidden" name="source_id" value="' . esc_attr( (string) $source_id ) . '" />';
+
+		echo '<div class="tmq-box tmq-settings-card">';
+		$title = sprintf(
+			/* translators: %s: source key */
+			__( 'Edit source: %s', 'total-mail-queue' ),
+			(string) $row['source_key']
+		);
+		echo Icons::heading( 'sources', $title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
+		echo '<p class="description">' . esc_html__( 'Leave a field empty to fall back to the translated default. The override only affects what you see in the admin — the source_key, detection and enforcement stay identical.', 'total-mail-queue' ) . '</p>';
 
 		echo '<table class="form-table">';
 
@@ -148,6 +150,7 @@ final class SourcesEditRenderer {
 		echo '</td></tr>';
 
 		echo '</table>';
+		echo '</div>';
 
 		// wp_core template override section (v2.6.0). Only the 11 wp_core
 		// templates we ship overrides for show this block — for plugin /
@@ -181,7 +184,8 @@ final class SourcesEditRenderer {
 		$body_override    = (string) ( $row['body_override'] ?? '' );
 		$skip_wrap        = ! empty( $row['skip_template_wrap'] );
 
-		echo '<h4>' . esc_html__( 'Template override (subject + body)', 'total-mail-queue' ) . '</h4>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'templates', __( 'Template override (subject + body)', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p class="description">' . esc_html__( 'Edit the subject and body sent for this WP-core email. Leave a field empty to keep the WordPress default.', 'total-mail-queue' );
 
 		// Token list for this template.
@@ -221,16 +225,22 @@ final class SourcesEditRenderer {
 		echo '<textarea id="tmq-template-body" name="body_override" rows="10" class="large-text code">' . esc_textarea( $body_override ) . '</textarea>';
 		if ( '' !== $default_body ) {
 			echo '<details><summary>' . esc_html__( 'Show WP default body', 'total-mail-queue' ) . '</summary>';
-			echo '<pre style="white-space:pre-wrap; background:#f6f7f7; padding:10px; border-left:4px solid #c3c4c7;">' . esc_html( $default_body ) . '</pre>';
+			echo '<pre class="tmq-default-body">' . esc_html( $default_body ) . '</pre>';
 			echo '</details>';
 		}
 		echo '</td></tr>';
 
 		// Skip template wrap.
 		echo '<tr><th scope="row">' . esc_html__( 'Skip template wrapper', 'total-mail-queue' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="skip_template_wrap" value="1" ' . checked( $skip_wrap, true, false ) . ' /> ';
-		echo esc_html__( 'Send this email raw (bypass the global HTML envelope from the Templates tab).', 'total-mail-queue' );
-		echo '</label></td></tr>';
+		Toggle::render(
+			array(
+				'name'    => 'skip_template_wrap',
+				'id'      => 'skip_template_wrap',
+				'checked' => (bool) $skip_wrap,
+				'label'   => __( 'Send this email raw (bypass the global HTML envelope from the Templates tab).', 'total-mail-queue' ),
+			)
+		);
+		echo '</td></tr>';
 
 		// Reset row.
 		if ( '' !== $subject_override || '' !== $body_override || $skip_wrap ) {
@@ -259,6 +269,7 @@ final class SourcesEditRenderer {
 		echo '</td></tr>';
 
 		echo '</tbody></table>';
+		echo '</div>';
 
 		// Inline JS for the preview button. Kept inline (not in a separate
 		// asset) so the template-override section is self-contained.

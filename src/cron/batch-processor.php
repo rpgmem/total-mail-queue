@@ -112,7 +112,12 @@ final class BatchProcessor {
 			$pending_ids   = QueueRepository::pendingIds( (int) $options['queue_amount'] );
 			$batch_size    = count( $pending_ids );
 
-			AlertSender::maybeAlert( $pending_total, $batch_size );
+			// The alert may switch the plugin to Block mode; then nothing in
+			// this batch goes out either.
+			if ( AlertSender::maybeAlert( $pending_total, $batch_size ) ) {
+				$diag->set( 'result', 'stopped: alert switched to block mode' );
+				$pending_ids = array();
+			}
 
 			// Reset SMTP counters once per cron run, then snapshot the available accounts.
 			SmtpRepository::resetCounters();
@@ -150,8 +155,13 @@ final class BatchProcessor {
 
 		// Adapt the schedule to what's left: sleep if the queue drained empty,
 		// defer to the next cycle/quota window if SMTP-only work is stuck with
-		// every account capped, or keep the normal cadence otherwise.
-		Scheduler::adjustSchedule( $options );
+		// every account capped, or keep the normal cadence otherwise. Out of
+		// queue mode (the alert blocked sending) the worker stops altogether.
+		if ( '1' === (string) Options::get()['enabled'] ) {
+			Scheduler::adjustSchedule( $options );
+		} else {
+			Scheduler::syncSchedule();
+		}
 
 		if ( ! $diag->has( 'result' ) ) {
 			$diag->set( 'result', 'ok' );
@@ -272,7 +282,13 @@ final class BatchProcessor {
 			SmtpRepository::markUsed( $smtp_accounts, $smtp_to_use['id'] );
 		}
 
-		AttachmentStore::releaseFor( $attachments );
+		// Staged files go only when the row is done with them. A failure that
+		// MailFailedHandler sent back to the queue for a retry still needs
+		// them: without the files the retry would go out without attachments,
+		// since wp_mail() skips an attachment it cannot read.
+		if ( $send_status || 'queue' !== QueueRepository::statusFor( $mail_id ) ) {
+			AttachmentStore::releaseFor( $attachments );
+		}
 		return $send_status ? 'sent' : 'failed';
 	}
 

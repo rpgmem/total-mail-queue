@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Icons;
+use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Settings\Options as PluginOptions;
 use TotalMailQueue\Templates\Options;
 use TotalMailQueue\Templates\TestEmailSender;
@@ -174,18 +176,27 @@ final class TemplatesPage {
 	 */
 	private static function renderToggleSection( array $options ): void {
 		$enabled = ! empty( $options['enabled'] );
-		echo '<h2>' . esc_html__( 'HTML Template Engine', 'total-mail-queue' ) . '</h2>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'templates', __( 'HTML Template Engine', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 
 		if ( ! $enabled ) {
-			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'The template engine is currently off — outgoing emails are sent as-is. Tick the box below to enable it.', 'total-mail-queue' ) . '</p></div>';
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'The template engine is currently off — outgoing emails are sent as-is. Switch it on below.', 'total-mail-queue' ) . '</p></div>';
 		}
 
 		echo '<table class="form-table"><tbody>';
 		echo '<tr><th scope="row">' . esc_html__( 'Enable HTML wrapping', 'total-mail-queue' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="tmq_template[enabled]" value="1" ' . checked( $enabled, true, false ) . ' /> ';
-		echo esc_html__( 'Wrap every outgoing email in a styled HTML envelope.', 'total-mail-queue' );
-		echo '</label></td></tr>';
+		Toggle::render(
+			array(
+				'name'     => 'tmq_template[enabled]',
+				'id'       => 'tmq_template_enabled',
+				'checked'  => $enabled,
+				'label'    => __( 'Wrap every outgoing email in a styled HTML envelope.', 'total-mail-queue' ),
+				'autosave' => 'template:enabled',
+			)
+		);
+		echo '</td></tr>';
 		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 	/**
@@ -194,7 +205,8 @@ final class TemplatesPage {
 	 * @param array<string,mixed> $options Resolved options.
 	 */
 	private static function renderHeaderSection( array $options ): void {
-		echo '<h2>' . esc_html__( 'Header', 'total-mail-queue' ) . '</h2>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'header', __( 'Header', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<table class="form-table"><tbody>';
 
 		self::renderColorRow( __( 'Background color', 'total-mail-queue' ), 'header_bg', (string) $options['header_bg'] );
@@ -214,6 +226,7 @@ final class TemplatesPage {
 		self::renderIntRow( __( 'Logo max width (px)', 'total-mail-queue' ), 'header_logo_max_width', (int) $options['header_logo_max_width'] );
 
 		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 	/**
@@ -222,7 +235,8 @@ final class TemplatesPage {
 	 * @param array<string,mixed> $options Resolved options.
 	 */
 	private static function renderBodySection( array $options ): void {
-		echo '<h2>' . esc_html__( 'Body', 'total-mail-queue' ) . '</h2>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'body', __( 'Body', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<table class="form-table"><tbody>';
 
 		self::renderColorRow( __( 'Background color', 'total-mail-queue' ), 'body_bg', (string) $options['body_bg'] );
@@ -245,6 +259,7 @@ final class TemplatesPage {
 		self::renderIntRow( __( 'Max width (px)', 'total-mail-queue' ), 'body_max_width', (int) $options['body_max_width'] );
 
 		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 	/**
@@ -253,7 +268,8 @@ final class TemplatesPage {
 	 * @param array<string,mixed> $options Resolved options.
 	 */
 	private static function renderFooterSection( array $options ): void {
-		echo '<h2>' . esc_html__( 'Footer', 'total-mail-queue' ) . '</h2>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'footer', __( 'Footer', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<table class="form-table"><tbody>';
 
 		self::renderColorRow( __( 'Background color', 'total-mail-queue' ), 'footer_bg', (string) $options['footer_bg'] );
@@ -265,11 +281,19 @@ final class TemplatesPage {
 		echo '</td></tr>';
 
 		echo '<tr><th scope="row">' . esc_html__( 'Powered-by line', 'total-mail-queue' ) . '</th><td>';
-		echo '<label><input type="checkbox" name="tmq_template[footer_powered_by]" value="1" ' . checked( ! empty( $options['footer_powered_by'] ), true, false ) . ' /> ';
-		echo esc_html__( 'Show "Sent via Total Mail Queue" beneath the footer text.', 'total-mail-queue' );
-		echo '</label></td></tr>';
+		Toggle::render(
+			array(
+				'name'     => 'tmq_template[footer_powered_by]',
+				'id'       => 'tmq_template_footer_powered_by',
+				'checked'  => ! empty( $options['footer_powered_by'] ),
+				'label'    => __( 'Show "Sent via Total Mail Queue" beneath the footer text.', 'total-mail-queue' ),
+				'autosave' => 'template:footer_powered_by',
+			)
+		);
+		echo '</td></tr>';
 
 		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 	/**
@@ -278,7 +302,8 @@ final class TemplatesPage {
 	 * @param array<string,mixed> $options Resolved options.
 	 */
 	private static function renderWrapperSection( array $options ): void {
-		echo '<h2>' . esc_html__( 'Wrapper', 'total-mail-queue' ) . '</h2>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'wrapper', __( 'Wrapper', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<table class="form-table"><tbody>';
 
 		self::renderColorRow( __( 'Outer background color', 'total-mail-queue' ), 'wrapper_bg', (string) $options['wrapper_bg'] );
@@ -286,6 +311,7 @@ final class TemplatesPage {
 		self::renderIntRow( __( 'Outer padding (px)', 'total-mail-queue' ), 'wrapper_padding', (int) $options['wrapper_padding'] );
 
 		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 	/**
@@ -293,8 +319,8 @@ final class TemplatesPage {
 	 * main settings form.
 	 */
 	private static function renderTestEmailWidget(): void {
-		echo '<hr />';
-		echo '<h2>' . esc_html__( 'Send a test email', 'total-mail-queue' ) . '</h2>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'send', __( 'Send a test email', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>' . esc_html__( 'Sends a sample message to the address below using the current template settings (must be saved first).', 'total-mail-queue' ) . '</p>';
 
 		$current_user = wp_get_current_user();
@@ -306,6 +332,7 @@ final class TemplatesPage {
 		echo esc_html__( 'Send test email', 'total-mail-queue' );
 		echo '</button>';
 		echo '<span id="tmq_test_email_result" class="tmq-templates-test-result" aria-live="polite"></span>';
+		echo '</div>';
 		echo '</div>';
 	}
 

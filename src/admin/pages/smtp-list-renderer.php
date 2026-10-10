@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
 /**
@@ -24,8 +25,8 @@ final class SmtpListRenderer {
 	public static function render(): void {
 		$accounts = SmtpRepository::all();
 
-		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'SMTP Accounts', 'total-mail-queue' ) . '</h3>';
+		echo '<div class="tmq-section">';
+		echo Icons::heading( 'smtp', __( 'SMTP Accounts', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>';
 		echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp&smtp-action=add' ) ) . '" class="button button-primary">' . esc_html__( 'Add SMTP Account', 'total-mail-queue' ) . '</a> ';
 

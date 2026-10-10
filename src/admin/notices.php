@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
+use TotalMailQueue\Admin\Access;
+use TotalMailQueue\Cron\AutoBlock;
 use TotalMailQueue\Cron\Diagnostics;
 use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Queue\QueueRepository;
@@ -51,6 +53,29 @@ final class Notices {
 
 		self::maybeRenderCronStalledNotice( $options );
 		self::maybeRenderConflictNotice();
+		self::maybeRenderAutoBlockNotice( $options );
+	}
+
+	/**
+	 * Say why nothing is being sent when the alert switched the plugin to
+	 * Block mode. Stays until the mode changes.
+	 *
+	 * @param array<string,mixed> $options Plugin options snapshot.
+	 */
+	private static function maybeRenderAutoBlockNotice( array $options ): void {
+		$since = AutoBlock::activeSince();
+		if ( null === $since || '2' !== (string) $options['enabled'] || ! Access::canView() ) {
+			return;
+		}
+		echo '<div class="notice notice-error"><p>' . wp_kses_post(
+			sprintf(
+				/* translators: %1$s: date and time, %2$s: link to the Retention tab, %3$s: link to Settings */
+				__( 'Total Mail Queue stopped sending on %1$s: the queue passed the alert threshold and the plugin switched itself to Block mode. Check the %2$s, then set the Operation Mode back to Queue in %3$s to send what was held.', 'total-mail-queue' ),
+				esc_html( (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $since ) ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-queue' ) ) . '">' . esc_html__( 'Retention tab', 'total-mail-queue' ) . '</a>',
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue' ) ) . '">' . esc_html__( 'Settings', 'total-mail-queue' ) . '</a>'
+			)
+		) . '</p></div>';
 	}
 
 	/**
@@ -107,7 +132,7 @@ final class Notices {
 	 * @param array<string,mixed> $options Plugin options snapshot.
 	 */
 	private static function maybeRenderCronStalledNotice( array $options ): void {
-		if ( '1' !== (string) $options['enabled'] || ! current_user_can( 'manage_options' ) ) {
+		if ( '1' !== (string) $options['enabled'] || ! Access::canView() ) {
 			return;
 		}
 
@@ -146,7 +171,7 @@ final class Notices {
 	 * @param array<string,mixed> $last_mail The most recent non-queued log row.
 	 */
 	private static function renderLastErrorNotice( array $last_mail ): void {
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( Access::canView() ) {
 			$notice  = '<div class="notice notice-error is-dismissible">';
 			$notice .= '<h1>' . esc_html__( 'Attention: Your website has problems sending e-mails', 'total-mail-queue' ) . '</h1>';
 			/* translators: %1$s: opening italic tag, %2$s: closing italic tag, %3$s: opening Mail Log link tag, %4$s: closing link tag */
@@ -209,7 +234,7 @@ final class Notices {
 			)
 		);
 		$notice .= '</p>';
-		$notice .= '<p><a href="' . esc_url( get_admin_url( null, 'admin.php?page=wp_tmq_mail_queue-tab-faq' ) ) . '">' . esc_html__( 'More information', 'total-mail-queue' ) . '</a></p>';
+		$notice .= '<p><a href="' . esc_url( get_admin_url( null, 'admin.php?page=wp_tmq_mail_queue-tab-docs#' . Documentation::TROUBLESHOOTING_ANCHOR ) ) . '">' . esc_html__( 'More information', 'total-mail-queue' ) . '</a></p>';
 		$notice .= '</div>';
 		echo wp_kses_post( $notice );
 	}

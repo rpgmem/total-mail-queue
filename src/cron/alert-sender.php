@@ -33,22 +33,26 @@ final class AlertSender {
 	 *
 	 * @param int $pending_total Result of {@see QueueRepository::pendingCount()}.
 	 * @param int $batch_size    Number of rows the cron is about to send this run.
+	 * @return bool True when the alert also switched the plugin to Block mode.
 	 */
-	public static function maybeAlert( int $pending_total, int $batch_size ): void {
+	public static function maybeAlert( int $pending_total, int $batch_size ): bool {
 		$options = Options::get();
 
 		if ( '1' !== $options['alert_enabled'] ) {
-			return;
+			return false;
 		}
 		if ( $pending_total <= (int) $options['email_amount'] ) {
-			return;
+			return false;
 		}
 		if ( QueueRepository::recentAlertExists() ) {
-			return;
+			return false;
 		}
 
+		// Block first, so the alert can say so. The alert itself still goes
+		// out: the worker is draining, so the interceptor leaves it alone.
+		$blocked       = AutoBlock::maybeTrigger();
 		$alert_subject = self::buildSubject();
-		$alert_message = self::buildMessage( $pending_total );
+		$alert_message = self::buildMessage( $pending_total, $blocked );
 		$info_payload  = wp_json_encode(
 			array(
 				'in_queue'       => (string) $batch_size,
@@ -79,6 +83,7 @@ final class AlertSender {
 			)
 		);
 		wp_mail( $options['email'], $alert_subject, $alert_message );
+		return $blocked;
 	}
 
 	/**
@@ -92,9 +97,10 @@ final class AlertSender {
 	/**
 	 * Compose the alert body (plain text).
 	 *
-	 * @param int $pending_total Number of pending rows in the queue.
+	 * @param int  $pending_total Number of pending rows in the queue.
+	 * @param bool $blocked       Whether the plugin switched itself to Block mode.
 	 */
-	private static function buildMessage( int $pending_total ): string {
+	private static function buildMessage( int $pending_total, bool $blocked ): string {
 		$lines  = __( 'Hi,', 'total-mail-queue' );
 		$lines .= "\n\n";
 		/* translators: %s: site URL */
@@ -104,6 +110,10 @@ final class AlertSender {
 		$lines .= "\n" . sprintf( __( 'The Total Mail Queue Plugin has detected that your website tries to send more emails than expected (currently %s).', 'total-mail-queue' ), $pending_total );
 		$lines .= "\n" . __( 'Please take a close look at the email queue, because it contains more messages than the specified limit.', 'total-mail-queue' );
 		$lines .= "\n";
+		if ( $blocked ) {
+			$lines .= "\n" . __( 'Sending has been stopped automatically: the plugin switched to Block mode, which keeps every email and sends none. Once you have checked the queue, set the Operation Mode back to Queue to send what was held.', 'total-mail-queue' );
+			$lines .= "\n";
+		}
 		$lines .= "\n" . __( 'In case this is the usual amount of emails, you can adjust the threshold for alerts in the settings of your Total Mail Queue Plugin.', 'total-mail-queue' );
 		$lines .= "\n\n-- \n";
 		$lines .= admin_url();

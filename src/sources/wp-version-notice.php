@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Sources;
 
+use TotalMailQueue\Admin\Access;
+
 /**
  * Tracks the WordPress version the plugin most recently observed, and
  * shows an admin notice when WP is upgraded so the admin can re-verify
@@ -48,7 +50,7 @@ final class WpVersionNotice {
 	 * one we last saw and the admin can act on it.
 	 */
 	public static function render(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Access::canManage() ) {
 			return;
 		}
 		$current = self::currentVersion();
@@ -81,6 +83,8 @@ final class WpVersionNotice {
 				'</a>'
 			)
 		);
+		// The one inline style left: this notice shows on every admin screen,
+		// where the plugin's stylesheet is not loaded.
 		echo ' <a href="' . esc_url( $dismiss_url ) . '" class="button button-small" style="margin-left:8px;">' . esc_html__( 'Dismiss', 'total-mail-queue' ) . '</a>';
 		echo '</p></div>';
 	}
@@ -90,7 +94,7 @@ final class WpVersionNotice {
 	 * Dismiss or visits the Sources tab.
 	 */
 	public static function maybeDismiss(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Access::canManage() ) {
 			return;
 		}
 

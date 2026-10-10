@@ -1,6 +1,6 @@
 <?php
 /**
- * Top-level admin page renderer (Settings / Log / Retention / SMTP / FAQ / Cron Info).
+ * Top-level admin page renderer (Settings / Log / Retention / SMTP / Sources / Templates / Cron Info / Documentation).
  *
  * @package TotalMailQueue
  */
@@ -15,6 +15,7 @@ use TotalMailQueue\Admin\Pages\SourcesPage;
 use TotalMailQueue\Admin\Pages\TemplatesPage;
 use TotalMailQueue\Admin\Tables\LogTable;
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Queue\ListFilter;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
 
@@ -29,7 +30,7 @@ use TotalMailQueue\Settings\Options;
  * - SMTP      → delegated to {@see SmtpPage}.
  * - Sources   → delegated to {@see SourcesPage}.
  * - Templates → delegated to {@see TemplatesPage}.
- * - FAQ       → {@see FaqRenderer} static markup.
+ * - Documentation → {@see Documentation}; the old FAQ slug opens it too.
  * - Cron Info → delegated to {@see CronInfoPage} (only registered when
  *               `DISABLE_WP_CRON` is truthy).
  */
@@ -46,23 +47,28 @@ final class PluginPage {
 	public const TAB_TEMPLATES = 'wp_tmq_mail_queue-tab-templates';
 	public const TAB_CRON_INFO = 'wp_tmq_mail_queue-tab-croninfo';
 	public const TAB_FAQ       = 'wp_tmq_mail_queue-tab-faq';
+	public const TAB_DOCS      = 'wp_tmq_mail_queue-tab-docs';
 
 	/**
 	 * Page entry point — invoked by every submenu the {@see Menu} registers.
 	 */
 	public static function render(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual tabs verify their own nonces.
+		$tab = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::TAB_SETTINGS;
+
+		// WordPress already refuses a tab its menu capability excludes; this
+		// is the same rule, for a callback reached any other way.
+		if ( ! current_user_can( Access::tabCapability( $tab ) ) ) {
 			return;
 		}
 
 		$import_notice = self::maybeHandleImport();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual tabs verify their own nonces.
-		$tab = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::TAB_SETTINGS;
-
-		echo '<div class="wrap">';
+		echo '<div class="wrap tmq-admin" id="tmq-top">';
 		self::renderHeader( $tab );
+		echo '<div class="tmq-tabs">';
 		self::renderNav( $tab );
+		echo '<div class="tmq-tabs__panel">';
 
 		switch ( $tab ) {
 			case self::TAB_LOG:
@@ -81,7 +87,9 @@ final class PluginPage {
 				TemplatesPage::render();
 				break;
 			case self::TAB_FAQ:
-				self::renderFaqTab();
+			case self::TAB_DOCS:
+				$plugin_file = Plugin::container()->get( 'plugin.file' );
+				Documentation::render( plugins_url( 'assets/img/total-mail-queue-postman.png', $plugin_file ), $plugin_file );
 				break;
 			case self::TAB_CRON_INFO:
 				CronInfoPage::render();
@@ -92,7 +100,46 @@ final class PluginPage {
 				break;
 		}
 
-		echo '</div>';
+		echo '</div></div></div>';
+	}
+
+	/**
+	 * Every tab, in navigation order: slug => translated label.
+	 *
+	 * The one list both the menu registration and the tab column read, so the
+	 * two cannot disagree. Cron Information exists only while WP-Cron is
+	 * disabled, because it explains how to run the cron by hand.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function tabs(): array {
+		$tabs = array(
+			self::TAB_SETTINGS  => __( 'Settings', 'total-mail-queue' ),
+			self::TAB_LOG       => __( 'Log', 'total-mail-queue' ),
+			self::TAB_QUEUE     => __( 'Retention', 'total-mail-queue' ),
+			self::TAB_SMTP      => __( 'SMTP Accounts', 'total-mail-queue' ),
+			self::TAB_SOURCES   => __( 'Sources', 'total-mail-queue' ),
+			self::TAB_TEMPLATES => __( 'Templates', 'total-mail-queue' ),
+		);
+		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
+			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
+		}
+		$tabs[ self::TAB_DOCS ] = __( 'Documentation', 'total-mail-queue' );
+
+		return $tabs;
+	}
+
+	/**
+	 * The tabs the current user may open, in the same order.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function visibleTabs(): array {
+		return array_filter(
+			self::tabs(),
+			static fn ( string $slug ): bool => current_user_can( Access::tabCapability( $slug ) ),
+			ARRAY_FILTER_USE_KEY
+		);
 	}
 
 	/**
@@ -102,7 +149,7 @@ final class PluginPage {
 	 * before the page chrome.
 	 */
 	private static function maybeHandleImport(): string {
-		if ( ! isset( $_POST['wp_tmq_import'] ) ) {
+		if ( ! isset( $_POST['wp_tmq_import'] ) || ! Access::isAdmin() ) {
 			return '';
 		}
 		if ( ! isset( $_POST['wp_tmq_import_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wp_tmq_import_nonce'] ) ), 'wp_tmq_import' ) ) {
@@ -117,8 +164,17 @@ final class PluginPage {
 	 * @param string $tab Active tab slug.
 	 */
 	private static function renderHeader( string $tab ): void {
-		$logo = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.png', Plugin::container()->get( 'plugin.file' ) );
-		echo '<h1 class="tmq-title"><img class="tmq-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr__( 'Total Mail Queue', 'total-mail-queue' ) . '" width="692" height="342" /></h1>';
+		// Two wordmarks, one per theme: the lettering is navy, which vanishes
+		// on the dark ground. CSS shows one; `loading="lazy"` keeps the hidden
+		// one from being fetched at all.
+		$file  = Plugin::container()->get( 'plugin.file' );
+		$alt   = esc_attr__( 'Total Mail Queue', 'total-mail-queue' );
+		$light = plugins_url( 'assets/img/total-mail-queue-logo-wordmark.png', $file );
+		$dark  = plugins_url( 'assets/img/total-mail-queue-logo-wordmark-dark.png', $file );
+		echo '<h1 class="tmq-title">';
+		echo '<img class="tmq-logo tmq-logo--light" src="' . esc_url( $light ) . '" alt="' . $alt . '" width="692" height="342" loading="lazy" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $alt is esc_attr__() above.
+		echo '<img class="tmq-logo tmq-logo--dark" src="' . esc_url( $dark ) . '" alt="' . $alt . '" width="692" height="342" loading="lazy" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $alt is esc_attr__() above.
+		echo '</h1>';
 
 		if ( self::TAB_CRON_INFO === $tab ) {
 			return;
@@ -141,29 +197,19 @@ final class PluginPage {
 	}
 
 	/**
-	 * Tab navigation strip.
+	 * Vertical tab column. Each tab is a link to its own page, so the active
+	 * one is marked with `aria-current` rather than as a widget tab.
 	 *
 	 * @param string $tab Active tab slug.
 	 */
 	private static function renderNav( string $tab ): void {
-		$tabs = array(
-			self::TAB_SETTINGS  => __( 'Settings', 'total-mail-queue' ),
-			self::TAB_LOG       => __( 'Log', 'total-mail-queue' ),
-			self::TAB_QUEUE     => __( 'Retention', 'total-mail-queue' ),
-			self::TAB_SMTP      => __( 'SMTP Accounts', 'total-mail-queue' ),
-			self::TAB_SOURCES   => __( 'Sources', 'total-mail-queue' ),
-			self::TAB_TEMPLATES => __( 'Templates', 'total-mail-queue' ),
-		);
-		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
-			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
+		echo '<nav class="tmq-tabs__nav" aria-label="' . esc_attr__( 'Total Mail Queue sections', 'total-mail-queue' ) . '">';
+		echo '<ul class="tmq-tabs__list">';
+		foreach ( self::visibleTabs() as $slug => $label ) {
+			$active = $tab === $slug || ( self::TAB_FAQ === $tab && self::TAB_DOCS === $slug );
+			echo '<li class="tmq-tabs__item"><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '" class="tmq-tabs__tab' . ( $active ? ' is-active' : '' ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>' . Icons::tag( Icons::TABS[ $slug ] ?? '' ) . esc_html( $label ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() escapes its one attribute and emits fixed markup.
 		}
-		$tabs[ self::TAB_FAQ ] = __( 'FAQ', 'total-mail-queue' );
-
-		echo '<nav class="nav-tab-wrapper">';
-		foreach ( $tabs as $slug => $label ) {
-			$class = 'nav-tab' . ( $tab === $slug ? ' nav-tab-active' : '' );
-			echo '<a href="?page=' . esc_attr( $slug ) . '" class="' . esc_attr( $class ) . '">' . esc_html( $label ) . '</a>';
-		}
+		echo '</ul>';
 		echo '</nav>';
 	}
 
@@ -179,8 +225,15 @@ final class PluginPage {
 		submit_button();
 		echo '</form>';
 
-		echo '<hr />';
-		echo '<h2>' . esc_html__( 'Export / Import', 'total-mail-queue' ) . '</h2>';
+		// Who may use the plugin, and moving SMTP accounts between sites,
+		// stay with administrators.
+		if ( ! Access::isAdmin() ) {
+			return;
+		}
+
+		AccessSettings::render();
+
+		echo '<h2 class="tmq-section-title">' . esc_html__( 'Export / Import', 'total-mail-queue' ) . '</h2>';
 
 		if ( '' !== $import_notice ) {
 			echo wp_kses_post( $import_notice );
@@ -190,7 +243,7 @@ final class PluginPage {
 
 		// Export.
 		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'Export', 'total-mail-queue' ) . '</h3>';
+		echo Icons::heading( 'export', __( 'Export', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>' . esc_html__( 'Download an XML file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post">';
 		wp_nonce_field( 'wp_tmq_export', 'wp_tmq_export_nonce' );
@@ -200,7 +253,7 @@ final class PluginPage {
 
 		// Import.
 		echo '<div class="tmq-box">';
-		echo '<h3>' . esc_html__( 'Import', 'total-mail-queue' ) . '</h3>';
+		echo Icons::heading( 'import', __( 'Import', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>' . esc_html__( 'Upload a previously exported XML file to restore settings and SMTP accounts. This will replace all current settings and SMTP accounts.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post" enctype="multipart/form-data">';
 		wp_nonce_field( 'wp_tmq_import', 'wp_tmq_import_nonce' );
@@ -216,7 +269,8 @@ final class PluginPage {
 	 * Log tab — wraps the {@see LogTable} subclass.
 	 */
 	private static function renderLogTab(): void {
-		echo '<form method="post">';
+		LogTable::renderFilterForm( self::TAB_LOG );
+		echo '<form method="post" class="tmq-table-scroll">';
 		$logtable = new LogTable( LogTable::MODE_LOG );
 		$logtable->prepare_items();
 		$logtable->display();
@@ -246,9 +300,9 @@ final class PluginPage {
 			}
 		}
 
-		// "Put a test mail" link target (FAQ tab carries the nonce'd link).
+		// "Queue a test email" link target (the Troubleshooting topic carries the nonce'd link).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked just below.
-		if ( isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_addtestmail' ) ) {
+		if ( Access::canManage() && isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_addtestmail' ) ) {
 			QueueRepository::insert(
 				array(
 					'timestamp' => current_time( 'mysql', false ),
@@ -264,24 +318,14 @@ final class PluginPage {
 		QueueDiagnostics::renderModeNotice( $options );
 		QueueDiagnostics::renderConflictNotice( $options );
 
-		echo '<form method="post" action="admin.php?page=' . esc_attr( self::TAB_QUEUE ) . '">';
+		// The bulk form posts to the list it shows, filters included, but
+		// never back to a one-shot `addtestmail` link.
+		LogTable::renderFilterForm( self::TAB_QUEUE );
+		$action = add_query_arg( array_merge( array( 'page' => self::TAB_QUEUE ), ListFilter::fromRequest()->queryArgs() ), admin_url( 'admin.php' ) );
+		echo '<form method="post" class="tmq-table-scroll" action="' . esc_url( $action ) . '">';
 		$queuetable = new LogTable( LogTable::MODE_QUEUE );
 		$queuetable->prepare_items();
 		$queuetable->display();
 		echo '</form>';
-	}
-
-	/**
-	 * FAQ tab — long-form static help with code samples, prefaced by the
-	 * postman hero banner.
-	 */
-	private static function renderFaqTab(): void {
-		$postman = plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) );
-		echo '<div class="tmq-banner">';
-		echo '<img src="' . esc_url( $postman ) . '" alt="" height="300" loading="lazy" />';
-		echo '</div>';
-
-		$options = Options::get();
-		FaqRenderer::render( $options );
 	}
 }

@@ -46,30 +46,85 @@ final class SettingsApi {
 			)
 		);
 
-		add_settings_section(
-			'wp_tmq_settings_section',
-			'',
-			static function (): void {},
-			self::PAGE
-		);
-
-		$fields = array(
-			'wp_tmq_status'         => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
-			'wp_tmq_queue'          => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
-			'wp_tmq_log'            => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
-			'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
-			'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
-			'wp_tmq_smtp_timeout'   => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
-			'wp_tmq_smtp_debug'     => array( __( 'SMTP Debug Log', 'total-mail-queue' ), 'renderSmtpDebug' ),
-			'wp_tmq_cron_lock_ttl'  => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
-			'wp_tmq_alert_status'   => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
-			'wp_tmq_sensitivity'    => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
-			'wp_tmq_default_sender' => array( __( 'Default Sender', 'total-mail-queue' ), 'renderDefaultSender' ),
-		);
-
-		foreach ( $fields as $id => $spec ) {
-			add_settings_field( $id, $spec[0], array( self::class, $spec[1] ), self::PAGE, 'wp_tmq_settings_section' );
+		foreach ( self::sections() as $section_id => $section ) {
+			add_settings_section(
+				$section_id,
+				Icons::tag( $section['icon'] ) . esc_html( $section['title'] ),
+				static function (): void {},
+				self::PAGE,
+				array(
+					// Each section is a card. These arguments exist from
+					// WordPress 6.1; older versions render the same fields
+					// without the box.
+					'before_section' => '<div class="%s">',
+					'after_section'  => '</div>',
+					'section_class'  => 'tmq-box tmq-settings-card',
+				)
+			);
+			foreach ( $section['fields'] as $id => $spec ) {
+				$render = array( self::class, $spec[1] );
+				if ( is_callable( $render ) ) {
+					add_settings_field( $id, $spec[0], $render, self::PAGE, $section_id );
+				}
+			}
 		}
+	}
+
+	/**
+	 * The Settings tab, grouped by what an administrator comes to change.
+	 *
+	 * Field ids are unchanged from the single-section layout, so nothing that
+	 * addresses a row moves.
+	 *
+	 * @return array<string,array{title:string,icon:string,fields:array<string,array{0:string,1:string}>}>
+	 */
+	public static function sections(): array {
+		return array(
+			'wp_tmq_section_sending'    => array(
+				'title'  => __( 'Sending', 'total-mail-queue' ),
+				'icon'   => 'send',
+				'fields' => array(
+					'wp_tmq_status'         => array( __( 'Operation Mode', 'total-mail-queue' ), 'renderStatus' ),
+					'wp_tmq_block_password' => array( __( 'Password resets', 'total-mail-queue' ), 'renderBlockPasswordReset' ),
+					'wp_tmq_queue'          => array( __( 'Queue', 'total-mail-queue' ), 'renderQueue' ),
+					'wp_tmq_send_method'    => array( __( 'Send Method', 'total-mail-queue' ), 'renderSendMethod' ),
+					'wp_tmq_retry'          => array( __( 'Auto-Retry', 'total-mail-queue' ), 'renderRetry' ),
+					'wp_tmq_default_sender' => array( __( 'Default Sender', 'total-mail-queue' ), 'renderDefaultSender' ),
+				),
+			),
+			'wp_tmq_section_log'        => array(
+				'title'  => __( 'Log', 'total-mail-queue' ),
+				'icon'   => 'log',
+				'fields' => array(
+					'wp_tmq_log' => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
+				),
+			),
+			'wp_tmq_section_alerts'     => array(
+				'title'  => __( 'Alerts', 'total-mail-queue' ),
+				'icon'   => 'alert',
+				'fields' => array(
+					'wp_tmq_alert_status' => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
+					'wp_tmq_sensitivity'  => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
+					'wp_tmq_auto_block'   => array( __( 'Block on alert', 'total-mail-queue' ), 'renderAutoBlock' ),
+				),
+			),
+			'wp_tmq_section_advanced'   => array(
+				'title'  => __( 'Advanced', 'total-mail-queue' ),
+				'icon'   => 'advanced',
+				'fields' => array(
+					'wp_tmq_smtp_timeout'  => array( __( 'SMTP Timeout', 'total-mail-queue' ), 'renderSmtpTimeout' ),
+					'wp_tmq_smtp_debug'    => array( __( 'SMTP Debug Log', 'total-mail-queue' ), 'renderSmtpDebug' ),
+					'wp_tmq_cron_lock_ttl' => array( __( 'Cron Lock Timeout', 'total-mail-queue' ), 'renderCronLockTtl' ),
+				),
+			),
+			'wp_tmq_section_appearance' => array(
+				'title'  => __( 'Appearance', 'total-mail-queue' ),
+				'icon'   => 'theme',
+				'fields' => array(
+					'wp_tmq_dark_mode' => array( __( 'Dark Mode', 'total-mail-queue' ), 'renderDarkMode' ),
+				),
+			),
+		);
 	}
 
 	/**
@@ -91,12 +146,49 @@ final class SettingsApi {
 	}
 
 	/**
-	 * Alert-enabled checkbox.
+	 * Alert-enabled toggle.
 	 */
 	public static function renderAlertStatus(): void {
-		$options = Options::get();
-		$checked = '1' === (string) $options['alert_enabled'] ? ' checked' : '';
-		echo '<input type="checkbox" name="wp_tmq_settings[alert_enabled]" value="1"' . esc_attr( $checked ) . ' />';
+		self::settingToggle( 'alert_enabled', __( 'Email me when the queue grows past the threshold below.', 'total-mail-queue' ) );
+	}
+
+	/**
+	 * An on/off setting of `wp_tmq_settings` as a toggle that saves on flip.
+	 *
+	 * The hidden `0` keeps it a full field of the form: a checkbox posts
+	 * nothing when off, and the form's save replaces the whole option, so
+	 * without it the Save button would reset what autosave stored.
+	 *
+	 * @param string $key   Setting key, listed in {@see SettingsAutosave::KEYS}.
+	 * @param string $label Text beside the switch.
+	 */
+	private static function settingToggle( string $key, string $label ): void {
+		Toggle::render(
+			array(
+				'name'      => 'wp_tmq_settings[' . $key . ']',
+				'id'        => 'wp_tmq_' . $key,
+				'checked'   => '1' === (string) Options::get()[ $key ],
+				'label'     => $label,
+				'off_value' => '0',
+				'autosave'  => 'settings:' . $key,
+			)
+		);
+	}
+
+	/**
+	 * Block-on-alert toggle.
+	 */
+	public static function renderAutoBlock(): void {
+		self::settingToggle( 'auto_block', __( 'Switch to Block mode when the alert fires.', 'total-mail-queue' ) );
+		echo '<p class="description">' . esc_html__( 'Nothing more is sent until you set the Operation Mode back to Queue, which then sends what was held. Use it when a sudden flood is more likely an attack than real mail.', 'total-mail-queue' ) . '</p>';
+	}
+
+	/**
+	 * Password resets in Block mode toggle. On by default.
+	 */
+	public static function renderBlockPasswordReset(): void {
+		self::settingToggle( 'block_password_reset', __( 'Send password resets even in Block mode.', 'total-mail-queue' ) );
+		echo '<p class="description">' . esc_html__( 'Otherwise a user who asks for a new password waits for as long as the block lasts. Disabling the Password reset source on the Sources tab still stops them.', 'total-mail-queue' ) . '</p>';
 	}
 
 	/**
@@ -189,10 +281,7 @@ final class SettingsApi {
 	 * possible to see exactly where a send failed (auth, TLS, greylisting…).
 	 */
 	public static function renderSmtpDebug(): void {
-		$options = Options::get();
-		$checked = '1' === (string) $options['smtp_debug'] ? ' checked' : '';
-		echo '<label><input type="checkbox" name="wp_tmq_settings[smtp_debug]" value="1"' . esc_attr( $checked ) . ' /> ';
-		echo esc_html__( 'Record the full SMTP conversation for each send into its error log.', 'total-mail-queue' ) . '</label>';
+		self::settingToggle( 'smtp_debug', __( 'Record the full SMTP conversation for each send into its error log.', 'total-mail-queue' ) );
 		echo '<p class="description">';
 		echo esc_html__( 'Useful for diagnosing why sends fail (authentication, TLS, rejections). The transcript is stored in the Log entry and cleared automatically when an email later sends successfully. Leave off for normal operation — it adds detail to the log on every SMTP send.', 'total-mail-queue' );
 		echo '</p>';
@@ -267,5 +356,25 @@ final class SettingsApi {
 		echo '<input type="email" id="wp_tmq_from_email" name="wp_tmq_settings[from_email]" value="' . esc_attr( $from_email ) . '" placeholder="' . esc_attr__( 'noreply@example.com', 'total-mail-queue' ) . '" class="regular-text" /> ';
 		echo '<input type="text" id="wp_tmq_from_name" name="wp_tmq_settings[from_name]" value="' . esc_attr( $from_name ) . '" placeholder="' . esc_attr__( 'My Site', 'total-mail-queue' ) . '" class="regular-text" />';
 		echo '<p class="description">' . esc_html__( 'From address + name used when no SMTP account is sending the email. Leave blank to keep WordPress\'s default ("admin_email" + "WordPress"). When an SMTP account sends the email, that account\'s From wins.', 'total-mail-queue' ) . '</p>';
+	}
+
+	/**
+	 * Dark Mode select. Applies to this plugin's screens only; the rest of
+	 * wp-admin follows WordPress's own colour scheme.
+	 */
+	public static function renderDarkMode(): void {
+		$options = Options::get();
+		$mode    = (string) $options['dark_mode'];
+		$labels  = array(
+			'off'  => __( 'Off', 'total-mail-queue' ),
+			'on'   => __( 'On', 'total-mail-queue' ),
+			'auto' => __( 'Follow the operating system', 'total-mail-queue' ),
+		);
+		echo '<select id="wp_tmq_dark_mode" name="wp_tmq_settings[dark_mode]">';
+		foreach ( Options::DARK_MODES as $value ) {
+			echo '<option value="' . esc_attr( $value ) . '"' . selected( $mode, $value, false ) . '>' . esc_html( $labels[ $value ] ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p class="description">' . esc_html__( 'Applies to the Total Mail Queue screens only.', 'total-mail-queue' ) . '</p>';
 	}
 }

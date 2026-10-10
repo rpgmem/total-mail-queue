@@ -1,467 +1,270 @@
 # Changelog
 
-All notable changes to **Total Mail Queue** are documented in this file.
+All notable changes to the **Total Mail Queue** plugin are documented in this file.
+The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
-The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+---
 
 ## [Unreleased]
 
-## [2.9.0] - 2026-07-25
+## [2.10.0] (2026-10-10)
 
 ### Added
 
-- **Per-source preferred SMTP account (with quota fallback).** Any source can now be pinned to a specific SMTP account on the Sources → edit screen ("Preferred SMTP account"). When a queued message is sent, if its source has a preferred account that is **enabled and still under quota**, it goes through that account; otherwise the normal round-robin selection is used — a preference never blocks or delays a send, and a disabled/deleted/capped account transparently falls back. Especially useful with the per-function sources below (e.g. route `plugin:ffcertificate_certificate` through a dedicated high-deliverability account). New `preferred_smtp_account_id` column on the sources table (rolled forward via `dbDelta`), `Sources\Repository::preferredAccountFor()` / `updatePreferredAccount()`, and `Smtp\Repository::pickPreferredOrAvailable()`.
-- **Plugins can now label each of their emails as a distinct source via headers.** A new highest-priority detection strategy reads an `X-TMQ-Source-Key` (and optional `X-TMQ-Source-Label`) header off the outgoing message and uses it as the source — ahead of the primary listeners and the backtrace fallback. This lets a plugin whose mail all funnels through a single wrapper (so the backtrace can only ever see one `plugin:<slug>` frame) split its emails into per-feature sources, e.g. `plugin:ffcertificate_certificate` vs `plugin:ffcertificate_scheduling`. Only the `plugin:` / `mu_plugin:` / `theme:` namespaces are accepted (a header can never claim a `wp_core:` source), and both control headers are stripped before the message is stored or sent, so they never reach the recipient — exactly like the existing `X-Mail-Queue-Prio` header. Backed by `Detector::fromExplicitKey()`.
+- **Updates from GitHub Releases** (#66). WordPress offers new versions on its normal update screen, checks the package's SHA-256 before installing it, and reads the compatibility fields and upgrade notice from the release's own `readme.txt`. Ported from Free Form Certificate.
+- **Choose which roles view and manage the plugin** (#91). Settings → Access, for administrators only, grants a role View (read-only screens) or Manage (settings, sources, templates, bulk actions, message bodies). SMTP accounts, Export / Import and the bodies of one-time account-link emails stay administrator-only.
+- **Search and date range on the Log and Retention lists** (#83). Search matches recipient and subject, the dates select a range of days, and both combine with the status and source filters. The filters live in the page address, so pagination and bulk actions keep them.
+- **Block on alert** (#84). An opt-in setting under Alerts switches the Operation Mode to Block when the queue alert fires, so a sudden flood stops leaving the site until someone has looked. The alert email says so, and an admin notice stays until the mode changes.
+- **Password resets go out in Block mode** (#84). Block holds every other email, but a held password reset locks its user out, so it is sent at once unless the new setting is turned off. A disabled Password reset source still stops it.
+- **On/off settings are toggle switches that save on flip** (#89). Alerts, Block on alert, Password resets, SMTP Debug Log and the Templates switches save the moment they change, with a Saved badge; the SMTP account and source forms use the same switches and keep their Save button.
+- **Dark mode** (#68). Off, On or Follow the system, restyling only the plugin's screens. The submenus become a vertical tab column that keeps every URL, and the menu icon follows the admin colour scheme.
+- **A Documentation tab** (#71, #77, #78). The plugin ships its own guide, grouped by tab in menu order under a searchable navigation tree, with Troubleshooting in place of the FAQ and a "Back to top" button on every screen.
+- **Development workflow** (#64, #74, #75, #94). CI on PHP 8.1–8.4 with ESLint, Stylelint and Composer checks; `develop` deploys to the testes site behind a smoke check; a `v*` tag publishes the release zip, and older tags can be published by hand without becoming the latest.
+
+### Changed
+
+- **Minimum PHP is now 8.1** (#64), was 7.4. Composer already required it, and 7.4 and 8.0 are out of security support.
+- **Admin screens laid out as cards with icon headings** (#68, #76). Settings is grouped into Sending, Log, Alerts, Advanced and Appearance, Log and Retention columns can be hidden from Screen Options, and every colour comes from a token checked against WCAG AA.
+- **The changelog follows Free Form Certificate's format** (#80, #79, #93). Every version carries its date and the commit its tag sits on, lists what that commit shipped, and the pre-fork history credits the original plugin and its developer.
 
 ### Fixed
 
-- **The "queue may not be processing" notice no longer cries wolf.** The notice keyed off the last *worker run* with a 15-minute threshold, so it surfaced during healthy operation: the worker keeps running (and saving diagnostics) even while every account is capped or the queue idles, and a mail enqueued after a quiet spell tripped it instantly because the last run was stale. It now keys off the last *individual send* — it appears only when mail is waiting, nothing has been sent for **over two hours**, AND the worker isn't scheduled to act (no event armed, or an overdue one, which is the real signature of WP-Cron not firing). A future-scheduled run (normal cadence or an intentional quota deferral) and a just-armed event both keep it quiet. Backed by the new `Diagnostics::lastSendTimestamp()` / `Diagnostics::recordSend()` and the `wp_tmq_last_send` option; the unused `lastRunTimestamp()` is removed.
+- **A retried email keeps its attachments** (#81). Files staged for a failed send were deleted before the retry; they now go only when the email is sent, fails for good or is deleted. Resend and Force Resend keep the source and its priority.
+- **Attachment staging is all or nothing** (#81). A failed copy no longer queues a broken attachment, same-named files no longer overwrite each other, blocked emails stage nothing, and only folders inside the staging directory are ever deleted.
+- **Emails to long recipient lists are stored whole** (#82). The recipient column held 255 characters, so a longer list was cut off and the email reached only part of it, or failed. The column is now `text`, widened in place on upgrade.
+- **Deleting the plugin removes everything it wrote** (#71, #84, #91). The template settings, the WordPress-version marker, the auto-block marker and the role capabilities are removed too, and a test checks every option the plugin writes.
 
----
-
-## [2.8.0] - 2026-06-07
+## [2.9.0] (2026-07-25) — `bee76b0`
 
 ### Added
 
-- **Persistent per-email error log with optional SMTP debug.** Failed sends now accumulate a full, untruncated history on the queue row — each attempt stamped with the time and the complete error message — instead of only the latest 255-character `info` summary. The history is shown as an expandable *"Error details"* block in the Log table and is cleared automatically the moment the email later sends successfully, so a row that recovers keeps no stale errors. A new **SMTP Debug Log** toggle in Settings (off by default) additionally captures the entire client/server SMTP conversation for each send into that log, making it possible to see exactly where a send broke (authentication, TLS, greylisting…). Backed by a new `error_log` column on the queue table and the `smtp_debug` setting.
-- **Specific "why is the queue waiting?" message.** When SMTP-only mode can't send because every account is capped, the waiting row now spells out which limit holds each account (per-cycle / daily / monthly, with the current count) and roughly when it recovers — e.g. *"Primary SMTP: per-cycle quota reached (25/25), resumes ~2026-06-07 14:30"* — instead of a bare "no SMTP account available".
-- **Proactive "queue may not be processing" admin notice.** WP-Cron only fires when a request reaches PHP, so on a cached or low-traffic front-end the queue silently stalls once the admin logs out. A `manage_options` notice now appears whenever mail is waiting but the worker hasn't run in a while (past `max(2× interval, 15 min)`), pointing to the real-cron setup docs. It works whether or not `DISABLE_WP_CRON` is set — unlike the Cron Information tab — and stays quiet on fresh sites and during intentional quota deferrals. Decision logic is the pure, unit-tested `Notices::isWorkerStalled()`, backed by the new `Diagnostics::lastRunTimestamp()`.
+- **Per-source preferred SMTP account** (#60). A source can be pinned to one SMTP account; a send uses it while the account is enabled and under quota, and otherwise falls back to round-robin, so a preference never blocks or delays a send.
+- **Plugins can label each of their emails as a distinct source** (#62, #63). An `X-TMQ-Source-Key` header, with an optional `X-TMQ-Source-Label`, overrides detection for `plugin:`, `mu_plugin:` and `theme:` keys. Both headers are stripped before the message is stored or sent.
+
+## [2.8.1] (2026-06-07) — `cb6c357`
 
 ### Fixed
 
-- **Per-cycle SMTP quotas no longer get stuck and stop sending.** An account's cycle counter (`cycle_sent`) only rolled back to zero `send_interval` minutes after its *last* send, because the rollover was measured from `last_sent_at` — a column that advances on every send. An account that kept trickling out mail therefore slid its own window forward indefinitely: the cycle never reset, `cycle_sent` climbed to the per-cycle cap, and the account stuck there (never reaching its much larger daily/monthly limits) until it happened to sit fully idle for a whole interval. The rollover is now anchored to a new `last_cycle_reset` column stamped at the cycle's *first* send, so a "25 per 60 min" account reliably regains its full allowance 60 minutes after each cycle begins, regardless of how the sends are spread across the window. The scheduler's deferral wake-up is anchored to the same moment. Note: this only resets when the worker actually runs, so a real system cron hitting `wp-cron.php` is still required for quotas to roll over on a low-traffic site.
-- **SMTP passwords no longer fail to decrypt intermittently.** `Support\Encryption` stored credentials as `base64(iv::ciphertext)` and split them back apart by exploding on `::`. But the 16-byte IV is random binary and can itself contain the bytes `::` (or end in `:`), which truncated the IV below 16 bytes and made `openssl_decrypt()` fail for roughly 0.4% of stored passwords — surfacing as a random "couldn't send" on an otherwise valid SMTP account. Decoding now splits by the known fixed IV length instead of the delimiter; existing ciphertexts decode unchanged.
-- **The queue no longer freezes when a send hangs.** The cron lock was a MySQL `GET_LOCK()` tied to the database connection: it released when a worker process *died*, but a process that *hung* mid-batch (e.g. on a slow SMTP socket) held it indefinitely and froze the whole queue until killed — the advertised `cron_lock_ttl` "safety timeout" was never actually enforced. `Cron\CronLock` now uses a timestamped option with a real, self-expiring TTL: a hung holder's claim lapses after `cron_lock_ttl` and the next cron run reclaims it automatically. A per-row keepalive extends the deadline while a batch is progressing (so legitimately long batches don't expire early) and makes a revived hung worker stop instead of double-sending rows a newer batch has taken over. Claims are confirmed with a cache-bypassing read so two simultaneous cron runs can't both proceed.
+- **The "queue may not be processing" notice no longer cries wolf** (#59). It now appears only when mail is waiting, nothing has been sent for over two hours and no worker run is due, instead of keying off the last worker run with a 15-minute threshold.
 
-### Refactored
-
-- **All database access moved behind the repository layer.** The admin tabs and the REST controller used to issue their own `$wpdb` queries against the queue and SMTP tables — the Save/Delete/Reset SMTP actions, the list/form renderers, the Settings bulk-limit warning, the XML export/import, the Log/Retention list table (counts, paging, bulk delete/resend/force-resend, the SMTP-name lookup), the "email failed" admin notice, the "add test mail" link, and the message-preview REST endpoint. They now call `Queue\QueueRepository` and `Smtp\Repository` instead. New repository methods back the moved queries (`QueueRepository::delete/logCount/logPage/queuePage/lastLogRow`, `Smtp\Repository::all/findById/insert/update/delete/zeroSentCounters/tableColumns/truncate/namesById/accountsExceedingBulk`), and the prefixed table name is no longer threaded through `SmtpPage` → actions/renderers. The only direct `$wpdb` use that remains is where it must: the schema/migrator DDL, the three repositories, the retention sweep, and the cron lock. No behavior change.
-
----
-
-## [2.7.0] - 2026-06-07
-
-> Smarter multi-account delivery and a unified queue priority. SMTP accounts are now chosen round-robin so every enabled account shares the load and covers more of the hour; the worker runs on demand instead of on a fixed heartbeat; and a single numeric priority scale replaces the old binary "high" status, configurable per source.
+## [2.8.0] (2026-06-07) — `606fa84`
 
 ### Added
 
-- **Per-source send priority.** A new numeric `priority` on each source (Sources tab → Edit) decides how soon its mail leaves the queue — lower number = sent sooner, `1` most urgent, `50` normal. Pin password resets to `1` and they jump ahead of newsletters. Shown as a column in the Sources list and as a badge on pending rows in the Log.
-- **Last-sent visibility.** The SMTP Accounts panel now shows when each account last sent (relative "x ago", absolute timestamp on hover, "Never" until the first send) and the live per-cycle usage (`cycle_sent / limit`) alongside the existing daily / monthly counters.
+- **Per-email error history, with an optional SMTP debug log** (#58). Each failed attempt is kept in full on the queue row and shown as "Error details" in the Log, cleared when the email later sends. The SMTP Debug Log setting also records the whole SMTP conversation.
+- **The waiting row says why the queue waits** (#58). When every SMTP account is capped, it names the limit holding each account (per-cycle, daily or monthly) and roughly when it recovers.
+- **"Queue may not be processing" notice** (#57). Warns administrators when mail is waiting and the worker has not run for a while, the usual sign of WP-Cron not firing on a cached or quiet site.
 
 ### Changed
 
-- **SMTP account selection is round-robin (least-recently-used) instead of greedy-by-priority.** The worker used to drain the whole batch through the top-priority account before touching the next; now it rotates through every enabled account, spreading load across the hour so a freshly queued mail is far likelier to find an account with capacity. `priority` becomes a tie-breaker; the picker also enforces daily and monthly caps in-memory within a single batch.
-- **The queue worker runs on demand.** It sleeps when the queue is empty and wakes the instant a mail is enqueued; in SMTP-only mode with every account capped it defers to the next cycle/quota window instead of firing every interval for nothing.
-- **Queue urgency unified onto one numeric scale.** The `X-Mail-Queue-Prio: High` header and the configurable per-source priority now feed the same `priority` column (the row stays a normal `queue` status). The legacy binary `high` row status is migrated to `Priority::HIGH` on upgrade.
-- **Activating/deactivating or editing an SMTP account takes effect on the next request.** Saving an account (or the settings) re-arms the cycle immediately, removing the need to toggle Operation Mode to "block" and back.
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.7.0**.
-
-### Database
-
-- Queue table: new `priority` column + `idx_status_priority` index. Sources table: new `priority` column. Applied via `dbDelta()`; legacy `status = 'high'` rows folded into `priority` on upgrade.
-
-### Tests
-
-- New `PriorityTest`, `SchedulerStateTest`, and round-robin / multi-limit / rotation cases in `SmtpHelpersTest`. `PreWpMailTest`, `CronFlowTest`, and `ActivationTest` updated for the unified priority model.
-
----
-
-## [2.6.2] - 2026-04-29
-
-> Settings sanitizer hardening, FAQ accuracy corrections, admin UI polish (postman banner moved to FAQ, H1 icon dropped, dark code blocks), and a major internal refactor pass — admin-page split-up, single coordinated reset for per-request static state, PHPStan strictness raised from level 5 to level 8, and the analyser itself bumped from 1.12 to 2.1 (with `szepeviktor/phpstan-wordpress` 1.3 → 2.0).
+- **All database access goes through the repositories** (#56). The admin tabs, the REST controller and the notices no longer query the tables themselves; only the schema, the repositories, the retention sweep and the cron lock touch `$wpdb`. No behaviour change.
 
 ### Fixed
 
-- **`Settings\Sanitizer` rejects malformed addresses for `email` / `from_email`.** Both keys now run through `sanitize_email()` instead of `sanitize_text_field()`. Malformed input (`"not an email"`, `<garbage>`, etc.) collapses to an empty string at save time, so the alert recipient and the Default Sender no longer ship as broken `From:` headers downstream. New `EMAIL_KEYS` constant carries the per-field type metadata; new tests pin the regression.
-- **FAQ — "Does this plugin change HOW emails are sent?"** rewritten. The previous answer claimed the plugin only ever affects WHEN, never HOW — that stopped being true once SMTP Accounts, the Template engine, and per-source enforcement landed. Now reads "by default, no" + a bullet list of the three opt-in features that genuinely change the send path, with deep links to each tab.
-- **FAQ — W3 Total Cache entry** stops over-prescribing manual external cron. Caching plugins (W3 Total Cache among them) ship built-in WP-Cron triggers; the answer now points at the caching plugin's own setting first and falls back to "external cron job" only if there isn't one.
+- **Per-cycle SMTP quotas no longer get stuck** (#58). The cycle counter rolled over from the last send, so an account sending steadily never reset; it is now anchored to the cycle's first send.
+- **SMTP passwords no longer fail to decrypt intermittently** (#57). A random IV containing `::` broke about 0.4% of stored passwords; decoding now splits by the fixed IV length, and existing values decode unchanged.
+- **A hung send no longer freezes the queue** (#57). The cron lock is now a timestamped option with a real TTL, kept alive while a batch progresses, instead of a MySQL `GET_LOCK` that a hung process held forever.
+
+## [2.7.0] (2026-06-07) — `58bedbf`
+
+### Added
+
+- **Per-source send priority** (#55). Each source gets a numeric priority, `1` most urgent and `50` normal, shown in the Sources list and as a badge on pending Log rows.
+- **Last-sent time and cycle usage per SMTP account** (#55), beside the daily and monthly counters.
 
 ### Changed
 
-- **Postman illustration moved from a corner background on the Settings form to a centered hero banner at the top of the FAQ tab.** The 1408×768 raster is properly proportioned for a banner; the previous `background-image` placement squashed it into a 20rem corner. The Settings tab no longer carries the orphaned background and the H1 icon `::before` was dropped (the wordmark is enough; the GIF files stay in `assets/img/` for external uses such as the WP.org plugin directory).
-- **FAQ code-sample styling:** inline `<code>` (single tokens) gets a soft gray chip; `<pre><code>` (multi-line PHP snippets in the priority-header sections) gets a dark theme so the example code separates visually from the surrounding help text. New `.tmq-faq-bullets` helper for the bullet list introduced in the HOW-emails-are-sent answer.
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.6.2**.
+- **SMTP accounts are picked round-robin** (#55). Every enabled account shares the load instead of the batch draining through the top-priority one; daily and monthly caps are enforced within a batch.
+- **The worker runs on demand** (#55). It sleeps on an empty queue, wakes when mail is queued, and defers to the next quota window when every account is capped.
+- **One numeric priority scale** (#55). The `X-Mail-Queue-Prio: High` header and the per-source priority feed the same new `priority` column; legacy `high` rows are migrated on upgrade.
+- **Saving an SMTP account or the settings takes effect on the next request** (#55), with no need to toggle the operation mode.
 
-### Refactored
+## [2.6.2] (2026-04-29) — `8c88eed`
 
-- **Admin pages split.** `SmtpPage` (483 → 48 LOC) split into router + `SmtpActions` + `SmtpFormRenderer` + `SmtpListRenderer`. `SourcesPage` (508 → 98 LOC) split into router + `SourcesActions` + `SourcesEditRenderer` + `SourcesListRenderer`. `PluginPage` (441 → 283 LOC) extracts diagnostic notices into `Admin\QueueDiagnostics` and the Cron Information tab into `Admin\Pages\CronInfoPage`.
-- **`MailInterceptor::handle()` deepest nest extracted** into `applyCoreTemplateOverride()` so the orchestrator reads as a linear pipeline.
-- **`MailInterceptor::willHandle()`** centralizes the "will the interceptor catch the next `wp_mail()` call?" predicate; `Templates\Engine::register()` now asks via that single named call instead of re-deriving from `MainOptions` directly.
-- **`LogTable` mode injection.** `MODE_LOG` / `MODE_QUEUE` constants + a new constructor parameter replace three `$_GET['page']` sniffs; `PluginPage` and the `BulkActions` test pass the mode explicitly.
-- **`Support\RuntimeState::reset()`** consolidates the five per-request static-state resets (`BatchProcessor`, `Detector`, `PhpMailerCapturer`, `Tracker`, `WooCommerceTokens`). Test base classes now call one method instead of catalog-tracking each static individually; new `PhpMailerCapturer::reset()` added so `RuntimeState` has a uniform contract.
-- **PHPStan strictness raised from level 5 to level 8.** Surfaced 14 typing gaps total (return types on WP_List_Table overrides, value-type hints on `array<int,string>` `$headers` parameters in `MailInterceptor`, `string|false` returns from `Serializer::encode` and `Encryption::decrypt` collapsed to always-string).
-- **PHPStan analyser bumped from 1.12 to 2.1** (and `szepeviktor/phpstan-wordpress` from 1.3 to 2.0). Level 8 stays clean under the stricter 2.x rules; 9 additional typing gaps surfaced by the upgrade fixed (`identical.alwaysFalse` redundant comparisons in `LogTable::bulk_resend` / `bulk_force_resend`, by-ref out-params in `MailInterceptor::scanPriorityHeaders` narrowed from `?bool` to `bool`, `list<>` returns enforced via `array_values()` wraps in `QueueRepository::pendingIds` and `Sources\Repository::all`, redundant `method_exists()` guard dropped in `Smtp\Configurator::apply`).
+### Changed
 
-### Tests
-
-- New `SanitizeSettingsTest` cases: `test_email_keys_are_validated_with_sanitize_email`, `test_garbage_in_email_keys_collapses_to_empty_string`, plus an updated `test_text_keys_are_passed_through_sanitize_text_field` that no longer fakes `email` as plain text.
-- `EncryptionTest::test_decrypt_returns_empty_string_for_payload_tampered_with_garbage_ciphertext` updated for the new `string`-only return type (was `false`).
-
----
-
-## [2.6.1] - 2026-04-28
-
-> Hotfix on top of 2.6.0. The per-source `skip_template_wrap` checkbox introduced in 2.6.0 was honored at intercept time but the Engine on the `wp_mail` filter @100 silently re-wrapped queued rows at cron drain time, so admins ticking the box still received styled emails.
+- **The postman illustration moved to a banner on the FAQ tab** (#37–#54), and the dark code blocks set the FAQ's PHP samples apart from the text.
+- **The plugin's images are PNG and GIF instead of SVG** (#51).
+- **Admin pages split into router, actions and renderers** (#37–#54). `SmtpPage`, `SourcesPage` and `PluginPage` shrank to routers; per-request static state resets through one `RuntimeState::reset()`.
+- **PHPStan raised from level 5 to level 8, and from 1.12 to 2.1** (#37–#54), with the typing gaps it surfaced fixed.
 
 ### Fixed
 
-- **`skip_template_wrap` now actually skips the wrapper end-to-end.** `Cron\BatchProcessor::sendOne` consults the source row's `skip_template_wrap` column before each `dispatchOnce()` call. When set, it registers a one-shot `wp_tmq_template_skip` filter that short-circuits the Engine for the duration of the send and removes it immediately after. New `BatchProcessor::skipsTemplateWrap(string $source_key): bool` helper surfaces the check.
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.6.1**.
+- **Malformed email addresses are rejected in Settings** (#37–#54). The alert recipient and the default sender now go through `sanitize_email()`, so they can no longer ship as a broken `From:`.
+- **The FAQ describes what the plugin actually changes** (#37–#54). "Does this plugin change how emails are sent?" lists the opt-in features that do, and the caching-plugin answer points to the plugin's own cron setting first.
 
-### Tests
-
-- New `CoreTemplateOverridesTest::test_batch_processor_drain_honors_skip_template_wrap` (3 sub-assertions): helper detects a skip row, returns false when the flag is off, and returns false for non-wp_core sources regardless of the column value.
-
----
-
-## [2.6.0] - 2026-04-28
-
-> Per-source body & subject overrides for the 11 most-customized WordPress core emails. Admins can now edit the welcome message, password-reset wording, account-change confirmations, etc. directly from the Sources tab — with token substitution, "Reset to WP default", and a per-template "Send preview" button. The Sender override moves out of the Templates tab into a clearer Default Sender section in Settings, with explicit precedence documentation against SMTP-account senders.
-
-### Added
-
-- **Per-source template editor.** When the source being edited in the Sources tab is one of the 11 supported WP-core emails, the edit form gains a Template override section with subject input, body textarea, available-tokens help row, "Send preview" button, "Reset to WP default" link, and a per-template "Skip template wrapper" checkbox to bypass the global HTML envelope for raw delivery.
-- **`Sources\CoreTemplates`** — hardcoded WP 6.9.4 baseline for 11 templates: `password_reset`, `new_user`, `new_user_admin`, `password_change`, `password_change_admin_notify`, `email_change`, `admin_email_change_confirm`, `user_action_confirm`, `privacy_export_ready`, `privacy_erasure_done`, `recovery_mode`. Each carries its WP default subject + body and the list of tokens valid for that template.
-- **Token registry extension.** Two new dynamic tokens available inside override templates: `{subject}` (the original WP-default subject for chained reuse) and `{message_original}` (the WP-default body). These let admins prefix or suffix without losing dynamic content.
-- **`Sources\Detector` per-call context.** Primary listeners (password_reset, new_user, etc.) now capture user/key/url context via `Detector::setData()`. The override pipeline reads it through `consumeData()` and substitutes per-call tokens like `{username}` and `{reset_url}` correctly.
-- **`Sources\WpVersionNotice`.** When WordPress is upgraded between requests, an admin info notice points to the Sources tab so admins can re-verify the wp_core baseline against the new WP version. Dismissed by clicking Dismiss or by visiting the Sources tab.
-- **`Templates\TestEmailSender` preview by source_key.** The existing "Send test email" AJAX endpoint accepts an optional `source_key`. When supplied, it fakes a realistic `Detector` context (preview-username = current user, fake reset URLs that point back to the same site) and dispatches the override pipeline so the recipient sees the saved template exactly as a real recipient would.
-- **`tests/Unit/CoreTemplatesBaselineTest`** — sanity guard that asserts every template in our hardcoded baseline still carries its historically-stable canonical phrase, AND (when `vendor/wordpress/` is present in the test environment) the same phrase still appears in the live WP source. Catches drift before merge.
-
-### Changed
-
-- **Schema:** `{$prefix}total_mail_queue_sources` gains three columns: `subject_override VARCHAR(255) NOT NULL DEFAULT ''`, `body_override LONGTEXT NOT NULL`, `skip_template_wrap TINYINT(1) NOT NULL DEFAULT 0`. Applied via `dbDelta()` on version-bump.
-- **`Queue\MailInterceptor::handle()`** now consults the Sources row before the Engine wraps. When the source is wp_core AND a non-empty subject_override / body_override exists, the user-supplied template is rendered with `Tokens::globals()` + `Detector::consumeData()` context. `skip_template_wrap=1` bypasses the global HTML envelope for that source.
-- **`Queue\MailInterceptor::handle()`** also exposes `{subject}` and `{message_original}` to override templates, so admins can wrap or quote the original WP content rather than rewriting from scratch.
-- **`Sources\Repository`** gains `updateTemplateOverrides( id, subject, body, skip_wrap )` and `clearTemplateOverrides( id )` — used by the Sources edit form save handler and the "Reset to WP default" link.
-- **Sender override moved.** `from_email` / `from_name` left the Templates tab and now live in the main Settings tab as a "Default Sender" section. Migration runs once on `Migrator::install`: legacy values in `wp_tmq_template_options` are copied into `wp_tmq_settings` (only when the new location is empty), then stripped from the legacy row. The Templates tab carries a `<p class="description">` note pointing v2.5-and-earlier admins to the new home. Help text on both the Settings → Default Sender section and on each SMTP account's From Email/Name fields documents the three-tier precedence: SMTP account → Default Sender → WordPress core.
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.6.0**.
-
-### Out of scope (intentional cuts)
-
-- Four wp_core templates whose bodies are dynamically composed from many `sprintf` calls instead of a single literal — `auto_update`, `auto_update_plugins_themes`, `comment_notification`, `comment_moderation`. These keep going through WP core unmodified; the source still appears in the Sources tab but the body/subject editor is silently disabled for them.
-- WC, ffcertificate, and other plugin-source templates — the override editor only surfaces for `wp_core:*` sources. Plugin authors should ship their own template editors (WooCommerce already does).
-
----
-
-## [2.5.2] - 2026-04-27
-
-> Fix for a long-standing capture gap: emails sent from inside a WP-Cron event by other plugins (deferred user-creation flows, abandoned-cart hooks, scheduled digests) bypassed the `MailInterceptor` and never landed in the queue / log. Worse, in **block mode** they actually went out — block mode silently failed for cron-originated mail. The plugin now intercepts in cron context too, with a precise drainer-only short-circuit.
+## [2.6.1] (2026-04-28) — `d49a91a`
 
 ### Fixed
 
-- **Emails from third-party cron events were leaking past the queue.** `Queue\MailInterceptor::register()` no longer skips registration when `wp_doing_cron()` is true. Instead, `Queue\MailInterceptor::handle()` consults a new `Cron\BatchProcessor::isDraining()` flag and short-circuits only while the plugin's own drain loop is iterating queued rows. Effect: deferred sends from any plugin (ffcertificate, WooCommerce abandoned-cart, custom CSV-import hooks, etc.) now land in the queue / Sources catalog with the right `source_key`, and **block mode now actually blocks** in cron context.
-- **`Cron\BatchProcessor::run()` is now exception-safe around the drain.** The new `is_draining` flag is set before the loop and cleared in a `finally` block, so a fatal mid-loop no longer strands the flag at true and silences subsequent intercepts. The cron lock release moved into the same `finally`.
+- **"Skip template wrapper" now skips it end to end** (#36). The engine re-wrapped queued rows when the queue drained, so a source with the box ticked still received the styled email.
+
+## [2.6.0] (2026-04-28) — `243aaea`
 
 ### Added
 
-- **`Cron\BatchProcessor::isDraining()` (public).** Returns true while `run()` is iterating; documented as the right way for any future component to detect "we are sending queued mail right now".
-- **6 functional tests** in `CronContextCaptureTest`: `register()` no longer skips in cron context; `register()` still skips when disabled; `handle()` short-circuits while draining; cron-originated wp_mail lands in the queue with the expected source key; block mode in cron context retains emails (regression for the silent-leak); `isDraining()` is false at baseline.
+- **Subject and body overrides for 11 WordPress core emails** (#35). From the Sources tab, with tokens, a preview send, "Reset to WP default" and a per-source "Skip template wrapper". Four core emails composed from many `sprintf` calls stay unmodified.
+- **`{subject}` and `{message_original}` tokens** (#35), so an override can wrap or quote the original WordPress text.
+- **A notice after a WordPress upgrade** (#35), pointing to the Sources tab to re-check the overridden emails against the new version.
 
 ### Changed
 
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.5.2**.
+- **The default sender moved to Settings** (#35). From email and name left the Templates tab, migrated once on upgrade, with the precedence documented: SMTP account, then default sender, then WordPress.
 
----
-
-## [2.5.1] - 2026-04-27
-
-> Hotfix bundle on top of 2.5.0. Two production issues: a Fatal on plugin load because the `WooCommerceTokens` file name didn't match the inline autoloader's kebab-case convention, and a `_load_textdomain_just_in_time` `_doing_it_wrong` notice surfaced by WordPress 6.7+ that this release silences by loading the textdomain earlier.
+## [2.5.2] (2026-04-27) — `18749dd`
 
 ### Fixed
 
-- **Autoloader miss on `WooCommerceTokens`.** Renamed `src/templates/woocommerce-tokens.php` → `src/templates/woo-commerce-tokens.php` so the camelCase-to-kebab regex in the inline autoloader (`(?<=[a-z0-9])(?=[A-Z])`) finds it. `WooCommerceTokens` → `Woo-Commerce-Tokens` → `woo-commerce-tokens.php`. Local CI was green because Composer's classmap autoloader (loaded from the test bootstrap) finds files regardless of name; production has no Composer.
-- **`_load_textdomain_just_in_time` notice on WP 6.7+.** `Admin\TextDomain::register()` now hooks `plugins_loaded` priority 0 instead of `init`. The earlier-load makes `$GLOBALS['l10n']['total-mail-queue']` available before any callback on `plugins_loaded` / `cron_schedules` / `pre_wp_mail` / `plugin_action_links_*` runs, so WP's just-in-time loader short-circuits and never fires the `_doing_it_wrong` notice. No change in user-visible behavior — translations were already loading correctly; this only silences the warning.
+- **Emails sent from other plugins' cron events are queued** (#34). They bypassed the queue, and in Block mode they went out; the interceptor now skips only while the plugin's own worker is draining.
+- **The worker is exception-safe** (#34). The draining flag and the cron lock are released in a `finally`, so a fatal mid-batch no longer silences later intercepts.
+
+## [2.5.1] (2026-04-27) — `b7c9fc6`
+
+### Fixed
+
+- **Fatal on load from an autoloader miss** (#33). `WooCommerceTokens` lived in a file the inline autoloader could not resolve; renamed, and a test now walks `src/` to check every class is reachable.
+- **`_load_textdomain_just_in_time` notice on WordPress 6.7+** (#33). The text domain loads on `plugins_loaded` priority 0.
+
+## [2.5.0] (2026-04-27) — `d20e1bd`
 
 ### Added
 
-- **Regression guard for the inline autoloader.** New unit test `AutoloaderConsistencyTest::test_every_class_under_src_is_reachable_by_the_inline_autoloader` walks every `.php` file under `src/`, parses each `namespace` + `class` declaration, and asserts the inline autoloader's regex resolves to a file that actually exists on disk. Catches this class of bug before merge.
+- **HTML template engine** (#28–#32). Every outgoing email can be wrapped in a configurable envelope; full-HTML messages pass through untouched. Ported from the GPL Email Templates plugin, without its Customizer UI, Google Fonts or third-party integrations.
+- **Templates tab** (#28–#32). Header, body, footer and wrapper colours, fonts, logo and footer text, with Save, Reset and "Send test email".
+- **Token registry with WooCommerce order tokens** (#28–#32). Site, recipient and date tokens plus order number, customer name, email, total and date, extensible through `wp_tmq_template_tokens`.
+- **Template hooks** (#28–#32): `wp_tmq_template_skip`, `_content`, `_html`, `_tokens`, `_default_options`, `_options`, and the `wp_tmq_template_before_apply` / `_after_apply` actions.
 
-### Changed
-
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.5.1**.
-
----
-
-## [2.5.0] - 2026-04-27
-
-> A new **HTML template engine** ports the visual styling layer of the GPL Email Templates plugin into Total Mail Queue's namespaced architecture. Every outgoing email is now wrapped in a configurable card-on-light-grey envelope before it leaves the server (or before it lands in the queue, in queue mode), with an admin tab to customize colors / fonts / logo / footer, a "Send test email" button, and a WooCommerce-aware token registry that pulls order context into customer emails.
+## [2.4.1] (2026-04-26) — `30b87da`
 
 ### Added
 
-- **Phase T1 — HTML wrapper engine.** New `Templates\Engine` class that hooks `wp_mail` at priority 100 (or is invoked directly by `Queue\MailInterceptor` in queue/block mode for "capture → process → queue" ordering). Wraps the body in a styled HTML envelope, forces `Content-Type: text/html`, and replaces `{token}` placeholders. Skips full-HTML messages (`<html>` / `<!DOCTYPE` near the top) so builders like Elementor / MemberPress pass through untouched, plus a `wp_tmq_template_skip` filter for explicit opt-out. The wrapper template (`src/templates/default-html.php`) is table-based with inline CSS for cross-client rendering, system font stack (no external Google Fonts requests), RTL-aware via `language_attributes()`, and mobile-responsive via a single `@media` query.
-- **Phase T2 — `Templates\Options` storage layer.** Mirrors the shape of `Settings\Options` with `defaults()` / `get()` / `update()` / `reset()` / `sanitize()` / `isEnabled()`. The 23-key option map covers Header (bg / text / alignment / padding / logo URL / logo width), Body (bg / text / link color / font family / font size / padding / max width), Footer (bg / text color / free text / powered-by toggle), Wrapper (bg / border radius / padding), and Sender (from_email / from_name). Strict per-field sanitizer: hex colors via `sanitize_hex_color` (invalid → default), integers via `absint`, enums via whitelist, URL via `esc_url_raw`, email via `sanitize_email`, plain text via `sanitize_text_field`, footer text via `wp_kses_post`. Booleans round-trip correctly through `$_POST` strings and JSON.
-- **Phase T3 — Templates admin tab.** New "Templates" submenu under "Total Mail Queue", routed via `Admin\PluginPage::TAB_TEMPLATES`. The renderer (`Admin\Pages\TemplatesPage`) ships a 5-section settings form with WP-native color pickers, a `wp.media()`-backed logo picker, font-family dropdown (5 system stacks), Save / Reset / Send-test-email actions, and mode-aware notices at the top (block / disabled / queue). The "Send test email" widget calls `wp_mail()` so the recipient sees the styled HTML through the live engine. Per-tab asset gating: `wp-color-picker` + `wp_enqueue_media()` + `tmq-templates.js` load only on this tab.
-- **Phase T4 — Token registry + WooCommerce handler.** New `Templates\Tokens` module owns `{token}` substitution: nine globals (`{site_title}`, `{site_url}`, `{home_url}`, `{site_description}`, `{admin_email}`, `{recipient}`, `{date}`, `{time}`, `{year}`) plus a `wp_tmq_template_tokens` filter for extensions. Bundled `Templates\WooCommerceTokens` captures the live `WC_Order` from `WC_Email->object` via the `woocommerce_email_header` action and publishes six order tokens (`{order_number}`, `{customer_first_name}`, `{customer_last_name}`, `{customer_email}`, `{order_total}`, `{order_date}`). Duck-typed so the file loads without WooCommerce installed; cost on non-WC sites is two filter registrations.
-- **Send-test-email AJAX endpoint.** `Templates\TestEmailSender` (`wp_ajax_wp_tmq_send_template_test`) — capability + nonce + sanitized recipient → `wp_mail()` so the engine pipeline is exercised end-to-end.
+- **Translatable source labels** (#27), picked up by Loco Translate and `.po` tools.
+- **Per-source label and group overrides** (#27), edited inline and marked "(custom)", with a reset.
+- **Filter the Sources list by group** (#27).
+- **A warning on the Sources tab in Block or Disabled mode** (#27), where per-source toggles have no effect.
 
-### Changed
-
-- **`Engine::replacePlaceholders` is now a one-liner delegate to `Tokens::replace`** — engine no longer owns the token map directly.
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.5.0**.
-
-### Filters / Actions exposed
-
-| Hook                                                        | Purpose  |
-|---                                                          |       ---|
-| `wp_tmq_template_skip` (filter)                             | Short-circuit wrapping for a specific email |
-| `wp_tmq_template_content` (filter)                          | Pre-process raw body before wrapping |
-| `wp_tmq_template_html` (filter)                             | Final pass over the rendered HTML |
-| `wp_tmq_template_tokens` (filter)                           | Add per-source / per-plugin tokens |
-| `wp_tmq_template_default_options` (filter)                  | Override hardcoded defaults |
-| `wp_tmq_template_options` (filter)                          | Override resolved (post-merge) options |
-| `wp_tmq_template_before_apply` / `_after_apply` (action)    | Around `Engine::apply()` |
-
-### Tests
-
-35 new functional tests across four files: 9 in `TemplateEngineTest` (wrapping, full-HTML pass-through, toggle / block-mode skips, placeholder substitution, content-type force, reset-link cleanup, skip filter), 4 in `TemplateInterceptionTest` (queue mode wraps, block mode doesn't, engine-disabled doesn't, blocked-by-source doesn't), 8 in `TemplateOptionsTest` (defaults, roundtrip, color / email / enum / integer sanitizers, reset, default-options filter), 9 in `TemplatesPageTest` (save POST, unchecked-toggle round-trip, invalid-nonce wp_die, reset, three mode notices, toggle-off inline warning, rendered structure), and 7 in `TemplateTokensTest` (globals, unknown-token passthrough, custom filter, WC happy path with stub order, no-order fallback, malformed-email-object rejection, substitution over realistic HTML).
-
-### Out of scope (intentional cuts vs. the GPL plugin we ported from)
-
-- WP Customizer-based UI (replaced by a native admin page).
-- WC sub-templates per email state (use the per-Source override pattern from v2.4.1 instead).
-- Google Fonts dynamic loader (system stack — most clients block external fonts anyway).
-- Social-links repeater (use the free-text footer with `<a>` tags).
-- EDD / Gravity Forms / MemberPress integrations (out of TMQ's domain).
-- Postman / Post SMTP marketing (TMQ has SMTP natively).
-
----
-
-## [2.4.1] - 2026-04-26
-
-> UX patch on top of the 2.4.0 Sources tab: the labels are now translatable via Loco / `.po` files, the admin can override label and group per-row, the table has a "Filter by group" dropdown, and the page warns when the global Operation Mode (Block / Disabled) means per-source toggles can't take effect.
+## [2.4.0] (2026-04-26) — `868509c`
 
 ### Added
 
-- **Translatable Source labels.** `Sources\KnownSources::translatedLabel()` / `translatedGroup()` / `translateRawGroup()` route every known `source_key` through a literal `__('Password reset', 'total-mail-queue')` (and equivalents) so Loco Translate, Poedit, `wp i18n make-pot`, etc. pick the strings up. Display order at render time: admin override → translated default → raw stored value.
-- **Per-row Edit / Reset of label and group.** New "Edit" action per row in `Admin\Tables\SourcesTable` opens an inline form; saving updates the new `label_override` + `group_override` columns. A "Reset" action drops the overrides and falls back to the translated default. Each table row that carries an override gets a small "(custom)" badge so the admin can spot manual overrides at a glance.
-- **Filter the catalog by group.** New `?group_filter=<canonical>` dropdown in the Sources table's `extra_tablenav` lists every distinct group (translated for display, canonical as the option value). Filter narrowing matches against either `group_label` or `group_override` so admin-set "VIP" rows still appear when the admin filters by "VIP".
-- **Operation-Mode warning on the Sources tab.** When the global plugin mode is **Block** (`enabled = 2`) or **Disabled** (`enabled = 0`), a notice now appears at the top of the Sources tab explaining that per-source toggles are inert in that mode and linking to Settings to switch back to Queue mode.
+- **Control of emails by source** (#19–#26). Every queued email is tagged with a source (`wp_core:password_reset`, `plugin:woocommerce`…), detected from WordPress filters or the call stack, and the new Sources tab enables or disables each source, a group or a selection.
+- **Disabled sources are blocked** (#19–#26). Their emails are stored as "Blocked by source" and never sent, even with the Instant header; the plugin's own alert source cannot be disabled.
+- **A pre-filled source catalogue** (#19–#26). Every email a stock WordPress sends, plus WooCommerce, Contact Form 7 and WPForms, appears on install, so a source can be switched off before it first fires.
+- **Filter the Log by source** (#19–#26), from a Source column.
 
 ### Changed
 
-- **Schema** `{$prefix}total_mail_queue_sources` gains two columns: `label_override VARCHAR(255) NOT NULL DEFAULT ''` and `group_override VARCHAR(120) NOT NULL DEFAULT ''`. `Database\Migrator::install()` (triggered automatically by the version bump) calls `dbDelta()` to add them on existing installs without disturbing any other column.
-- **`Sources\Repository`** gains `updateOverrides( id, label_override, group_override )` (silently drops the group override for system sources) and `distinctGroups()` (canonical, deduplicated, includes both `group_label` and any non-empty `group_override`).
-- **`Plugin::VERSION`**, plugin header, `readme.txt` `Stable tag` bumped to **2.4.1**.
-
-### Tests
-
-11 new functional tests in `SourcesOverridesTest`: schema columns exist, override persistence, system-source group override is dropped, display priority (override > translated > raw), `distinctGroups` includes overrides, table filter matches against either column, edit POST persists, reset action clears overrides, mode warning notice on Block, on Disabled, and the absence of the notice on Queue mode.
-
----
-
-## [2.4.0] - 2026-04-26
-
-> A new **"individual control of emails by source"** feature plus a small admin/UI cleanup pass. Each enqueued message is tagged with a `source_key` (e.g. `wp_core:password_reset`, `woocommerce:new_order`) and the admin can toggle delivery per-source. The roll-out was split across phases S1 → S5; the cleanup shipped alongside.
-
-### Added
-
-- **Phase S5 — pre-populated catalog (full WP-core coverage).** The Sources tab now shows every default outgoing email a stock single-site WordPress install can produce — plus a small set of well-known integrations — on a fresh install (and on every version bump). Admins can toggle any of them off without having to wait for the first email to fire and auto-register the source. Detection still happens organically for everything else via the S2 backtrace fallback.
-    - `Sources\KnownSources` (new `src/sources/known-sources.php`) holds the `(source_key, label, group)` tuples and exposes a `seed()` method.
-    - Seed entries (21 total):
-      - **Plugin internals:** `total_mail_queue:alert` (system, un-toggleable).
-      - **WordPress Core (15):** `wp_core:password_reset`, `wp_core:new_user`, `wp_core:new_user_admin`, `wp_core:password_change`, `wp_core:password_change_admin_notify`, `wp_core:email_change`, `wp_core:admin_email_change_confirm`, `wp_core:auto_update`, `wp_core:auto_update_plugins_themes`, `wp_core:comment_notification`, `wp_core:comment_moderation`, `wp_core:user_action_confirm`, `wp_core:privacy_export_ready`, `wp_core:privacy_erasure_done`, `wp_core:recovery_mode`.
-      - **Popular third-party plugins (4):** `plugin:woocommerce`, `plugin:contact-form-7`, `plugin:wpforms`, `plugin:wpforms-lite`.
-    - **7 new `Sources\Detector` listeners** matching the new WP-core seeds: `wp_password_change_notification_email` (password change → admin), `new_admin_email_content` (admin-email change confirm), `auto_plugin_theme_update_email` (plugin/theme auto-update report), `user_confirmed_action_email_content` (privacy request confirm), `wp_privacy_personal_data_email_content` (privacy export ready), `user_erasure_complete_email_content` (privacy erasure done), `recovery_mode_email` (recovery-mode notification). Same passthrough pattern as the existing 8 listeners.
-    - `Database\Migrator::install()` calls `KnownSources::seed()` after the schema install — so activation and version bumps both pre-populate. Idempotent: existing rows are left untouched (admin-toggled `enabled` values survive re-installs).
-- **4 new functional tests** (`SourcesKnownCatalogTest`): every entry exists after `Migrator::install()`; repeated `seed()` calls don't duplicate rows; a re-install doesn't flip an admin-disabled row back to enabled; the alert system source is included in the seed.
-- **Phase S4 — enforcement.** Disabled sources now actually block delivery (the previous phases only persisted the catalog and previewed the toggle).
-    - `Queue\MailInterceptor::handle()` calls `Sources\Repository::isEnabled()` after detecting the source. When the source is disabled the message is stored with the new `blocked_by_source` status instead of being scheduled for sending. The wp_mail() return value is still `true` so callers can't tell their message was suppressed (same swallow as block-mode).
-    - **`blocked_by_source` overrides `Instant` priority.** A third-party plugin cannot set `X-Mail-Queue-Prio: Instant` to bypass an admin-imposed source block.
-    - **System sources are hardcoded as always-enabled.** Any `source_key` starting with `total_mail_queue:` (currently only `total_mail_queue:alert`) is recognised by `Repository::isSystem()`; `setEnabled()` and `setEnabledByGroup()` silently refuse to flip it, and `Admin\Tables\SourcesTable` renders a non-actionable "system (always on)" badge in place of the per-row toggle.
-    - `Sources\Repository::SYSTEM_PREFIX` constant exposes the prefix for callers.
-    - `Sources\Repository::setEnabledByGroup()` rewritten to use `$wpdb->query()` + a `NOT LIKE 'total_mail_queue:%'` WHERE clause so a "Disable group" call against the system group leaves the system rows untouched.
-    - **Log table** picks up the new status: badge label "Blocked by source" (red CSS class `tmq-status-blocked-by-source`), and the status filter dropdown now offers `Blocked by source` alongside Sent / Error / Alert.
-    - The Sources tab notice copy refreshed to reflect that toggles are live now, and to call out the system-source rule.
-    - Skipped for blocked rows in `MailInterceptor`: `Content-Type` / `From` backfill, third-party PHPMailer config snapshot, and attachment staging — none of those are needed since the message will never be sent.
-- **15 new tests for S4** — 4 integration tests on `Sources\Repository` (`isSystem`, `setEnabled` skipping a system row, `setEnabled` proceeding for a non-system row, `setEnabledByGroup` SQL excludes the system prefix), 6 functional tests on the end-to-end flow (`SourcesEnforcementTest`: disabled source → `blocked_by_source` row, enabled source still queues, Instant header doesn't bypass the block, repository refuses to disable system source, group disable skips system sources, admin UI per-row toggle cannot disable a system source). `MockWpdb` gained an `esc_like()` helper.
-- **Phase S3 — admin UI.** The "Sources" tab is the place admins go to inspect what their site sends and toggle delivery per-source. Toggle UI is live; the actual blocking still lands in S4 (until then, disabling a source previews the change but the queue keeps delivering).
-    - New tab **"Sources"** (slug `wp_tmq_mail_queue-tab-sources`), wired in `Admin\Menu` and `Admin\PluginPage`. Routes to the new `Admin\Pages\SourcesPage` renderer.
-    - `Admin\Tables\SourcesTable` (new `WP_List_Table` under `src/admin/tables/`) — columns: status badge / label / source_key (as code chip) / group / total emails / last seen ("X ago" with full timestamp on hover) / per-row Actions (Enable-or-Disable + "Filter log" shortcut).
-    - `Admin\Pages\SourcesPage`:
-      - **Per-row Enable/Disable** (GET link, nonce-protected per row).
-      - **Bulk Enable / Disable** (WP_List_Table's standard dropdown, applied to selected ids).
-      - **Per-group Enable / Disable** toolbar above the table (select a group → "Enable group" / "Disable group" button).
-      - Inline notices summarise how many rows changed.
-    - `Admin\Tables\LogTable` gains a new **"Source"** column (just after "Status") that shows the `source_key` as a clickable code chip — clicking adds `?source_filter=<key>` to the URL and the LogTable narrows to that source.
-      - The status filter form preserves the active `source_filter` so combining a status + a source narrowing works.
-      - When a source filter is active, a small badge + "Clear source filter" link appears next to the status dropdown.
-    - 6 functional tests (`SourcesAdminTest`) cover: per-row toggle (happy path + nonce rejection), bulk POST (only selected ids change), group POST (only members of the named group change), LogTable source-filter narrows the visible rows, SourcesTable lists every row ordered by group then key.
-- **Phase S2 — detection + MailInterceptor wiring.** Sources are now resolved and persisted on every queued message; the catalog populates itself organically. No UI yet (S3); no enforcement yet (S4).
-    - `Sources\Detector` (new `src/sources/detector.php`):
-      - **Primary listeners** wired on the WP-core filters that fire just before `wp_mail()` is called: `retrieve_password_notification_email` → `wp_core:password_reset`, `wp_new_user_notification_email` / `wp_new_user_notification_email_admin` → `wp_core:new_user(_admin)`, `password_change_email` → `wp_core:password_change`, `email_change_email` → `wp_core:email_change`, `auto_core_update_email` → `wp_core:auto_update`, `comment_notification_text` / `comment_moderation_text` → `wp_core:comment_(notification|moderation)`. Each listener is a passthrough that records the source and returns the filter argument unchanged.
-      - **Fallback** `inferFromBacktrace()` walks `debug_backtrace()` (skipping our own files + `wp-includes/`) and maps the first interesting frame to a `plugin:<slug>` / `theme:<slug>` / `mu_plugin:<slug>` / `wp_core:admin` / `wp_core:unknown` source. Cross-platform path normalisation handles Windows backslashes too.
-      - `setCurrent()` / `consume()` (single-shot read + clear) keep the marker per-process and prevent stale leaks across requests.
-    - `Queue\MailInterceptor::handle()` consumes the source (or falls back to backtrace) at the top of each invocation, persists it on the queue row in the new `source_key` column, and calls `Sources\Repository::register()` + `markSeen()` so the catalog stays in sync without an explicit "register" step on the admin's part. Skipped entirely when an earlier `pre_wp_mail` filter already short-circuited the send.
-    - `Cron\AlertSender::maybeAlert()` now stamps the alert email with `total_mail_queue:alert` (new `AlertSender::SOURCE_KEY` constant) and registers that source up-front. S4 will hardcode this key as un-toggleable so the admin cannot silence their own monitoring.
-    - `Plugin::boot()` wires `Sources\Detector::register()` before the mail interceptor.
-- **15 new tests** for the S2 path: 8 unit tests covering every branch of `Detector::classify()` (plugin / theme / mu-plugin (dir + single-file) / wp-admin / wp-includes skip / our own files skip / Windows path normalisation / unknown fallback); 4 integration tests covering MailInterceptor's source-capture (listener marker, consume-and-clear, no catalog write on failed insert, short-circuit bail); 3 functional tests covering the end-to-end pipeline (real `wp_mail()` → queue row carries `source_key` → catalog auto-registers → repeat sends bump `total_count` without duplicating the catalog row).
-- **Phase S1 — schema + repository foundation.** Wiring code only; no detection, no UI, no enforcement yet.
-    - **New table** `{$prefix}total_mail_queue_sources` (`id`, `source_key` UNIQUE, `label`, `group_label`, `enabled`, `detected_at`, `last_seen_at`, `total_count`). Created idempotently via `dbDelta()` on activation / version-bump.
-    - **New column** `source_key VARCHAR(120)` on `{$prefix}total_mail_queue` plus a matching `KEY idx_source_key` so the upcoming "filter log by source" query is indexed.
-    - `Database\Schema::sourcesTable()` accessor + `Schema::SOURCES_TABLE` constant. `Schema::install()` and `Schema::drop()` updated to cover the new table.
-    - `Sources\Repository` — read/write helpers that the upcoming detector + admin UI will consume:
-      - `findByKey()` / `findById()` — single-row lookup.
-      - `register()` — insert-or-return-existing for auto-detected keys (UNIQUE index handles dedup).
-      - `markSeen()` — bumps `total_count` + `last_seen_at`.
-      - `isEnabled()` — central decision point; **defaults to true** for unknown keys so the upgrade is non-breaking (opt-out, not opt-in).
-      - `setEnabled()` / `setEnabledByGroup()` — toggle one row or every row in a group.
-      - `all()` / `count()` — listing helpers for the admin tab.
-- **15 integration tests** for `Sources\Repository` covering every method (default-true behaviour, dedup on `register`, no-op guards on non-positive ids, ORDER BY contract on `all()`, etc.).
-
-### Changed
-
-- **Plugin version bumped to 2.4.0** (`total-mail-queue.php` header, `readme.txt` `Stable tag`, `Plugin::VERSION`). The bump triggers `Database\Migrator::maybeMigrate()` on next load, which calls `Schema::install()` and dbDelta picks up the new table + column.
-- **Compact admin header.** The plugin's logo block on every tab page now uses a 4rem icon and 1rem/1.25rem vertical padding (was 6rem icon and 3rem/3rem padding). The wordmark image renders at 14rem instead of 18rem. Net effect: ~60px less vertical space between the WordPress admin bar and the tab nav.
-- **Block-mode banner contrast.** The "All outgoing emails are being blocked!" banner (Settings tab when the plugin is in block mode) was previously emitted with both `.tmq-warning` (red background + white text) and `.tmq-warning-block` (red text), which made it red-on-red and unreadable. Dropped the second class from the banner.
-- **Renamed `.tmq-warning-block` → `.tmq-text-danger`** so its name no longer rhymes with `.tmq-warning`. The two classes solve different problems (a red banner with white text vs. a short paragraph of red caution copy); having near-identical names invited the cascade conflict above. `.tmq-text-danger` keeps the same `color: #d63638;` rule and is used by the cron-lock-TTL caution copy in `Admin\SettingsApi::renderCronLockTtl()`.
-- **`.tmq-warning` background** darkened from CSS-named `red` (#ff0000, 4.0:1 contrast vs white text) to `#b32d2e` (5.94:1) so the banner clears WCAG AA for normal text.
-- **Inline `style=""` on the SMTP form decoy fields** moved into `.tmq-autofill-decoy` in `assets/css/admin.css`. The behaviour (off-screen browser-autofill absorbers) is identical.
+- **A more compact admin header and a readable Block-mode banner** (#19–#26). The banner was red on red, and its red now meets WCAG AA.
 
 ### Removed
 
-- **Dead CSS rules** in `assets/css/admin.css`: `.tmq-status-sent-from-queue` (no such status was ever emitted), `.tmq-status-has-info` + `.tmq-status-has-info::after` + `.tmq-status-has-info:hover .tmq-info` + `.tmq-info` (an info-tooltip pattern with no callers), `.column-id` (the WP_List_Table doesn't expose an `id` column).
-- **Dead Container entry** `plugin.dir`: registered in `Plugin::boot()` but never read by any consumer. `plugin.file` (the only entry that has callers) stays.
+- **Dead CSS rules and an unused container entry** (#19–#26).
 
----
-
-## [2.3.0] - 2026-04-26
-
-> A full namespaced rebuild of the plugin. Procedural functions and the `$wp_tmq_*` globals are gone; every responsibility now lives in a dedicated class under the `TotalMailQueue\` namespace, loaded by a small inline autoloader registered directly in `total-mail-queue.php` (and mirrored in `uninstall.php`). Hook wiring is centralised in `Plugin::boot()`. Source files live under `src/` with lowercase directories + kebab-case filenames (e.g. `src/admin/plugin-page.php`) for case-coherent Linux deployments. The on-disk schema, option keys, cron events, page slugs, nonces and AJAX action names are unchanged — existing installs upgrade in place.
+## [2.3.0] (2026-04-26) — `9766005`
 
 ### Added
 
-- **PSR-4 autoload root `TotalMailQueue\` mapping to `src/`** plus the orchestration scaffolding: `Plugin` (singleton orchestrator with `VERSION` / `REQUIRES_PHP` / `REQUIRES_WP` constants and a `boot()` / `container()` API) and `Container` (minimal lazy service locator with `set` / `get` / `has`).
-- **Pure utility classes** — `Support\Encryption` (AES-256-CBC password helper), `Support\Serializer` (JSON encode/decode with backwards-compatible `unserialize` fallback, `allowed_classes => false`), `Support\Paths` (single source of truth for the attachments directory and the legacy attachments path), `Support\HtmlPreview` (admin log/queue HTML rendering).
-- **Database + lifecycle** — `Database\Schema` (authoritative table definitions with idempotent `install()` via `dbDelta()`, `drop()`, plus `queueTable()` / `smtpTable()` accessors), `Database\Migrator` (version detection on `plugins_loaded`), `Lifecycle\Activator`, `Lifecycle\Deactivator`, and `Lifecycle\Uninstaller` driven by the new `uninstall.php` (WP convention; `register_uninstall_hook` cannot serialize closures).
-- **Settings** — `Settings\Options` (single source of truth for the `wp_tmq_settings` option; `defaults()` + `get()` apply the queue interval / clear-queue derivations every consumer expects) and `Settings\Sanitizer` (`register_setting` callback that whitelists admin-settable keys so a crafted POST cannot inject `tableName`, `smtpTableName`, or `triggercount`).
-- **SMTP** — `Smtp\Repository` (CRUD-adjacent access to the SMTP accounts table: `resetCounters()`, `available()`, `pickAvailable()`, `bumpMemoryCounter()`, `incrementCounter()`, `findPasswordById()`), `Smtp\Configurator` (`apply($phpmailer, $smtp_account)` — reads the SMTP timeout from `Options::get()`), `Smtp\PhpMailerCapturer` (returns the configuration third-party `phpmailer_init` listeners apply, with the password encrypted before storage; the `$wp_tmq_capturing_phpmailer` global moved to a typed static property `PhpMailerCapturer::$capturing`), `Smtp\ConnectionTester` (admin AJAX "Test Connection" handler).
-- **Queue** — `Queue\QueueRepository` (every read/write against `{$prefix}total_mail_queue`), `Queue\AttachmentStore` (per-email staging area under `wp-content/uploads/tmq-attachments/`, released after the send), `Queue\Tracker` (replaces the legacy `$wp_tmq_mailid` global with `set()` / `get()` / `reset()`), `Queue\MailInterceptor` (`pre_wp_mail` filter — recognises `X-Mail-Queue-Prio: Instant|High`, backfills `Content-Type` / `From` from `wp_mail_*` filters, snapshots third-party `phpmailer_init` config), `Queue\MailFailedHandler` (`wp_mail_failed` with auto-retry up to `max_retries`), `Queue\MailSucceededHandler` (`wp_mail_succeeded` flips `instant` rows to `sent`).
-- **Cron** — `Cron\Scheduler` (registers the `wp_tmq_interval` schedule + (un)schedules the queue event based on `enabled`), `Cron\BatchProcessor` (the cron worker; `run()` + `sendOne()` per row + `reset()` for tests), `Cron\CronLock` (MySQL `GET_LOCK` / `RELEASE_LOCK` with shutdown-time failsafe release), `Cron\Diagnostics` (accumulator for the `wp_tmq_last_cron` option), `Cron\AlertSender` (queue-overflow alert email with the 6-hour throttle).
-- **Retention** — `Retention\LogPruner` with `pruneByAge()` (for `clear_queue`) + `pruneByCount()` (for `log_max_records`), run at the end of every batch.
-- **Admin UI** — `Admin\TextDomain`, `Admin\PluginRowLinks`, `Admin\Menu`, `Admin\Assets` (admin CSS/JS + the inline `window.tmq` config blob with `restNonce` / `testSmtpNonce` / i18n strings), `Admin\SettingsApi` (`register_setting` + every field renderer: status, alert status, queue, log, send method, retry, smtp timeout, cron lock TTL, sensitivity), `Admin\Notices` (last-error notice + warning when known wp_mail-bypassing plugins like MailPoet are active), `Admin\ExportImport` (XML export/import with `LIBXML_NONET` for XXE protection and a settings-key whitelist on import), `Admin\PluginPage` (the single page callback dispatched by every submenu — routes by `page` slug to the per-tab renderers, runs the Settings API, surfaces the mode/cron/conflict notices, handles the `addtestmail` queue insert), `Admin\FaqRenderer` (long-form static FAQ split into focused private renderers), `Admin\Pages\SmtpPage` (full SMTP CRUD: list, add, edit with the connection-lock toggle that protects host + credential fields, delete, reset counters), `Admin\Tables\LogTable` (`WP_List_Table` subclass powering the Log + Retention tabs: status filter, bulk delete/resend/force-resend, lazy-loaded message preview, SMTP-account name caching).
-- **REST** — `Rest\MessageController` registers `GET /tmq/v1/message/{id}` for the lazy-loaded message preview, gated on `manage_options`.
-- **Automated test suite (PHPUnit 9.6).** 86 tests / 213 assertions across three suites — 25 unit tests (pure-PHP helpers without booting WP: Encryption AES-256-CBC round-trip + tamper detection, Serializer JSON+unserialize fallback, SMTP picker, in-memory counter increment, base64 redaction in HTML preview), 27 integration tests (Brain Monkey + Mockery + an in-memory `MockWpdb` test double covering Options defaults + interval conversion + 10s minimum clamp; Sanitizer whitelist; MailInterceptor priority handling, block mode, content-type backfill; PhpMailerCapturer encrypted-password capture; MailFailedHandler retry counter + error finalisation), 34 functional tests against a real WordPress + MySQL via `wp-phpunit/wp-phpunit` (activation + dbDelta schema/indexes; retention cleanup by age + count cap; REST endpoint capability + 404; bulk actions delete/resend/force_resend; full cron flow with priority ordering, batch limit, block/disabled modes, smtp-only fallback, diagnostics; AJAX `wp_tmq_test_smtp` permission/nonce/validation/connection failure paths; XML export/import round-trip with whitelist enforcement and XXE protection).
-- **Static analysis** with PHPStan (level 5) using `szepeviktor/phpstan-wordpress`.
-- **Coding standards** with PHP_CodeSniffer + WordPress Coding Standards 3.x (full ruleset, with PSR-4-compatible scoped exclusions for `src/*`).
-- **PHP compatibility checks** via `phpcompatibility/phpcompatibility-wp` against the declared minimum PHP 7.4.
-- **GitHub Actions workflow** — PHPUnit on PHP 8.1 / 8.2 / 8.3, functional tests against MySQL 8 on PHP 8.1 + 8.3, PHPStan, PHPCS — runs on every push and pull request.
-- **`bin/install-wp-tests.sh`** helper that bootstraps the WordPress test database for local development.
-- **`CHANGELOG.md`** following the Keep a Changelog format.
+- **Automated tests and static analysis** (#8–#18). PHPUnit unit, integration and functional suites against a real WordPress, PHPStan, PHPCS with WordPress Coding Standards, PHP compatibility checks and a GitHub Actions workflow.
 
 ### Changed
 
-- **Plugin version bumped to 2.3.0** (header in `total-mail-queue.php`, `Stable tag` in `readme.txt`, `Plugin::VERSION`).
-- **Bootstrap** (`total-mail-queue.php`) shrunk to ~30 lines: `ABSPATH` guard → inline `spl_autoload_register` for the `TotalMailQueue\` namespace → `Plugin::boot(__FILE__)`. The Composer-generated `vendor/autoload.php` is no longer required at runtime — the plugin has no third-party runtime dependencies, so a small inline autoloader handles the namespace lookup. Dev tooling (PHPUnit, PHPCS, PHPStan, Brain Monkey) still uses `vendor/` from the test bootstraps.
-- **Hook wiring** centralised in `Plugin::boot()`: lifecycle hooks, the `pre_wp_mail` / `wp_mail_failed` / `wp_mail_succeeded` chain, the cron schedule + worker, the AJAX endpoint, the admin UI scaffolding, and the REST controller.
+- **A full namespaced rebuild** (#8–#18). Every responsibility lives in a class under `TotalMailQueue\`, loaded by an inline autoloader and wired in `Plugin::boot()`. The schema, option keys, cron events, page slugs, nonces and AJAX actions are unchanged, so installs upgrade in place.
 
 ### Removed
 
-- **The two procedural admin files** (`total-mail-queue-options.php` and `total-mail-queue-smtp.php`, ~1900 lines combined) and the `is_admin()` includes that loaded them.
-- **All 30+ procedural `wp_tmq_*` functions** that lived in those files plus the bootstrap (encrypt/decrypt password, encode/decode, attachments_dir, render_list_message / render_html_for_display; activate / deactivate / uninstall / updateDatabaseTables / check_update_db; get_settings / sanitize_settings; prewpmail / mail_failed / mail_succeeded / search_mail_from_queue / cron_interval; reset_smtp_counters / get_available_smtp / pick_available_smtp / update_memory_counter / increment_smtp_counter / configure_phpmailer / capture_phpmailer_config; the `wp_tmq_ajax_test_smtp_connection` AJAX handler; load_textdomain, actionlinks, settings_page_assets / _inline_script / settings_init / every render_option_*, checkLogForErrors, maybe_handle_export / handle_export / build_export_xml / handle_import, add_rest_endpoints / rest_get_message, settings_page / settings_page_navi / settings_page_menuitem, render_smtp_page) and their `add_action` / `add_filter` / `register_*_hook` registrations.
-- **The legacy globals** — `$wp_tmq_options`, `$wp_tmq_version`, `$wp_tmq_mailid`, `$wp_tmq_pre_wp_mail_priority`, `$wp_tmq_next_cron_timestamp`, `$wp_tmq_capturing_phpmailer`.
-- **The `wp_tmq_Log_Table` class** (replaced by `Admin\Tables\LogTable`).
-- **The PHPStan baseline** — empty after the file deletions.
+- **The procedural admin files, the `wp_tmq_*` functions and the `$wp_tmq_*` globals** (#8–#18), replaced by the classes above.
+
+### Fixed
+
+- **No early text-domain notice on WordPress 6.7+** (#18). The cron schedule label is no longer translated, because WordPress asks for it before `init`.
 
 ### Security
 
-- **Settings import whitelist (`Admin\ExportImport`).** A crafted XML payload cannot rewrite `tableName` / `smtpTableName` to redirect SQL queries to other tables.
-- **XXE protection on import.** `simplexml_load_string` is called with `LIBXML_NONET`, blocking external-entity resolution.
-- **Settings sanitiser whitelist (`Settings\Sanitizer`).** Same whitelist enforced server-side on every `wp_tmq_settings` write, so a forged form POST cannot inject the protected option keys.
-- **REST + AJAX gating.** `manage_options` is verified at the permission callback for `GET /tmq/v1/message/{id}` and at the AJAX entry point for `wp_tmq_test_smtp`.
-- **SMTP password storage.** Passwords are encrypted with AES-256-CBC + a per-record IV before being written to `{$prefix}total_mail_queue_smtp.password` (legacy passwords are re-encrypted lazily on next save).
+- **Hardened settings, import and endpoints** (#8–#18). Settings saves and XML imports go through a key whitelist, imports block external entities, the REST and AJAX endpoints require `manage_options`, and SMTP passwords are stored with AES-256-CBC and a per-record IV.
 
----
-
-## [2.2.1] - 2026-01-XX
+## [2.2.1] (2026-02-01) — `1c1b4d2`
 
 ### Added
 
-- Configurable SMTP Timeout and Cron Lock Timeout settings in admin panel.
-- Cross-process cron lock using MySQL `GET_LOCK` to prevent overlapping batch sends.
+- **Configurable SMTP and cron-lock timeouts.**
+- **A cross-process cron lock** (MySQL `GET_LOCK`), so batches cannot overlap.
 
 ### Changed
 
-- WordPress Plugin Check compliance: output escaping, `ABSPATH` guards, safe redirects.
-- Memory optimization: lazy-load email bodies per iteration instead of loading all at once.
-- Replaced `file_put_contents` with the WP_Filesystem API for attachment directory protection.
+- **WordPress Plugin Check compliance**: output escaping, `ABSPATH` guards and safe redirects.
+- **Lower memory use**: email bodies load one at a time instead of all at once.
+- **The attachment directory is protected through the WP_Filesystem API.**
 
 ### Removed
 
-- `error_log`/`print_r` development calls from production code.
-- `%i` placeholder for compatibility with WordPress < 6.2.
+- **Development `error_log` / `print_r` calls**, and the `%i` placeholder for WordPress before 6.2.
 
 ### Fixed
 
-- SMTP accounts no longer blocked mid-cycle by the `send_interval` check.
+- **SMTP accounts are no longer blocked mid-cycle** by the `send_interval` check.
 
----
-
-## [2.2.0] - 2025-XX-XX
+## [2.2.0] (2026-01-31) — `b182aae`
 
 ### Added
 
-- SMTP test connection button to verify credentials before sending.
-- Export/import plugin settings and SMTP accounts via XML.
-- Status filter on the log table (sent / error / alert).
-- Auto-retry failed emails with configurable retry limit.
-- Resend and force-resend actions that remove the original log entry.
-- Cron diagnostics panel on the Retention tab.
-- Detection of conflicting `pre_wp_mail` filters from other plugins.
-- Info column in the log with retry count and error details.
-- Bulk delete confirmation dialog.
+- **Test Connection for SMTP accounts**, before any email is sent.
+- **Export and import** of settings and SMTP accounts as XML.
+- **A Send Method setting**: Automatic, plugin SMTP only, or WordPress default.
+- **Log improvements**: a status filter, an Info column with retries and errors, and a resend that replaces the original entry.
+- **Cron diagnostics** on the Retention tab, and detection of conflicting `pre_wp_mail` filters.
+- **Per-account send interval and per-cycle limit**, capped by the global queue limit, with a warning when an account's limit exceeds it.
+- **An SMTP column in the Log** naming the account that sent each email, and account IDs in the SMTP list.
+- **Connection fields locked when editing an SMTP account**, behind an unlock switch, so limits can change without touching credentials.
 
 ### Changed
 
-- JSON serialization replaces PHP `serialize()` (with backwards compatibility for legacy data).
-- Strict comparisons throughout, `wp_kses_post` on notices, consistent `wpdb` formats.
-- Inline CSS moved to `assets/css/admin.css`.
-- Asset cache-busting via version parameter.
-- SMTP counter reset runs once per cron instead of per email.
-- SQL `LIMIT`/`OFFSET` pagination instead of loading all rows.
+- **JSON storage instead of `serialize()`**, still reading legacy data.
+- **Paginated queries and one SMTP counter reset per run** instead of loading every row and resetting per email.
+- **Stricter code**: strict comparisons, consistent `wpdb` formats, styles moved to `admin.css`, cache-busted assets.
+- **Resend and Force Resend refuse emails already sent or still queued**, with a notice instead of skipping them silently.
+- **SMTP accounts are picked from in-memory counters**, not one query per email.
 
 ### Fixed
 
-- Set envelope sender (`$phpmailer->Sender`) alongside From header.
-- Instant email tracking now correctly updates status on success/failure.
-- `NOW()` replaced with WordPress local time in SQL queries.
-- Attachments stored in `wp-content/uploads/tmq-attachments/` with `.htaccess` protection.
-- Use `wp_generate_password()` for attachment subfolder names.
+- **Envelope sender set with the From header**, and instant emails record their result.
+- **Local time in SQL** instead of `NOW()`.
+- **Attachments stored under `uploads/tmq-attachments/`** behind `.htaccess`, in random subfolders.
+- **SMTP authentication no longer fails from the second email of a batch**: the connection is closed before each send.
+- **A per-account cycle counter survives cron runs shorter than its send interval**, so the per-cycle limit holds.
+- **The worker no longer re-adds its `pre_wp_mail` filter mid-batch**, which could queue an email again instead of sending it.
 
 ### Security
 
-- Mandatory nonce verification on all bulk actions.
-- Nonce protection on test email insertion.
-- XXE prevention on XML import (`LIBXML_NONET`).
-- Settings whitelist on import and `register_setting` `sanitize_callback`.
-- Encrypted captured SMTP passwords in queue headers.
-- Browser autofill prevention on SMTP username field.
-- Database indexes on status column (`idx_status_retry`, `idx_status_timestamp`).
+- **Nonces on every bulk action and on the test email**, XXE prevention and a key whitelist on import, encrypted captured SMTP passwords, and no browser autofill on the SMTP username.
 
----
-
-## [2.1.0]
+## [2.1.0] (2026-01-31) — `0238266`
 
 ### Added
 
-- SMTP accounts management with priority, daily and monthly sending limits.
-- Multiple send methods: `auto`, SMTP only, PHP default.
-- Capture and replay `phpmailer_init` configurations from other plugins.
-- Block mode: retain all emails without sending.
-- Log max records limit setting.
-- Database table for SMTP accounts.
-- Encrypted SMTP password storage (AES-256-CBC).
+- **A log size limit**: keep at most N entries, beside the age-based cleanup.
+- **Automatic retry**: a failed email returns to the queue up to `max_retries` times (default 3).
+- **Force Resend** for failed emails, ignoring the retry limit.
 
----
-
-## [1.5.0]
+## [2.0.0] (2026-01-31) — `dd11612`
 
 ### Added
 
-- Fork of *Mail Queue* by WDM. Renamed all prefixes and identifiers; new branding: **Total Mail Queue**.
+- **Operation modes**: Disabled, Queue, and Block, which keeps every email without sending it.
+- **SMTP accounts** with priority, daily and monthly limits, and fallback to the next account when a limit is reached; passwords encrypted with AES-256-CBC.
+- **The Retention tab**, renamed from Queue, listing only the emails still waiting.
+- **Capture and replay of other plugins' `phpmailer_init` settings.**
 
----
+## [1.5.0] (2026-01-30) — `0fd2805`
+
+### Added
+
+- **Fork of [Mail Queue](https://wordpress.org/plugins/mail-queue/) by [WDM](https://www.webdesign-muenchen.de)**, renamed **Total Mail Queue**, with every prefix and identifier changed.
+
+### Security
+
+- **Every database query goes through `$wpdb->prepare()`**, and every string is translatable.
+
+**The versions below are releases of the original plugin, [Mail Queue](https://wordpress.org/plugins/mail-queue/), developed by [WDM](https://www.webdesign-muenchen.de).** Their entries are reproduced from its changelog. They predate the fork, are not part of this repository's history and have no tags here.
 
 ## [1.4.6]
 
@@ -555,9 +358,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial release.
-
-[Unreleased]: https://github.com/rpgmem/total-mail-queue/compare/v2.2.1...HEAD
-[2.2.1]: https://github.com/rpgmem/total-mail-queue/compare/v2.2.0...v2.2.1
-[2.2.0]: https://github.com/rpgmem/total-mail-queue/compare/v2.1.0...v2.2.0
-[2.1.0]: https://github.com/rpgmem/total-mail-queue/compare/v1.5.0...v2.1.0
-[1.5.0]: https://github.com/rpgmem/total-mail-queue/releases/tag/v1.5.0

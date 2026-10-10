@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Admin\Tables\SourcesTable;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -59,12 +60,15 @@ final class SourcesListRenderer {
 	 * Render the per-group enable / disable toolbar above the table.
 	 */
 	private static function renderGroupToolbar(): void {
+		if ( ! Access::canManage() ) {
+			return;
+		}
 		$groups = SourcesRepository::distinctGroups();
 		if ( empty( $groups ) ) {
 			return;
 		}
 
-		echo '<form method="post" class="tmq-inline-form" style="margin-bottom:1em;">';
+		echo '<form method="post" class="tmq-inline-form tmq-group-toolbar">';
 		wp_nonce_field( 'wp_tmq_sources_group', 'wp_tmq_sources_group_nonce' );
 		echo '<input type="hidden" name="page" value="wp_tmq_mail_queue-tab-sources" />';
 		echo '<label>';

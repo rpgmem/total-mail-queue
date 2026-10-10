@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Smtp;
 
+use TotalMailQueue\Admin\Access;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use PHPMailer\PHPMailer\PHPMailer;
 use TotalMailQueue\Support\Encryption;
@@ -49,7 +50,7 @@ final class ConnectionTester {
 	 * AJAX action handler. Responds with `wp_send_json_success` / `wp_send_json_error`.
 	 */
 	public static function handle(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Access::isAdmin() ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'total-mail-queue' ) ), 403 );
 		}
 

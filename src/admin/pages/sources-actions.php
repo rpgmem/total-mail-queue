@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Access;
 use TotalMailQueue\Sources\CoreTemplates;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -30,6 +31,10 @@ final class SourcesActions {
 	 * page chrome.
 	 */
 	public static function handle(): void {
+		// Every handler here changes a source; reading the list needs only VIEW.
+		if ( ! Access::canManage() ) {
+			return;
+		}
 		self::handleRowAction();
 		self::handleEditSave();
 		self::handleTemplateReset();

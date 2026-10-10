@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin;
 
 use TotalMailQueue\Plugin;
+use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\ConnectionTester;
 use TotalMailQueue\Templates\TestEmailSender;
 
@@ -37,14 +38,30 @@ final class Assets {
 		}
 		$base = plugin_dir_url( Plugin::container()->get( 'plugin.file' ) );
 		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin.css', array(), Plugin::VERSION );
+		wp_add_inline_style( 'wp_tmq_style', Icons::stylesheet() );
+
+		// Printed in the footer, at <body> level, so `position: fixed` is
+		// relative to the viewport and no ancestor can contain it.
+		add_action( 'admin_footer', array( self::class, 'printBackToTop' ) );
+
+		// The theme class must be on <html> before the page paints, or a dark
+		// screen flashes light first: an inline script in the head, with no
+		// file behind it.
+		wp_register_script( 'wp_tmq_theme', false, array(), Plugin::VERSION, false );
+		wp_enqueue_script( 'wp_tmq_theme' );
+		wp_add_inline_script( 'wp_tmq_theme', self::darkModeScript( (string) Options::get()['dark_mode'] ) );
 		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin.js', array( 'jquery' ), Plugin::VERSION, true );
 		wp_add_inline_script( 'wp_tmq_script', self::inlineConfig(), 'before' );
+		wp_enqueue_script( 'wp_tmq_autosave', $base . 'assets/js/tmq-autosave.js', array( 'wp_tmq_script' ), Plugin::VERSION, true );
 
 		// Templates tab carries its own asset bundle (color picker + media
 		// uploader + the test-email handler). Loaded only on that tab so the
 		// other plugin pages stay slim.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, not a sensitive action.
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( PluginPage::TAB_DOCS === $page || PluginPage::TAB_FAQ === $page ) {
+			wp_enqueue_script( 'wp_tmq_docs', $base . 'assets/js/tmq-docs.js', array(), Plugin::VERSION, true );
+		}
 		if ( 'wp_tmq_mail_queue-tab-templates' === $page ) {
 			wp_enqueue_style( 'wp-color-picker' );
 			wp_enqueue_media();
@@ -80,7 +97,51 @@ final class Assets {
 		$d .= 'tmq.i18n.testFailed = "' . esc_js( __( 'Test email failed: ', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.i18n.mediaTitle = "' . esc_js( __( 'Choose a logo', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.i18n.mediaButton = "' . esc_js( __( 'Use this image', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.autosave = ' . wp_json_encode(
+			array(
+				'action'  => SettingsAutosave::ACTION,
+				'nonce'   => wp_create_nonce( SettingsAutosave::NONCE ),
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'i18n'    => array(
+					'saving' => __( 'Saving…', 'total-mail-queue' ),
+					'saved'  => __( 'Saved', 'total-mail-queue' ),
+					'error'  => __( 'Not saved', 'total-mail-queue' ),
+				),
+			)
+		) . ';';
 		$d .= '}) ( this );';
 		return $d;
+	}
+
+	/**
+	 * The script that puts `tmq-dark-mode` on <html>.
+	 *
+	 * "on" and "off" are decided here; only "auto" asks the operating system,
+	 * and it keeps listening, so switching the system theme repaints the open
+	 * page. An unknown value is treated as "off".
+	 *
+	 * @param string $mode The stored `dark_mode` setting.
+	 */
+	public static function darkModeScript( string $mode ): string {
+		if ( ! in_array( $mode, Options::DARK_MODES, true ) ) {
+			$mode = 'off';
+		}
+		return '(function(mode){'
+			. 'var root=document.documentElement;'
+			. 'var query=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;'
+			. 'function apply(){root.classList.toggle("tmq-dark-mode",mode==="on"||(mode==="auto"&&!!query&&query.matches));}'
+			. 'apply();'
+			. 'if(mode==="auto"&&query&&query.addEventListener){query.addEventListener("change",apply);}'
+			. '})(' . wp_json_encode( $mode ) . ');';
+	}
+
+	/**
+	 * The floating "Back to top" link on the plugin's screens. A plain
+	 * anchor to the page wrapper: it works without JavaScript.
+	 */
+	public static function printBackToTop(): void {
+		echo '<a href="#tmq-top" class="tmq-back-to-top" title="' . esc_attr__( 'Back to top', 'total-mail-queue' ) . '">'
+			. Icons::tag( 'top' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() is fixed markup.
+			. '<span class="screen-reader-text">' . esc_html__( 'Back to top', 'total-mail-queue' ) . '</span></a>';
 	}
 }

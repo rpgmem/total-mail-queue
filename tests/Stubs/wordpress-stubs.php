@@ -296,3 +296,48 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
         public function current_action() { return false; }
     }
 }
+
+if ( ! class_exists( 'WP_Error' ) ) {
+    /**
+     * Minimal stand-in for core's WP_Error: a code and a message.
+     */
+    class WP_Error {
+
+        /** @var string */
+        private $code;
+
+        /** @var string */
+        private $message;
+
+        public function __construct( $code = '', $message = '' ) {
+            $this->code    = (string) $code;
+            $this->message = (string) $message;
+        }
+
+        public function get_error_code() {
+            return $this->code;
+        }
+
+        public function get_error_message() {
+            return $this->message;
+        }
+    }
+}
+
+if ( ! function_exists( 'get_file_data' ) ) {
+    /**
+     * Same reading as core: the first 8 KB, one `Name: value` line per header.
+     *
+     * @param string               $file    Path.
+     * @param array<string,string> $headers Key => header name.
+     * @return array<string,string>
+     */
+    function get_file_data( $file, $headers, $context = '' ): array {
+        $data = (string) file_get_contents( $file, false, null, 0, 8192 );
+        $out  = array();
+        foreach ( $headers as $key => $name ) {
+            $out[ $key ] = preg_match( '/^(?:[ \t]*<\?php)?[ \t\/*#@]*' . preg_quote( $name, '/' ) . ':(.*)$/mi', $data, $m ) ? trim( preg_replace( '/\s*(?:\*\/|\?>).*/', '', $m[1] ) ) : '';
+        }
+        return $out;
+    }
+}
