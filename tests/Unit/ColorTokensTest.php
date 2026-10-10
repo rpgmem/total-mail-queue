@@ -188,4 +188,71 @@ final class ColorTokensTest extends TestCase {
 
         self::assertSame( array(), $failing );
     }
+
+    /**
+     * Rules outside the token blocks, as `selector => declarations`.
+     *
+     * @return list<array{0:string,1:array<string,string>}>
+     */
+    private static function rules(): array {
+        $css = (string) preg_replace( '/(?:^|(?<=\}))\s*:root(\.tmq-dark-mode)?\s*\{[^}]*\}/', '', self::css() );
+        // Flatten @media wrappers: their inner rules are ordinary rules.
+        $css = (string) preg_replace( '/@media[^{]*\{/', '', $css );
+
+        preg_match_all( '/([^{}]+)\{([^{}]*)\}/', $css, $m, PREG_SET_ORDER );
+        $rules = array();
+        foreach ( $m as $rule ) {
+            preg_match_all( '/([\w-]+)\s*:\s*([^;]+)/', $rule[2], $decls, PREG_SET_ORDER );
+            $map = array();
+            foreach ( $decls as $d ) {
+                $map[ $d[1] ] = trim( $d[2] );
+            }
+            $rules[] = array( trim( $rule[1] ), $map );
+        }
+        return $rules;
+    }
+
+    public function test_every_token_read_is_declared(): void {
+        $declared = self::block( ':root' );
+        preg_match_all( '/var\((--tmq-[\w-]+)/', self::css(), $m );
+
+        self::assertNotEmpty( $m[1], 'Reading the token uses collapsed.' );
+        $missing = array_values( array_unique( array_diff( $m[1], array_keys( $declared ) ) ) );
+        self::assertSame( array(), $missing, 'An undeclared custom property invalidates the whole declaration.' );
+    }
+
+    /**
+     * The pair list above is what somebody remembered to write. This derives
+     * the rest: any rule that sets a text colour and a background together is
+     * a pair, and is measured whether or not it is listed.
+     *
+     * @dataProvider themes
+     */
+    public function test_every_rule_that_paints_text_on_a_ground_meets_aa( string $theme ): void {
+        $palette = self::palette( $theme );
+        $pairs   = 0;
+        $failing = array();
+
+        foreach ( self::rules() as $rule ) {
+            list( $selector, $decls ) = $rule;
+            $bg = $decls['background-color'] ?? $decls['background'] ?? null;
+            if ( ! isset( $decls['color'] ) || null === $bg ) {
+                continue;
+            }
+            if ( ! preg_match( '/^var\((--tmq-[\w-]+)\)$/', $decls['color'], $fg ) || ! preg_match( '/^var\((--tmq-[\w-]+)\)$/', $bg, $ground ) ) {
+                continue;
+            }
+            if ( ! isset( $palette[ $fg[1] ], $palette[ $ground[1] ] ) ) {
+                continue; // An undeclared token is the test above's to report.
+            }
+            ++$pairs;
+            $ratio = self::contrast( $palette[ $fg[1] ], $palette[ $ground[1] ] );
+            if ( $ratio < 4.5 ) {
+                $failing[] = sprintf( '%s — %s on %s: %.2f:1', $selector, $fg[1], $ground[1], $ratio );
+            }
+        }
+
+        self::assertGreaterThan( 15, $pairs, 'The rule scan collapsed.' );
+        self::assertSame( array(), $failing );
+    }
 }
