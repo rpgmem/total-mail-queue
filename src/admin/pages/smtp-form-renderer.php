@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
 /**
@@ -64,8 +65,8 @@ final class SmtpFormRenderer {
 		$is_edit    = ( 'edit' === $action && 0 < $edit_id );
 		$form_title = $is_edit ? __( 'Edit SMTP Account', 'total-mail-queue' ) : __( 'Add SMTP Account', 'total-mail-queue' );
 
-		echo '<div class="tmq-section">';
-		echo '<h3>' . esc_html( $form_title ) . '</h3>';
+		echo '<div class="tmq-box tmq-settings-card">';
+		echo Icons::heading( 'smtp', $form_title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<form method="post" autocomplete="off" action="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '">';
 		// Hidden decoy fields to absorb browser autofill (positioned off-screen via .tmq-autofill-decoy in admin.css).
 		echo '<div class="tmq-autofill-decoy" aria-hidden="true">';

@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Settings\Options;
 
 /**
@@ -37,7 +38,7 @@ final class SourcesPage {
 		$edit_id = isset( $_GET['source-id'] ) ? (int) $_GET['source-id'] : 0;
 
 		echo '<div class="tmq-section">';
-		echo '<h2>' . esc_html__( 'Sources', 'total-mail-queue' ) . '</h2>';
+		echo Icons::heading( 'sources', __( 'Sources', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 
 		self::renderModeNotice();
 

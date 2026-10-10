@@ -301,6 +301,12 @@ h1.tmq-title {
 	margin-top: 0;
 }
 
+/* A form card's own lines read at the admin's size, like the descriptions in
+   its form table; the larger `.tmq-box p` is for prose cards. */
+.tmq-box.tmq-settings-card > p {
+	font-size: inherit;
+}
+
 .tmq-box p {
 	font-size: 1rem;
 }
