@@ -19,6 +19,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Password resets go out in Block mode** (#84). Block holds every other email, but a held password reset locks its user out, so it is sent at once unless the new setting is turned off. A disabled Password reset source still stops it.
 - **On/off settings are toggle switches that save on flip** (#89). Alerts, Block on alert, Password resets, SMTP Debug Log and the two Templates switches save the moment they change, with a Saved badge; the SMTP account and source forms use the same switches and keep their Save button.
 - **Choose which roles view and manage the plugin** (#91). Settings → Access, for administrators only, grants roles View (Log, Retention, Sources, docs, read-only) or Manage (settings, sources, templates, bulk actions, message bodies). SMTP accounts, Export / Import and the bodies of emails carrying one-time account links stay administrator-only.
+- **Releases for the tags cut before the release workflow** (#94). Release → Run workflow publishes an existing tag's zip and notes, never as the latest release, and every PR now builds the newest tag's zip so a broken package fails before a release.
 
 ### Changed
 
