@@ -47,6 +47,8 @@ Every versioned artifact is in **English**: code, comments, docblocks, i18n sour
    **Pushing the tag publishes a production release, so an agent hands that command to the maintainer and does not run it.** Verify `HEAD` equals `origin/main` before tagging.
 4. Reset `develop` to `main` (`git reset --hard origin/main`, then a force-with-lease push). Don't rebase: the squash already contains every develop commit.
 
+**Every released version has a `vX.Y.Z` tag** on the commit whose `Version:` header declares it, and the CHANGELOG heading links to it. The history before 2.10.0 was tagged after the fact: each tag sits on the last commit of `main` that carried that version before work on the next one began. Those tags have no GitHub Release, because `release.yml` did not exist yet; the first release it publishes is 2.10.0. The 1.x entries below 1.5.0 belong to the original Mail Queue and have no tags here.
+
 The zip ships no Composer or npm dependency. The autoloader is inline in `total-mail-queue.php` and `lib/` is vendored. Anything new at the repository root that should not ship goes into `.distignore`.
 
 ## Deploy to testes
