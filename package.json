@@ -1,0 +1,19 @@
+{
+  "name": "total-mail-queue",
+  "private": true,
+  "description": "Dev tooling for Total Mail Queue (linting only; nothing here ships in the plugin).",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "lint:js": "eslint \"assets/js/**/*.js\"",
+    "lint:js:fix": "eslint \"assets/js/**/*.js\" --fix",
+    "lint:css": "stylelint \"assets/css/*.css\"",
+    "lint:css:fix": "stylelint \"assets/css/*.css\" --fix",
+    "lint": "npm run lint:js && npm run lint:css"
+  },
+  "devDependencies": {
+    "eslint": "^10.11.0",
+    "globals": "^17.13.0",
+    "stylelint": "^17.16.0",
+    "stylelint-config-recommended": "^18.0.0"
+  }
+}
