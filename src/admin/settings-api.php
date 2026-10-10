@@ -65,6 +65,7 @@ final class SettingsApi {
 			'wp_tmq_alert_status'   => array( __( 'Alert enabled', 'total-mail-queue' ), 'renderAlertStatus' ),
 			'wp_tmq_sensitivity'    => array( __( 'Alert Sensitivity', 'total-mail-queue' ), 'renderSensitivity' ),
 			'wp_tmq_default_sender' => array( __( 'Default Sender', 'total-mail-queue' ), 'renderDefaultSender' ),
+			'wp_tmq_dark_mode'      => array( __( 'Dark Mode', 'total-mail-queue' ), 'renderDarkMode' ),
 		);
 
 		foreach ( $fields as $id => $spec ) {
@@ -267,5 +268,25 @@ final class SettingsApi {
 		echo '<input type="email" id="wp_tmq_from_email" name="wp_tmq_settings[from_email]" value="' . esc_attr( $from_email ) . '" placeholder="' . esc_attr__( 'noreply@example.com', 'total-mail-queue' ) . '" class="regular-text" /> ';
 		echo '<input type="text" id="wp_tmq_from_name" name="wp_tmq_settings[from_name]" value="' . esc_attr( $from_name ) . '" placeholder="' . esc_attr__( 'My Site', 'total-mail-queue' ) . '" class="regular-text" />';
 		echo '<p class="description">' . esc_html__( 'From address + name used when no SMTP account is sending the email. Leave blank to keep WordPress\'s default ("admin_email" + "WordPress"). When an SMTP account sends the email, that account\'s From wins.', 'total-mail-queue' ) . '</p>';
+	}
+
+	/**
+	 * Dark Mode select. Applies to this plugin's screens only; the rest of
+	 * wp-admin follows WordPress's own colour scheme.
+	 */
+	public static function renderDarkMode(): void {
+		$options = Options::get();
+		$mode    = (string) $options['dark_mode'];
+		$labels  = array(
+			'off'  => __( 'Off', 'total-mail-queue' ),
+			'on'   => __( 'On', 'total-mail-queue' ),
+			'auto' => __( 'Follow the operating system', 'total-mail-queue' ),
+		);
+		echo '<select id="wp_tmq_dark_mode" name="wp_tmq_settings[dark_mode]">';
+		foreach ( Options::DARK_MODES as $value ) {
+			echo '<option value="' . esc_attr( $value ) . '"' . selected( $mode, $value, false ) . '>' . esc_html( $labels[ $value ] ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p class="description">' . esc_html__( 'Applies to the Total Mail Queue screens only.', 'total-mail-queue' ) . '</p>';
 	}
 }
