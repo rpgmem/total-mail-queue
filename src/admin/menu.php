@@ -55,6 +55,10 @@ final class Menu {
 		foreach ( PluginPage::tabs() as $slug => $label ) {
 			add_submenu_page( self::SLUG, $label, $label, 'manage_options', $slug, $render );
 		}
+		// The FAQ tab became the documentation; its slug stays registered so
+		// bookmarks and links in old emails still open a page.
+		$docs = __( 'Documentation', 'total-mail-queue' );
+		add_submenu_page( self::SLUG, $docs, $docs, 'manage_options', PluginPage::TAB_FAQ, $render );
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Top-level admin page renderer (Settings / Log / Retention / SMTP / FAQ / Cron Info).
+ * Top-level admin page renderer (Settings / Log / Retention / SMTP / Sources / Templates / Cron Info / Documentation).
  *
  * @package TotalMailQueue
  */
@@ -29,7 +29,7 @@ use TotalMailQueue\Settings\Options;
  * - SMTP      → delegated to {@see SmtpPage}.
  * - Sources   → delegated to {@see SourcesPage}.
  * - Templates → delegated to {@see TemplatesPage}.
- * - FAQ       → {@see FaqRenderer} static markup.
+ * - Documentation → {@see Documentation}; the old FAQ slug opens it too.
  * - Cron Info → delegated to {@see CronInfoPage} (only registered when
  *               `DISABLE_WP_CRON` is truthy).
  */
@@ -84,8 +84,6 @@ final class PluginPage {
 				TemplatesPage::render();
 				break;
 			case self::TAB_FAQ:
-				self::renderFaqTab();
-				break;
 			case self::TAB_DOCS:
 				Documentation::render( plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) ) );
 				break;
@@ -123,7 +121,6 @@ final class PluginPage {
 			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
 		}
 		$tabs[ self::TAB_DOCS ] = __( 'Documentation', 'total-mail-queue' );
-		$tabs[ self::TAB_FAQ ]  = __( 'FAQ', 'total-mail-queue' );
 
 		return $tabs;
 	}
@@ -192,7 +189,7 @@ final class PluginPage {
 		echo '<nav class="tmq-tabs__nav" aria-label="' . esc_attr__( 'Total Mail Queue sections', 'total-mail-queue' ) . '">';
 		echo '<ul class="tmq-tabs__list">';
 		foreach ( self::tabs() as $slug => $label ) {
-			$active = $tab === $slug;
+			$active = $tab === $slug || ( self::TAB_FAQ === $tab && self::TAB_DOCS === $slug );
 			echo '<li class="tmq-tabs__item"><a href="' . esc_url( admin_url( 'admin.php?page=' . $slug ) ) . '" class="tmq-tabs__tab' . ( $active ? ' is-active' : '' ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>' . Icons::tag( Icons::TABS[ $slug ] ?? '' ) . esc_html( $label ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::tag() escapes its one attribute and emits fixed markup.
 		}
 		echo '</ul>';
@@ -277,7 +274,7 @@ final class PluginPage {
 			}
 		}
 
-		// "Put a test mail" link target (FAQ tab carries the nonce'd link).
+		// "Queue a test email" link target (the Troubleshooting topic carries the nonce'd link).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked just below.
 		if ( isset( $_GET['addtestmail'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_addtestmail' ) ) {
 			QueueRepository::insert(
@@ -300,19 +297,5 @@ final class PluginPage {
 		$queuetable->prepare_items();
 		$queuetable->display();
 		echo '</form>';
-	}
-
-	/**
-	 * FAQ tab — long-form static help with code samples, prefaced by the
-	 * postman hero banner.
-	 */
-	private static function renderFaqTab(): void {
-		$postman = plugins_url( 'assets/img/total-mail-queue-postman.png', Plugin::container()->get( 'plugin.file' ) );
-		echo '<div class="tmq-banner">';
-		echo '<img src="' . esc_url( $postman ) . '" alt="" height="300" loading="lazy" />';
-		echo '</div>';
-
-		$options = Options::get();
-		FaqRenderer::render( $options );
 	}
 }

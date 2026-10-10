@@ -25,6 +25,12 @@ final class Documentation {
 	public const INDEX_ANCHOR = 'tmq-docs-index';
 
 	/**
+	 * Id of the Troubleshooting topic, where the plugin's own notices and the
+	 * old FAQ links point.
+	 */
+	public const TROUBLESHOOTING_ANCHOR = 'troubleshooting';
+
+	/**
 	 * Every topic, in reading order.
 	 *
 	 * @return list<array{anchor:string,icon:string,title:string,file:string}>
@@ -60,6 +66,42 @@ final class Documentation {
 				'icon'   => 'sources',
 				'title'  => __( 'Sources', 'total-mail-queue' ),
 				'file'   => 'sources.php',
+			),
+			array(
+				'anchor' => 'html-templates',
+				'icon'   => 'templates',
+				'title'  => __( 'HTML templates', 'total-mail-queue' ),
+				'file'   => 'html-templates.php',
+			),
+			array(
+				'anchor' => 'alerts',
+				'icon'   => 'alert',
+				'title'  => __( 'Alerts', 'total-mail-queue' ),
+				'file'   => 'alerts.php',
+			),
+			array(
+				'anchor' => 'export-import',
+				'icon'   => 'export',
+				'title'  => __( 'Export and import', 'total-mail-queue' ),
+				'file'   => 'export-import.php',
+			),
+			array(
+				'anchor' => 'developers',
+				'icon'   => 'advanced',
+				'title'  => __( 'For developers', 'total-mail-queue' ),
+				'file'   => 'developers.php',
+			),
+			array(
+				'anchor' => 'updates-and-data',
+				'icon'   => 'retention',
+				'title'  => __( 'Updates, stored data and uninstall', 'total-mail-queue' ),
+				'file'   => 'updates-and-data.php',
+			),
+			array(
+				'anchor' => self::TROUBLESHOOTING_ANCHOR,
+				'icon'   => 'faq',
+				'title'  => __( 'Troubleshooting', 'total-mail-queue' ),
+				'file'   => 'troubleshooting.php',
 			),
 		);
 	}
