@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Log and Retention columns can be shown or hidden per user from WordPress's Screen Options. Headers and Attachments start hidden, every column gets a readable width, and with all columns shown the table scrolls sideways instead of squeezing the text.
   - The last inline styles on the plugin's screens moved into the stylesheet, so they follow the dark theme (#68).
 - **Documentation tab.** The plugin ships its own guide, written from scratch. This release covers getting started, modes and the queue, the log, SMTP accounts and sources, with an index, a link back to it from every topic, and the postman banner. Every plugin screen also gains a floating "Back to top" button (#71).
+- **The FAQ is now Troubleshooting, inside the documentation.** The guide gains topics on HTML templates, alerts, export and import, developers (headers, filters, REST) and stored data. The FAQ tab is gone: its old address opens the documentation, and the plugin's notices link to Troubleshooting, which keeps the "queue a test email" button (#71).
+
+### Fixed
+
+- **Deleting the plugin removes all of its settings.** The HTML template settings and the WordPress-version marker were left in the database after the plugin was deleted. A test now checks that every option the plugin writes is removed on uninstall (#71).
 
 ## [2.9.0] - 2026-07-25
 

@@ -12,7 +12,9 @@ namespace TotalMailQueue\Lifecycle;
 use TotalMailQueue\Cron\CronLock;
 use TotalMailQueue\Database\Migrator;
 use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Sources\WpVersionNotice;
 use TotalMailQueue\Support\Paths;
+use TotalMailQueue\Templates\Options as TemplateOptions;
 
 /**
  * Callback invoked by WordPress when the plugin is deleted via the admin UI.
@@ -37,6 +39,8 @@ final class Uninstaller {
 		delete_option( 'wp_tmq_last_cron' );
 		delete_option( 'wp_tmq_last_send' );
 		delete_option( CronLock::OPTION );
+		delete_option( TemplateOptions::OPTION_NAME );
+		delete_option( WpVersionNotice::OPTION_NAME );
 		delete_site_transient( \TotalMailQueue\Update\GithubUpdater::CACHE_KEY );
 
 		// Tables.

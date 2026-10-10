@@ -209,7 +209,7 @@ final class Notices {
 			)
 		);
 		$notice .= '</p>';
-		$notice .= '<p><a href="' . esc_url( get_admin_url( null, 'admin.php?page=wp_tmq_mail_queue-tab-faq' ) ) . '">' . esc_html__( 'More information', 'total-mail-queue' ) . '</a></p>';
+		$notice .= '<p><a href="' . esc_url( get_admin_url( null, 'admin.php?page=wp_tmq_mail_queue-tab-docs#' . Documentation::TROUBLESHOOTING_ANCHOR ) ) . '">' . esc_html__( 'More information', 'total-mail-queue' ) . '</a></p>';
 		$notice .= '</div>';
 		echo wp_kses_post( $notice );
 	}

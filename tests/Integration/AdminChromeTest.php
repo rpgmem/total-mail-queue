@@ -19,11 +19,12 @@ use TotalMailQueue\Admin\PluginPage;
  */
 final class AdminChromeTest extends IntegrationTestCase {
 
-    public function test_tabs_start_with_settings_and_end_with_faq(): void {
+    public function test_tabs_start_with_settings_and_end_with_the_documentation(): void {
         $slugs = array_keys( PluginPage::tabs() );
 
         self::assertSame( PluginPage::TAB_SETTINGS, $slugs[0] );
-        self::assertSame( PluginPage::TAB_FAQ, end( $slugs ) );
+        self::assertSame( PluginPage::TAB_DOCS, end( $slugs ) );
+        self::assertNotContains( PluginPage::TAB_FAQ, $slugs, 'The FAQ became the documentation.' );
         self::assertSame( Menu::SLUG, PluginPage::TAB_SETTINGS, 'The Settings tab is the top-level page.' );
     }
 
@@ -46,7 +47,7 @@ final class AdminChromeTest extends IntegrationTestCase {
         Menu::addMenuItems();
 
         self::assertSame( array( array( Menu::SLUG, 'manage_options', 'none' ) ), $menus );
-        self::assertSame( array_keys( PluginPage::tabs() ), array_keys( $submenus ) );
+        self::assertSame( array_merge( array_keys( PluginPage::tabs() ), array( PluginPage::TAB_FAQ ) ), array_keys( $submenus ), 'Every tab, plus the old FAQ slug kept as an alias.' );
         foreach ( $submenus as $slug => $spec ) {
             self::assertSame( array( Menu::SLUG, 'manage_options' ), $spec, $slug );
         }

@@ -45,7 +45,7 @@ final class PluginRowLinks {
 			'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log' ) ) . '">' . esc_html__( 'Log', 'total-mail-queue' ) . '</a>',
 			'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-queue' ) ) . '">' . esc_html__( 'Retention', 'total-mail-queue' ) . '</a>',
 			'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '">' . esc_html__( 'SMTP', 'total-mail-queue' ) . '</a>',
-			'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-faq' ) ) . '">' . esc_html__( 'FAQ', 'total-mail-queue' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-docs' ) ) . '">' . esc_html__( 'Documentation', 'total-mail-queue' ) . '</a>',
 		);
 		return array_merge( $actions, $links );
 	}
