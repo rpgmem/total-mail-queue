@@ -49,6 +49,15 @@ Every versioned artifact is in **English**: code, comments, docblocks, i18n sour
 
 The zip ships no Composer or npm dependency. The autoloader is inline in `total-mail-queue.php` and `lib/` is vendored. Anything new at the repository root that should not ship goes into `.distignore`.
 
+## Deploy to testes
+
+`.github/workflows/deploy-develop.yml` runs on every push to `develop` (and by hand through `workflow_dispatch`). It rsyncs the tree to the testes site, the same host Free Form Certificate deploys to, and then runs a smoke check there.
+- **What lands is what a release would ship.** The rsync excludes `.distignore`, the list `release.yml` builds the zip from, and `--delete` keeps the directory an exact copy.
+- **Secrets**, set in this repository: `TESTES_SSH_HOST`, `TESTES_SSH_USER`, `TESTES_SSH_KEY` (no passphrase) and the optional `TESTES_SSH_PORT` carry the same values as in `rpgmem/ffcertificate`. `TESTES_REMOTE_PATH` is this plugin's own folder: `…/wp-content/plugins/total-mail-queue`, absolute, no trailing slash.
+- **The smoke** (`.github/scripts/testes-smoke.php`, copied to a scratch directory and removed afterwards) boots the real WordPress and checks that the plugin is active, that `Plugin::VERSION` on the host equals the deployed commit, and that the three tables exist. A boot that stops early, such as `wp_die()` on an unreachable database, fails rather than passing on exit code 0. A timeout only warns, because the rsync already succeeded.
+- **Schema changes reach testes without an activation**: `Migrator::maybeMigrate()` runs on `plugins_loaded` whenever the stored version differs.
+- **It is an alarm, not a gate**: it runs after the merge. Anything that must block a merge belongs in CI.
+
 ## Quality gates
 
 These run in CI on every PR and on pushes to `main` and `develop`:
