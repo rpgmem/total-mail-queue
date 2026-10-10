@@ -23,7 +23,7 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '2.10.0';
+	public const VERSION = '2.11.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
@@ -93,6 +93,7 @@ final class Plugin {
 		// Admin AJAX endpoints.
 		Smtp\ConnectionTester::register();
 		Templates\TestEmailSender::register();
+		Templates\Preview::register();
 
 		// Admin UI scaffolding — text domain, action links, asset pipeline,
 		// menu + page renderer, Settings API, admin notices, export/import.

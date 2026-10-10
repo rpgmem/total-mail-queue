@@ -97,6 +97,8 @@ final class Assets {
 		$d .= 'tmq.i18n.testFailed = "' . esc_js( __( 'Test email failed: ', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.i18n.mediaTitle = "' . esc_js( __( 'Choose a logo', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.i18n.mediaButton = "' . esc_js( __( 'Use this image', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.i18n.previewUpdating = "' . esc_js( __( 'Updating preview…', 'total-mail-queue' ) ) . '";';
+		$d .= 'tmq.i18n.previewFailed = "' . esc_js( __( 'The preview could not be updated.', 'total-mail-queue' ) ) . '";';
 		$d .= 'tmq.autosave = ' . wp_json_encode(
 			array(
 				'action'  => SettingsAutosave::ACTION,

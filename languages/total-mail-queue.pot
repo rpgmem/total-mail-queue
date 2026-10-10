@@ -2915,3 +2915,47 @@ msgstr ""
 #: src/admin/tables/log-table.php
 msgid "The content is shown to users who can manage the mail queue."
 msgstr ""
+
+#: src/templates/preview.php:91
+msgid "Template preview"
+msgstr ""
+
+#: src/templates/preview.php:103
+msgid "Hello,"
+msgstr ""
+
+#: src/templates/preview.php:104
+msgid "This is how emails from this site look with the settings on this screen. The header, the footer and the colours update as you change them; save to apply them to real mail."
+msgstr ""
+
+#: src/templates/preview.php:106
+msgid "Links take the link colour, like this one: %s"
+msgstr ""
+
+#: src/templates/preview.php:107
+msgid "Thank you."
+msgstr ""
+
+#: src/admin/pages/templates-page.php:110
+msgid "Preview"
+msgstr ""
+
+#: src/admin/pages/templates-page.php:111
+msgid "A sample email with the settings on this screen. It updates as you edit; save to apply them to real mail."
+msgstr ""
+
+#: src/admin/pages/templates-page.php:112
+msgid "Email preview"
+msgstr ""
+
+#: src/admin/assets.php:105
+msgid "Updating preview…"
+msgstr ""
+
+#: src/admin/assets.php:106
+msgid "The preview could not be updated."
+msgstr ""
+
+#: src/admin/docs/html-templates.php:27
+msgid "The Preview beside the form shows a sample email with the settings on screen, header and footer included, and updates as you change them, before anything is saved. It is drawn by the same code that wraps real mail."
+msgstr ""

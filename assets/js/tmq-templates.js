@@ -1,6 +1,7 @@
 /**
- * Templates admin tab — wires up the color pickers, media uploader, and
- * the "Send test email" AJAX button. Loaded only on the Templates tab.
+ * Templates admin tab — wires up the color pickers, media uploader, the
+ * live preview and the "Send test email" AJAX button. Loaded only on the
+ * Templates tab.
  */
 (function ($, tmq) {
 	'use strict';
@@ -10,10 +11,19 @@
 	}
 
 	$(function () {
-		// Native WP color picker on every .tmq-color-picker input.
+		var refreshPreview = previewRefresher();
+
+		// Native WP color picker on every .tmq-color-picker input. Its
+		// change event fires while dragging, before the input holds the
+		// new value, so the refresh is scheduled rather than run inline.
 		if ($.fn.wpColorPicker) {
-			$('.tmq-color-picker').wpColorPicker();
+			$('.tmq-color-picker').wpColorPicker({
+				change: refreshPreview,
+				clear: refreshPreview,
+			});
 		}
+
+		$('.tmq-templates-form').on('input change', refreshPreview);
 
 		// Logo media uploader — opens wp.media() and writes the selected
 		// attachment URL into the bound input.
@@ -85,4 +95,54 @@
 				});
 		});
 	});
+
+	/**
+	 * Build the debounced preview refresh: post the form's unsaved values,
+	 * put the returned email into the sandboxed frame. A late reply from
+	 * an earlier edit never overwrites a newer one.
+	 *
+	 * @return {Function} The refresh, safe to call on every keystroke.
+	 */
+	function previewRefresher() {
+		var $frame = $('.tmq-templates-preview-frame');
+		var $status = $('.tmq-templates-preview-status');
+		var $form = $('.tmq-templates-form');
+		var timer = null;
+		var latest = 0;
+
+		if (!$frame.length || !$form.length) {
+			return function () {};
+		}
+
+		function send() {
+			var ticket = ++latest;
+			var data = $form.find(':input[name^="tmq_template["]').serializeArray();
+			data.push({ name: 'action', value: $frame.data('action') });
+			data.push({ name: 'nonce', value: $frame.data('nonce') });
+
+			$status.text(tmq.i18n.previewUpdating || '');
+			$.post(tmq.ajaxUrl, $.param(data))
+				.done(function (response) {
+					if (ticket !== latest) {
+						return;
+					}
+					if (response && response.success && response.data) {
+						$frame.attr('srcdoc', response.data.html);
+						$status.text('');
+					} else {
+						$status.text(tmq.i18n.previewFailed || '');
+					}
+				})
+				.fail(function () {
+					if (ticket === latest) {
+						$status.text(tmq.i18n.previewFailed || '');
+					}
+				});
+		}
+
+		return function () {
+			window.clearTimeout(timer);
+			timer = window.setTimeout(send, 400);
+		};
+	}
 })(window.jQuery, window.tmq);
