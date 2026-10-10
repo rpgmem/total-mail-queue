@@ -45,6 +45,8 @@ final class Icons {
 		'header'    => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M7 7h5"/>',
 		'body'      => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 12.5h10M7 16h6"/>',
 		'footer'    => '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14.5h18M7 17h5"/>',
+		'chevron'   => '<path d="m9 6 6 6-6 6"/>',
+		'search'    => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
 		'wrapper'   => '<rect x="2.5" y="2.5" width="19" height="19" rx="3"/><rect x="7" y="7" width="10" height="10" rx="1"/>',
 	);
 

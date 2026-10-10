@@ -94,7 +94,8 @@ npm run lint
 
 The Documentation tab is `Admin\Documentation`: one partial per topic under `src/admin/docs/`, listed in `Documentation::topics()`.
 - **Documentation travels with the change, in the same PR.** A PR that changes what an administrator sees or configures (a tab, a setting, a default, a notice, a header, a filter) updates the topic that describes it, with its strings in the pt_BR catalogues.
-- **`DocumentationTest`** maps every `PluginPage::TAB_*` slug to a topic and fails when a tab has none, when a listed topic file is missing, or when a file in `src/admin/docs/` is never shown. It proves a topic exists, never that it is right.
+- **Topics are grouped by tab, in the menu's order.** `Documentation::groups()` names the tabs each group documents and takes its title from the tab's own label, so the documentation reads the way the menu does, as Free Form Certificate's does. The quick navigation is a sticky single-column tree of those groups, with a search box (`assets/js/tmq-docs.js`).
+- **`DocumentationTest`** fails when a tab belongs to no group or to two, when the groups leave the menu's order, when a tab group's title is not the tab's label, when a listed topic file is missing, or when a file in `src/admin/docs/` is never shown. It proves a topic exists, never that it is right.
 - **Name the labels the screen shows.** A topic quotes a button or field by the label the plugin prints, so the translated topic and the translated screen agree.
 - **The old FAQ slug** (`PluginPage::TAB_FAQ`) stays registered and opens the documentation, so old links keep working. Notices link to the Troubleshooting topic.
 - **Every option the plugin writes is deleted on uninstall.** `UninstallFootprintTest` reads each `update_option()` under `src/` and fails when the uninstaller does not delete it.

@@ -20,34 +20,61 @@ final class DocumentationTest extends IntegrationTestCase {
     private const DIR = __DIR__ . '/../../src/admin/docs/';
 
     /**
-     * The topic that documents each tab. Topics are named for what they
-     * explain, not for the tab, so the map is written out rather than derived.
+     * Every TAB_* slug except the documentation itself and its FAQ alias, in
+     * declaration order, which is the menu's. Read from the class so a new tab
+     * cannot be left out.
+     *
+     * @return list<string>
      */
-    private const TAB_TOPICS = array(
-        PluginPage::TAB_SETTINGS  => 'modes-and-queue',
-        PluginPage::TAB_LOG       => 'log-and-retention',
-        PluginPage::TAB_QUEUE     => 'log-and-retention',
-        PluginPage::TAB_SMTP      => 'smtp-accounts',
-        PluginPage::TAB_SOURCES   => 'sources',
-        PluginPage::TAB_TEMPLATES => 'html-templates',
-        PluginPage::TAB_CRON_INFO => 'troubleshooting',
-    );
+    private static function documentedTabs(): array {
+        $constants = ( new \ReflectionClass( PluginPage::class ) )->getConstants();
+        $tabs      = array();
+        foreach ( $constants as $name => $value ) {
+            if ( 0 === strpos( $name, 'TAB_' ) && ! in_array( $value, array( PluginPage::TAB_DOCS, PluginPage::TAB_FAQ ), true ) ) {
+                $tabs[] = $value;
+            }
+        }
+        return $tabs;
+    }
 
-    /**
-     * Every TAB_* slug except the documentation itself and its FAQ alias,
-     * read from the class so a new tab cannot be left out of the map.
-     */
-    public function test_every_tab_is_documented_by_a_listed_topic(): void {
-        $slugs = array_diff(
-            array_values( array_filter( ( new \ReflectionClass( PluginPage::class ) )->getConstants(), static fn ( $name ) => 0 === strpos( $name, 'TAB_' ), ARRAY_FILTER_USE_KEY ) ),
-            array( PluginPage::TAB_DOCS, PluginPage::TAB_FAQ )
-        );
-        $anchors = array_column( Documentation::topics(), 'anchor' );
+    public function test_every_tab_is_documented_by_exactly_one_group(): void {
+        $tabs   = self::documentedTabs();
+        $claims = array();
+        foreach ( Documentation::groups() as $group ) {
+            self::assertArrayHasKey( $group['icon'], Icons::PATHS, $group['title'] );
+            self::assertNotSame( '', $group['title'] );
+            self::assertNotEmpty( $group['topics'], $group['title'] . ' has no topic.' );
+            foreach ( $group['tabs'] as $tab ) {
+                $claims[] = $tab;
+            }
+        }
 
-        self::assertContains( PluginPage::TAB_CRON_INFO, $slugs, 'Reading the tab constants collapsed.' );
-        self::assertEqualsCanonicalizing( array_values( $slugs ), array_keys( self::TAB_TOPICS ), 'A tab has no topic mapped to it.' );
-        foreach ( self::TAB_TOPICS as $tab => $anchor ) {
-            self::assertContains( $anchor, $anchors, $tab . ' maps to a topic that is not listed.' );
+        self::assertContains( PluginPage::TAB_CRON_INFO, $tabs, 'Reading the tab constants collapsed.' );
+        self::assertEqualsCanonicalizing( $tabs, $claims, 'A tab has no group, or two groups claim it.' );
+    }
+
+    public function test_groups_follow_the_menu_order(): void {
+        $order    = array_flip( self::documentedTabs() );
+        $sequence = array();
+        foreach ( Documentation::groups() as $group ) {
+            foreach ( $group['tabs'] as $tab ) {
+                $sequence[] = $order[ $tab ];
+            }
+        }
+        $sorted = $sequence;
+        sort( $sorted );
+
+        self::assertGreaterThan( 1, count( $sequence ) );
+        self::assertSame( $sorted, $sequence, 'The documentation groups are out of the menu order.' );
+    }
+
+    public function test_a_tab_group_is_titled_with_the_tab_label(): void {
+        $labels = PluginPage::tabs();
+        foreach ( Documentation::groups() as $group ) {
+            if ( array() === $group['tabs'] || ! isset( $labels[ $group['tabs'][0] ] ) || PluginPage::TAB_CRON_INFO === $group['tabs'][0] ) {
+                continue;
+            }
+            self::assertStringContainsString( $labels[ $group['tabs'][0] ], $group['title'] );
         }
     }
 
@@ -91,7 +118,7 @@ final class DocumentationTest extends IntegrationTestCase {
 
         self::assertStringContainsString( 'id="' . Documentation::INDEX_ANCHOR . '"', $html );
         foreach ( Documentation::topics() as $topic ) {
-            self::assertStringContainsString( '<a href="#' . $topic['anchor'] . '">', $html, 'Missing from the index.' );
+            self::assertStringContainsString( 'href="#' . $topic['anchor'] . '" data-topic="' . $topic['anchor'] . '"', $html, 'Missing from the index.' );
             self::assertStringContainsString( 'id="' . $topic['anchor'] . '"', $html, 'Missing topic card.' );
         }
         self::assertStringContainsString( 'class="tmq-docs-credits"', $html );

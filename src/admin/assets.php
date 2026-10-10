@@ -58,6 +58,9 @@ final class Assets {
 		// other plugin pages stay slim.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, not a sensitive action.
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( PluginPage::TAB_DOCS === $page || PluginPage::TAB_FAQ === $page ) {
+			wp_enqueue_script( 'wp_tmq_docs', $base . 'assets/js/tmq-docs.js', array(), Plugin::VERSION, true );
+		}
 		if ( 'wp_tmq_mail_queue-tab-templates' === $page ) {
 			wp_enqueue_style( 'wp-color-picker' );
 			wp_enqueue_media();
