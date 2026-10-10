@@ -2087,3 +2087,7 @@ msgstr ""
 #, php-format
 msgid "🔴 WordPress Total Mail Queue Alert - %s"
 msgstr ""
+
+#: src/update/github-updater.php:197
+msgid "Update package integrity check (SHA-256) failed. Installation aborted."
+msgstr ""

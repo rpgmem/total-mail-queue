@@ -2097,3 +2097,7 @@ msgstr "— Sem preferência (rotação normal) —"
 #, php-format
 msgid "🔴 WordPress Total Mail Queue Alert - %s"
 msgstr "🔴 Alerta de fila de e-mails do WordPress Total - %s"
+
+#: src/update/github-updater.php:197
+msgid "Update package integrity check (SHA-256) failed. Installation aborted."
+msgstr "A verificação de integridade (SHA-256) do pacote de atualização falhou. Instalação cancelada."

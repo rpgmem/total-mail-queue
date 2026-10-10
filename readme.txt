@@ -175,6 +175,8 @@ Upload the the plugin, activate it, and go to the Settings to enable the Queue.
 
 Please make sure that your WP Cron is running reliably.
 
+Updates arrive through the normal WordPress update screen, straight from this plugin's [GitHub Releases](https://github.com/rpgmem/total-mail-queue/releases). Each package is checked against its published SHA-256 before it is installed, and WordPress's own per-plugin toggle turns on automatic updates.
+
 
 == Changelog ==
 
