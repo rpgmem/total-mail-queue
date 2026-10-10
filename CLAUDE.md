@@ -43,13 +43,15 @@ Every versioned artifact is in **English**: code, comments, docblocks, i18n sour
 3. After the squash lands on `main`, tag that commit (`vX.Y.Z`) and push the tag. `.github/workflows/release.yml` then:
    - checks the tag against the header version;
    - builds `total-mail-queue-X.Y.Z.zip`, staged through `.distignore`;
-   - publishes a GitHub Release whose notes are that CHANGELOG section.
+   - publishes a GitHub Release whose notes are that CHANGELOG section, marked as the latest.
+
+   The build is `bin/build-release-zip.sh`, which the Lint workflow also runs against the newest tag on every PR, so a broken `.distignore` or CHANGELOG section fails there rather than at the release.
 
    **Pushing the tag publishes a production release, so an agent hands that command to the maintainer and does not run it.** Verify `HEAD` equals `origin/main` before tagging.
 4. Reset `develop` to `main` (`git reset --hard origin/main`, then a force-with-lease push). Don't rebase: the squash already contains every develop commit.
 5. Through a normal PR to `develop`, append `` — `<short-sha>` `` to the new heading, with the width `git rev-parse --short` gives for the squash commit. It must come after step 4, which would discard it, so the tagged tree never carries its own sha and the newest heading on `main` lacks one until the next release.
 
-**Every released version has a `vX.Y.Z` tag** on the commit whose `Version:` header declares it, and the CHANGELOG heading names that commit. The history before 2.10.0 was tagged after the fact: each tag sits on the last commit of `main` that carried that version before work on the next one began. Those tags have no GitHub Release, because `release.yml` did not exist yet; the first release it publishes is 2.10.0. The entries below 1.5.0 belong to the original plugin, [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM; the CHANGELOG says so above them, and they have no tags here.
+**Every released version has a `vX.Y.Z` tag** on the commit whose `Version:` header declares it, and the CHANGELOG heading names that commit. The history before 2.10.0 was tagged after the fact, each tag on the commit the CHANGELOG names for that version: the one that carries what the section lists and nothing from the next. Their releases are published by hand, from Actions → Release → Run workflow with the tag: the run packages the tag's files with the current `.distignore` and notes from the current CHANGELOG, and never marks the release as the latest, because the plugin's updater reads `releases/latest`. The same run rebuilds a release whose CHANGELOG section was corrected later; the published body otherwise keeps the text it was released with. The entries below 1.5.0 belong to the original plugin, [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM; the CHANGELOG says so above them, and they have no tags here.
 
 The zip ships no Composer or npm dependency. The autoloader is inline in `total-mail-queue.php` and `lib/` is vendored. Anything new at the repository root that should not ship goes into `.distignore`.
 
