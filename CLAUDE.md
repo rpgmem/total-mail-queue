@@ -30,13 +30,14 @@ Every versioned artifact is in **English**: code, comments, docblocks, i18n sour
   - the PHPCompatibility `testVersion` in `phpcs.xml.dist`.
 
   `composer.json` declares the same floor.
-- Feature PRs never bump the version. Their CHANGELOG entry goes under `## [Unreleased]`, grouped by `Added` / `Changed` / `Fixed` / `Removed` / `Security`. Append the bullet at the end of its heading and cite the issue or PR.
+- Feature PRs never bump the version. Their CHANGELOG entry goes under `## [Unreleased]`, grouped by `Added` / `Changed` / `Fixed` / `Removed` / `Security` / `Deprecated` and no other heading (tests, refactors, schema and hooks fold into these). Append the bullet at the end of its heading.
+- **The CHANGELOG follows Free Form Certificate's format.** A bullet is a bold lead sentence, the PR or issue reference, then one or two short sentences — aim for 300 characters; the PR holds the detail. No version-bump bullets, no blockquote intros, no `---` between versions, no link-reference list. A released heading reads `` ## [X.Y.Z] (YYYY-MM-DD) — `<short-sha>` ``, the sha being the release commit on `main`.
 
 ## Releases
 
 1. On `develop`, through a dedicated `release: X.Y.Z` PR:
    - bump the three version sites;
-   - rename `[Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`;
+   - rename `[Unreleased]` to `## [X.Y.Z] (YYYY-MM-DD)` (the sha comes at step 5);
    - add a fresh `[Unreleased]` above it.
 2. Open the `develop → main` PR. Keep it draft until the maintainer confirms the production release.
 3. After the squash lands on `main`, tag that commit (`vX.Y.Z`) and push the tag. `.github/workflows/release.yml` then:
@@ -46,8 +47,9 @@ Every versioned artifact is in **English**: code, comments, docblocks, i18n sour
 
    **Pushing the tag publishes a production release, so an agent hands that command to the maintainer and does not run it.** Verify `HEAD` equals `origin/main` before tagging.
 4. Reset `develop` to `main` (`git reset --hard origin/main`, then a force-with-lease push). Don't rebase: the squash already contains every develop commit.
+5. Through a normal PR to `develop`, append `` — `<short-sha>` `` to the new heading, with the width `git rev-parse --short` gives for the squash commit. It must come after step 4, which would discard it, so the tagged tree never carries its own sha and the newest heading on `main` lacks one until the next release.
 
-**Every released version has a `vX.Y.Z` tag** on the commit whose `Version:` header declares it, and the CHANGELOG heading links to it. The history before 2.10.0 was tagged after the fact: each tag sits on the last commit of `main` that carried that version before work on the next one began. Those tags have no GitHub Release, because `release.yml` did not exist yet; the first release it publishes is 2.10.0. The 1.x entries below 1.5.0 belong to the original Mail Queue and have no tags here.
+**Every released version has a `vX.Y.Z` tag** on the commit whose `Version:` header declares it, and the CHANGELOG heading names that commit. The history before 2.10.0 was tagged after the fact: each tag sits on the last commit of `main` that carried that version before work on the next one began. Those tags have no GitHub Release, because `release.yml` did not exist yet; the first release it publishes is 2.10.0. The entries below 1.5.0 belong to the original plugin, [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM; the CHANGELOG says so above them, and they have no tags here.
 
 The zip ships no Composer or npm dependency. The autoloader is inline in `total-mail-queue.php` and `lib/` is vendored. Anything new at the repository root that should not ship goes into `.distignore`.
 
