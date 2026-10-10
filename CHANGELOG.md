@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Minimum PHP is now 8.1** (was 7.4) in the plugin header and `readme.txt`. Composer already required it, and PHP 7.4 and 8.0 are out of security support (#64).
 - **Status badges are readable in both themes.** Every colour in the admin stylesheet now comes from a token checked against WCAG AA. Sent, queued, high-priority, error and blocked badges use tinted pairs; the orange "instant" badge was below the contrast floor (#68).
+- **Admin screens laid out as cards.**
+  - Settings is grouped into Sending, Log, Alerts, Advanced and Appearance, each a card with its own heading.
+  - Tabs and headings carry icons drawn for the plugin.
+  - Log and Retention give every column a readable width and scroll sideways on narrow screens instead of squeezing the text.
+  - The last inline styles on the plugin's screens moved into the stylesheet, so they follow the dark theme (#68).
 
 ## [2.9.0] - 2026-07-25
 

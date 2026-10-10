@@ -81,6 +81,8 @@ final class WpVersionNotice {
 				'</a>'
 			)
 		);
+		// The one inline style left: this notice shows on every admin screen,
+		// where the plugin's stylesheet is not loaded.
 		echo ' <a href="' . esc_url( $dismiss_url ) . '" class="button button-small" style="margin-left:8px;">' . esc_html__( 'Dismiss', 'total-mail-queue' ) . '</a>';
 		echo '</p></div>';
 	}

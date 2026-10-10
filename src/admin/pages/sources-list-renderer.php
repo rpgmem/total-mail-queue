@@ -64,7 +64,7 @@ final class SourcesListRenderer {
 			return;
 		}
 
-		echo '<form method="post" class="tmq-inline-form" style="margin-bottom:1em;">';
+		echo '<form method="post" class="tmq-inline-form tmq-group-toolbar">';
 		wp_nonce_field( 'wp_tmq_sources_group', 'wp_tmq_sources_group_nonce' );
 		echo '<input type="hidden" name="page" value="wp_tmq_mail_queue-tab-sources" />';
 		echo '<label>';

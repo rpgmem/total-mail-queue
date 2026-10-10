@@ -175,7 +175,7 @@ final class LogTable extends WP_List_Table {
 		submit_button( __( 'Filter', 'total-mail-queue' ), '', 'filter_action', false );
 		if ( '' !== $source_filter ) {
 			$clear_url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-log' . ( $current ? '&status_filter=' . rawurlencode( $current ) : '' ) );
-			echo ' <span class="tmq-status tmq-status-alert" style="margin-left:.5em;">' . esc_html(
+			echo ' <span class="tmq-status tmq-status-alert tmq-status-inline">' . esc_html(
 				sprintf(
 					/* translators: %s: source key */
 					__( 'Source: %s', 'total-mail-queue' ),
@@ -279,7 +279,7 @@ final class LogTable extends WP_List_Table {
 		}
 		if ( '' !== trim( $error_log ) ) {
 			$parts[] = '<details class="tmq-error-log"><summary>' . esc_html__( 'Error details', 'total-mail-queue' ) . '</summary>'
-				. '<pre style="white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;margin:.5em 0 0;">'
+				. '<pre class="tmq-error-log-text">'
 				. esc_html( trim( $error_log ) ) . '</pre></details>';
 		}
 		return implode( '<br>', $parts );

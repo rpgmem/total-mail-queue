@@ -191,7 +191,8 @@ h1.tmq-title {
 }
 
 .tmq-tabs__tab {
-	display: block;
+	display: flex;
+	align-items: center;
 	padding: var(--tmq-space-md) var(--tmq-space-lg);
 	color: var(--tmq-text);
 	text-decoration: none;
@@ -268,9 +269,36 @@ h1.tmq-title {
 	border-radius: var(--tmq-radius);
 }
 
-.tmq-box h2 {
-	margin-top: 0.5em;
-	font-size: 2.5em;
+.tmq-box + .tmq-box {
+	margin-top: var(--tmq-space-lg);
+}
+
+/* A page's content without a frame of its own: the tab panel is the card. */
+.tmq-section > h2:first-child,
+.tmq-box h2,
+.tmq-section-title {
+	display: flex;
+	align-items: center;
+	margin: var(--tmq-space-md) 0;
+	font-size: 1.3em;
+}
+
+/* Settings: each section is a card, its heading the section's name. */
+.tmq-settings-card {
+	margin: var(--tmq-space-lg) 0;
+	padding: var(--tmq-space-sm) var(--tmq-space-xl);
+}
+
+.tmq-settings-card > h2 {
+	margin: 0 calc(-1 * var(--tmq-space-xl));
+	padding: var(--tmq-space-md) var(--tmq-space-xl);
+	border-bottom: 1px solid var(--tmq-border-light);
+}
+
+.tmq-card-title {
+	display: flex;
+	align-items: center;
+	margin-top: 0;
 }
 
 .tmq-box p {
@@ -352,6 +380,7 @@ span.tmq-status.tmq-status-alert {
 
 .tmq-ok,
 .tmq-warning {
+	display: inline-block;
 	padding: 0.25em 0.5em;
 	border-radius: 0.25em;
 	color: var(--tmq-text-on-signal);
@@ -382,16 +411,59 @@ span.tmq-status.tmq-status-alert {
 	margin-left: 0 !important;
 }
 
+/* Log and Retention: eleven columns in a fixed-layout table, which do not
+   fit the panel of a common laptop screen. The table keeps a minimum width
+   and the form scrolls sideways instead of squeezing a column to a letter
+   a line. Every column but Message has a width; Message takes the rest. */
+.tmq-table-scroll {
+	overflow-x: auto;
+}
+
+.tmq-table-scroll .wp-list-table {
+	min-width: 1180px;
+}
+
 .tmq-admin .column-timestamp {
-	width: 150px;
+	width: 90px;
 }
 
 .tmq-admin .column-status {
-	width: 80px;
+	width: 90px;
 }
 
-.tmq-admin .column-message {
-	width: 20%;
+.tmq-admin .column-source_key {
+	width: 8%;
+}
+
+.tmq-admin .column-smtp_account_id,
+.tmq-admin .column-info {
+	width: 5%;
+}
+
+.tmq-admin .column-recipient,
+.tmq-admin .column-subject {
+	width: 11%;
+	overflow-wrap: anywhere;
+}
+
+.tmq-admin .column-headers {
+	width: 60px;
+}
+
+.tmq-admin .column-attachments {
+	width: 85px;
+}
+
+span.tmq-status.tmq-status-inline {
+	margin-left: 0.5em;
+}
+
+.tmq-error-log-text {
+	max-height: 240px;
+	margin: 0.5em 0 0;
+	overflow: auto;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 
 .tmq-view-source {
@@ -446,6 +518,20 @@ span.tmq-status.tmq-status-alert {
    ========================================================================== */
 .tmq-inline-form {
 	display: inline;
+}
+
+.tmq-group-toolbar {
+	display: block;
+	margin-bottom: 1em;
+}
+
+/* WordPress's default body for a core email, shown for reference. */
+.tmq-default-body {
+	padding: 10px;
+	white-space: pre-wrap;
+	color: var(--tmq-text);
+	background: var(--tmq-bg-alt);
+	border-left: 4px solid var(--tmq-border);
 }
 
 #tmq-test-smtp-result {

@@ -221,7 +221,7 @@ final class SourcesEditRenderer {
 		echo '<textarea id="tmq-template-body" name="body_override" rows="10" class="large-text code">' . esc_textarea( $body_override ) . '</textarea>';
 		if ( '' !== $default_body ) {
 			echo '<details><summary>' . esc_html__( 'Show WP default body', 'total-mail-queue' ) . '</summary>';
-			echo '<pre style="white-space:pre-wrap; background:#f6f7f7; padding:10px; border-left:4px solid #c3c4c7;">' . esc_html( $default_body ) . '</pre>';
+			echo '<pre class="tmq-default-body">' . esc_html( $default_body ) . '</pre>';
 			echo '</details>';
 		}
 		echo '</td></tr>';

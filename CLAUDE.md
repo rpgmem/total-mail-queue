@@ -75,6 +75,8 @@ npm run lint
 - **Colours.** Every colour is a `--tmq-*` token from its `:root` block. The `:root.tmq-dark-mode` block redefines colour tokens only, because dark is light overridden, not a second set.
 - **The dark class.** `Admin\Assets::darkModeScript()` puts the class on `<html>` from the Dark Mode setting. There is no `prefers-color-scheme` in the CSS: the operating system is consulted only when the setting is "auto".
 - **`ColorTokensTest`** fails on a colour literal outside the token blocks, on a `var(--tmq-*)` nobody declares, and on a text/background pair below 4.5:1 in either theme. It checks pairs two ways: a curated `PAIRS` list, for pairs that inheritance creates, and a scan that measures every rule declaring `color` and a background together.
+- **Icons.** They come from `Admin\Icons`: 24×24 stroke drawings painted as a `currentColor` mask. A new icon joins `Icons::PATHS`; no emoji, dashicon or one-off inline SVG stands in for one.
+- **No inline `style=""`** on the plugin's screens. The one exception is the WordPress-update notice, which shows on screens where the sheet is not loaded.
 - **Tabs and submenus.** Each tab is its own submenu slug, listed once in `PluginPage::tabs()`. The submenus stay registered, so URLs and screen ids are stable, and `Menu::menuStylesheet()` hides them from the sidebar.
 
 ## Code
