@@ -93,6 +93,7 @@ final class Plugin {
 		// Admin AJAX endpoints.
 		Smtp\ConnectionTester::register();
 		Templates\TestEmailSender::register();
+		Templates\Preview::register();
 
 		// Admin UI scaffolding — text domain, action links, asset pipeline,
 		// menu + page renderer, Settings API, admin notices, export/import.

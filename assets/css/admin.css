@@ -291,6 +291,53 @@ h1.tmq-title {
 	font-size: 1.3em;
 }
 
+/*
+ * Templates: the form on the left, the live preview beside it and in view
+ * while the form scrolls. One column, preview first, on narrower screens.
+ */
+.tmq-templates-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0 var(--tmq-space-xl);
+}
+
+.tmq-templates-preview {
+	order: -1;
+}
+
+.tmq-templates-preview-frame {
+	display: block;
+	width: 100%;
+	height: 560px;
+	border: 1px solid var(--tmq-border-light);
+	border-radius: var(--tmq-radius);
+	background: var(--tmq-bg-card);
+}
+
+.tmq-templates-preview-status {
+	min-height: 1.5em;
+	margin: var(--tmq-space-xs) 0 0;
+	color: var(--tmq-text-muted);
+}
+
+@media screen and (min-width: 1400px) {
+	.tmq-templates-layout {
+		grid-template-columns: minmax(0, 1fr) minmax(360px, 34%);
+		align-items: start;
+	}
+
+	.tmq-templates-preview {
+		order: 0;
+		position: sticky;
+		top: 46px;
+	}
+
+	.tmq-templates-preview-frame {
+		height: calc(100vh - 240px);
+		min-height: 420px;
+	}
+}
+
 /* Settings: each section is a card, its heading the section's name. */
 .tmq-settings-card {
 	margin: var(--tmq-space-lg) 0;

@@ -110,8 +110,29 @@ final class Engine {
 
 		do_action( 'wp_tmq_template_before_apply', $args );
 
-		$body = self::preprocessBody( $args['message'] );
-		$html = self::renderWrapper( $body, $args );
+		$args['message'] = self::render( $args['message'], $args, self::options() );
+
+		do_action( 'wp_tmq_template_after_apply', $args );
+
+		return $args;
+	}
+
+	/**
+	 * Wrap a message body with the given options and return the finished
+	 * HTML document, tokens resolved.
+	 *
+	 * This is the whole wrapping step without its gates (master toggle,
+	 * block mode, skip filter, full-HTML detection), so the Templates tab
+	 * can preview options that are not saved yet through the very code that
+	 * will send them.
+	 *
+	 * @param string              $message Message body, plain text or HTML.
+	 * @param array<string,mixed> $args    wp_mail() arguments (subject, to…).
+	 * @param array<string,mixed> $options Template options to render with.
+	 */
+	public static function render( string $message, array $args, array $options ): string {
+		$body = self::preprocessBody( $message );
+		$html = self::renderWrapper( $body, $args, $options );
 		$html = self::replacePlaceholders( $html, $args );
 
 		/**
@@ -121,11 +142,7 @@ final class Engine {
 		 * @param string              $html Rendered HTML.
 		 * @param array<string,mixed> $args wp_mail() arguments.
 		 */
-		$args['message'] = (string) apply_filters( 'wp_tmq_template_html', $html, $args );
-
-		do_action( 'wp_tmq_template_after_apply', $args );
-
-		return $args;
+		return (string) apply_filters( 'wp_tmq_template_html', $html, $args );
 	}
 
 	/**
@@ -262,13 +279,13 @@ final class Engine {
 	 * Capture-and-return the default HTML wrapper, with `$body` and
 	 * `$options` exposed to the template.
 	 *
-	 * @param string              $body Pre-processed body HTML.
-	 * @param array<string,mixed> $args wp_mail() arguments (so the template
-	 *                                  can access `$args['subject']` etc).
+	 * @param string              $body    Pre-processed body HTML.
+	 * @param array<string,mixed> $args    wp_mail() arguments (so the template
+	 *                                     can access `$args['subject']` etc).
+	 * @param array<string,mixed> $options Template options to render with.
 	 * @return string
 	 */
-	private static function renderWrapper( string $body, array $args ): string {
-		$options = self::options();
+	private static function renderWrapper( string $body, array $args, array $options ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- $options is read by the included default-html.php.
 		$subject = isset( $args['subject'] ) ? (string) $args['subject'] : '';
 
 		ob_start();

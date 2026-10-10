@@ -48,6 +48,7 @@ final class Icons {
 		'chevron'   => '<path d="m9 6 6 6-6 6"/>',
 		'search'    => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
 		'wrapper'   => '<rect x="2.5" y="2.5" width="19" height="19" rx="3"/><rect x="7" y="7" width="10" height="10" rx="1"/>',
+		'preview'   => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
 		'access'    => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/>',
 	);
 

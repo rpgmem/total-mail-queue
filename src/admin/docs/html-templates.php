@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p><?php esc_html_e( 'The footer text can use {site_title}, {site_url}, {home_url}, {admin_email}, {recipient}, {date} and {year}. Each is replaced when the email is sent.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Trying it', 'total-mail-queue' ); ?></h3>
+<p><?php esc_html_e( 'The Preview beside the form shows a sample email with the settings on screen, header and footer included, and updates as you change them, before anything is saved. It is drawn by the same code that wraps real mail.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'Save your changes, then use "Send test email" at the bottom of the tab to receive a sample at any address. "Reset to Defaults" puts every template setting back as it shipped.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Rewriting WordPress\'s own emails', 'total-mail-queue' ); ?></h3>
