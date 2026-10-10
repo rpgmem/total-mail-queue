@@ -2735,3 +2735,31 @@ msgstr ""
 #: src/admin/documentation.php:170
 msgid "Source code and issue tracker: %s"
 msgstr ""
+
+#: src/admin/documentation.php:150
+msgid "Reference and help"
+msgstr ""
+
+#: src/admin/documentation.php:205
+msgid " and "
+msgstr ""
+
+#: src/admin/documentation.php:216
+msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic below; the navigation stays at the top while you read."
+msgstr ""
+
+#: src/admin/documentation.php:222
+msgid "Quick navigation"
+msgstr ""
+
+#: src/admin/documentation.php:224
+msgid "Search the documentation…"
+msgstr ""
+
+#: src/admin/documentation.php:224
+msgid "Search the documentation"
+msgstr ""
+
+#: src/admin/documentation.php:248
+msgid "No topic matches this search."
+msgstr ""

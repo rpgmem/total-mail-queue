@@ -71,6 +71,8 @@
 	--tmq-radius: 4px;
 	--tmq-radius-lg: 6px;
 	--tmq-space-xs: 4px;
+	/* Height of the documentation's sticky navigation, set by tmq-docs.js. */
+	--tmq-docs-nav-h: 0px;
 	--tmq-space-sm: 8px;
 	--tmq-space-md: 12px;
 	--tmq-space-lg: 16px;
@@ -170,7 +172,10 @@ h1.tmq-title {
 	border: 1px solid var(--tmq-border-light);
 	border-radius: var(--tmq-radius);
 	box-shadow: 0 1px 3px var(--tmq-shadow);
-	overflow: hidden;
+	/* Clips the columns to the rounded corners. `clip`, not `hidden`: a
+	   `hidden` box is a scroll container, and the documentation's sticky
+	   navigation would stick to it instead of to the page. */
+	overflow: clip;
 }
 
 .tmq-tabs__nav {
@@ -780,24 +785,151 @@ span.tmq-status.tmq-status-inline {
 	border-top: 1px solid var(--tmq-border-light);
 }
 
+/* Quick navigation, after Free Form Certificate's: a card that stays below the
+   admin bar while the topics scroll, with a search box over a single-column
+   tree, one row per group in the menu's order. A group with one topic is a
+   link; a longer one is a <details> branch whose topics open beneath it.
+   Its height is capped so it never takes the whole screen. */
+.tmq-docs-index {
+	position: sticky;
+	top: 46px;
+	z-index: 10;
+	max-height: 60vh;
+	overflow-y: auto;
+	box-shadow: 0 2px 6px var(--tmq-shadow);
+}
+
+.tmq-docs-index .tmq-card-title {
+	margin-bottom: var(--tmq-space-md);
+	padding-bottom: var(--tmq-space-sm);
+	border-bottom: 1px solid var(--tmq-border-light);
+}
+
+.tmq-docs-index .tmq-card-title .tmq-icon {
+	color: var(--tmq-primary);
+}
+
+.tmq-docs-search {
+	margin: 0 0 var(--tmq-space-sm);
+}
+
+.tmq-docs-search input {
+	width: 100%;
+	max-width: 350px;
+}
+
+.tmq-docs-index__groups,
 .tmq-docs-index__list {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-	gap: var(--tmq-space-xs) var(--tmq-space-xl);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
 	margin: 0;
-	padding-left: 1.5em;
+	padding: 0;
+	list-style: none;
 }
 
+.tmq-docs-index__groups li,
+.tmq-docs-index__list li {
+	margin: 0;
+}
+
+/* Each nested level indents under a soft guide rail. */
+.tmq-docs-index__list {
+	margin: 4px 0 0 var(--tmq-space-sm);
+	padding-left: var(--tmq-space-lg);
+	border-left: 1px solid var(--tmq-border-light);
+}
+
+/* One row: a branch's summary or a topic's link. */
+.tmq-docs-index__tile,
 .tmq-docs-index__list a {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	padding: var(--tmq-space-xs) 0;
+	gap: var(--tmq-space-sm);
+	padding: var(--tmq-space-sm) var(--tmq-space-md);
+	font-weight: 500;
+	color: var(--tmq-primary);
+	text-decoration: none;
+	background: var(--tmq-bg-card);
+	border: 1px solid var(--tmq-border);
+	border-radius: var(--tmq-radius);
+	cursor: pointer;
 }
 
-/* An anchored topic lands below the admin bar, not under it. */
-.tmq-docs-topic,
+.tmq-docs-index__tile .tmq-icon,
+.tmq-docs-index__list a .tmq-icon {
+	margin-right: 0;
+}
+
+/* A leaf's icon is quieter than a branch's. */
+a.tmq-docs-index__tile .tmq-icon,
+.tmq-docs-index__list a .tmq-icon {
+	color: var(--tmq-text-muted);
+}
+
+summary.tmq-docs-index__tile {
+	list-style: none;
+}
+
+summary.tmq-docs-index__tile::-webkit-details-marker {
+	display: none;
+}
+
+/* The disclosure chevron, first in a branch's row; it turns when open. */
+.tmq-docs-index__tile .tmq-icon-chevron {
+	color: var(--tmq-text-muted);
+	transition: transform 0.15s ease;
+}
+
+.tmq-docs-index details[open] > summary .tmq-icon-chevron {
+	transform: rotate(90deg);
+}
+
+.tmq-docs-index__tile:hover,
+.tmq-docs-index__tile:focus,
+.tmq-docs-index__list a:hover,
+.tmq-docs-index__list a:focus,
+:root.tmq-dark-mode .tmq-tabs__panel .tmq-docs-index__tile:not(.button):hover,
+:root.tmq-dark-mode .tmq-tabs__panel .tmq-docs-index__tile:not(.button):focus,
+:root.tmq-dark-mode .tmq-tabs__panel .tmq-docs-index__list a:not(.button):hover,
+:root.tmq-dark-mode .tmq-tabs__panel .tmq-docs-index__list a:not(.button):focus {
+	color: var(--tmq-text-on-primary);
+	background: var(--tmq-primary);
+	border-color: var(--tmq-primary);
+}
+
+.tmq-docs-index__tile:hover .tmq-icon,
+.tmq-docs-index__tile:focus .tmq-icon,
+.tmq-docs-index__list a:hover .tmq-icon,
+.tmq-docs-index__list a:focus .tmq-icon {
+	color: var(--tmq-text-on-primary);
+}
+
+.tmq-docs-search-empty {
+	margin: var(--tmq-space-sm) 0 0;
+	color: var(--tmq-text-secondary);
+}
+
+/* An anchored topic lands below the admin bar and the sticky navigation,
+   whose height the script publishes; without it, below the admin bar. */
+.tmq-docs-topic {
+	scroll-margin-top: calc(56px + var(--tmq-docs-nav-h, 0px));
+}
+
 .tmq-docs-index {
 	scroll-margin-top: 48px;
+}
+
+/* On a phone the navigation scrolls away with the page. */
+@media screen and (max-width: 782px) {
+	.tmq-docs-index {
+		position: static;
+		max-height: none;
+	}
+
+	.tmq-docs-topic {
+		scroll-margin-top: 56px;
+	}
 }
 
 .tmq-docs-topic h3 {

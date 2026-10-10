@@ -2745,3 +2745,31 @@ msgstr "Desenvolvido por %s."
 #: src/admin/documentation.php:170
 msgid "Source code and issue tracker: %s"
 msgstr "Código-fonte e relato de problemas: %s"
+
+#: src/admin/documentation.php:150
+msgid "Reference and help"
+msgstr "Referência e ajuda"
+
+#: src/admin/documentation.php:205
+msgid " and "
+msgstr " e "
+
+#: src/admin/documentation.php:216
+msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic below; the navigation stays at the top while you read."
+msgstr "Como configurar e operar o Total Mail Queue, um tópico por cartão. Busque ou escolha um tópico abaixo; a navegação fica no topo enquanto você lê."
+
+#: src/admin/documentation.php:222
+msgid "Quick navigation"
+msgstr "Navegação rápida"
+
+#: src/admin/documentation.php:224
+msgid "Search the documentation…"
+msgstr "Buscar na documentação…"
+
+#: src/admin/documentation.php:224
+msgid "Search the documentation"
+msgstr "Buscar na documentação"
+
+#: src/admin/documentation.php:248
+msgid "No topic matches this search."
+msgstr "Nenhum tópico corresponde a esta busca."

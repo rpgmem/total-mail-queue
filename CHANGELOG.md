@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The FAQ is now Troubleshooting, inside the documentation.** The guide gains topics on HTML templates, alerts, export and import, developers (headers, filters, REST) and stored data. The FAQ tab is gone: its old address opens the documentation, and the plugin's notices link to Troubleshooting, which keeps the "queue a test email" button (#71).
 - **Every screen uses the same cards and icon headings.** Templates, the SMTP account form, the source editor and Cron Information now group their fields in cards like the Settings tab, and every heading carries an icon, including the SMTP and Sources lists. A test keeps headings from shipping without one (#76).
 - **The documentation names its developer and links the repository**, read from the plugin header, the same lines the Plugins screen shows (#77).
+- **The documentation follows the menu, with a quick navigation like Free Form Certificate's.** Topics are grouped by tab in menu order, each group titled with the tab's own name. A sticky single-column tree with a search box stays at the top while you read; the search hides the topics that do not match (#78).
 
 ### Fixed
 
