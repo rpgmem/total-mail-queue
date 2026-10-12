@@ -18,6 +18,7 @@
 /package-lock.json
 /node_modules
 /eslint.config.mjs
+/vitest.config.mjs
 /.stylelintrc.json
 /phpcs.xml
 /phpcs.xml.dist
