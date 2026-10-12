@@ -107,26 +107,21 @@ final class PluginPage {
 	 * Every tab, in navigation order: slug => translated label.
 	 *
 	 * The one list both the menu registration and the tab column read, so the
-	 * two cannot disagree. Cron Information exists only while WP-Cron is
-	 * disabled, because it explains how to run the cron by hand.
+	 * two cannot disagree.
 	 *
 	 * @return array<string,string>
 	 */
 	public static function tabs(): array {
-		$tabs = array(
+		return array(
 			self::TAB_SETTINGS  => __( 'Settings', 'total-mail-queue' ),
 			self::TAB_LOG       => __( 'Log', 'total-mail-queue' ),
 			self::TAB_QUEUE     => __( 'Retention', 'total-mail-queue' ),
 			self::TAB_SMTP      => __( 'SMTP Accounts', 'total-mail-queue' ),
 			self::TAB_SOURCES   => __( 'Sources', 'total-mail-queue' ),
 			self::TAB_TEMPLATES => __( 'Templates', 'total-mail-queue' ),
+			self::TAB_CRON_INFO => __( 'Cron', 'total-mail-queue' ),
+			self::TAB_DOCS      => __( 'Documentation', 'total-mail-queue' ),
 		);
-		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
-			$tabs[ self::TAB_CRON_INFO ] = __( 'Cron Information', 'total-mail-queue' );
-		}
-		$tabs[ self::TAB_DOCS ] = __( 'Documentation', 'total-mail-queue' );
-
-		return $tabs;
 	}
 
 	/**

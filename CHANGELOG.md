@@ -13,6 +13,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **JavaScript test suite** (#115). Vitest with jsdom now covers the four admin scripts (queue list, autosave, documentation search, templates preview and test email), and CI fails below a JS line-coverage floor.
 - **Functional tests for the admin screens** (#115). The SMTP, Sources edit, Settings, notices, queue diagnostics, Access, assets and page-router screens, and the test-email handler, are now exercised with their nonce, capability and error paths; the coverage floor rises to 83%.
 - **Tests for the worker, scheduler, boot and uninstall** (#115). The batch processor's lock, failure and transport branches, the schedule against the real cron table, SMTP recovery times, plugin boot and the uninstaller are now covered; the coverage floor rises to 88%.
+- **Cron tab** (#121). Always shown, it says whether the queue worker is running, asleep, waiting for an SMTP quota, overdue or stalled, with its next and last run; whether WP-Cron's visit trigger is on and which events are overdue; and, for administrators, the crontab line to add (WP-CLI, wget or curl) with a copy button. It replaces the Cron Information tab that appeared only with `DISABLE_WP_CRON`.
 
 ### Changed
 

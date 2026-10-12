@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h3><?php esc_html_e( 'WP-Cron', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'The worker runs on WP-Cron, and WP-Cron only runs when someone visits the site. On a quiet site, or one served from a full-page cache, emails can wait far longer than the interval says.', 'total-mail-queue' ); ?></p>
-<p><?php esc_html_e( 'The reliable setup is a real cron job on the server that calls wp-cron.php every minute or two, with WP-Cron\'s visit trigger turned off (DISABLE_WP_CRON in wp-config.php). When that constant is set, a Cron Information tab appears with the address to call.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'The reliable setup is a real cron job on the server that calls wp-cron.php every minute or two, with WP-Cron\'s visit trigger turned off (DISABLE_WP_CRON in wp-config.php). The Cron tab shows whether the worker is running and gives the exact line to add.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Order and priority', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'Waiting emails leave in priority order, lower number first, from 1 to 100. Ordinary mail is 50. An email carrying the header X-Mail-Queue-Prio: High gets 10, and each source can be given its own priority in the Sources tab.', 'total-mail-queue' ); ?></p>
