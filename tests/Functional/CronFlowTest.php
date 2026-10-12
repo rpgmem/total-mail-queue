@@ -13,7 +13,10 @@ namespace TMQ\Tests\Functional;
  * intercepts at the PHPMailer level — so wp_mail() returns true without
  * making any network calls, and we can introspect the captured messages.
  *
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Cron\CronLock
+ * @covers \TotalMailQueue\Smtp\Repository
+ * @covers \TotalMailQueue\Queue\QueueRepository
  */
 final class CronFlowTest extends FunctionalTestCase {
 

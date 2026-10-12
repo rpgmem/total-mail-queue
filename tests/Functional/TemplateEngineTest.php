@@ -12,7 +12,7 @@ use TotalMailQueue\Templates\Options;
  * forces text/html content type, supports a skip filter, and stays out of
  * the way in block mode and when the feature is toggled off.
  *
- * @covers \TotalMailQueue\Templates\Engine
+ * No covers annotation: the wrapper is the default-html.php partial, which no such annotation can name; without one the test counts what it renders.
  */
 final class TemplateEngineTest extends FunctionalTestCase {
 

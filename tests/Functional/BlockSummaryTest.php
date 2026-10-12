@@ -9,7 +9,8 @@ use TotalMailQueue\Smtp\Repository;
 /**
  * The waiting-row "why is the queue stuck?" message.
  *
- * @covers \TotalMailQueue\Smtp\Repository::blockSummary
+ * @covers \TotalMailQueue\Smtp\Repository
+ * @covers \TotalMailQueue\Support\Encryption
  */
 final class BlockSummaryTest extends FunctionalTestCase {
 

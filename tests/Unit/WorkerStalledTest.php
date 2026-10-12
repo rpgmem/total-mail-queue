@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use TotalMailQueue\Admin\Notices;
 
 /**
- * @covers \TotalMailQueue\Admin\Notices::isWorkerStalled
+ * @covers \TotalMailQueue\Admin\Notices
  */
 final class WorkerStalledTest extends TestCase {
 

@@ -14,12 +14,12 @@ use TotalMailQueue\Sources\Repository as SourcesRepository;
 /**
  * 2.4.1 — translatable + editable source labels, plus group filter.
  *
- * @covers \TotalMailQueue\Sources\Repository::updateOverrides
- * @covers \TotalMailQueue\Sources\Repository::distinctGroups
- * @covers \TotalMailQueue\Sources\KnownSources::displayLabel
- * @covers \TotalMailQueue\Sources\KnownSources::displayGroup
+ * @covers \TotalMailQueue\Sources\Repository
+ * @covers \TotalMailQueue\Sources\KnownSources
  * @covers \TotalMailQueue\Admin\Pages\SourcesPage
  * @covers \TotalMailQueue\Admin\Tables\SourcesTable
+ * @covers \TotalMailQueue\Admin\Pages\SourcesActions
+ * @covers \TotalMailQueue\Admin\Pages\SourcesListRenderer
  */
 final class SourcesOverridesTest extends FunctionalTestCase {
 

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use TotalMailQueue\Cron\Scheduler;
 
 /**
- * @covers \TotalMailQueue\Cron\Scheduler::nextState
+ * @covers \TotalMailQueue\Cron\Scheduler
  */
 final class SchedulerStateTest extends TestCase {
 

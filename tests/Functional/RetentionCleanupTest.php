@@ -8,7 +8,9 @@ namespace TMQ\Tests\Functional;
  * Verifies the cleanup paths inside \TotalMailQueue\Cron\BatchProcessor::run() that
  * trim the log table by age (clear_queue) and by hard cap (log_max_records).
  *
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Retention\LogPruner
+ * @covers \TotalMailQueue\Cron\CronLock
  */
 final class RetentionCleanupTest extends FunctionalTestCase {
 

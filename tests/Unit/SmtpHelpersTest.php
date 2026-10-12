@@ -7,9 +7,7 @@ namespace TMQ\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \TotalMailQueue\Smtp\Repository::pickAvailable
- * @covers \TotalMailQueue\Smtp\Repository::bumpMemoryCounter
- * @covers \TotalMailQueue\Smtp\Repository::markUsed
+ * @covers \TotalMailQueue\Smtp\Repository
  */
 final class SmtpHelpersTest extends TestCase {
 

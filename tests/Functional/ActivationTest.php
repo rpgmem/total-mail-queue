@@ -9,7 +9,7 @@ namespace TMQ\Tests\Functional;
  * creates both plugin tables with the columns and indexes the rest of the
  * code relies on.
  *
- * @covers \TotalMailQueue\Database\Migrator::install
+ * @covers \TotalMailQueue\Database\Migrator
  */
 final class ActivationTest extends FunctionalTestCase {
 

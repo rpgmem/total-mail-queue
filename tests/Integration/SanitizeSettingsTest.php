@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers \TotalMailQueue\Settings\Sanitizer::sanitize
+ * @covers \TotalMailQueue\Settings\Sanitizer
  */
 final class SanitizeSettingsTest extends IntegrationTestCase {
 

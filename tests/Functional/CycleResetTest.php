@@ -14,8 +14,7 @@ use TotalMailQueue\Smtp\Repository;
  * last send (last_sent_at) — otherwise an account that keeps trickling out mail
  * slides its own window forward forever and the cycle never rolls over.
  *
- * @covers \TotalMailQueue\Smtp\Repository::resetCounters
- * @covers \TotalMailQueue\Smtp\Repository::incrementCounter
+ * @covers \TotalMailQueue\Smtp\Repository
  */
 final class CycleResetTest extends FunctionalTestCase {
 

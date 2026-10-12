@@ -11,7 +11,8 @@ use TotalMailQueue\Support\Encryption;
  * Stored SMTP passwords move from the legacy, unauthenticated envelope to
  * the authenticated one on the next version bump.
  *
- * @covers \TotalMailQueue\Smtp\Repository::upgradePasswordEncryption
+ * @covers \TotalMailQueue\Smtp\Repository
+ * @covers \TotalMailQueue\Support\Encryption
  */
 final class SmtpPasswordUpgradeTest extends FunctionalTestCase {
 

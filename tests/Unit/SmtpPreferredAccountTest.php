@@ -11,7 +11,7 @@ use TotalMailQueue\Smtp\Repository as SmtpRepository;
  * Exercises {@see SmtpRepository::pickPreferredOrAvailable()} — the per-source
  * preferred-account selection with fallback to the normal rotation.
  *
- * @covers \TotalMailQueue\Smtp\Repository::pickPreferredOrAvailable
+ * @covers \TotalMailQueue\Smtp\Repository
  */
 final class SmtpPreferredAccountTest extends TestCase {
 

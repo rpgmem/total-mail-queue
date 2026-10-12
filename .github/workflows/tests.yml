@@ -132,8 +132,9 @@ jobs:
       # Merged line coverage of the unit, integration and functional suites,
       # as PHPUnit attributes it through @covers. Ratcheted up in the PR that
       # delivers a gain, never lowered, and at most 5 points below the
-      # measured figure (47.04% when set).
-      COVERAGE_FLOOR_LINES: '43'
+      # measured figure: 47.04% when set (43), 66.49% once every test
+      # declared the classes it exercises (61, #115).
+      COVERAGE_FLOOR_LINES: '61'
     services:
       mysql:
         image: mysql:8.0

@@ -9,8 +9,8 @@ use TotalMailQueue\Admin\ExportImport;
 /**
  * Exercises the XML export/import round-trip and the XXE protection on import.
  *
- * @covers \TotalMailQueue\Admin\ExportImport::buildExportXml
- * @covers \TotalMailQueue\Admin\ExportImport::handleImport
+ * @covers \TotalMailQueue\Admin\ExportImport
+ * @covers \TotalMailQueue\Settings\Sanitizer
  */
 final class ExportImportXmlTest extends FunctionalTestCase {
 

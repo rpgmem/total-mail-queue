@@ -13,7 +13,7 @@ use TotalMailQueue\Admin\SettingsApi;
  * The icon set and the grouped Settings tab.
  *
  * @covers \TotalMailQueue\Admin\Icons
- * @covers \TotalMailQueue\Admin\SettingsApi::sections
+ * @covers \TotalMailQueue\Admin\SettingsApi
  */
 final class AdminIconsAndSectionsTest extends TestCase {
 

@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers \TotalMailQueue\Smtp\PhpMailerCapturer::capture
+ * @covers \TotalMailQueue\Smtp\PhpMailerCapturer
  */
 final class CapturePhpmailerConfigTest extends IntegrationTestCase {
 
