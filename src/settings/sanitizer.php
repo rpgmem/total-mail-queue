@@ -18,11 +18,11 @@ namespace TotalMailQueue\Settings;
 final class Sanitizer {
 
 	/**
-	 * Keys the user is allowed to set from the Settings page.
+	 * Keys the user is allowed to set from the Settings page or an import file.
 	 *
 	 * @var array<int,string>
 	 */
-	private const ALLOWED_KEYS = array(
+	public const ALLOWED_KEYS = array(
 		'enabled',
 		'alert_enabled',
 		'email',
@@ -59,9 +59,9 @@ final class Sanitizer {
 
 	/**
 	 * `register_setting()` `sanitize_callback`. Drops unknown keys and applies
-	 * the right sanitizer per field type — `sanitize_email()` for address
-	 * fields, an allowlist for `dark_mode`, `sanitize_text_field()` for
-	 * everything else.
+	 * the right sanitizer per field type — {@see Options::number()} for numbers,
+	 * `sanitize_email()` for address fields, an allowlist for `dark_mode`,
+	 * `sanitize_text_field()` for everything else.
 	 *
 	 * @param mixed $input Raw input from `$_POST` (typically array, may be anything).
 	 * @return array<string,string> Sanitized settings, ready to merge into the option.
@@ -71,11 +71,17 @@ final class Sanitizer {
 		if ( ! is_array( $input ) ) {
 			return $sanitized;
 		}
+		$stored = get_option( Options::OPTION_NAME, array() );
+		$stored = is_array( $stored ) ? $stored : array();
 		foreach ( $input as $key => $value ) {
 			if ( ! in_array( $key, self::ALLOWED_KEYS, true ) ) {
 				continue;
 			}
-			if ( in_array( $key, self::EMAIL_KEYS, true ) ) {
+			if ( isset( Options::NUMBER_FLOORS[ $key ] ) ) {
+				// An empty field keeps what is stored, never 0.
+				$fallback          = Options::number( $stored[ $key ] ?? null, $key, (string) Options::defaults()[ $key ] );
+				$sanitized[ $key ] = Options::number( $value, $key, $fallback );
+			} elseif ( in_array( $key, self::EMAIL_KEYS, true ) ) {
 				$sanitized[ $key ] = sanitize_email( (string) $value );
 			} elseif ( 'dark_mode' === $key ) {
 				$sanitized[ $key ] = in_array( $value, Options::DARK_MODES, true ) ? $value : 'off';
