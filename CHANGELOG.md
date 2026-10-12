@@ -15,7 +15,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **Documentation navigation beside the topics** (#121). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
+- **Documentation navigation beside the topics** (#120). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
 
 ### Fixed
 
