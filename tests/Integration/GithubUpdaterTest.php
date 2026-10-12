@@ -82,6 +82,7 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 			}
 		);
 		Functions\when( 'wpautop' )->returnArg();
+		Functions\when( 'wp_kses_post' )->returnArg();
 
 		unset( $_GET['force-check'] );
 	}
@@ -266,6 +267,40 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 
 		$older = GithubUpdater::checkForUpdate( $this->transient( '0.0.1' ) );
 		self::assertSame( $expected, current( $older->response )->icons );
+	}
+
+	public function test_the_details_modal_has_the_banner_and_the_readme_tabs_in_order(): void {
+		$this->responses['raw.githubusercontent.com']['body'] = "=== Total Mail Queue ===\nRequires PHP: 8.1\n\n== Description ==\n\nQueues **every** email.\n\n== Frequently Asked Questions ==\n\n= Does it send? =\n\nYes.\n\n== Screenshots ==\n\nThe images live in the repository.\n\n1. The log\n2. Retention\n\n== Installation ==\n\nActivate it.\n\n== Privacy ==\n\nNothing leaves.\n\n== Changelog ==\n\nSee CHANGELOG.md.\n";
+		$release         = $this->release();
+		$release['body'] = "### Changed\n\n- **The licence** moved (#73).";
+		$this->responses['api.github.com']['body'] = (string) json_encode( $release );
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		$base = 'https://example.org/wp-content/plugins/total-mail-queue/assets/img/brand/';
+		self::assertSame(
+			array(
+				'low'  => $base . 'banner-772x250.png',
+				'high' => $base . 'banner-1544x500.png',
+			),
+			$info->banners
+		);
+		self::assertSame( array( 'description', 'installation', 'faq', 'changelog', 'screenshots', 'other_notes' ), array_keys( $info->sections ) );
+		self::assertSame( '<p>Queues <strong>every</strong> email.</p>', $info->sections['description'] );
+		self::assertSame( '<h4>Does it send?</h4><p>Yes.</p>', $info->sections['faq'] );
+		self::assertSame( '<h3>Privacy</h3><p>Nothing leaves.</p>', $info->sections['other_notes'] );
+		self::assertStringContainsString( '<h4>Changed</h4><ul><li><strong>The licence</strong> moved (<a href="https://github.com/rpgmem/total-mail-queue/issues/73">#73</a>).</li></ul>', $info->sections['changelog'] );
+		self::assertStringContainsString( 'https://raw.githubusercontent.com/rpgmem/total-mail-queue/v2.10.0/docs/screenshots/01-log.png', $info->sections['screenshots'] );
+		self::assertStringNotContainsString( 'live in the repository', $info->sections['screenshots'], 'Prose before the caption list is not a caption.' );
+	}
+
+	public function test_a_release_readme_that_cannot_be_fetched_falls_back_to_the_installed_one(): void {
+		$this->responses['raw.githubusercontent.com'] = null;
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertArrayHasKey( 'description', $info->sections );
+		self::assertArrayHasKey( 'screenshots', $info->sections );
 	}
 
 	public function test_plugin_info_answers_only_for_our_slug(): void {
