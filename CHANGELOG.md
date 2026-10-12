@@ -19,6 +19,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - **Documentation navigation beside the topics** (#120). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
 - **The documentation's navigation reads as in Free Form Certificate** (#122). Its title is now Quick Navigation (pt_BR "Navegação Rápida") and the search box says "Search documentation…" ("Pesquisar na documentação…"), the wording of Free Form Certificate and the other plugins.
+- **Icons and colours follow Free Form Certificate** (#123). Each icon with a counterpart there now uses its drawing — Settings is the gear and Advanced the sliders, the reverse of before — and the colour tokens take its values, among them the darker field border (3:1 against white) and its status text colours.
 
 ### Fixed
 
