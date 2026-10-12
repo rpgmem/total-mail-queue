@@ -12,7 +12,7 @@ namespace TotalMailQueue\Admin;
 /**
  * The plugin's two capabilities and every decision built on them.
  *
- * - {@see self::VIEW} opens the Log, Retention, Sources, Cron Information and
+ * - {@see self::VIEW} opens the Log, Retention, Sources, Cron and
  *   the documentation, read-only.
  * - {@see self::MANAGE} also changes settings, sources and templates, runs
  *   bulk actions and reads message bodies. It includes VIEW.

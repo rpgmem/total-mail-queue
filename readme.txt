@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 5.9
 Tested up to: 6.9
-Stable tag: 2.11.0
+Stable tag: 2.12.0
 Requires PHP: 8.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -24,6 +24,7 @@ If your site exhibits unusual behavior — such as a spam bot repeatedly submitt
 * Resend or force-resend failed emails from the log
 * Receive alerts when the queue grows unexpectedly
 * Receive alerts when WordPress is unable to send emails
+* See whether WP-Cron is sending the queue, and copy the server cron line that makes it reliable
 * Export/import plugin settings and SMTP accounts via XML
 * Detects and resolves conflicts with other email plugins
 
@@ -51,7 +52,7 @@ If you configure SMTP accounts within the plugin, it will use those to send emai
 
 = Does this plugin work, if I have a caching Plugin installed? =
 
-If you're using a caching plugin like W3 Total Cache, WP Rocket or any other caching solution which generates static HTML files and serves them to visitors, you'll have to make sure you're calling the wp-cron file manually every couple of minutes.
+If you're using a caching plugin like W3 Total Cache, WP Rocket or any other caching solution which generates static HTML files and serves them to visitors, you'll have to make sure you're calling the wp-cron file manually every couple of minutes. The Cron tab gives the exact line to add to the server.
 
 Otherwise your normal WP Cron wouldn't be called as often as it should be and scheduled messages would be sent with big delays.
 
@@ -182,6 +183,7 @@ The images live in the repository's `docs/screenshots/` folder and are shown in 
 7. Access: which roles view and which manage the plugin
 8. Built-in documentation
 9. Dark mode
+10. Cron: the queue worker's state, WP-Cron's health and the server cron line
 
 == Installation ==
 
@@ -196,18 +198,16 @@ Updates arrive through the normal WordPress update screen, straight from this pl
 
 The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
 
+= 2.12.0 =
+* New: a Cron tab, always shown, says whether the queue worker is running, asleep, waiting, overdue or stalled, whether WP-Cron fires, and gives administrators the server cron line to copy.
+* Changed: icons, colours and the documentation's Quick Navigation follow Free Form Certificate.
+* Fixed: an empty number field keeps its value instead of saving 0, and Import restores every setting the form saves.
+* Security: stored SMTP passwords are authenticated as well as encrypted.
+
 = 2.11.0 =
 * New: a live preview on the Templates tab shows a sample email, header and footer included, with the settings on screen and updates as you edit, before saving.
 
-= 2.10.0 =
-* New: updates arrive from GitHub Releases on the normal WordPress update screen, each package checked against its SHA-256.
-* New: Settings → Access lets administrators choose which roles view and which manage the plugin; one-time account-link emails stay administrator-only.
-* New: search and a date range on the Log and Retention lists; an opt-in Block on alert; password resets still go out in Block mode.
-* New: on/off settings are switches that save on flip, a dark mode, card layouts and a built-in Documentation tab.
-* Changed: PHP 8.1 is now the minimum.
-* Fixed: retried emails keep their attachments, long recipient lists are stored whole, and deleting the plugin removes everything it wrote.
-
 == Upgrade Notice ==
 
-= 2.11.0 =
-Adds a live preview of the email template on the Templates tab: header, body and footer update as you edit, before saving. Details and issues in CHANGELOG.md.
+= 2.12.0 =
+Adds a Cron tab that shows whether the queue is being sent and gives the server cron line to copy; an empty number field no longer saves 0, and SMTP passwords are authenticated. Details and issues in CHANGELOG.md.

@@ -7,6 +7,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.12.0] (2026-10-12)
+
+A Cron tab that says whether the queue is being sent and gives the server cron line, Free Form Certificate's icons, colours and documentation navigation, empty number fields that keep their value, and authenticated SMTP passwords.
+
 ### Added
 
 - **Coverage floor and three guards** (#113). CI now fails below a merged line-coverage floor, and the unit suite checks that the version and the PHP and WordPress floors agree across every file that declares them, that the Upgrade Notice describes the release on offer, and that every suppression names its rule and a reason.

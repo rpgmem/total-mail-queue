@@ -1,6 +1,6 @@
 <?php
 /**
- * Top-level admin page renderer (Settings / Log / Retention / SMTP / Sources / Templates / Cron Info / Documentation).
+ * Top-level admin page renderer (Settings / Log / Retention / SMTP / Sources / Templates / Cron / Documentation).
  *
  * @package TotalMailQueue
  */
@@ -31,8 +31,7 @@ use TotalMailQueue\Settings\Options;
  * - Sources   → delegated to {@see SourcesPage}.
  * - Templates → delegated to {@see TemplatesPage}.
  * - Documentation → {@see Documentation}; the old FAQ slug opens it too.
- * - Cron Info → delegated to {@see CronInfoPage} (only registered when
- *               `DISABLE_WP_CRON` is truthy).
+ * - Cron      → delegated to {@see CronInfoPage}.
  */
 final class PluginPage {
 

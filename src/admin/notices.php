@@ -127,7 +127,7 @@ final class Notices {
 	 * Warn manage_options users when mail is piling up but the worker hasn't
 	 * run in a while — the classic symptom of WP-Cron only firing while an
 	 * admin is logged in (cached front-end / low traffic). Works whether or
-	 * not `DISABLE_WP_CRON` is set, unlike the Cron Information tab.
+	 * not `DISABLE_WP_CRON` is set; the Cron tab shows the same state in full.
 	 *
 	 * @param array<string,mixed> $options Plugin options snapshot.
 	 */
