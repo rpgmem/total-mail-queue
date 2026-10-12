@@ -12,7 +12,12 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Coverage floor and three guards** (#113). CI now fails below a merged line-coverage floor, and the unit suite checks that the version and the PHP and WordPress floors agree across every file that declares them, that the Upgrade Notice describes the release on offer, and that every suppression names its rule and a reason.
 - **JavaScript test suite** (#115). Vitest with jsdom now covers the four admin scripts (queue list, autosave, documentation search, templates preview and test email), and CI fails below a JS line-coverage floor.
 - **Functional tests for the admin screens** (#115). The SMTP, Sources edit, Settings, notices, queue diagnostics, Access, assets and page-router screens, and the test-email handler, are now exercised with their nonce, capability and error paths; the coverage floor rises to 83%.
+- **Tests for the worker, scheduler, boot and uninstall** (#115). The batch processor's lock, failure and transport branches, the schedule against the real cron table, SMTP recovery times, plugin boot and the uninstaller are now covered; the coverage floor rises to 88%.
 - **Cron tab** (#121). Always shown, it says whether the queue worker is running, asleep, waiting for an SMTP quota, overdue or stalled, with its next and last run; whether WP-Cron's visit trigger is on and which events are overdue; and, for administrators, the crontab line to add (WP-CLI, wget or curl) with a copy button. It replaces the Cron Information tab that appeared only with `DISABLE_WP_CRON`.
+
+### Changed
+
+- **Documentation navigation beside the topics** (#120). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
 
 ### Fixed
 

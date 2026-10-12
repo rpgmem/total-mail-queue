@@ -2745,7 +2745,7 @@ msgid " and "
 msgstr ""
 
 #: src/admin/documentation.php:216
-msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic below; the navigation stays at the top while you read."
+msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic; on a wide screen the navigation stays beside the text while you read."
 msgstr ""
 
 #: src/admin/documentation.php:222

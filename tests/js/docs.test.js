@@ -42,10 +42,6 @@ describe( 'search', () => {
 		runScript( 'assets/js/tmq-docs.js' );
 	} );
 
-	it( 'publishes the navigation height on load', () => {
-		expect( document.documentElement.style.getPropertyValue( '--tmq-docs-nav-h' ) ).toBe( '0px' );
-	} );
-
 	it( 'hides the topics, links and groups that do not match, and opens the group that does', () => {
 		search( 'SMTP' );
 
