@@ -79,7 +79,6 @@ abstract class IntegrationTestCase extends TestCase {
             'smtp_timeout'        => '30',
             'tableName'           => 'total_mail_queue',
             'smtpTableName'       => 'total_mail_queue_smtp',
-            'triggercount'        => 0,
         );
     }
 }

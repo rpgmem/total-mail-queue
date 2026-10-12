@@ -73,7 +73,6 @@ final class Options {
 			'smtp_debug'           => '0',   // 0=off, 1=capture the full SMTP conversation into each row's error log.
 			'tableName'            => 'total_mail_queue',
 			'smtpTableName'        => 'total_mail_queue_smtp',
-			'triggercount'         => 0,
 			'from_email'           => '',
 			'from_name'            => '',
 			'dark_mode'            => 'off', // off|on|auto — the plugin's admin screens only.

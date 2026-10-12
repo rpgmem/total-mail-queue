@@ -16,6 +16,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **An empty number field no longer saves as 0** (#112). Clearing the log retention deleted every log row on the next run, and clearing the batch size stopped sending. An empty field now keeps its value, each number has a minimum, and values already stored empty read as the default.
 - **Import restores every setting the form saves** (#112). Six keys the export writes, among them the SMTP timeout, the default sender and dark mode, were dropped on import; the import now goes through the form's own sanitizer.
 
+### Security
+
+- **SMTP passwords are authenticated, not only encrypted** (#114). A stored password now carries an HMAC over its ciphertext, checked before decryption, with the cipher and MAC keys derived separately from the salt. Existing passwords are re-encrypted on update and after an import; the old format is still read.
+
 ## [2.11.0] (2026-10-10) — `88add1d`
 
 ### Added

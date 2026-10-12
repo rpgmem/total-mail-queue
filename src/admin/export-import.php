@@ -175,6 +175,9 @@ final class ExportImport {
 					SmtpRepository::insert( $account );
 				}
 			}
+			// A file exported by an earlier version carries passwords in the
+			// legacy, unauthenticated envelope.
+			SmtpRepository::upgradePasswordEncryption();
 		}
 
 		$exported_at = (string) ( $xml['exported_at'] ?? '' );
