@@ -4,7 +4,7 @@ A WordPress plugin that puts every email the site sends through a managed queue.
 
 The complete reference ships inside the plugin, under **Total Mail Queue → Documentation**.
 
-**Requires** WordPress 5.9 or later and PHP 8.1 or later · **License** GPLv3 or later
+**Requires** WordPress 6.8 or later and PHP 8.3 or later · **License** AGPLv3 or later
 
 ![Log](docs/screenshots/01-log.png)
 
@@ -78,6 +78,7 @@ The queue is sent by WP-Cron, so make sure it runs reliably. On a site behind a 
 ## Documentation and credits
 
 - [CHANGELOG.md](CHANGELOG.md): what changed in each release.
-- This plugin is a fork of [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM.
+- This plugin is a fork of [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM, which is GPLv3 or later.
+- `lib/html2text` is [html2text](https://github.com/soundasleep/html2text), MIT, with its own `LICENSE.md`.
 
 Every screenshot above comes from a throwaway WordPress filled with invented people and data. `.github/scripts/screenshots/` holds the two scripts that rebuild them: `seed.php` and `capture.mjs`.

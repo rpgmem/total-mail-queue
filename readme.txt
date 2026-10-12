@@ -1,19 +1,17 @@
 === Total Mail Queue ===
 Tags: email, mail, queue, email log, wp_mail
-Requires at least: 5.9
-Tested up to: 6.9
-Stable tag: 2.12.0
-Requires PHP: 8.1
-License: GPLv3 or later
-License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Requires at least: 6.8
+Tested up to: 7.1.3
+Stable tag: 3.0.0
+Requires PHP: 8.3
+License: AGPLv3 or later
+License URI: https://www.gnu.org/licenses/agpl-3.0.html
 
 Queue outgoing emails, manage SMTP accounts with daily/monthly limits, and get alerts if your site sends too many emails.
 
 == Description ==
 
-This plugin enhances the security and stability of your WordPress installation by delaying and controlling wp_mail() email submissions through a managed queue.
-
-If your site exhibits unusual behavior — such as a spam bot repeatedly submitting forms — you will be alerted immediately.
+Total Mail Queue holds every email WordPress sends in a queue and lets it out at a pace you choose, through the delivery you already use or through SMTP accounts with daily and monthly limits. A sudden flood of mail, such as a bot abusing a form, piles up in the queue instead of leaving the site, and an alert tells you about it.
 
 * Intercepts wp_mail() and places outgoing messages in a queue
 * Configure how many emails are sent and at what interval
@@ -32,143 +30,75 @@ If your site exhibits unusual behavior — such as a spam bot repeatedly submitt
 
 == Frequently Asked Questions ==
 
-= Do I need to configure anything? =
+= What do I set up after activating it? =
 
-Yes. Once activated please go into the Settings of the Plugin to do some configurations.
+Open the plugin's settings, choose the operation mode and set how many emails leave per run and how often. Alerts are configured on the same screen: the queue length that triggers one, and who receives it.
 
-You can enable the Queue, control how many emails and how often they should be sent.
+= How does the queue work? =
 
-You can enable the Alerting feature and control at which point exactly you want to be alerted.
+The plugin answers wp_mail() itself. Each message is saved to the database and a WP-Cron job sends a batch at every interval you set, so nothing leaves faster than that pace.
 
-= How does this plugin work? =
+= Does it change how my emails are delivered? =
 
-When enabled, the plugin intercepts wp_mail(). Instead of sending emails immediately, they are stored in the database and released gradually via WP-Cron according to your configured interval.
+Only if you ask it to. The default `auto` method hands each message to whatever delivers mail on your site today: another SMTP plugin, PHP's mail(), an API service. Add SMTP accounts in the plugin to send through them, with their limits, or choose `php` to always use WordPress's own mailer.
 
-= Does this plugin change the way HOW the emails are sent? =
+= My site uses a page cache. Will the queue still be sent? =
 
-It depends on your configuration. In the default `auto` send method the plugin preserves whatever email delivery mechanism you already have (SMTP from another plugin, PHP mail, Mailgun, etc.).
+A page cache (W3 Total Cache, WP Rocket, a proxy such as NGINX in front of the site) serves visitors without running WordPress, so WP-Cron runs rarely and the queue waits. Call wp-cron.php from a server cron job every few minutes instead; the Cron tab shows the exact line for your server.
 
-If you configure SMTP accounts within the plugin, it will use those to send emails with full control over daily/monthly limits. You can also set the send method to `php` to always use WordPress's default mail function.
+= What happens to attachments? =
 
-= Does this plugin work, if I have a caching Plugin installed? =
+They are copied when the email is queued and kept until that email is sent, then removed.
 
-If you're using a caching plugin like W3 Total Cache, WP Rocket or any other caching solution which generates static HTML files and serves them to visitors, you'll have to make sure you're calling the wp-cron file manually every couple of minutes. The Cron tab gives the exact line to add to the server.
+= What are queue alerts for? =
 
-Otherwise your normal WP Cron wouldn't be called as often as it should be and scheduled messages would be sent with big delays.
+A queue that grows far beyond normal usually means something is sending mail it should not, such as a form under attack. The queue already slows that mail down; the alert tells you when its length passes the limit you chose, so you can look before more of it goes out.
 
-= What about Proxy-Caching, e.g. NGINX? =
+= Can an email skip ahead of the others? =
 
-Same situation here. Please make sure you're calling the WordPress Cron by an external service or your webhoster every couple of minutes.
+Yes. Add the header `X-Mail-Queue-Prio: High` and the email leaves before ordinary mail in the next run. Each source can also have its own priority in the Sources tab.
 
-= My form builder supports attachments. What about them? =
+With wp_mail():
 
-You are covered. All attachments are stored temporarily in the queue until they are sent along with their corresponding emails.
+`wp_mail( $to, $subject, $message, array( 'X-Mail-Queue-Prio: High' ) );`
 
-= What are Queue alerts? =
+For WooCommerce emails:
 
-This is a simple and effective way to improve the security of your WordPress installation.
-
-Imagine: In case your website is sending spam through wp_mail(), the email Queue would fill up very quickly preventing your website from sending so many spam emails at once. This gives you time and avoids a lot of trouble.
-
-Queue Alerts warn you, if the Queue is longer than usal. You decide at which point you want to be alerted. So you get the chance to have a look if there might be something wrong on the website.
-
-= Can I add emails with a high priority to the queue? =
-
-Yes, you can add the custom `X-Mail-Queue-Prio` header set to `High` to your email. High priority emails will be sent through the standard Total Mail Queue sending cycle but before all normal emails lacking a priority header in the queue.
-
-*Example 1 (add priority to Woocommerce emails):*
-
-`add_filter('woocommerce_mail_callback_params',function ( $array ) {
-	$prio_header = 'X-Mail-Queue-Prio: High';
-	if (is_array($array[3])) {
-		$array[3][] = $prio_header;
+`add_filter( 'woocommerce_mail_callback_params', function ( $params ) {
+	$header = 'X-Mail-Queue-Prio: High';
+	if ( is_array( $params[3] ) ) {
+		$params[3][] = $header;
 	} else {
-		$array[3] .= $array[3] ? "\r\n" : '';
-		$array[3] .= $prio_header;
+		$params[3] = trim( $params[3] . "\r\n" . $header );
 	}
-	return $array;
-},10,1);`
+	return $params;
+} );`
 
-*Example 2 (add priority to Contact Form 7 form emails):*
+In Contact Form 7, add `X-Mail-Queue-Prio: High` as a line of the form's Additional Headers, on its Mail tab.
 
-When editing a form in Contact Form 7 just add an additional line to the
-`Additional Headers` field under the `Mail` tab panel.
+= Can an email bypass the queue? =
 
-`X-Mail-Queue-Prio: High`
+Yes, with the header `X-Mail-Queue-Prio: Instant`: the email is sent at once and logged as `instant`. It ignores the pace you set, so keep it for the rare email that cannot wait, such as a password reset. A source you disabled still blocks it, and in Block mode it is held like any other email.
 
-*Example 3 (add priority to WordPress reset password emails):*
+For password reset emails:
 
-`add_filter('retrieve_password_notification_email', function ($defaults, $key, $user_login, $user_data) {
-	$prio_header = 'X-Mail-Queue-Prio: High';
-	if (is_array($defaults['headers'])) {
-		$defaults['headers'][] = $prio_header;
+`add_filter( 'retrieve_password_notification_email', function ( $email ) {
+	$header = 'X-Mail-Queue-Prio: Instant';
+	if ( is_array( $email['headers'] ) ) {
+		$email['headers'][] = $header;
 	} else {
-		$defaults['headers'] .= $defaults['headers'] ? "\r\n" : '';
-		$defaults['headers'] .= $prio_header;
+		$email['headers'] = trim( $email['headers'] . "\r\n" . $header );
 	}
-	return $defaults;
-}, 10, 4);`
+	return $email;
+} );`
 
+= What does wp_mail() return while the queue is on? =
 
-= Can I send emails instantly without going through the queue? =
+`true` once the message is stored in the queue, and `false` if it could not be stored. An `Instant` email is sent even if its log entry fails, because it was marked as one that cannot wait.
 
-Yes, this is possible (if you absolutely need to do this).
+= Does it work on a multisite network? =
 
-For this you can add the custom `X-Mail-Queue-Prio` header set to `Instant` to your email. These emails are sent instantly circumventing the mail queue. They still appear in the Total Mail Queue log flagged as `instant`.
-
-Mind that this is a potential security risk and should be considered carefully. Please use only as an exception.
-
-*Example 1 (instantly send Woocommerce emails):*
-
-`add_filter('woocommerce_mail_callback_params',function ( $array ) {
-	$prio_header = 'X-Mail-Queue-Prio: Instant';
-	if (is_array($array[3])) {
-		$array[3][] = $prio_header;
-	} else {
-		$array[3] .= $array[3] ? "\r\n" : '';
-		$array[3] .= $prio_header;
-	}
-	return $array;
-},10,1);`
-
-*Example 2 (instantly send Contact Form 7 form emails):*
-
-When editing a form in Contact Form 7 just add an additional line to the
-`Additional Headers` field under the `Mail` tab panel.
-
-`X-Mail-Queue-Prio: Instant`
-
-*Example 3 (instantly send WordPress reset password emails):*
-
-`add_filter('retrieve_password_notification_email', function ($defaults, $key, $user_login, $user_data) {
-	$prio_header = 'X-Mail-Queue-Prio: Instant';
-	if (is_array($defaults['headers'])) {
-		$defaults['headers'][] = $prio_header;
-	} else {
-		$defaults['headers'] .= $defaults['headers'] ? "\r\n" : '';
-		$defaults['headers'] .= $prio_header;
-	}
-	return $defaults;
-}, 10, 4);`
-
-= Can I still use the wp_mail() function as ususal? =
-
-Yes, the wp_mail() function works as expected.
-
-When calling wp_mail() the function returns `true` as expected. This means the email has been entered into the queue.
-
-*Exceptions:*
-
-If for some reason the email cannot be entered into the database, wp_mail() will return `false`.
-
-However if you send an email using the instant header option the email will be considered important.
-In this case the email will be sent right away, even if there is an error creating a log for it in the queue.
-
-= I have a MultiSite. Can I use Total Mail Queue? =
-
-Yes, but with limitations.
-
-Do not activate the Total Mail Queue for the whole network. Instead, please activate it for each site separately. Then it will work smoothly. In a future release we'll add full MultiSite support.
+Activate it on each site rather than network-wide; each site then keeps its own queue and settings.
 
 == Screenshots ==
 
@@ -187,9 +117,7 @@ The images live in the repository's `docs/screenshots/` folder and are shown in 
 
 == Installation ==
 
-Upload the the plugin, activate it, and go to the Settings to enable the Queue. 
-
-Please make sure that your WP Cron is running reliably.
+Install and activate the plugin, then turn the queue on in its settings. The queue is sent by WP-Cron, so make sure it runs reliably; on a cached or quiet site, the Cron tab gives the server line that does.
 
 Updates arrive through the normal WordPress update screen, straight from this plugin's [GitHub Releases](https://github.com/rpgmem/total-mail-queue/releases). Each package is checked against its published SHA-256 before it is installed, and WordPress's own per-plugin toggle turns on automatic updates.
 
@@ -209,5 +137,5 @@ The two most recent releases are summarised below. The full history of every rel
 
 == Upgrade Notice ==
 
-= 2.12.0 =
-Adds a Cron tab that shows whether the queue is being sent and gives the server cron line to copy; an empty number field no longer saves 0, and SMTP passwords are authenticated. Details and issues in CHANGELOG.md.
+= 3.0.0 =
+⚠ Requires WordPress 6.8 and PHP 8.3; sites below keep their installed version. ⚠ The licence is now AGPLv3 or later: reuse and forks stay free, and a modified copy offered as a service must publish its source. Details in CHANGELOG.md.

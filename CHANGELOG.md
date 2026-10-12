@@ -7,7 +7,21 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [2.12.0] (2026-10-12)
+## [3.0.0] (2026-10-12)
+
+A major version for two changes to what the plugin asks of a site, not to what it does: it now requires WordPress 6.8 and PHP 8.3, and the licence moves to AGPLv3 or later. The release process also catches up with the other three plugins.
+
+### Changed
+
+- **⚠ Requires WordPress 6.8 and PHP 8.3** (#129). The floor moves from WordPress 5.9 and PHP 8.1, which CI never ran, to the one Free Form Certificate, Email Signature Generator and Institutional Email share; sites below it keep their installed version. CI runs the functional suite on the floor, and the coverage floors rise to 90% (PHP) and 94% (JS).
+- ⚠ **The licence is now AGPLv3 or later** (#134). Reuse and forks stay free; a modified copy offered as a network service must publish its source too. The readme prose inherited from Mail Queue is rewritten, html2text stays MIT, and releases already published stay GPLv3.
+- **Dependabot's patch and minor updates merge on their own** (#131). Required checks still gate the merge; majors stay manual.
+
+### Security
+
+- **CI jobs run with a read-only token** (#137). `lint.yml` and `tests.yml` declare `contents: read`.
+
+## [2.12.0] (2026-10-12) — `89bef95`
 
 A Cron tab that says whether the queue is being sent and gives the server cron line, Free Form Certificate's icons, colours and documentation navigation, empty number fields that keep their value, and authenticated SMTP passwords.
 
@@ -298,7 +312,7 @@ A Cron tab that says whether the queue is being sent and gives the server cron l
 
 - **Every database query goes through `$wpdb->prepare()`**, and every string is translatable.
 
-**The versions below are releases of the original plugin, [Mail Queue](https://wordpress.org/plugins/mail-queue/), developed by [WDM](https://www.webdesign-muenchen.de).** Their entries are reproduced from its changelog. They predate the fork, are not part of this repository's history and have no tags here.
+**The versions below are releases of the original plugin, [Mail Queue](https://wordpress.org/plugins/mail-queue/), developed by [WDM](https://www.webdesign-muenchen.de).** Their entries are reproduced from its changelog, under its GPLv3-or-later licence. They predate the fork, are not part of this repository's history and have no tags here.
 
 ## [1.4.6]
 

@@ -10,9 +10,10 @@ export default defineConfig( {
 			// than vanishing from the figure.
 			include: [ 'assets/js/**/*.js' ],
 			reporter: [ 'text', 'text-summary' ],
-			// Ratcheted up in the PR that delivers a gain, never lowered; at
-			// most 5 points below the measured figure.
-			thresholds: { lines: 93 },
+			// The highest of 90%, the measured figure minus 5 points, and the
+			// current value; never lowered (CLAUDE.md). Raised 93 -> 94 in #129,
+			// measured 98.55% when set.
+			thresholds: { lines: 94 },
 		},
 	},
 } );

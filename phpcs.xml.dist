@@ -74,12 +74,12 @@
     </rule>
 
     <!-- PHP version compatibility for the runtime supported by the plugin.
-         Plugin header declares PHP 8.1+ as the minimum. -->
-    <config name="testVersion" value="8.1-"/>
+         Plugin header declares PHP 8.3+ as the minimum. -->
+    <config name="testVersion" value="8.3-"/>
     <rule ref="PHPCompatibilityWP"/>
 
     <!-- Minimum supported WP version (matches readme.txt "Requires at least") -->
-    <config name="minimum_wp_version" value="5.9"/>
+    <config name="minimum_wp_version" value="6.8"/>
 
     <!-- ================================================================
          src/ overrides

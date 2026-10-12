@@ -2,9 +2,9 @@
     "name": "rpgmem/total-mail-queue",
     "description": "Queue outgoing emails, manage SMTP accounts with daily/monthly limits, and get alerts if your site sends too many emails.",
     "type": "wordpress-plugin",
-    "license": "GPL-3.0-or-later",
+    "license": "AGPL-3.0-or-later",
     "require": {
-        "php": ">=8.1"
+        "php": ">=8.3"
     },
     "require-dev": {
         "brain/monkey": "^2.6",
@@ -42,6 +42,9 @@
         "phpcbf": "phpcbf"
     },
     "config": {
+        "platform": {
+            "php": "8.3"
+        },
         "sort-packages": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true

@@ -3,13 +3,13 @@
  * Plugin Name:       Total Mail Queue
  * Plugin URI:        https://github.com/rpgmem/total-mail-queue
  * Description:       Take Control and improve Security of wp_mail(). Queue and log outgoing emails, and get alerted, if your website wants to send more emails than usual.
- * Version:           2.12.0
- * Requires at least: 5.9
- * Requires PHP:      8.1
+ * Version:           3.0.0
+ * Requires at least: 6.8
+ * Requires PHP:      8.3
  * Author:            Alex Meusburger
  * Author URI:        https://github.com/rpgmem
- * License:           GPLv3 or later
- * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
+ * License:           AGPLv3 or later
+ * License URI:       https://www.gnu.org/licenses/agpl-3.0.html
  * Text Domain:       total-mail-queue
  *
  * This plugin is a fork of Mail Queue by WDM (https://www.webdesign-muenchen.de).

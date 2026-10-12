@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 // The plugin's floor. A managed host may ship an older CLI binary than its web
 // SAPI; that is not a plugin defect, so skip with an explanation.
-const TMQ_SMOKE_MIN_PHP = '8.1';
+const TMQ_SMOKE_MIN_PHP = '8.3';
 
 /**
  * Print one check result.

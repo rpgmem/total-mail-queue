@@ -23,17 +23,17 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '2.12.0';
+	public const VERSION = '3.0.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
 	 */
-	public const REQUIRES_PHP = '8.1';
+	public const REQUIRES_PHP = '8.3';
 
 	/**
 	 * Minimum required WordPress version (mirrors readme.txt).
 	 */
-	public const REQUIRES_WP = '5.9';
+	public const REQUIRES_WP = '6.8';
 
 	/**
 	 * Singleton container instance, populated by {@see Plugin::boot()}.

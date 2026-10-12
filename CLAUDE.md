@@ -14,8 +14,21 @@ Every versioned artifact is in **English**: code, comments, docblocks, i18n sour
 - Open PRs as **draft**, flip to ready, then enable **auto-merge (SQUASH)**. When a PR completes a pre-agreed unit, flip it straight to ready. When its scope emerged mid-session, confirm with the maintainer first.
 - When `develop` moves under a PR, the PR is `behind`. Update the branch; don't wait it out.
 - `Closes #NNN` does not auto-close an issue when the PR merges into `develop`, because the default branch is `main`. Close the issue by hand when the work lands, and tick its checkboxes or map each one to the PR that shipped it.
-- An agent's credential can create and update refs but **cannot delete a ref** (HTTP 403). Deleting merged branches is the maintainer's job.
+- An agent's credential can create and update refs but **cannot delete a ref** (HTTP 403). Deleting a branch that survives the merge is the maintainer's job (see "Issues, pull requests and the merge queue").
 - Dependabot targets `develop`. A security update opens against `main`: retarget it to `develop`.
+- `dependabot-automerge.yml` arms squash auto-merge on Dependabot's patch and minor updates, the same as Free Form Certificate; the required checks still gate the merge. Majors stay manual, because a major can change behaviour the checks do not see. A merge made with the workflow's token does not trigger other workflows, so `deploy-develop.yml` skips it, which only matters for testes and only until the next merge.
+
+## Issues, pull requests and the merge queue
+
+The same standard as Free Form Certificate (its `CLAUDE.md` → "Issues, pull requests and the merge queue"). The layout lives in the templates — `.github/ISSUE_TEMPLATE/` (bug, feature, task) and `.github/PULL_REQUEST_TEMPLATE.md` (plus `PULL_REQUEST_TEMPLATE/release.md`, reached with `?template=release.md`); the rules around them are here.
+
+- **An issue before the PR.** Every PR names the issue it closes. Exempt, and only these: a trivial docs or chore change, a Dependabot PR, the `release: X.Y.Z` bump and the CHANGELOG SHA backfill. An agent opens the issue itself, in English, from the task template.
+- **Titles.** Issue: `Area: the problem in one sentence`. PR: `type(scope): summary`, `type` one of `feat`, `fix`, `docs`, `test`, `refactor`, `chore` — it becomes the squash subject on `develop`. Release titles keep their own shape.
+- **Labels: one type, one area.** Type is `bug`, `enhancement`, `task`, `documentation` or `security`; area is an `area:` label — `area:queue`, `area:smtp`, `area:cron`, `area:admin` or `area:infra`. `duplicate`, `invalid` and `wontfix` say why something closed unmerged, and `dependencies` and the ecosystem labels belong to Dependabot, whose config applies them. An agent cannot create a label, only apply one that exists.
+- **A PR carries the labels of the issue it closes.** The agent's tool opens a PR with no labels and cannot set them at creation, so the agent applies them as the next step, before marking it ready. Every issue and every PR carries its type and its area; a PR that only names its issue in the body is unlabelled until someone labels it, which is how the alignment PRs of 2026-10-12 went out bare in three repositories.
+- **One merge at a time.** Only one PR is ready with auto-merge armed; the others wait as drafts. After a merge the next PR takes `develop` by a merge, never a rebase; `CHANGELOG.md` conflicts keep both bullets, translation catalogues are recompiled rather than hand-edited, the touched tests run again, and only then is it flipped to ready and armed.
+- **After each merge** the agent closes the issue by hand, ticking or naming each acceptance criterion.
+- **Branches.** Settings → General → "Automatically delete head branches" is on, so GitHub deletes a merged PR's branch. Whatever survives, the agent lists at the end of the batch for the maintainer to delete; local worktrees the agent removes itself.
 
 ## Versioning and CHANGELOG
 
@@ -68,13 +81,13 @@ The zip ships no Composer or npm dependency. The autoloader is inline in `total-
 ## Quality gates
 
 These run in CI on every PR and on pushes to `main` and `develop`:
-- PHPUnit `unit` and `integration` suites on PHP 8.1–8.4.
-- The functional suite against a real WordPress and MySQL (`phpunit.functional.xml.dist`).
+- PHPUnit `unit` and `integration` suites on PHP 8.3 and 8.4, the floor (8.3) and the newest. `composer.json` pins `config.platform.php` to the floor, so Composer resolves dev dependencies as if it ran there and none can quietly require a newer PHP.
+- The functional suite against a real WordPress and MySQL (`phpunit.functional.xml.dist`), on the latest WordPress and on **the declared floor**: the `floor` leg reads `Requires at least` from the plugin header, resolves it to that branch's newest patch release and swaps the WordPress test library to the same branch, so moving the floor moves the test. A floor nothing runs is a claim, not a requirement.
 - PHPStan, and PHPCS with WPCS and PHPCompatibilityWP.
 - ESLint over `assets/js` and Stylelint over `assets/css` (`npm run lint`).
 - **JS tests (Vitest)**: `tests/js/*.test.js` under jsdom, failing below the line floor in `vitest.config.mjs` (same ratchet rule as the PHP floor). Scripts load through `runScript()` in `tests/js/helpers.js`, which runs them under their real file name so V8 attributes coverage, and `installJquery()` binds real jQuery and resolves its ready event, which jsdom has already fired. jsdom has no layout: assert on `css('display')`, never `:visible`.
 - `composer validate --strict` and `composer audit --locked`.
-- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. Raise the floor in the PR that delivers a gain, never lower it, and keep it at most 5 points below the measured figure. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
+- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. The rule is the same in the four plugins (Free Form Certificate, Total Mail Queue, Email Signature Generator, Institutional Email), for this floor and the JS one: **a floor is the highest of 90%, the measured figure minus 5 points, and its current value.** So it is never below 90%, never more than 5 points behind what is measured, and never lowered — the one exception is an honest re-measure after deleting covered product code, recorded beside the floor. Raise it in the PR that delivers the gain, and only once the measured figure is above it. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
   - **declare the class, not the method** (`@covers \TotalMailQueue\Cron\BatchProcessor`, never `…::run`): a method-level annotation drops the private helpers that method calls, which hid a fifth of the batch processor;
   - **declare every class the test exercises on purpose**, such as the cron lock in a cron-flow test, but not the incidental ones every request touches (options, schema);
   - **a test whose subject is a partial goes without the annotation**, saying why in its docblock: the `src/admin/docs/` topics and `default-html.php` are included files, which no annotation can name.
