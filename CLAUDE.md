@@ -73,6 +73,12 @@ These run in CI on every PR and on pushes to `main` and `develop`:
 - PHPStan, and PHPCS with WPCS and PHPCompatibilityWP.
 - ESLint over `assets/js` and Stylelint over `assets/css` (`npm run lint`).
 - `composer validate --strict` and `composer audit --locked`.
+- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. Raise the floor in the PR that delivers a gain, never lower it, and keep it at most 5 points below the measured figure. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it.
+
+Three guards in the unit suite hold what nothing else reads:
+- `PluginIdentityTest`: the version (header, `Plugin::VERSION`, `Stable tag`, a dated CHANGELOG section) and the PHP and WordPress floors (header, `readme.txt`, `composer.json`, the PHPCS `testVersion` and `minimum_wp_version`) agree.
+- `ReadmeUpgradeNoticeTest`: the Upgrade Notice holds one entry, for the `Stable tag` version, in at most 300 characters, pointing at `CHANGELOG.md`, and the updater's own parser reads the same text. Rewrite it in every release PR.
+- `SuppressionTest`: every `phpcs:ignore` / `phpcs:disable` names its sniffs and gives a reason of at least 15 characters after `--`, and every `@phpstan-ignore` names an identifier and a reason; the `-line` forms are refused. A reason says why this line is safe ("the plugin's own table, name from Schema"), never "same".
 
 Locally:
 

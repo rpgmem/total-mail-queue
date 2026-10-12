@@ -52,7 +52,7 @@ final class Serializer {
 		if ( is_serialized( $raw ) ) {
 			// The @ swallows PHP's notice on truncated/corrupt legacy payloads —
 			// we treat those as "no data" by returning false.
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, WordPress.PHP.NoSilencedErrors.Discouraged
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, WordPress.PHP.NoSilencedErrors.Discouraged -- legacy rows are serialized; allowed_classes false blocks objects
 			return @unserialize( $raw, array( 'allowed_classes' => false ) );
 		}
 		return $raw;

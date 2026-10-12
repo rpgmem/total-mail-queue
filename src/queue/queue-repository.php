@@ -37,7 +37,7 @@ final class QueueRepository {
 				$data[ $text_column ] = '';
 			}
 		}
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$inserted = $wpdb->insert( $table, $data );
 		if ( false === $inserted ) {
 			return 0;
@@ -56,7 +56,7 @@ final class QueueRepository {
 	public static function update( int $id, array $data, ?array $formats = null ) {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		return $wpdb->update( $table, $data, array( 'id' => $id ), $formats, array( '%d' ) );
 	}
 
@@ -69,7 +69,7 @@ final class QueueRepository {
 	public static function findById( int $id ): ?array {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE `id` = %d", $id ), ARRAY_A );
 		return $row ? $row : null;
 	}
@@ -82,7 +82,7 @@ final class QueueRepository {
 	public static function pendingCount(): int {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE `status` = 'queue' OR `status` = 'high'" );
 	}
 
@@ -98,7 +98,7 @@ final class QueueRepository {
 	public static function pendingIds( int $limit ): array {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT `id` FROM `$table` WHERE `status` = 'queue' OR `status` = 'high' ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d", $limit ) );
 		return array_values( array_map( 'intval', is_array( $ids ) ? $ids : array() ) );
 	}
@@ -113,7 +113,7 @@ final class QueueRepository {
 	public static function recentAlertExists(): bool {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE `status` = 'alert' AND `timestamp` > DATE_SUB(%s, INTERVAL 6 HOUR)", current_time( 'mysql', false ) ), ARRAY_A );
 		return ! empty( $rows );
 	}
@@ -126,7 +126,7 @@ final class QueueRepository {
 	public static function infoFor( int $id ): string {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$info = $wpdb->get_var( $wpdb->prepare( "SELECT `info` FROM `$table` WHERE `id` = %d", $id ) );
 		return is_string( $info ) ? $info : '';
 	}
@@ -139,7 +139,7 @@ final class QueueRepository {
 	public static function errorLogFor( int $id ): string {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$log = $wpdb->get_var( $wpdb->prepare( "SELECT `error_log` FROM `$table` WHERE `id` = %d", $id ) );
 		return is_string( $log ) ? $log : '';
 	}
@@ -156,10 +156,10 @@ final class QueueRepository {
 	public static function appendErrorLog( int $id, string $entry ): void {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$table` SET `error_log` = CONCAT(`error_log`, %s) WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$table` SET `error_log` = CONCAT(`error_log`, %s) WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$entry . "\n",
 				$id
 			)
@@ -174,7 +174,7 @@ final class QueueRepository {
 	public static function statusFor( int $id ): string {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$status = $wpdb->get_var( $wpdb->prepare( "SELECT `status` FROM `$table` WHERE `id` = %d", $id ) );
 		return is_string( $status ) ? $status : '';
 	}
@@ -188,7 +188,7 @@ final class QueueRepository {
 	public static function retryStateFor( int $id ): ?array {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT `retry_count`, `status` FROM `$table` WHERE `id` = %d", $id ), ARRAY_A );
 		if ( ! $row ) {
 			return null;
@@ -207,7 +207,7 @@ final class QueueRepository {
 	public static function delete( int $id ): void {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
 	}
 
@@ -267,7 +267,7 @@ final class QueueRepository {
 		global $wpdb;
 		$table = Schema::queueTable();
 		$where = self::listWhere( $filter, false );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
 	}
 
@@ -283,7 +283,7 @@ final class QueueRepository {
 		global $wpdb;
 		$table = Schema::queueTable();
 		$where = self::listWhere( $filter, false );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `timestamp` DESC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
 	}
@@ -298,7 +298,7 @@ final class QueueRepository {
 		global $wpdb;
 		$table = Schema::queueTable();
 		$where = self::listWhere( $filter, true );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE $where" );
 	}
 
@@ -315,7 +315,7 @@ final class QueueRepository {
 		global $wpdb;
 		$table = Schema::queueTable();
 		$where = self::listWhere( $filter, true );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` WHERE $where ORDER BY `priority` ASC, `retry_count` ASC, `id` ASC LIMIT %d OFFSET %d", $per_page, $offset ), ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
 	}
@@ -330,7 +330,7 @@ final class QueueRepository {
 	public static function lastLogRow(): ?array {
 		global $wpdb;
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$row = $wpdb->get_row( "SELECT * FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `id` DESC", ARRAY_A );
 		return is_array( $row ) ? $row : null;
 	}

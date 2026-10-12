@@ -146,7 +146,7 @@ final class SmtpListRenderer {
 		}
 
 		/* translators: %s: human-readable time difference, e.g. "5 mins". */
-		$relative = sprintf( __( '%s ago', 'total-mail-queue' ), human_time_diff( $timestamp, (int) current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$relative = sprintf( __( '%s ago', 'total-mail-queue' ), human_time_diff( $timestamp, (int) current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- last_sent_at is stored in site time, so now must be too
 
 		return '<span title="' . esc_attr( $last_sent_at ) . '">' . esc_html( $relative ) . '</span>';
 	}

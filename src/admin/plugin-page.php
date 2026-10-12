@@ -287,7 +287,7 @@ final class PluginPage {
 		// "Resent N email(s)" success notice carried by the resend redirect.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only flash flag, not destructive.
 		if ( isset( $_GET['resent'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only count for a flash notice, not destructive.
 			$resent_count = intval( $_GET['resent'] );
 			if ( $resent_count > 0 ) {
 				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html(

@@ -7,6 +7,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Coverage floor and three guards** (#113). CI now fails below a merged line-coverage floor, and the unit suite checks that the version and the PHP and WordPress floors agree across every file that declares them, that the Upgrade Notice describes the release on offer, and that every suppression names its rule and a reason.
+
 ### Fixed
 
 - **An empty number field no longer saves as 0** (#112). Clearing the log retention deleted every log row on the next run, and clearing the batch size stopped sending. An empty field now keeps its value, each number has a minimum, and values already stored empty read as the default.

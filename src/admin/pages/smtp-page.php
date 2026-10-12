@@ -27,7 +27,7 @@ final class SmtpPage {
 	public static function render(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing parameters, action handlers verify their own nonces.
 		$action = isset( $_GET['smtp-action'] ) ? sanitize_key( wp_unslash( $_GET['smtp-action'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same as above.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing parameter; the action handlers verify their own nonces.
 		$edit_id = isset( $_GET['smtp-id'] ) ? intval( $_GET['smtp-id'] ) : 0;
 
 		$action_state = SmtpActions::handle( $action, $edit_id );

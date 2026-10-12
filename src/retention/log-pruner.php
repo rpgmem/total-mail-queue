@@ -35,10 +35,10 @@ final class LogPruner {
 		global $wpdb;
 		$options = Options::get();
 		$table   = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < DATE_SUB(%s, INTERVAL %d HOUR)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"DELETE FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' AND `timestamp` < DATE_SUB(%s, INTERVAL %d HOUR)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				current_time( 'mysql', false ),
 				(int) $options['clear_queue']
 			)
@@ -57,16 +57,16 @@ final class LogPruner {
 			return;
 		}
 		$table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table` WHERE `status` != 'queue' AND `status` != 'high'" );
 		if ( $total <= $cap ) {
 			return;
 		}
 		$excess = $total - $cap;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `timestamp` ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"DELETE FROM `$table` WHERE `status` != 'queue' AND `status` != 'high' ORDER BY `timestamp` ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$excess
 			)
 		);

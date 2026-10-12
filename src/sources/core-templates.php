@@ -79,7 +79,7 @@ final class CoreTemplates {
 	 *
 	 * @return array<string,array{subject:string,body:string,tokens:array<int,string>,label:string}>
 	 *
-	 * phpcs:disable WordPress.WP.I18n.NonSingularStringLiteralText
+	 * phpcs:disable WordPress.WP.I18n.NonSingularStringLiteralText -- multi-line literals, folded into one string by make-pot
 	 */
 	public static function all(): array {
 		return array(
