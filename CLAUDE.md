@@ -72,7 +72,17 @@ These run in CI on every PR and on pushes to `main` and `develop`:
 - The functional suite against a real WordPress and MySQL (`phpunit.functional.xml.dist`).
 - PHPStan, and PHPCS with WPCS and PHPCompatibilityWP.
 - ESLint over `assets/js` and Stylelint over `assets/css` (`npm run lint`).
+- **JS tests (Vitest)**: `tests/js/*.test.js` under jsdom, failing below the line floor in `vitest.config.mjs` (same ratchet rule as the PHP floor). Scripts load through `runScript()` in `tests/js/helpers.js`, which runs them under their real file name so V8 attributes coverage, and `installJquery()` binds real jQuery and resolves its ready event, which jsdom has already fired. jsdom has no layout: assert on `css('display')`, never `:visible`.
 - `composer validate --strict` and `composer audit --locked`.
+- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. Raise the floor in the PR that delivers a gain, never lower it, and keep it at most 5 points below the measured figure. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
+  - **declare the class, not the method** (`@covers \TotalMailQueue\Cron\BatchProcessor`, never `…::run`): a method-level annotation drops the private helpers that method calls, which hid a fifth of the batch processor;
+  - **declare every class the test exercises on purpose**, such as the cron lock in a cron-flow test, but not the incidental ones every request touches (options, schema);
+  - **a test whose subject is a partial goes without the annotation**, saying why in its docblock: the `src/admin/docs/` topics and `default-html.php` are included files, which no annotation can name.
+
+Three guards in the unit suite hold what nothing else reads:
+- `PluginIdentityTest`: the version (header, `Plugin::VERSION`, `Stable tag`, a dated CHANGELOG section) and the PHP and WordPress floors (header, `readme.txt`, `composer.json`, the PHPCS `testVersion` and `minimum_wp_version`) agree.
+- `ReadmeUpgradeNoticeTest`: the Upgrade Notice holds one entry, for the `Stable tag` version, in at most 300 characters, pointing at `CHANGELOG.md`, and the updater's own parser reads the same text. Rewrite it in every release PR.
+- `SuppressionTest`: every `phpcs:ignore` / `phpcs:disable` names its sniffs and gives a reason of at least 15 characters after `--`, and every `@phpstan-ignore` names an identifier and a reason; the `-line` forms are refused. A reason says why this line is safe ("the plugin's own table, name from Schema"), never "same".
 
 Locally:
 
@@ -83,6 +93,7 @@ vendor/bin/phpunit --testsuite integration
 vendor/bin/phpstan analyse --no-progress
 vendor/bin/phpcs
 npm run lint
+npm run test:coverage
 ```
 
 ## Admin stylesheet
@@ -100,7 +111,7 @@ npm run lint
 
 The Documentation tab is `Admin\Documentation`: one partial per topic under `src/admin/docs/`, listed in `Documentation::topics()`.
 - **Documentation travels with the change, in the same PR.** A PR that changes what an administrator sees or configures (a tab, a setting, a default, a notice, a header, a filter) updates the topic that describes it, with its strings in the pt_BR catalogues.
-- **Topics are grouped by tab, in the menu's order.** `Documentation::groups()` names the tabs each group documents and takes its title from the tab's own label, so the documentation reads the way the menu does, as Free Form Certificate's does. The quick navigation is a sticky single-column tree of those groups, with a search box (`assets/js/tmq-docs.js`).
+- **Topics are grouped by tab, in the menu's order.** `Documentation::groups()` names the tabs each group documents and takes its title from the tab's own label, so the documentation reads the way the menu does, as Free Form Certificate's does. The quick navigation is a tree of those groups with a search box (`assets/js/tmq-docs.js`). On a wide screen it is a sticky column beside the topics, never a bar over them, so it cannot hide the text being read; on a narrow one it sits above the topics and scrolls away.
 - **`DocumentationTest`** fails when a tab belongs to no group or to two, when the groups leave the menu's order, when a tab group's title is not the tab's label, when a listed topic file is missing, or when a file in `src/admin/docs/` is never shown. It proves a topic exists, never that it is right.
 - **Name the labels the screen shows.** A topic quotes a button or field by the label the plugin prints, so the translated topic and the translated screen agree.
 - **The old FAQ slug** (`PluginPage::TAB_FAQ`) stays registered and opens the documentation, so old links keep working. Notices link to the Troubleshooting topic.

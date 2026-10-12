@@ -141,6 +141,19 @@ final class Documentation {
 			),
 			array(
 				'tabs'   => array( PluginPage::TAB_CRON_INFO ),
+				'icon'   => 'cron',
+				'title'  => self::tabsTitle( array( PluginPage::TAB_CRON_INFO ) ),
+				'topics' => array(
+					array(
+						'anchor' => 'cron',
+						'icon'   => 'cron',
+						'title'  => __( 'Cron', 'total-mail-queue' ),
+						'file'   => 'cron.php',
+					),
+				),
+			),
+			array(
+				'tabs'   => array(),
 				'icon'   => 'faq',
 				'title'  => __( 'Reference and help', 'total-mail-queue' ),
 				'topics' => array(
@@ -211,15 +224,16 @@ final class Documentation {
 
 		echo '<div class="tmq-box tmq-docs-intro">';
 		echo Icons::heading( 'docs', __( 'Documentation', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
-		echo '<p>' . esc_html__( 'How to set up and run Total Mail Queue, one topic per card. Search or pick a topic below; the navigation stays at the top while you read.', 'total-mail-queue' ) . '</p>';
+		echo '<p>' . esc_html__( 'How to set up and run Total Mail Queue, one topic per card. Search or pick a topic; on a wide screen the navigation stays beside the text while you read.', 'total-mail-queue' ) . '</p>';
 		echo self::credits( $plugin_file ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- credits() escapes every part it prints.
 		echo '</div>';
 
-		// Quick navigation: stays in view while the topics scroll under it,
-		// and the search box filters both its links and the topic cards.
-		echo '<nav class="tmq-box tmq-docs-index" id="' . esc_attr( self::INDEX_ANCHOR ) . '" aria-label="' . esc_attr__( 'Quick navigation', 'total-mail-queue' ) . '">';
-		echo Icons::heading( 'search', __( 'Quick navigation', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
-		echo '<p class="tmq-docs-search"><input type="search" id="tmq-docs-search" class="regular-text" placeholder="' . esc_attr__( 'Search the documentation…', 'total-mail-queue' ) . '" aria-label="' . esc_attr__( 'Search the documentation', 'total-mail-queue' ) . '" /></p>';
+		// Quick navigation: a column beside the topics that stays in view while
+		// they scroll, and the search box filters both its links and the cards.
+		echo '<div class="tmq-docs-layout">';
+		echo '<nav class="tmq-box tmq-docs-index" id="' . esc_attr( self::INDEX_ANCHOR ) . '" aria-label="' . esc_attr__( 'Quick Navigation', 'total-mail-queue' ) . '">';
+		echo Icons::heading( 'search', __( 'Quick Navigation', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
+		echo '<p class="tmq-docs-search"><input type="search" id="tmq-docs-search" class="regular-text" placeholder="' . esc_attr__( 'Search documentation…', 'total-mail-queue' ) . '" aria-label="' . esc_attr__( 'Search documentation', 'total-mail-queue' ) . '" /></p>';
 		// One row per group, in the menu's order, in a single column like the
 		// Free Form Certificate documentation's tree. A group with one topic is
 		// a link; a longer one is a branch that opens to list its topics.
@@ -243,6 +257,7 @@ final class Documentation {
 		echo '<p class="tmq-docs-search-empty" hidden>' . esc_html__( 'No topic matches this search.', 'total-mail-queue' ) . '</p>';
 		echo '</nav>';
 
+		echo '<div class="tmq-docs-topics">';
 		foreach ( self::topics() as $topic ) {
 			echo '<section class="tmq-box tmq-docs-topic" id="' . esc_attr( $topic['anchor'] ) . '">';
 			echo Icons::heading( $topic['icon'], $topic['title'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
@@ -250,6 +265,7 @@ final class Documentation {
 			echo '<p class="tmq-docs-back"><a href="#' . esc_attr( self::INDEX_ANCHOR ) . '">' . esc_html__( 'Back to the index', 'total-mail-queue' ) . '</a></p>';
 			echo '</section>';
 		}
+		echo '</div></div>';
 	}
 
 	/**

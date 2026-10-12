@@ -2755,24 +2755,24 @@ msgid " and "
 msgstr " e "
 
 #: src/admin/documentation.php:216
-msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic below; the navigation stays at the top while you read."
-msgstr "Como configurar e operar o Total Mail Queue, um tópico por cartão. Busque ou escolha um tópico abaixo; a navegação fica no topo enquanto você lê."
+msgid "How to set up and run Total Mail Queue, one topic per card. Search or pick a topic; on a wide screen the navigation stays beside the text while you read."
+msgstr "Como configurar e operar o Total Mail Queue, um tópico por cartão. Busque ou escolha um tópico; em telas largas a navegação fica ao lado do texto enquanto você lê."
 
 #: src/admin/documentation.php:222
-msgid "Quick navigation"
-msgstr "Navegação rápida"
+msgid "Quick Navigation"
+msgstr "Navegação Rápida"
 
 #: src/admin/documentation.php:224
-msgid "Search the documentation…"
-msgstr "Buscar na documentação…"
+msgid "Search documentation…"
+msgstr "Pesquisar na documentação…"
 
 #: src/admin/documentation.php:224
-msgid "Search the documentation"
-msgstr "Buscar na documentação"
+msgid "Search documentation"
+msgstr "Pesquisar na documentação"
 
 #: src/admin/documentation.php:248
 msgid "No topic matches this search."
-msgstr "Nenhum tópico corresponde a esta busca."
+msgstr "Nenhum tópico corresponde a esta pesquisa."
 
 #: src/admin/tables/log-table.php
 msgid "Filter by status"
@@ -2969,3 +2969,239 @@ msgstr "Não foi possível atualizar a pré-visualização."
 #: src/admin/docs/html-templates.php:27
 msgid "The Preview beside the form shows a sample email with the settings on screen, header and footer included, and updates as you change them, before anything is saved. It is drawn by the same code that wraps real mail."
 msgstr "A Pré-visualização ao lado do formulário mostra um e-mail de exemplo com as configurações da tela, incluindo cabeçalho e rodapé, e se atualiza conforme você as altera, antes de salvar. Ela é desenhada pelo mesmo código que formata os e-mails de verdade."
+
+#: src/admin/docs/cron.php:14
+msgid "The queue is sent by a worker that WP-Cron runs at the interval set in Settings. The Cron tab shows whether that worker is running, whether WP-Cron itself is firing, and the line to add to the server so it always does."
+msgstr "A fila é enviada por um worker que o WP-Cron executa no intervalo definido em Configurações. A aba Cron mostra se esse worker está rodando, se o próprio WP-Cron está disparando e a linha a adicionar ao servidor para que ele sempre dispare."
+
+#: src/admin/docs/cron.php:16
+#: src/admin/pages/cron-info-page.php:120
+msgid "Queue worker"
+msgstr "Worker da fila"
+
+#: src/admin/docs/cron.php:20
+msgid "Running"
+msgstr "Rodando"
+
+#: src/admin/docs/cron.php:21
+msgid "The next run is due within one interval. Nothing to do."
+msgstr "A próxima execução vence dentro de um intervalo. Nada a fazer."
+
+#: src/admin/docs/cron.php:24
+msgid "Asleep"
+msgstr "Dormindo"
+
+#: src/admin/docs/cron.php:25
+msgid "The queue is empty, so nothing is scheduled. The next email that enters the queue wakes the worker."
+msgstr "A fila está vazia, então nada está agendado. O próximo e-mail que entrar na fila acorda o worker."
+
+#: src/admin/docs/cron.php:28
+msgid "Waiting"
+msgstr "Aguardando"
+
+#: src/admin/docs/cron.php:29
+msgid "With the send method set to SMTP only and every account at a limit, the worker sleeps until the first account frees up instead of waking every interval."
+msgstr "Com o método de envio em somente SMTP e todas as contas no limite, o worker dorme até a primeira conta liberar, em vez de acordar a cada intervalo."
+
+#: src/admin/docs/cron.php:32
+msgid "Overdue"
+msgstr "Atrasado"
+
+#: src/admin/docs/cron.php:33
+msgid "A run is scheduled but well past its time: WP-Cron is not firing. Add a server cron."
+msgstr "Há uma execução agendada, mas bem depois do horário: o WP-Cron não está disparando. Adicione um cron no servidor."
+
+#: src/admin/docs/cron.php:36
+msgid "Stalled"
+msgstr "Parado"
+
+#: src/admin/docs/cron.php:37
+msgid "Emails are waiting and no run is scheduled. Saving the settings schedules one again; if it keeps happening, check the Troubleshooting topic."
+msgstr "Há e-mails aguardando e nenhuma execução agendada. Salvar as configurações agenda uma de novo; se continuar acontecendo, veja o tópico Solução de problemas."
+
+#: src/admin/docs/cron.php:40
+msgid "Not running"
+msgstr "Não está rodando"
+
+#: src/admin/docs/cron.php:41
+msgid "The operation mode is Disabled or Block, so the queue is not sent on purpose."
+msgstr "O modo de operação é Desativado ou Bloqueio, então a fila não é enviada de propósito."
+
+#: src/admin/docs/cron.php:45
+msgid "The card also shows the next and the last run, how many emails are waiting, and when the last email was sent."
+msgstr "O cartão também mostra a próxima e a última execução, quantos e-mails aguardam e quando o último e-mail foi enviado."
+
+#: src/admin/docs/cron.php:48
+msgid "This card says whether WP-Cron's visit trigger is on, and lists how many scheduled events, from any plugin, are overdue. Several overdue events mean WP-Cron is not running at all, not that this plugin has a problem."
+msgstr "Este cartão diz se o gatilho por visita do WP-Cron está ligado e quantos eventos agendados, de qualquer plugin, estão atrasados. Vários eventos atrasados significam que o WP-Cron não está rodando, e não que este plugin tem um problema."
+
+#: src/admin/docs/cron.php:50
+#: src/admin/pages/cron-info-page.php:265
+msgid "Server cron"
+msgstr "Cron do servidor"
+
+#: src/admin/docs/cron.php:51
+msgid "Choose how often the server should wake WP-Cron and how: WP-CLI runs the due events directly, wget and curl call wp-cron.php over HTTP. Copy the line into the crontab of the user that runs the site, or into the cron jobs of your hosting panel, then set DISABLE_WP_CRON to true in wp-config.php so visits no longer trigger it."
+msgstr "Escolha com que frequência e de que forma o servidor deve acordar o WP-Cron: o WP-CLI executa os eventos vencidos diretamente, wget e curl chamam o wp-cron.php por HTTP. Copie a linha para o crontab do usuário que roda o site, ou para as tarefas cron do painel da hospedagem, e então defina DISABLE_WP_CRON como true no wp-config.php para que as visitas deixem de dispará-lo."
+
+#: src/admin/docs/cron.php:52
+msgid "The line only wakes WP-Cron. How often the queue sends is still the interval in Settings, so a server cron every minute with an interval of five minutes sends every five minutes. This card shows the WordPress path, so only administrators see it."
+msgstr "A linha apenas acorda o WP-Cron. A frequência de envio da fila continua sendo o intervalo em Configurações, então um cron do servidor a cada minuto com intervalo de cinco minutos envia a cada cinco minutos. Este cartão mostra o caminho do WordPress, por isso só administradores o veem."
+
+#: src/admin/docs/modes-and-queue.php:37
+msgid "The reliable setup is a real cron job on the server that calls wp-cron.php every minute or two, with WP-Cron's visit trigger turned off (DISABLE_WP_CRON in wp-config.php). The Cron tab shows whether the worker is running and gives the exact line to add."
+msgstr "A configuração confiável é um cron de verdade no servidor que chama o wp-cron.php a cada um ou dois minutos, com o gatilho por visita do WP-Cron desligado (DISABLE_WP_CRON no wp-config.php). A aba Cron mostra se o worker está rodando e dá a linha exata a adicionar."
+
+#: src/admin/documentation.php:150
+#: src/admin/plugin-page.php:122
+msgid "Cron"
+msgstr "Cron"
+
+#: src/admin/pages/cron-info-page.php:43
+msgid "WP-CLI (recommended)"
+msgstr "WP-CLI (recomendado)"
+
+#: src/admin/pages/cron-info-page.php:44
+msgid "wget"
+msgstr "wget"
+
+#: src/admin/pages/cron-info-page.php:45
+msgid "curl"
+msgstr "curl"
+
+#: src/admin/pages/cron-info-page.php:111
+msgid "Not running: the plugin is not in Queue mode, so nothing is sent from the queue."
+msgstr "Não está rodando: o plugin não está no modo Fila, então nada é enviado da fila."
+
+#: src/admin/pages/cron-info-page.php:112
+msgid "Asleep: the queue is empty. The next email wakes it."
+msgstr "Dormindo: a fila está vazia. O próximo e-mail o acorda."
+
+#: src/admin/pages/cron-info-page.php:113
+msgid "Running at the configured interval."
+msgstr "Rodando no intervalo configurado."
+
+#: src/admin/pages/cron-info-page.php:114
+msgid "Waiting: every SMTP account is at a limit, so the next run is set for when one frees up."
+msgstr "Aguardando: todas as contas SMTP estão no limite, então a próxima execução está marcada para quando uma liberar."
+
+#: src/admin/pages/cron-info-page.php:115
+msgid "Overdue: the next run is past due. WP-Cron is not firing on this site."
+msgstr "Atrasado: a próxima execução já venceu. O WP-Cron não está disparando neste site."
+
+#: src/admin/pages/cron-info-page.php:116
+msgid "Stalled: emails are waiting and no run is scheduled."
+msgstr "Parado: há e-mails aguardando e nenhuma execução agendada."
+
+#: src/admin/pages/cron-info-page.php:125
+msgid "State"
+msgstr "Estado"
+
+#: src/admin/pages/cron-info-page.php:127
+msgid "Not scheduled"
+msgstr "Não agendado"
+
+#: src/admin/pages/cron-info-page.php:128
+msgid "Next run"
+msgstr "Próxima execução"
+
+#. translators: %s: human-readable duration, e.g. "5 mins"
+#: src/admin/pages/cron-info-page.php:135
+#, php-format
+msgid "Every %s"
+msgstr "A cada %s"
+
+#: src/admin/pages/cron-info-page.php:141
+msgid "Waiting in the queue"
+msgstr "Aguardando na fila"
+
+#. translators: 1: emails sent in that run, 2: errors in that run
+#: src/admin/pages/cron-info-page.php:151
+#, php-format
+msgid "(%1$d sent, %2$d errors)"
+msgstr "(%1$d enviados, %2$d erros)"
+
+#: src/admin/pages/cron-info-page.php:160
+msgid "Last run"
+msgstr "Última execução"
+
+#: src/admin/pages/cron-info-page.php:164
+msgid "Last email sent"
+msgstr "Último e-mail enviado"
+
+#: src/admin/pages/cron-info-page.php:184
+msgid "The visit trigger is off (<code>DISABLE_WP_CRON</code> is set in wp-config.php), so WP-Cron runs only when something calls it. Make sure a server cron does, every minute or two."
+msgstr "O gatilho por visita está desligado (<code>DISABLE_WP_CRON</code> está definido no wp-config.php), então o WP-Cron só roda quando algo o chama. Garanta que um cron do servidor faça isso a cada um ou dois minutos."
+
+#: src/admin/pages/cron-info-page.php:186
+msgid "WP-Cron runs when someone visits the site. On a quiet site, or one served from a full-page cache, the queue can wait much longer than its interval."
+msgstr "O WP-Cron roda quando alguém visita o site. Num site com pouco acesso, ou servido por cache de página inteira, a fila pode esperar muito mais que o seu intervalo."
+
+#: src/admin/pages/cron-info-page.php:187
+msgid "For sending you can rely on, add a server cron that calls WP-Cron every minute or two, then turn the visit trigger off with <code>define( 'DISABLE_WP_CRON', true );</code> in wp-config.php."
+msgstr "Para um envio confiável, adicione um cron no servidor que chame o WP-Cron a cada um ou dois minutos e então desligue o gatilho por visita com <code>define( 'DISABLE_WP_CRON', true );</code> no wp-config.php."
+
+#: src/admin/pages/cron-info-page.php:193
+msgid "No scheduled event is overdue."
+msgstr "Nenhum evento agendado está atrasado."
+
+#. translators: %d: number of overdue WP-Cron events
+#: src/admin/pages/cron-info-page.php:201
+#, php-format
+msgid "%d scheduled event is overdue: WP-Cron does not seem to be running."
+msgid_plural "%d scheduled events are overdue: WP-Cron does not seem to be running."
+msgstr[0] "%d evento agendado está atrasado: o WP-Cron parece não estar rodando."
+msgstr[1] "%d eventos agendados estão atrasados: o WP-Cron parece não estar rodando."
+
+#. translators: %s: human-readable time difference
+#: src/admin/pages/cron-info-page.php:209
+#, php-format
+msgid "The queue worker has been waiting to run for %s."
+msgstr "O worker da fila está esperando para rodar há %s."
+
+#: src/admin/pages/cron-info-page.php:266
+msgid "Add this line to the crontab of the user that runs the site (crontab -e), or to your hosting panel's cron jobs. It only wakes WP-Cron: how often the queue sends is still set by the interval in Settings."
+msgstr "Adicione esta linha ao crontab do usuário que roda o site (crontab -e), ou às tarefas cron do painel da hospedagem. Ela apenas acorda o WP-Cron: a frequência de envio da fila continua definida pelo intervalo em Configurações."
+
+#: src/admin/pages/cron-info-page.php:269
+msgid "Frequency"
+msgstr "Frequência"
+
+#. translators: %d: number of minutes
+#: src/admin/pages/cron-info-page.php:275
+msgid "Every %d minute"
+msgid_plural "Every %d minutes"
+msgstr[0] "A cada %d minuto"
+msgstr[1] "A cada %d minutos"
+
+#: src/admin/pages/cron-info-page.php:282
+msgid "Method"
+msgstr "Método"
+
+#: src/admin/pages/cron-info-page.php:288
+msgid "WP-CLI runs the due events directly, with no web request. Use wget or curl when WP-CLI is not installed on the server."
+msgstr "O WP-CLI executa os eventos vencidos diretamente, sem requisição web. Use wget ou curl quando o WP-CLI não estiver instalado no servidor."
+
+#: src/admin/pages/cron-info-page.php:291
+msgid "Crontab line"
+msgstr "Linha do crontab"
+
+#: src/admin/pages/cron-info-page.php:293
+msgid "Copied"
+msgstr "Copiado"
+
+#: src/admin/pages/cron-info-page.php:293
+msgid "Copy"
+msgstr "Copiar"
+
+#. translators: 1: human-readable time difference, 2: date and time
+#: src/admin/pages/cron-info-page.php:343
+#, php-format
+msgid "in %1$s (%2$s)"
+msgstr "em %1$s (%2$s)"
+
+#. translators: 1: human-readable time difference, 2: date and time
+#: src/admin/pages/cron-info-page.php:346
+#, php-format
+msgid "%1$s ago (%2$s)"
+msgstr "há %1$s (%2$s)"

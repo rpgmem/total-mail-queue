@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers \TotalMailQueue\Settings\Options::get
+ * @covers \TotalMailQueue\Settings\Options
  */
 final class GetSettingsTest extends IntegrationTestCase {
 
@@ -77,4 +77,32 @@ final class GetSettingsTest extends IntegrationTestCase {
 
         self::assertSame( 168, $opts['clear_queue'] );
     }
+
+    public function test_an_empty_stored_number_reads_as_its_default(): void {
+        // Installs that saved a cleared field before the sanitizer refused it.
+        Functions\when( 'get_option' )->justReturn( array(
+            'clear_queue'  => '',
+            'queue_amount' => '',
+            'email_amount' => '',
+        ) );
+
+        $opts = \TotalMailQueue\Settings\Options::get();
+
+        self::assertSame( 14 * 24, $opts['clear_queue'] );
+        self::assertSame( '1', $opts['queue_amount'] );
+        self::assertSame( '10', $opts['email_amount'] );
+    }
+
+    public function test_a_stored_number_below_its_floor_reads_as_the_floor(): void {
+        Functions\when( 'get_option' )->justReturn( array(
+            'clear_queue'   => '0',
+            'cron_lock_ttl' => '5',
+        ) );
+
+        $opts = \TotalMailQueue\Settings\Options::get();
+
+        self::assertSame( 24, $opts['clear_queue'] );
+        self::assertSame( '30', $opts['cron_lock_ttl'] );
+    }
 }
+

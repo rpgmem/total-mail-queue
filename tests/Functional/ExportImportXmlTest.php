@@ -9,8 +9,8 @@ use TotalMailQueue\Admin\ExportImport;
 /**
  * Exercises the XML export/import round-trip and the XXE protection on import.
  *
- * @covers \TotalMailQueue\Admin\ExportImport::buildExportXml
- * @covers \TotalMailQueue\Admin\ExportImport::handleImport
+ * @covers \TotalMailQueue\Admin\ExportImport
+ * @covers \TotalMailQueue\Settings\Sanitizer
  */
 final class ExportImportXmlTest extends FunctionalTestCase {
 
@@ -99,6 +99,51 @@ final class ExportImportXmlTest extends FunctionalTestCase {
         self::assertSame( '1', $settings['enabled'] );
         self::assertArrayNotHasKey( 'tableName', $settings );
         self::assertArrayNotHasKey( 'smtpTableName', $settings );
+    }
+
+    public function test_import_restores_every_key_the_settings_form_saves(): void {
+        // These six were exported and then dropped on import until the import
+        // reused the sanitizer's key list.
+        $payload = '<?xml version="1.0" encoding="UTF-8"?>
+            <total-mail-queue version="2.11.0" exported_at="2026-01-01">
+                <settings>
+                    <cron_lock_ttl>600</cron_lock_ttl>
+                    <smtp_timeout>45</smtp_timeout>
+                    <smtp_debug>1</smtp_debug>
+                    <from_email>sender@example.test</from_email>
+                    <from_name>Robot</from_name>
+                    <dark_mode>auto</dark_mode>
+                </settings>
+                <smtp_accounts/>
+            </total-mail-queue>';
+
+        $this->importXml( $payload );
+
+        $settings = get_option( 'wp_tmq_settings' );
+        self::assertSame( '600', $settings['cron_lock_ttl'] );
+        self::assertSame( '45', $settings['smtp_timeout'] );
+        self::assertSame( '1', $settings['smtp_debug'] );
+        self::assertSame( 'sender@example.test', $settings['from_email'] );
+        self::assertSame( 'Robot', $settings['from_name'] );
+        self::assertSame( 'auto', $settings['dark_mode'] );
+    }
+
+    public function test_import_does_not_store_an_empty_number(): void {
+        update_option( 'wp_tmq_settings', array( 'clear_queue' => '30' ) );
+        $payload = '<?xml version="1.0" encoding="UTF-8"?>
+            <total-mail-queue version="2.11.0" exported_at="2026-01-01">
+                <settings>
+                    <clear_queue></clear_queue>
+                    <queue_amount>0</queue_amount>
+                </settings>
+                <smtp_accounts/>
+            </total-mail-queue>';
+
+        $this->importXml( $payload );
+
+        $settings = get_option( 'wp_tmq_settings' );
+        self::assertSame( '30', $settings['clear_queue'] );
+        self::assertSame( '1', $settings['queue_amount'] );
     }
 
     public function test_import_rejects_payload_with_external_entity_for_xxe_protection(): void {

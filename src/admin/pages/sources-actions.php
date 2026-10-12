@@ -50,9 +50,9 @@ final class SourcesActions {
 		if ( ! isset( $_GET['source-action'], $_GET['source-id'] ) ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the row action nonce is verified just below.
 		$source_id = (int) $_GET['source-id'];
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the row action nonce is verified just below.
 		$action = sanitize_key( wp_unslash( $_GET['source-action'] ) );
 
 		if ( $source_id > 0 && in_array( $action, array( 'enable', 'disable' ), true ) ) {
@@ -120,7 +120,7 @@ final class SourcesActions {
 		if ( ! isset( $_GET['source-action'] ) || 'reset_template' !== $_GET['source-action'] || ! isset( $_GET['source-id'] ) ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reset nonce is verified on the next line.
 		$reset_id = (int) $_GET['source-id'];
 		if ( $reset_id > 0 && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wp_tmq_source_reset_template_' . $reset_id ) ) {
 			SourcesRepository::clearTemplateOverrides( $reset_id );
@@ -135,7 +135,7 @@ final class SourcesActions {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified just below.
 		$bulk_action = isset( $_POST['action'] ) ? sanitize_key( wp_unslash( $_POST['action'] ) ) : '';
 		if ( '-1' === $bulk_action || '' === $bulk_action ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the bulk action nonce is verified just below.
 			$bulk_action = isset( $_POST['action2'] ) ? sanitize_key( wp_unslash( $_POST['action2'] ) ) : '';
 		}
 		if ( ! in_array( $bulk_action, array( 'enable', 'disable' ), true ) ) {

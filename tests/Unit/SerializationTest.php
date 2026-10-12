@@ -7,8 +7,7 @@ namespace TMQ\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \TotalMailQueue\Support\Serializer::encode
- * @covers \TotalMailQueue\Support\Serializer::decode
+ * @covers \TotalMailQueue\Support\Serializer
  */
 final class SerializationTest extends TestCase {
 

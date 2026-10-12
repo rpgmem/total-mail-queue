@@ -12,9 +12,10 @@ use TotalMailQueue\Support\RuntimeState;
 /**
  * Persistent per-row error log: failures accumulate, success clears it.
  *
- * @covers \TotalMailQueue\Queue\QueueRepository::appendErrorLog
- * @covers \TotalMailQueue\Queue\MailFailedHandler::handle
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
+ * @covers \TotalMailQueue\Queue\QueueRepository
+ * @covers \TotalMailQueue\Queue\MailFailedHandler
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Cron\CronLock
  */
 final class ErrorLogTest extends FunctionalTestCase {
 

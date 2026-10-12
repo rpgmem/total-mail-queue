@@ -99,4 +99,42 @@
 		});
 	});
 
+	// Cron tab: the frequency and method selects pick one of the crontab lines
+	// the page printed up front.
+	$doc.on( "change", "[data-tmq-cron-part]", function () {
+		const $line = $( "#tmq-cron-line" );
+		const lines = $line.data( "tmqCronLines" ) || {};
+		const key = $( "#tmq-cron-method" ).val() + ":" + $( "#tmq-cron-frequency" ).val();
+		if ( lines[ key ] ) {
+			$line.val( lines[ key ] );
+		}
+	});
+
+	// Copy a field's value, saying so on the button for a moment. Falls back
+	// to selecting the text where the clipboard API is unavailable (an
+	// insecure origin), so it can still be copied by hand.
+	$doc.on( "click", "[data-tmq-copy]", function () {
+		const $btn = $( this );
+		const field = document.querySelector( $btn.attr( "data-tmq-copy" ) );
+		if ( ! field ) {
+			return;
+		}
+		const done = function () {
+			const label = $btn.text();
+			$btn.text( $btn.attr( "data-tmq-copied" ) );
+			setTimeout( function () {
+				$btn.text( label );
+			}, 1500 );
+		};
+		const select = function () {
+			field.focus();
+			field.select();
+		};
+		if ( navigator.clipboard && window.isSecureContext ) {
+			navigator.clipboard.writeText( field.value ).then( done, select );
+		} else {
+			select();
+		}
+	});
+
 }) ( jQuery, tmq );

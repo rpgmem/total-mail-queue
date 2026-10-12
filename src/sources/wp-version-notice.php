@@ -109,7 +109,7 @@ final class WpVersionNotice {
 		}
 
 		// Passive ack: opening the Sources tab counts as "I've reviewed".
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only ack.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reads the page slug to acknowledge a notice, nothing else.
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 		if ( 'wp_tmq_mail_queue-tab-sources' === $page ) {
 			update_option( self::OPTION_NAME, self::currentVersion(), true );

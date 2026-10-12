@@ -7,8 +7,7 @@ namespace TMQ\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \TotalMailQueue\Support\Encryption::encrypt
- * @covers \TotalMailQueue\Support\Encryption::decrypt
+ * @covers \TotalMailQueue\Support\Encryption
  */
 final class EncryptionTest extends TestCase {
 
@@ -85,4 +84,50 @@ final class EncryptionTest extends TestCase {
         // so callers (PHPMailer's $Password) never receive a non-string.
         self::assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( $tampered ) );
     }
+
+    public function test_encrypt_writes_the_authenticated_envelope(): void {
+        $encrypted = \TotalMailQueue\Support\Encryption::encrypt( 'secret' );
+
+        $this->assertStringStartsWith( \TotalMailQueue\Support\Encryption::PREFIX, $encrypted );
+        $this->assertTrue( \TotalMailQueue\Support\Encryption::isCurrent( $encrypted ) );
+    }
+
+    /**
+     * @dataProvider tamperedBytes
+     */
+    public function test_a_modified_authenticated_envelope_is_refused( string $part ): void {
+        $encrypted = \TotalMailQueue\Support\Encryption::encrypt( 'secret-password' );
+        $raw       = base64_decode( substr( $encrypted, strlen( \TotalMailQueue\Support\Encryption::PREFIX ) ), true );
+        $offset    = array( 'iv' => 0, 'ciphertext' => 16, 'mac' => strlen( $raw ) - 1 )[ $part ];
+        $raw[ $offset ] = chr( ord( $raw[ $offset ] ) ^ 0x01 );
+
+        $this->assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( \TotalMailQueue\Support\Encryption::PREFIX . base64_encode( $raw ) ), 'One flipped bit in the ' . $part . ' must fail the MAC.' );
+    }
+
+    /**
+     * @return array<string,array{0:string}>
+     */
+    public function tamperedBytes(): array {
+        return array(
+            'iv'         => array( 'iv' ),
+            'ciphertext' => array( 'ciphertext' ),
+            'mac'        => array( 'mac' ),
+        );
+    }
+
+    public function test_a_truncated_authenticated_envelope_is_refused(): void {
+        $this->assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( \TotalMailQueue\Support\Encryption::PREFIX . base64_encode( str_repeat( 'x', 48 ) ) ) );
+        $this->assertSame( '', \TotalMailQueue\Support\Encryption::decrypt( \TotalMailQueue\Support\Encryption::PREFIX . '%%%not base64' ) );
+    }
+
+    public function test_the_legacy_envelope_still_decrypts(): void {
+        // What versions before the authenticated envelope wrote: the salt as
+        // the key, base64 of "iv::base64(ciphertext)", no MAC.
+        $iv     = str_repeat( 'B', 16 );
+        $legacy = base64_encode( $iv . '::' . openssl_encrypt( 'old-password', 'aes-256-cbc', wp_salt( 'auth' ), 0, $iv ) );
+
+        $this->assertFalse( \TotalMailQueue\Support\Encryption::isCurrent( $legacy ) );
+        $this->assertSame( 'old-password', \TotalMailQueue\Support\Encryption::decrypt( $legacy ) );
+    }
 }
+

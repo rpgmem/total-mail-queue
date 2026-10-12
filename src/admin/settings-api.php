@@ -203,9 +203,9 @@ final class SettingsApi {
 		}
 
 		echo esc_html__( 'Send max.', 'total-mail-queue' ) .
-			' <input name="wp_tmq_settings[queue_amount]" type="number" min="1" value="' . esc_attr( (string) $options['queue_amount'] ) . '" /> ' .
+			' <input name="wp_tmq_settings[queue_amount]" type="number" required min="1" value="' . esc_attr( (string) $options['queue_amount'] ) . '" /> ' .
 			esc_html__( 'email(s) every', 'total-mail-queue' ) .
-			' <input name="wp_tmq_settings[queue_interval]" type="number" min="1" value="' . esc_attr( (string) $number ) . '" />';
+			' <input name="wp_tmq_settings[queue_interval]" type="number" required min="1" value="' . esc_attr( (string) $number ) . '" />';
 
 		echo '<select name="wp_tmq_settings[queue_interval_unit]">';
 		echo '<option value="minutes"' . selected( $options['queue_interval_unit'], 'minutes', false ) . '>' . esc_html__( 'minute(s)', 'total-mail-queue' ) . '</option>';
@@ -242,11 +242,11 @@ final class SettingsApi {
 	public static function renderLog(): void {
 		$options = Options::get();
 		echo esc_html__( 'Delete Log entries older than', 'total-mail-queue' ) .
-			' <input name="wp_tmq_settings[clear_queue]" type="number" min="1" value="' . esc_attr( (string) ( intval( $options['clear_queue'] ) / 24 ) ) . '" /> ' .
+			' <input name="wp_tmq_settings[clear_queue]" type="number" required min="1" value="' . esc_attr( (string) ( intval( $options['clear_queue'] ) / 24 ) ) . '" /> ' .
 			esc_html__( 'days.', 'total-mail-queue' );
 		echo '<br /><br />';
 		echo esc_html__( 'Keep a maximum of', 'total-mail-queue' ) .
-			' <input name="wp_tmq_settings[log_max_records]" type="number" min="0" value="' . esc_attr( (string) intval( $options['log_max_records'] ) ) . '" /> ' .
+			' <input name="wp_tmq_settings[log_max_records]" type="number" required min="0" value="' . esc_attr( (string) intval( $options['log_max_records'] ) ) . '" /> ' .
 			esc_html__( 'log records.', 'total-mail-queue' );
 		echo ' <span class="description">' . esc_html__( '0 = unlimited', 'total-mail-queue' ) . '</span>';
 	}
@@ -257,7 +257,7 @@ final class SettingsApi {
 	public static function renderRetry(): void {
 		$options = Options::get();
 		echo esc_html__( 'If sending fails, retry up to', 'total-mail-queue' ) .
-			' <input name="wp_tmq_settings[max_retries]" type="number" min="0" value="' . esc_attr( (string) intval( $options['max_retries'] ) ) . '" /> ' .
+			' <input name="wp_tmq_settings[max_retries]" type="number" required min="0" value="' . esc_attr( (string) intval( $options['max_retries'] ) ) . '" /> ' .
 			esc_html__( 'time(s) before marking as error.', 'total-mail-queue' );
 		echo ' <span class="description">' . esc_html__( '0 = no retries, email is immediately marked as error', 'total-mail-queue' ) . '</span>';
 	}
@@ -268,7 +268,7 @@ final class SettingsApi {
 	public static function renderSmtpTimeout(): void {
 		$options = Options::get();
 		$timeout = intval( $options['smtp_timeout'] );
-		echo '<input name="wp_tmq_settings[smtp_timeout]" type="number" min="5" step="1" value="' . esc_attr( (string) $timeout ) . '" /> ' . esc_html__( 'seconds', 'total-mail-queue' );
+		echo '<input name="wp_tmq_settings[smtp_timeout]" type="number" required min="5" step="1" value="' . esc_attr( (string) $timeout ) . '" /> ' . esc_html__( 'seconds', 'total-mail-queue' );
 		echo '<p class="description">';
 		/* translators: %s: recommended value */
 		echo wp_kses_post( sprintf( __( 'Maximum time to wait for a response from the SMTP server per email. If the server does not respond within this time, the email is marked as failed and the batch continues to the next email. Recommended: %s seconds. Minimum: 5 seconds.', 'total-mail-queue' ), '<strong>30</strong>' ) );
@@ -293,7 +293,7 @@ final class SettingsApi {
 	public static function renderCronLockTtl(): void {
 		$options = Options::get();
 		$ttl     = intval( $options['cron_lock_ttl'] );
-		echo '<input name="wp_tmq_settings[cron_lock_ttl]" type="number" min="30" step="1" value="' . esc_attr( (string) $ttl ) . '" /> ' . esc_html__( 'seconds', 'total-mail-queue' );
+		echo '<input name="wp_tmq_settings[cron_lock_ttl]" type="number" required min="30" step="1" value="' . esc_attr( (string) $ttl ) . '" /> ' . esc_html__( 'seconds', 'total-mail-queue' );
 		echo '<p class="description">';
 		/* translators: %s: recommended value */
 		echo wp_kses_post( sprintf( __( 'Maximum time a cron batch can hold the processing lock. If the batch finishes normally, the lock is released immediately. This timeout is a safety net: if PHP crashes mid-batch, the lock expires after this period and the queue resumes automatically. Recommended: %s seconds (5 minutes). Minimum: 30 seconds.', 'total-mail-queue' ), '<strong>300</strong>' ) );
@@ -327,7 +327,7 @@ final class SettingsApi {
 		echo esc_html__( 'Send alert to', 'total-mail-queue' ) .
 			' <input type="text" name="wp_tmq_settings[email]" value="' . esc_attr( sanitize_email( (string) $options['email'] ) ) . '" /> ' .
 			esc_html__( 'if more than', 'total-mail-queue' ) .
-			' <input name="wp_tmq_settings[email_amount]" type="number" min="1" value="' . esc_attr( (string) intval( $options['email_amount'] ) ) . '" /> ' .
+			' <input name="wp_tmq_settings[email_amount]" type="number" required min="1" value="' . esc_attr( (string) intval( $options['email_amount'] ) ) . '" /> ' .
 			wp_kses_post(
 				sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */

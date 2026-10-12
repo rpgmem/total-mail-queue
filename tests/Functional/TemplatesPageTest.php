@@ -11,7 +11,7 @@ use TotalMailQueue\Templates\Options;
  * T3 — Templates admin tab: form save, reset, mode notices, toggle-off
  * inline warning, and the rendered structure.
  *
- * @covers \TotalMailQueue\Admin\Pages\TemplatesPage
+ * No covers annotation: the page renders the default-html.php partial in its preview, which no such annotation can name; without one the test counts what it renders.
  */
 final class TemplatesPageTest extends FunctionalTestCase {
 

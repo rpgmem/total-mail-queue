@@ -7,7 +7,34 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [2.11.0] (2026-10-10)
+## [2.12.0] (2026-10-12)
+
+A Cron tab that says whether the queue is being sent and gives the server cron line, Free Form Certificate's icons, colours and documentation navigation, empty number fields that keep their value, and authenticated SMTP passwords.
+
+### Added
+
+- **Coverage floor and three guards** (#113). CI now fails below a merged line-coverage floor, and the unit suite checks that the version and the PHP and WordPress floors agree across every file that declares them, that the Upgrade Notice describes the release on offer, and that every suppression names its rule and a reason.
+- **JavaScript test suite** (#115). Vitest with jsdom now covers the four admin scripts (queue list, autosave, documentation search, templates preview and test email), and CI fails below a JS line-coverage floor.
+- **Functional tests for the admin screens** (#115). The SMTP, Sources edit, Settings, notices, queue diagnostics, Access, assets and page-router screens, and the test-email handler, are now exercised with their nonce, capability and error paths; the coverage floor rises to 83%.
+- **Tests for the worker, scheduler, boot and uninstall** (#115). The batch processor's lock, failure and transport branches, the schedule against the real cron table, SMTP recovery times, plugin boot and the uninstaller are now covered; the coverage floor rises to 88%.
+- **Cron tab** (#121). Always shown, it says whether the queue worker is running, asleep, waiting for an SMTP quota, overdue or stalled, with its next and last run; whether WP-Cron's visit trigger is on and which events are overdue; and, for administrators, the crontab line to add (WP-CLI, wget or curl) with a copy button. It replaces the Cron Information tab that appeared only with `DISABLE_WP_CRON`.
+
+### Changed
+
+- **Documentation navigation beside the topics** (#120). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
+- **The documentation's navigation reads as in Free Form Certificate** (#122). Its title is now Quick Navigation (pt_BR "Navegação Rápida") and the search box says "Search documentation…" ("Pesquisar na documentação…"), the wording of Free Form Certificate and the other plugins.
+- **Icons and colours follow Free Form Certificate** (#123). Each icon with a counterpart there now uses its drawing — Settings is the gear and Advanced the sliders, the reverse of before — and the colour tokens take its values, among them the darker field border (3:1 against white) and its status text colours.
+
+### Fixed
+
+- **An empty number field no longer saves as 0** (#112). Clearing the log retention deleted every log row on the next run, and clearing the batch size stopped sending. An empty field now keeps its value, each number has a minimum, and values already stored empty read as the default.
+- **Import restores every setting the form saves** (#112). Six keys the export writes, among them the SMTP timeout, the default sender and dark mode, were dropped on import; the import now goes through the form's own sanitizer.
+
+### Security
+
+- **SMTP passwords are authenticated, not only encrypted** (#114). A stored password now carries an HMAC over its ciphertext, checked before decryption, with the cipher and MAC keys derived separately from the salt. Existing passwords are re-encrypted on update and after an import; the old format is still read.
+
+## [2.11.0] (2026-10-10) — `88add1d`
 
 ### Added
 

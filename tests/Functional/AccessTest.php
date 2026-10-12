@@ -16,9 +16,9 @@ use WP_REST_Request;
  * Which roles view and which manage the plugin (#91).
  *
  * @covers \TotalMailQueue\Admin\Access
- * @covers \TotalMailQueue\Admin\PluginPage::render
+ * @covers \TotalMailQueue\Admin\PluginPage
  * @covers \TotalMailQueue\Admin\Tables\LogTable
- * @covers \TotalMailQueue\Rest\MessageController::getMessage
+ * @covers \TotalMailQueue\Rest\MessageController
  */
 final class AccessTest extends FunctionalTestCase {
 
@@ -55,9 +55,7 @@ final class AccessTest extends FunctionalTestCase {
 
         self::assertTrue( Access::canView() );
         self::assertFalse( Access::canManage() );
-        // Cron Information exists only while WP-Cron is disabled; it is a view tab too.
-        $tabs = array_values( array_diff( array_keys( PluginPage::visibleTabs() ), array( PluginPage::TAB_CRON_INFO ) ) );
-        self::assertSame( array( PluginPage::TAB_LOG, PluginPage::TAB_QUEUE, PluginPage::TAB_SOURCES, PluginPage::TAB_DOCS ), $tabs );
+        self::assertSame( array( PluginPage::TAB_LOG, PluginPage::TAB_QUEUE, PluginPage::TAB_SOURCES, PluginPage::TAB_CRON_INFO, PluginPage::TAB_DOCS ), array_keys( PluginPage::visibleTabs() ) );
     }
 
     public function test_manage_includes_view_and_opens_settings_and_templates_but_not_smtp(): void {

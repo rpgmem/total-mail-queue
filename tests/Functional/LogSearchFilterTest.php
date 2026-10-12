@@ -12,11 +12,8 @@ use TotalMailQueue\Queue\QueueRepository;
  * Search and date range on the Log and Retention lists (#83).
  *
  * @covers \TotalMailQueue\Queue\ListFilter
- * @covers \TotalMailQueue\Queue\QueueRepository::logCount
- * @covers \TotalMailQueue\Queue\QueueRepository::logPage
- * @covers \TotalMailQueue\Queue\QueueRepository::queueCount
- * @covers \TotalMailQueue\Queue\QueueRepository::queuePage
- * @covers \TotalMailQueue\Admin\Tables\LogTable::extra_tablenav
+ * @covers \TotalMailQueue\Queue\QueueRepository
+ * @covers \TotalMailQueue\Admin\Tables\LogTable
  */
 final class LogSearchFilterTest extends FunctionalTestCase {
 

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin;
 
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Settings\Sanitizer;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use DOMDocument;
 use SimpleXMLElement;
@@ -22,30 +23,6 @@ use SimpleXMLElement;
  * Settings tab renderer once the request nonce has been verified there.
  */
 final class ExportImport {
-
-	/**
-	 * Whitelist of setting keys allowed to be restored from an import.
-	 *
-	 * `tableName` and `smtpTableName` are deliberately excluded — they would
-	 * let an attacker redirect SQL queries to arbitrary tables.
-	 *
-	 * @var array<int,string>
-	 */
-	private const ALLOWED_SETTING_KEYS = array(
-		'enabled',
-		'alert_enabled',
-		'email',
-		'email_amount',
-		'queue_amount',
-		'queue_interval',
-		'queue_interval_unit',
-		'clear_queue',
-		'log_max_records',
-		'send_method',
-		'max_retries',
-		'auto_block',
-		'block_password_reset',
-	);
 
 	/**
 	 * Hook the export handler onto admin_init.
@@ -170,12 +147,14 @@ final class ExportImport {
 			if ( ! is_array( $current ) ) {
 				$current = array();
 			}
+			$imported = array();
 			foreach ( $xml->settings->children() as $node ) {
-				$key = $node->getName();
-				if ( in_array( $key, self::ALLOWED_SETTING_KEYS, true ) ) {
-					$current[ $key ] = (string) $node;
-				}
+				$imported[ $node->getName() ] = (string) $node;
 			}
+			// The Settings form's sanitizer decides which keys an import may
+			// write, so the two cannot drift apart: `tableName` and
+			// `smtpTableName` stay out, and every key the form saves comes in.
+			$current = array_merge( $current, Sanitizer::sanitize( $imported ) );
 			if ( ! empty( $current ) ) {
 				update_option( Options::OPTION_NAME, $current );
 			}
@@ -196,6 +175,9 @@ final class ExportImport {
 					SmtpRepository::insert( $account );
 				}
 			}
+			// A file exported by an earlier version carries passwords in the
+			// legacy, unauthenticated envelope.
+			SmtpRepository::upgradePasswordEncryption();
 		}
 
 		$exported_at = (string) ( $xml['exported_at'] ?? '' );

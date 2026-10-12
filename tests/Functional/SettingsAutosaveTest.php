@@ -16,6 +16,7 @@ use WPAjaxDieStopException;
  * Toggles that save on flip (#89).
  *
  * @covers \TotalMailQueue\Admin\SettingsAutosave
+ * @covers \TotalMailQueue\Admin\SettingsApi
  */
 final class SettingsAutosaveTest extends WP_Ajax_UnitTestCase {
 

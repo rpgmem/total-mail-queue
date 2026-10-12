@@ -8,7 +8,9 @@ namespace TMQ\Tests\Functional;
  * Verifies the cleanup paths inside \TotalMailQueue\Cron\BatchProcessor::run() that
  * trim the log table by age (clear_queue) and by hard cap (log_max_records).
  *
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Retention\LogPruner
+ * @covers \TotalMailQueue\Cron\CronLock
  */
 final class RetentionCleanupTest extends FunctionalTestCase {
 
@@ -35,8 +37,10 @@ final class RetentionCleanupTest extends FunctionalTestCase {
 
     public function test_clear_queue_does_not_delete_pending_queue_items(): void {
         // Even if a queue item is "old" (timestamp), it must NOT be deleted —
-        // the retention sweep targets statuses other than queue/high.
-        $this->setPluginOptions( array( 'enabled' => '1', 'clear_queue' => 1, 'queue_amount' => 0 ) );
+        // the retention sweep targets statuses other than queue/high. With
+        // "Plugin SMTP only" and no account the row is held, not sent: a
+        // queue_amount of 0 can no longer express that, it is raised to 1.
+        $this->setPluginOptions( array( 'enabled' => '1', 'clear_queue' => 1, 'queue_amount' => 1, 'send_method' => 'smtp' ) );
 
         $this->insertQueueItem( array(
             'status'    => 'queue',
@@ -55,7 +59,7 @@ final class RetentionCleanupTest extends FunctionalTestCase {
             'enabled'         => '1',
             'clear_queue'     => 365,
             'log_max_records' => 2,
-            'queue_amount'    => 0,
+            'queue_amount'    => 1,
         ) );
 
         // Three sent entries at decreasing ages.
@@ -76,7 +80,7 @@ final class RetentionCleanupTest extends FunctionalTestCase {
             'enabled'         => '1',
             'clear_queue'     => 365,
             'log_max_records' => 0,
-            'queue_amount'    => 0,
+            'queue_amount'    => 1,
         ) );
 
         for ( $i = 0; $i < 5; $i++ ) {

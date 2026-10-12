@@ -13,7 +13,7 @@ use TotalMailQueue\Admin\SettingsApi;
  * The icon set and the grouped Settings tab.
  *
  * @covers \TotalMailQueue\Admin\Icons
- * @covers \TotalMailQueue\Admin\SettingsApi::sections
+ * @covers \TotalMailQueue\Admin\SettingsApi
  */
 final class AdminIconsAndSectionsTest extends TestCase {
 
@@ -22,9 +22,6 @@ final class AdminIconsAndSectionsTest extends TestCase {
             self::assertArrayHasKey( $slug, Icons::TABS, "{$slug} has no icon." );
             self::assertArrayHasKey( Icons::TABS[ $slug ], Icons::PATHS, "{$slug}'s icon is not drawn." );
         }
-        // Cron Information only appears while WP-Cron is disabled, but it is
-        // still a tab and still needs a drawing.
-        self::assertArrayHasKey( Icons::TABS[ PluginPage::TAB_CRON_INFO ], Icons::PATHS );
     }
 
     public function test_drawings_use_a_closed_vocabulary(): void {

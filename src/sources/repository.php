@@ -56,7 +56,7 @@ final class Repository {
 	public static function findByKey( string $source_key ): ?array {
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE `source_key` = %s", $source_key ), ARRAY_A );
 		return is_array( $row ) ? $row : null;
 	}
@@ -70,7 +70,7 @@ final class Repository {
 	public static function findById( int $id ): ?array {
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE `id` = %d", $id ), ARRAY_A );
 		return is_array( $row ) ? $row : null;
 	}
@@ -97,7 +97,7 @@ final class Repository {
 		global $wpdb;
 		$table = Schema::sourcesTable();
 		$now   = current_time( 'mysql', false );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$inserted = $wpdb->insert(
 			$table,
 			array(
@@ -130,10 +130,10 @@ final class Repository {
 		global $wpdb;
 		$table = Schema::sourcesTable();
 		$now   = current_time( 'mysql', false );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$table` SET `total_count` = `total_count` + 1, `last_seen_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$table` SET `total_count` = `total_count` + 1, `last_seen_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$now,
 				$id
 			)
@@ -192,7 +192,7 @@ final class Repository {
 		}
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->update(
 			$table,
 			array( 'priority' => Priority::clamp( $priority ) ),
@@ -236,7 +236,7 @@ final class Repository {
 		}
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->update(
 			$table,
 			array( 'preferred_smtp_account_id' => max( 0, $account_id ) ),
@@ -265,7 +265,7 @@ final class Repository {
 		}
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->update(
 			$table,
 			array( 'enabled' => $enabled ? 1 : 0 ),
@@ -287,10 +287,10 @@ final class Repository {
 	public static function setEnabledByGroup( string $group_label, bool $enabled ): int {
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$updated = $wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$table` SET `enabled` = %d WHERE `group_label` = %s AND `source_key` NOT LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$table` SET `enabled` = %d WHERE `group_label` = %s AND `source_key` NOT LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$enabled ? 1 : 0,
 				$group_label,
 				$wpdb->esc_like( self::SYSTEM_PREFIX ) . '%'
@@ -307,7 +307,7 @@ final class Repository {
 	public static function all(): array {
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY `group_label` ASC, `source_key` ASC", ARRAY_A );
 		return is_array( $rows ) ? array_values( $rows ) : array();
 	}
@@ -318,7 +318,7 @@ final class Repository {
 	public static function count(): int {
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM `$table`" );
 	}
 
@@ -351,7 +351,7 @@ final class Repository {
 		}
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->update(
 			$table,
 			array(
@@ -385,7 +385,7 @@ final class Repository {
 		}
 		global $wpdb;
 		$table = Schema::sourcesTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->update(
 			$table,
 			array(

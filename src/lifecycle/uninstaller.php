@@ -21,10 +21,11 @@ use TotalMailQueue\Templates\Options as TemplateOptions;
 /**
  * Callback invoked by WordPress when the plugin is deleted via the admin UI.
  *
- * Runs in a special context: WordPress loads the plugin file but only to
- * resolve the hook target — none of the plugin's normal init runs. The
- * handler must therefore be self-contained and rely only on the Composer
- * autoloader (which the bootstrap requires before {@see \TotalMailQueue\Plugin::boot}).
+ * Called from `uninstall.php`, which WordPress runs without loading the
+ * plugin's main file, so none of the plugin's normal init has happened.
+ * `uninstall.php` registers the same inline autoloader the main file does
+ * (the release zip ships no Composer autoloader), and this handler relies on
+ * nothing else.
  */
 final class Uninstaller {
 

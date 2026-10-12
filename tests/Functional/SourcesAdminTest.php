@@ -14,6 +14,10 @@ use TotalMailQueue\Sources\Repository as SourcesRepository;
  * @covers \TotalMailQueue\Admin\Pages\SourcesPage
  * @covers \TotalMailQueue\Admin\Tables\SourcesTable
  * @covers \TotalMailQueue\Admin\Tables\LogTable
+ * @covers \TotalMailQueue\Admin\Pages\SourcesActions
+ * @covers \TotalMailQueue\Admin\Pages\SourcesListRenderer
+ * @covers \TotalMailQueue\Sources\KnownSources
+ * @covers \TotalMailQueue\Sources\Repository
  */
 final class SourcesAdminTest extends FunctionalTestCase {
 

@@ -16,9 +16,11 @@ use TotalMailQueue\Support\Serializer;
  * Staged attachments live exactly as long as their row needs them (#81).
  *
  * @covers \TotalMailQueue\Queue\AttachmentStore
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
- * @covers \TotalMailQueue\Queue\MailFailedHandler::handle
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Queue\MailFailedHandler
+ * @covers \TotalMailQueue\Cron\CronLock
+ * @covers \TotalMailQueue\Queue\QueueRepository
  */
 final class AttachmentLifecycleTest extends FunctionalTestCase {
 
