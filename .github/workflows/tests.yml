@@ -133,8 +133,9 @@ jobs:
       # as PHPUnit attributes it through @covers. Ratcheted up in the PR that
       # delivers a gain, never lowered, and at most 5 points below the
       # measured figure: 47.04% when set (43), 66.49% once every test
-      # declared the classes it exercises (61, #115).
-      COVERAGE_FLOOR_LINES: '61'
+      # declared the classes it exercises (61, #115), 87.54% with the admin
+      # screens under functional tests (83, #115).
+      COVERAGE_FLOOR_LINES: '83'
     services:
       mysql:
         image: mysql:8.0
