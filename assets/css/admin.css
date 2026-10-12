@@ -33,28 +33,28 @@
 	--tmq-bg-input: #fff;
 
 	--tmq-text: #1d2327;
-	--tmq-text-secondary: #3c434a;
+	--tmq-text-secondary: #50575e;
 	--tmq-text-muted: #646970;
 
-	--tmq-border: #c3c4c7;
+	--tmq-border: #8e8f91;
 	--tmq-border-light: #dcdcde;
 	--tmq-border-focus: #2271b1;
 
 	/* Solid signals: a light label on a saturated ground. */
 	--tmq-success: #00801e;
-	--tmq-danger: #b32d2e;
-	--tmq-danger-text: #b32d2e;
+	--tmq-danger: #d63638;
+	--tmq-danger-text: #8a2424;
 	--tmq-text-on-signal: #fff;
 
 	/* Tinted badges: a dark label on a pale ground of the same hue. */
 	--tmq-success-bg: #e7f5ec;
-	--tmq-success-text: #00661a;
+	--tmq-success-text: #0a5c1a;
 	--tmq-warning-bg: #fff8e5;
-	--tmq-warning-text: #7a5a00;
+	--tmq-warning-text: #6e4e00;
 	--tmq-danger-bg: #fcf0f1;
 	--tmq-danger-badge-text: #a1191b;
 	--tmq-info-bg: #e5f5fa;
-	--tmq-info-text: #005a87;
+	--tmq-info-text: #004b70;
 	--tmq-neutral-bg: #f0f0f1;
 	--tmq-neutral-text: #3c434a;
 	--tmq-inverse-bg: #1d2327;
@@ -87,7 +87,7 @@
 	--tmq-primary: #5dabde;
 	--tmq-primary-hover: #7cbde8;
 	--tmq-primary-light: #1a2f42;
-	--tmq-text-on-primary: #10283a;
+	--tmq-text-on-primary: #213c4e;
 	/* The knob stays white: on the dark track a card-coloured knob would vanish. */
 	--tmq-toggle-knob: #fff;
 
@@ -101,22 +101,22 @@
 	--tmq-text-muted: #a7aaad;
 
 	--tmq-border: #6f7c89;
-	--tmq-border-light: #3c434a;
+	--tmq-border-light: #2c3338;
 	--tmq-border-focus: #5dabde;
 
 	--tmq-success: #4caf50;
 	--tmq-danger: #e88080;
-	--tmq-danger-text: #f29a9a;
+	--tmq-danger-text: #ef9a9a;
 	--tmq-text-on-signal: #1d2327;
 
 	--tmq-success-bg: #1a2e1a;
 	--tmq-success-text: #81c784;
 	--tmq-warning-bg: #332b10;
-	--tmq-warning-text: #f0c76a;
+	--tmq-warning-text: #ffe082;
 	--tmq-danger-bg: #2e1515;
 	--tmq-danger-badge-text: #f29a9a;
 	--tmq-info-bg: #0d2b3a;
-	--tmq-info-text: #7fd0f5;
+	--tmq-info-text: #81d4fa;
 	--tmq-neutral-bg: #3c434a;
 	--tmq-neutral-text: #e7e8ea;
 	--tmq-inverse-bg: #e7e8ea;
