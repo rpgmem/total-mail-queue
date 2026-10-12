@@ -11,7 +11,7 @@ use TotalMailQueue\Sources\Detector;
  * Exercises {@see Detector::fromExplicitKey()} — the header-declared source
  * strategy a sending plugin uses to label each of its emails distinctly.
  *
- * @covers \TotalMailQueue\Sources\Detector::fromExplicitKey
+ * @covers \TotalMailQueue\Sources\Detector
  */
 final class SourcesDetectorExplicitKeyTest extends TestCase {
 

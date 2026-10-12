@@ -24,9 +24,8 @@ use TotalMailQueue\Sources\Detector;
  * `BatchProcessor::isDraining()` check that's only true while our drain
  * loop is iterating queued rows.
  *
- * @covers \TotalMailQueue\Queue\MailInterceptor::register
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
- * @covers \TotalMailQueue\Cron\BatchProcessor::isDraining
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Cron\BatchProcessor
  */
 final class CronContextCaptureTest extends FunctionalTestCase {
 

@@ -73,7 +73,10 @@ These run in CI on every PR and on pushes to `main` and `develop`:
 - PHPStan, and PHPCS with WPCS and PHPCompatibilityWP.
 - ESLint over `assets/js` and Stylelint over `assets/css` (`npm run lint`).
 - `composer validate --strict` and `composer audit --locked`.
-- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. Raise the floor in the PR that delivers a gain, never lower it, and keep it at most 5 points below the measured figure. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it.
+- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. Raise the floor in the PR that delivers a gain, never lower it, and keep it at most 5 points below the measured figure. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
+  - **declare the class, not the method** (`@covers \TotalMailQueue\Cron\BatchProcessor`, never `…::run`): a method-level annotation drops the private helpers that method calls, which hid a fifth of the batch processor;
+  - **declare every class the test exercises on purpose**, such as the cron lock in a cron-flow test, but not the incidental ones every request touches (options, schema);
+  - **a test whose subject is a partial goes without the annotation**, saying why in its docblock: the `src/admin/docs/` topics and `default-html.php` are included files, which no annotation can name.
 
 Three guards in the unit suite hold what nothing else reads:
 - `PluginIdentityTest`: the version (header, `Plugin::VERSION`, `Stable tag`, a dated CHANGELOG section) and the PHP and WordPress floors (header, `readme.txt`, `composer.json`, the PHPCS `testVersion` and `minimum_wp_version`) agree.

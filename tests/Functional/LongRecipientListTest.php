@@ -12,10 +12,11 @@ use TotalMailQueue\Queue\QueueRepository;
 /**
  * A recipient list longer than 255 characters is stored and sent whole (#82).
  *
- * @covers \TotalMailQueue\Database\Schema::install
- * @covers \TotalMailQueue\Queue\QueueRepository::insert
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
+ * @covers \TotalMailQueue\Database\Schema
+ * @covers \TotalMailQueue\Queue\QueueRepository
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Cron\CronLock
  */
 final class LongRecipientListTest extends FunctionalTestCase {
 

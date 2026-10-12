@@ -9,9 +9,10 @@ use TotalMailQueue\Cron\Diagnostics;
 /**
  * The "last individual send" stamp that drives the stalled-queue notice.
  *
- * @covers \TotalMailQueue\Cron\Diagnostics::recordSend
- * @covers \TotalMailQueue\Cron\Diagnostics::lastSendTimestamp
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
+ * @covers \TotalMailQueue\Cron\Diagnostics
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Cron\CronLock
+ * @covers \TotalMailQueue\Smtp\Repository
  */
 final class LastSendTrackingTest extends FunctionalTestCase {
 

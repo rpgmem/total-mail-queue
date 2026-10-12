@@ -14,8 +14,8 @@ use TotalMailQueue\Admin\PluginPage;
  * and the script that applies the Dark Mode setting.
  *
  * @covers \TotalMailQueue\Admin\Menu
- * @covers \TotalMailQueue\Admin\PluginPage::tabs
- * @covers \TotalMailQueue\Admin\Assets::darkModeScript
+ * @covers \TotalMailQueue\Admin\PluginPage
+ * @covers \TotalMailQueue\Admin\Assets
  */
 final class AdminChromeTest extends IntegrationTestCase {
 

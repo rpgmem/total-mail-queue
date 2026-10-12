@@ -13,8 +13,8 @@ use TotalMailQueue\Sources\Detector;
  * `source_key` column is populated, the source is registered in the
  * sources catalog, and the catalog is bumped (`markSeen`) on every send.
  *
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
- * @covers \TotalMailQueue\Sources\Detector::consume
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Sources\Detector
  */
 final class MailInterceptorSourceTest extends IntegrationTestCase {
 

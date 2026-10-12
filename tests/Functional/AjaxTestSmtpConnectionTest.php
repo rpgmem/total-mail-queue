@@ -9,7 +9,8 @@ use WPAjaxDieContinueException;
 use WPAjaxDieStopException;
 
 /**
- * @covers \TotalMailQueue\Smtp\ConnectionTester::handle
+ * @covers \TotalMailQueue\Smtp\ConnectionTester
+ * @covers \TotalMailQueue\Admin\SettingsApi
  */
 final class AjaxTestSmtpConnectionTest extends WP_Ajax_UnitTestCase {
 

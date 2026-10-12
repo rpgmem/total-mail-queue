@@ -15,8 +15,7 @@ use WPAjaxDieStopException;
 /**
  * The live preview on the Templates tab.
  *
- * @covers \TotalMailQueue\Templates\Preview
- * @covers \TotalMailQueue\Templates\Engine::render
+ * No covers annotation: the preview renders the default-html.php partial, which no such annotation can name; without one the test counts what it renders.
  */
 final class TemplatePreviewTest extends WP_Ajax_UnitTestCase {
 

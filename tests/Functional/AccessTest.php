@@ -16,9 +16,9 @@ use WP_REST_Request;
  * Which roles view and which manage the plugin (#91).
  *
  * @covers \TotalMailQueue\Admin\Access
- * @covers \TotalMailQueue\Admin\PluginPage::render
+ * @covers \TotalMailQueue\Admin\PluginPage
  * @covers \TotalMailQueue\Admin\Tables\LogTable
- * @covers \TotalMailQueue\Rest\MessageController::getMessage
+ * @covers \TotalMailQueue\Rest\MessageController
  */
 final class AccessTest extends FunctionalTestCase {
 

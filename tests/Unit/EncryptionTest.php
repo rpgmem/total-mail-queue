@@ -7,8 +7,7 @@ namespace TMQ\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \TotalMailQueue\Support\Encryption::encrypt
- * @covers \TotalMailQueue\Support\Encryption::decrypt
+ * @covers \TotalMailQueue\Support\Encryption
  */
 final class EncryptionTest extends TestCase {
 

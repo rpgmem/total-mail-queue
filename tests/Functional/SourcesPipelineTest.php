@@ -16,7 +16,7 @@ use TotalMailQueue\Sources\Repository as SourcesRepository;
  *
  * @covers \TotalMailQueue\Sources\Detector
  * @covers \TotalMailQueue\Sources\Repository
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
+ * @covers \TotalMailQueue\Queue\MailInterceptor
  */
 final class SourcesPipelineTest extends FunctionalTestCase {
 

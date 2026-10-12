@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace TMQ\Tests\Integration;
 
 /**
- * @covers \TotalMailQueue\Queue\MailFailedHandler::handle
+ * @covers \TotalMailQueue\Queue\MailFailedHandler
  */
 final class MailFailedTest extends IntegrationTestCase {
 

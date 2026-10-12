@@ -17,9 +17,11 @@ use TotalMailQueue\Sources\Detector;
  * Block on alert, and password resets that Block mode does not hold (#84).
  *
  * @covers \TotalMailQueue\Cron\AutoBlock
- * @covers \TotalMailQueue\Cron\AlertSender::maybeAlert
- * @covers \TotalMailQueue\Cron\BatchProcessor::run
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
+ * @covers \TotalMailQueue\Cron\AlertSender
+ * @covers \TotalMailQueue\Cron\BatchProcessor
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Cron\CronLock
+ * @covers \TotalMailQueue\Queue\MailSucceededHandler
  */
 final class AutoBlockTest extends FunctionalTestCase {
 

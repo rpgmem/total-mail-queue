@@ -12,7 +12,7 @@ use TotalMailQueue\Admin\Tables\LogTable;
  * Screen Options column toggles for the Log and Retention tabs.
  *
  * @covers \TotalMailQueue\Admin\LogColumns
- * @covers \TotalMailQueue\Admin\Tables\LogTable::columnsFor
+ * @covers \TotalMailQueue\Admin\Tables\LogTable
  */
 final class LogColumnsTest extends IntegrationTestCase {
 

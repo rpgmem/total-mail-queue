@@ -16,7 +16,7 @@ use TotalMailQueue\Sources\Repository as SourcesRepository;
  * before the first email of each kind arrives.
  *
  * @covers \TotalMailQueue\Sources\KnownSources
- * @covers \TotalMailQueue\Database\Migrator::install
+ * @covers \TotalMailQueue\Database\Migrator
  */
 final class SourcesKnownCatalogTest extends FunctionalTestCase {
 

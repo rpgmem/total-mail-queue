@@ -23,14 +23,14 @@ use TotalMailQueue\Admin\Pages\SourcesPage;
  * migration, and the WP version-bump notice.
  *
  * @covers \TotalMailQueue\Sources\CoreTemplates
- * @covers \TotalMailQueue\Sources\Detector::setData
- * @covers \TotalMailQueue\Sources\Detector::consumeData
- * @covers \TotalMailQueue\Sources\Repository::updateTemplateOverrides
- * @covers \TotalMailQueue\Sources\Repository::clearTemplateOverrides
+ * @covers \TotalMailQueue\Sources\Detector
+ * @covers \TotalMailQueue\Sources\Repository
  * @covers \TotalMailQueue\Sources\WpVersionNotice
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
+ * @covers \TotalMailQueue\Queue\MailInterceptor
  * @covers \TotalMailQueue\Admin\Pages\SourcesPage
- * @covers \TotalMailQueue\Database\Migrator::install
+ * @covers \TotalMailQueue\Database\Migrator
+ * @covers \TotalMailQueue\Admin\Pages\SourcesActions
+ * @covers \TotalMailQueue\Admin\Pages\SourcesListRenderer
  */
 final class CoreTemplateOverridesTest extends FunctionalTestCase {
 
