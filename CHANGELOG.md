@@ -14,6 +14,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Functional tests for the admin screens** (#115). The SMTP, Sources edit, Settings, notices, queue diagnostics, Access, assets and page-router screens, and the test-email handler, are now exercised with their nonce, capability and error paths; the coverage floor rises to 83%.
 - **Tests for the worker, scheduler, boot and uninstall** (#115). The batch processor's lock, failure and transport branches, the schedule against the real cron table, SMTP recovery times, plugin boot and the uninstaller are now covered; the coverage floor rises to 88%.
 
+### Changed
+
+- **Documentation navigation beside the topics** (#120). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
+
 ### Fixed
 
 - **An empty number field no longer saves as 0** (#112). Clearing the log retention deleted every log row on the next run, and clearing the batch size stopped sending. An empty field now keeps its value, each number has a minimum, and values already stored empty read as the default.

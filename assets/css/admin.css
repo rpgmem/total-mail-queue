@@ -72,8 +72,6 @@
 	--tmq-radius: 4px;
 	--tmq-radius-lg: 6px;
 	--tmq-space-xs: 4px;
-	/* Height of the documentation's sticky navigation, set by tmq-docs.js. */
-	--tmq-docs-nav-h: 0px;
 	--tmq-space-sm: 8px;
 	--tmq-space-md: 12px;
 	--tmq-space-lg: 16px;
@@ -873,18 +871,35 @@ span.tmq-status.tmq-status-inline {
 	border-top: 1px solid var(--tmq-border-light);
 }
 
-/* Quick navigation, after Free Form Certificate's: a card that stays below the
-   admin bar while the topics scroll, with a search box over a single-column
-   tree, one row per group in the menu's order. A group with one topic is a
-   link; a longer one is a <details> branch whose topics open beneath it.
-   Its height is capped so it never takes the whole screen. */
-.tmq-docs-index {
-	position: sticky;
-	top: 46px;
-	z-index: 10;
-	max-height: 60vh;
-	overflow-y: auto;
-	box-shadow: 0 2px 6px var(--tmq-shadow);
+/* Quick navigation: on a wide screen, a column beside the topics that stays
+   below the admin bar while they scroll, with a search box over a tree, one
+   row per group in the menu's order. A group with one topic is a link; a
+   longer one is a <details> branch whose topics open beneath it. Beside the
+   text rather than over it, so it never hides what is being read. On a
+   narrower screen it sits above the topics and scrolls away with them. */
+@media screen and (min-width: 1100px) {
+	.tmq-docs-layout {
+		display: grid;
+		grid-template-columns: 260px minmax(0, 1fr);
+		gap: var(--tmq-space-lg);
+		align-items: start;
+	}
+
+	.tmq-docs-index {
+		position: sticky;
+		top: 46px;
+		max-height: calc(100vh - 62px);
+		overflow-y: auto;
+	}
+}
+
+.tmq-docs-layout > .tmq-docs-index {
+	margin-top: var(--tmq-space-lg);
+}
+
+.tmq-docs-topics {
+	min-width: 0;
+	margin-top: var(--tmq-space-lg);
 }
 
 .tmq-docs-index .tmq-card-title {
@@ -998,26 +1013,10 @@ summary.tmq-docs-index__tile::-webkit-details-marker {
 	color: var(--tmq-text-secondary);
 }
 
-/* An anchored topic lands below the admin bar and the sticky navigation,
-   whose height the script publishes; without it, below the admin bar. */
-.tmq-docs-topic {
-	scroll-margin-top: calc(56px + var(--tmq-docs-nav-h, 0px));
-}
-
+/* An anchored topic lands below the admin bar. */
+.tmq-docs-topic,
 .tmq-docs-index {
 	scroll-margin-top: 48px;
-}
-
-/* On a phone the navigation scrolls away with the page. */
-@media screen and (max-width: 782px) {
-	.tmq-docs-index {
-		position: static;
-		max-height: none;
-	}
-
-	.tmq-docs-topic {
-		scroll-margin-top: 56px;
-	}
 }
 
 .tmq-docs-topic h3 {
