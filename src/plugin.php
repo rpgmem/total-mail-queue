@@ -28,12 +28,12 @@ final class Plugin {
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
 	 */
-	public const REQUIRES_PHP = '8.1';
+	public const REQUIRES_PHP = '8.3';
 
 	/**
 	 * Minimum required WordPress version (mirrors readme.txt).
 	 */
-	public const REQUIRES_WP = '5.9';
+	public const REQUIRES_WP = '6.8';
 
 	/**
 	 * Singleton container instance, populated by {@see Plugin::boot()}.

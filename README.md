@@ -4,7 +4,7 @@ A WordPress plugin that puts every email the site sends through a managed queue.
 
 The complete reference ships inside the plugin, under **Total Mail Queue → Documentation**.
 
-**Requires** WordPress 5.9 or later and PHP 8.1 or later · **License** GPLv3 or later
+**Requires** WordPress 6.8 or later and PHP 8.3 or later · **License** GPLv3 or later
 
 ![Log](docs/screenshots/01-log.png)
 

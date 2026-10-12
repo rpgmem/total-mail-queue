@@ -7,6 +7,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **⚠ Requires WordPress 6.8 and PHP 8.3** (#129). The floor moves from WordPress 5.9 and PHP 8.1 (a WordPress floor CI never ran) to the one Free Form Certificate, Email Signature Generator and Institutional Email share; sites below it keep their installed version. Tested up to 7.1.3. CI now runs the functional suite on the declared floor too, and the coverage floors rise to 90% (PHP) and 94% (JS).
+
 ## [2.12.0] (2026-10-12) — `89bef95`
 
 A Cron tab that says whether the queue is being sent and gives the server cron line, Free Form Certificate's icons, colours and documentation navigation, empty number fields that keep their value, and authenticated SMTP passwords.

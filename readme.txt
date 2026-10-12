@@ -1,9 +1,9 @@
 === Total Mail Queue ===
 Tags: email, mail, queue, email log, wp_mail
-Requires at least: 5.9
-Tested up to: 6.9
+Requires at least: 6.8
+Tested up to: 7.1.3
 Stable tag: 2.12.0
-Requires PHP: 8.1
+Requires PHP: 8.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

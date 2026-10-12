@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3', '8.4']
+        php: ['8.3', '8.4']
     steps:
       - uses: actions/checkout@v7
 
@@ -63,10 +63,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.1'
+          - php: '8.3'
             wp: 'latest'
           - php: '8.4'
             wp: 'latest'
+          # The declared floor (`Requires at least` in the plugin header),
+          # resolved below to its newest patch release. Without this leg the
+          # floor is a claim nothing runs.
+          - php: '8.3'
+            wp: 'floor'
     services:
       mysql:
         image: mysql:8.0
@@ -94,6 +99,46 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Resolve the WordPress version
+        id: wpver
+        run: |
+          if [ "${{ matrix.wp }}" = latest ]; then
+            echo "version=latest" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          floor=$(sed -n 's/^ \* Requires at least:[[:space:]]*\([0-9.]*\).*/\1/p' total-mail-queue.php | head -n1)
+          if [ -z "$floor" ]; then
+            echo "::error::could not read 'Requires at least' from total-mail-queue.php"
+            exit 1
+          fi
+          for attempt in 1 2 3; do
+            if curl -fsSL --connect-timeout 20 -o "$RUNNER_TEMP/stable-check.json" https://api.wordpress.org/core/stable-check/1.0/; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::could not read the WordPress release list after 3 attempts"
+              exit 1
+            fi
+            sleep 10
+          done
+          # The newest patch release of the floor branch: a site on the floor
+          # gets security releases, so x.y.0 is not what it runs.
+          version=$(FLOOR="$floor" LIST="$RUNNER_TEMP/stable-check.json" php -r '$v = array_keys( (array) json_decode( (string) file_get_contents( getenv( "LIST" ) ), true ) ); $f = getenv( "FLOOR" ); $m = array_values( array_filter( $v, static fn( $k ) => $k === $f || 0 === strpos( $k, $f . "." ) ) ); usort( $m, "version_compare" ); echo (string) end( $m );')
+          if [ -z "$version" ]; then
+            echo "::error::no WordPress release found for the floor branch $floor"
+            exit 1
+          fi
+          echo "Floor $floor resolves to WordPress $version"
+          echo "floor=$floor" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # The WordPress test library has to match the core it boots: the 7.x
+      # library calls APIs a 6.x core does not have. Only this runner's copy of
+      # composer.json changes; the committed constraint stays on the latest.
+      - name: Match the test library to the floor
+        if: matrix.wp == 'floor'
+        run: composer require --dev --no-interaction --no-progress -W "wp-phpunit/wp-phpunit:${{ steps.wpver.outputs.floor }}.*"
+
       - name: Verify environment
         run: |
           php -v
@@ -118,7 +163,7 @@ jobs:
       - name: Bootstrap WP test environment
         run: |
           set -x
-          bash -x bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1:3306 true
+          bash -x bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1:3306 true "${{ steps.wpver.outputs.version }}"
           ls -la wp-tests-config.php
           cat wp-tests-config.php
 
@@ -135,8 +180,11 @@ jobs:
       # measured figure: 47.04% when set (43), 66.49% once every test
       # declared the classes it exercises (61, #115), 87.54% with the admin
       # screens under functional tests (83, #115), 92.26% with the worker,
-      # scheduler, boot and uninstall covered (88, #115).
-      COVERAGE_FLOOR_LINES: '88'
+      # scheduler, boot and uninstall covered (88, #115). Since #129 the floor
+      # is the highest of 90%, the measured figure minus 5 points, and its
+      # current value, the rule the four plugins share (CLAUDE.md): 90, with
+      # 92.50% measured when set.
+      COVERAGE_FLOOR_LINES: '90'
     services:
       mysql:
         image: mysql:8.0
