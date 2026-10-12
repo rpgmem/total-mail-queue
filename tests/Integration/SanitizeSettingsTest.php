@@ -133,4 +133,58 @@ final class SanitizeSettingsTest extends IntegrationTestCase {
             'array'        => array( array( 'on' ), 'off' ),
         );
     }
+
+    /**
+     * @dataProvider numberKeys
+     */
+    public function test_an_empty_number_keeps_the_stored_value( string $key ): void {
+        $this->options[ $key ] = '42';
+
+        $out = \TotalMailQueue\Settings\Sanitizer::sanitize( array( $key => '' ) );
+
+        self::assertSame( '42', $out[ $key ] );
+    }
+
+    /**
+     * @dataProvider numberKeys
+     */
+    public function test_an_empty_number_with_nothing_stored_takes_the_default( string $key ): void {
+        $this->options[ $key ] = '';
+
+        $out = \TotalMailQueue\Settings\Sanitizer::sanitize( array( $key => '' ) );
+
+        self::assertSame( (string) \TotalMailQueue\Settings\Options::defaults()[ $key ], $out[ $key ] );
+    }
+
+    /**
+     * @dataProvider numberKeys
+     */
+    public function test_a_number_below_its_floor_is_raised_to_it( string $key ): void {
+        $out = \TotalMailQueue\Settings\Sanitizer::sanitize( array( $key => '-5' ) );
+
+        self::assertSame( (string) \TotalMailQueue\Settings\Options::NUMBER_FLOORS[ $key ], $out[ $key ] );
+    }
+
+    public function test_an_empty_clear_queue_never_reaches_zero(): void {
+        // The defect: an empty retention field stored '' → intval 0, and the
+        // next cron run deleted every log row.
+        $this->options['clear_queue'] = '14';
+
+        $out = \TotalMailQueue\Settings\Sanitizer::sanitize( array( 'clear_queue' => '', 'queue_amount' => 'abc' ) );
+
+        self::assertSame( '14', $out['clear_queue'] );
+        self::assertSame( '1', $out['queue_amount'] );
+    }
+
+    /**
+     * @return array<string,array{0:string}>
+     */
+    public function numberKeys(): array {
+        $keys = array();
+        foreach ( array_keys( \TotalMailQueue\Settings\Options::NUMBER_FLOORS ) as $key ) {
+            $keys[ $key ] = array( $key );
+        }
+        return $keys;
+    }
 }
+

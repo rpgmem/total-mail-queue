@@ -30,6 +30,27 @@ final class Options {
 	public const DARK_MODES = array( 'off', 'on', 'auto' );
 
 	/**
+	 * Numeric settings and the smallest value each one accepts.
+	 *
+	 * A cleared number field posts an empty string, and `intval( '' )` is 0.
+	 * For these keys 0 is not a neutral value: an empty `clear_queue` deleted
+	 * every log row on the next cron run and an empty `queue_amount` sent
+	 * nothing. {@see self::number()} applies these floors on save and on read.
+	 *
+	 * @var array<string,int>
+	 */
+	public const NUMBER_FLOORS = array(
+		'email_amount'    => 1,
+		'queue_amount'    => 1,
+		'queue_interval'  => 1,
+		'clear_queue'     => 1,
+		'log_max_records' => 0,
+		'max_retries'     => 0,
+		'smtp_timeout'    => 5,
+		'cron_lock_ttl'   => 30,
+	);
+
+	/**
 	 * Default values for every setting.
 	 *
 	 * @return array<string,mixed>
@@ -69,8 +90,15 @@ final class Options {
 	 * @return array<string,mixed>
 	 */
 	public static function get(): array {
-		$args    = get_option( self::OPTION_NAME );
-		$options = wp_parse_args( $args, self::defaults() );
+		$args     = get_option( self::OPTION_NAME );
+		$defaults = self::defaults();
+		$options  = wp_parse_args( $args, $defaults );
+
+		// A value stored before the save path refused empty strings must not
+		// reach the consumers as 0.
+		foreach ( self::NUMBER_FLOORS as $key => $floor ) {
+			$options[ $key ] = self::number( $options[ $key ], $key, (string) $defaults[ $key ] );
+		}
 
 		if ( 'seconds' === $options['queue_interval_unit'] ) {
 			$options['queue_interval'] = intval( $options['queue_interval'] );
@@ -84,5 +112,24 @@ final class Options {
 
 		$options['clear_queue'] = intval( $options['clear_queue'] ) * 24;
 		return $options;
+	}
+
+	/**
+	 * Normalise one numeric setting.
+	 *
+	 * A value that is not a number, the empty string included, means "not
+	 * supplied" and yields the fallback. A number below the key's floor is
+	 * raised to it.
+	 *
+	 * @param mixed  $raw      Value to normalise.
+	 * @param string $key      A key of {@see self::NUMBER_FLOORS}.
+	 * @param string $fallback Value to use when `$raw` is not a number.
+	 * @return string The normalised value, as the option stores it.
+	 */
+	public static function number( $raw, string $key, string $fallback ): string {
+		if ( ! is_numeric( $raw ) ) {
+			return $fallback;
+		}
+		return (string) max( self::NUMBER_FLOORS[ $key ] ?? 0, (int) $raw );
 	}
 }
