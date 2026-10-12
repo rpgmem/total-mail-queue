@@ -7,7 +7,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [3.0.0] (2026-10-12)
+## [3.0.0] (2026-10-12) — `b5cec9c`
 
 A major version for two changes to what the plugin asks of a site, not to what it does: it now requires WordPress 6.8 and PHP 8.3, and the licence moves to AGPLv3 or later. The release process also catches up with the other three plugins.
 
