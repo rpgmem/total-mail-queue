@@ -35,7 +35,7 @@ final class SourcesPage {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, individual handlers verify their own nonces.
 		$action = isset( $_GET['source-action'] ) ? sanitize_key( wp_unslash( $_GET['source-action'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only; the handlers verify their own nonces.
 		$edit_id = isset( $_GET['source-id'] ) ? (int) $_GET['source-id'] : 0;
 
 		echo '<div class="tmq-section">';

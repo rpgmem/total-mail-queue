@@ -61,10 +61,10 @@ final class Migrator {
 	private static function migrateHighStatusToPriority(): void {
 		global $wpdb;
 		$queue_table = Schema::queueTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$queue_table` SET `priority` = %d, `status` = 'queue' WHERE `status` = 'high'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$queue_table` SET `priority` = %d, `status` = 'queue' WHERE `status` = 'high'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				Priority::HIGH
 			)
 		);

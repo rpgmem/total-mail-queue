@@ -17,7 +17,7 @@
             <directory>tests/Integration</directory>
         </testsuite>
     </testsuites>
-    <coverage processUncoveredFiles="true">
+    <coverage processUncoveredFiles="false">
         <include>
             <file>total-mail-queue.php</file>
             <directory suffix=".php">src</directory>

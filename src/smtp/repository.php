@@ -42,32 +42,32 @@ final class Repository {
 		$this_month = current_time( 'Y-m' );
 		$now        = current_time( 'mysql', false );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
-			"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` = 0" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` = 0" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 		);
 		// Interval accounts roll over once the window measured from the cycle's
 		// start (`last_cycle_reset`) has elapsed. The next send re-anchors the
 		// window via incrementCounter(), so the start is left untouched here.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_cycle_reset`, INTERVAL `send_interval` MINUTE) <= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$smtp_table` SET `cycle_sent` = 0 WHERE `send_interval` > 0 AND DATE_ADD(`last_cycle_reset`, INTERVAL `send_interval` MINUTE) <= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$now
 			)
 		);
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$smtp_table` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$smtp_table` SET `daily_sent` = 0, `last_daily_reset` = %s WHERE `last_daily_reset` < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$today,
 				$today
 			)
 		);
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$smtp_table` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$smtp_table` SET `monthly_sent` = 0, `last_monthly_reset` = %s WHERE DATE_FORMAT(`last_monthly_reset`, '%%Y-%%m') < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$today,
 				$this_month
 			)
@@ -93,7 +93,7 @@ final class Repository {
 	public static function available(): array {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1 AND (`daily_limit` = 0 OR `daily_sent` < `daily_limit`) AND (`monthly_limit` = 0 OR `monthly_sent` < `monthly_limit`) AND (`send_bulk` = 0 OR `cycle_sent` < `send_bulk`) ORDER BY `last_sent_at` ASC, `priority` ASC, `id` ASC", ARRAY_A );
 		return $accounts ? $accounts : array();
 	}
@@ -239,10 +239,10 @@ final class Repository {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
 		$now        = current_time( 'mysql', false );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE `$smtp_table` SET `last_cycle_reset` = IF(`cycle_sent` = 0, %s, `last_cycle_reset`), `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE `$smtp_table` SET `last_cycle_reset` = IF(`cycle_sent` = 0, %s, `last_cycle_reset`), `daily_sent` = `daily_sent` + 1, `monthly_sent` = `monthly_sent` + 1, `cycle_sent` = `cycle_sent` + 1, `last_sent_at` = %s WHERE `id` = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name comes from Schema, not from input
 				$now,
 				$now,
 				intval( $smtp_id )
@@ -268,7 +268,7 @@ final class Repository {
 	public static function nextAvailableAt( int $queue_interval ): ?int {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1", ARRAY_A );
 		if ( empty( $accounts ) ) {
 			return null;
@@ -299,7 +299,7 @@ final class Repository {
 	public static function blockSummary( int $queue_interval ): string {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$accounts = $wpdb->get_results( "SELECT * FROM `$smtp_table` WHERE `enabled` = 1 ORDER BY `priority` ASC, `id` ASC", ARRAY_A );
 
 		if ( empty( $accounts ) ) {
@@ -441,7 +441,7 @@ final class Repository {
 	public static function all(): array {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$rows = $wpdb->get_results( "SELECT * FROM `$smtp_table` ORDER BY `priority` ASC, `name` ASC", ARRAY_A );
 		return is_array( $rows ) ? array_values( $rows ) : array();
 	}
@@ -455,7 +455,7 @@ final class Repository {
 	public static function namesById(): array {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$rows = $wpdb->get_results( "SELECT `id`, `name` FROM `$smtp_table`", ARRAY_A );
 		$map  = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -473,7 +473,7 @@ final class Repository {
 	public static function findById( int $smtp_id ): ?array {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$smtp_table` WHERE `id` = %d", $smtp_id ), ARRAY_A );
 		return is_array( $row ) ? $row : null;
 	}
@@ -486,7 +486,7 @@ final class Repository {
 	public static function insert( array $data ): int {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$inserted = $wpdb->insert( $smtp_table, $data );
 		return false === $inserted ? 0 : (int) $wpdb->insert_id;
 	}
@@ -500,7 +500,7 @@ final class Repository {
 	public static function update( int $smtp_id, array $data ): void {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->update( $smtp_table, $data, array( 'id' => $smtp_id ), null, array( '%d' ) );
 	}
 
@@ -512,7 +512,7 @@ final class Repository {
 	public static function delete( int $smtp_id ): void {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$wpdb->delete( $smtp_table, array( 'id' => $smtp_id ), array( '%d' ) );
 	}
 
@@ -525,7 +525,7 @@ final class Repository {
 	public static function zeroSentCounters(): void {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$wpdb->query( "UPDATE `$smtp_table` SET `daily_sent` = 0, `monthly_sent` = 0" );
 	}
 
@@ -538,7 +538,7 @@ final class Repository {
 	public static function tableColumns(): array {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$columns = $wpdb->get_col( "DESCRIBE `$smtp_table`", 0 );
 		return is_array( $columns ) ? array_values( array_map( 'strval', $columns ) ) : array();
 	}
@@ -550,7 +550,7 @@ final class Repository {
 	public static function truncate(): void {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- schema change on the plugin's own table, name from Schema
 		$wpdb->query( "TRUNCATE TABLE `$smtp_table`" );
 	}
 
@@ -564,7 +564,7 @@ final class Repository {
 	public static function accountsExceedingBulk( int $global_amount ): array {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from Schema::smtpTable()
@@ -588,7 +588,7 @@ final class Repository {
 	public static function findPasswordById( int $smtp_id ): string {
 		global $wpdb;
 		$smtp_table = Schema::smtpTable();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, name from Schema; values go through prepare()
 		$stored = $wpdb->get_var( $wpdb->prepare( "SELECT `password` FROM `$smtp_table` WHERE `id` = %d", $smtp_id ) );
 		return is_string( $stored ) ? $stored : '';
 	}

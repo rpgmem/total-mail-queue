@@ -120,7 +120,7 @@ $wp_tmq_show_header_image = '' !== $wp_tmq_header_logo_url;
 							// $body is pre-processed HTML — wpautop / wptexturize / convert_chars
 							// already ran in Engine::preprocessBody() and the engine's
 							// `tmq_template_skip` filter lets callers veto the wrap entirely.
-							echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- email HTML already processed by the engine; escaping breaks it
 							?>
 						</div>
 					</td>
