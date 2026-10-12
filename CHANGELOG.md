@@ -13,6 +13,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **JavaScript test suite** (#115). Vitest with jsdom now covers the four admin scripts (queue list, autosave, documentation search, templates preview and test email), and CI fails below a JS line-coverage floor.
 - **Functional tests for the admin screens** (#115). The SMTP, Sources edit, Settings, notices, queue diagnostics, Access, assets and page-router screens, and the test-email handler, are now exercised with their nonce, capability and error paths; the coverage floor rises to 83%.
 
+### Changed
+
+- **Documentation navigation beside the topics** (#121). On a wide screen the quick navigation is now a fixed column next to the text instead of a bar that followed the scroll over it; on a narrow screen it sits above the topics.
+
 ### Fixed
 
 - **An empty number field no longer saves as 0** (#112). Clearing the log retention deleted every log row on the next run, and clearing the batch size stopped sending. An empty field now keeps its value, each number has a minimum, and values already stored empty read as the default.
