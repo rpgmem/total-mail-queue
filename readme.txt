@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 6.8
 Tested up to: 7.1.3
-Stable tag: 2.12.0
+Stable tag: 3.0.0
 Requires PHP: 8.3
 License: AGPLv3 or later
 License URI: https://www.gnu.org/licenses/agpl-3.0.html
@@ -137,5 +137,5 @@ The two most recent releases are summarised below. The full history of every rel
 
 == Upgrade Notice ==
 
-= 2.12.0 =
-Adds a Cron tab that shows whether the queue is being sent and gives the server cron line to copy; an empty number field no longer saves 0, and SMTP passwords are authenticated. Details and issues in CHANGELOG.md.
+= 3.0.0 =
+⚠ Requires WordPress 6.8 and PHP 8.3; sites below keep their installed version. ⚠ The licence is now AGPLv3 or later: reuse and forks stay free, and a modified copy offered as a service must publish its source. Details in CHANGELOG.md.

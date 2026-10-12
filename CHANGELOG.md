@@ -7,15 +7,19 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.0.0] (2026-10-12)
+
+A major version for two changes to what the plugin asks of a site, not to what it does: it now requires WordPress 6.8 and PHP 8.3, and the licence moves to AGPLv3 or later. The release process also catches up with the other three plugins.
+
 ### Changed
 
-- **⚠ Requires WordPress 6.8 and PHP 8.3** (#129). The floor moves from WordPress 5.9 and PHP 8.1 (a WordPress floor CI never ran) to the one Free Form Certificate, Email Signature Generator and Institutional Email share; sites below it keep their installed version. Tested up to 7.1.3. CI now runs the functional suite on the declared floor too, and the coverage floors rise to 90% (PHP) and 94% (JS).
-- **Dependabot's patch and minor updates merge on their own** (#131). A workflow arms squash auto-merge on them once Dependabot opens the PR, the same as Free Form Certificate; required checks still gate the merge, and majors stay manual.
-- ⚠ **The licence is now AGPLv3 or later** (#134). Reuse and forks stay free, and a modified copy offered as a network service must publish its source too. The readme prose inherited from Mail Queue is rewritten; html2text stays MIT. A test holds the declarations together. Releases already published stay GPLv3.
+- **⚠ Requires WordPress 6.8 and PHP 8.3** (#129). The floor moves from WordPress 5.9 and PHP 8.1, which CI never ran, to the one Free Form Certificate, Email Signature Generator and Institutional Email share; sites below it keep their installed version. CI runs the functional suite on the floor, and the coverage floors rise to 90% (PHP) and 94% (JS).
+- ⚠ **The licence is now AGPLv3 or later** (#134). Reuse and forks stay free; a modified copy offered as a network service must publish its source too. The readme prose inherited from Mail Queue is rewritten, html2text stays MIT, and releases already published stay GPLv3.
+- **Dependabot's patch and minor updates merge on their own** (#131). Required checks still gate the merge; majors stay manual.
 
 ### Security
 
-- **CI jobs run with a read-only token** (#137). `lint.yml` and `tests.yml` now declare `contents: read`; no job in either writes to the repository.
+- **CI jobs run with a read-only token** (#137). `lint.yml` and `tests.yml` declare `contents: read`.
 
 ## [2.12.0] (2026-10-12) — `89bef95`
 
