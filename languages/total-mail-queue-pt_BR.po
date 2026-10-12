@@ -2759,20 +2759,20 @@ msgid "How to set up and run Total Mail Queue, one topic per card. Search or pic
 msgstr "Como configurar e operar o Total Mail Queue, um tópico por cartão. Busque ou escolha um tópico; em telas largas a navegação fica ao lado do texto enquanto você lê."
 
 #: src/admin/documentation.php:222
-msgid "Quick navigation"
-msgstr "Navegação rápida"
+msgid "Quick Navigation"
+msgstr "Navegação Rápida"
 
 #: src/admin/documentation.php:224
-msgid "Search the documentation…"
-msgstr "Buscar na documentação…"
+msgid "Search documentation…"
+msgstr "Pesquisar na documentação…"
 
 #: src/admin/documentation.php:224
-msgid "Search the documentation"
-msgstr "Buscar na documentação"
+msgid "Search documentation"
+msgstr "Pesquisar na documentação"
 
 #: src/admin/documentation.php:248
 msgid "No topic matches this search."
-msgstr "Nenhum tópico corresponde a esta busca."
+msgstr "Nenhum tópico corresponde a esta pesquisa."
 
 #: src/admin/tables/log-table.php
 msgid "Filter by status"
