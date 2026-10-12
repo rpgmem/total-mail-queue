@@ -11,7 +11,9 @@ namespace TotalMailQueue\Database;
 
 use TotalMailQueue\Plugin;
 use TotalMailQueue\Queue\Priority;
+use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Sources\KnownSources;
+
 
 /**
  * Detects schema bumps between the persisted plugin version and the running
@@ -45,6 +47,7 @@ final class Migrator {
 		KnownSources::seed();
 		self::migrateSenderToSettings();
 		self::migrateHighStatusToPriority();
+		SmtpRepository::upgradePasswordEncryption();
 		update_option( self::VERSION_OPTION, Plugin::VERSION, true );
 	}
 

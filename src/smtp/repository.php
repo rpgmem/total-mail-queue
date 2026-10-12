@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Smtp;
 
 use TotalMailQueue\Database\Schema;
+use TotalMailQueue\Support\Encryption;
 
 /**
  * Read/write access to the `{$prefix}total_mail_queue_smtp` table.
@@ -489,6 +490,33 @@ final class Repository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table, which WordPress has no API for
 		$inserted = $wpdb->insert( $smtp_table, $data );
 		return false === $inserted ? 0 : (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Re-encrypt every stored password still in the legacy, unauthenticated
+	 * envelope. A password that does not decrypt (the salt changed since it
+	 * was saved) is left as it is: re-encrypting an empty string would erase
+	 * it, and the account form is where it gets typed again.
+	 *
+	 * Idempotent, so it runs on every version bump and after an import.
+	 *
+	 * @return int Number of passwords re-encrypted.
+	 */
+	public static function upgradePasswordEncryption(): int {
+		$upgraded = 0;
+		foreach ( self::all() as $account ) {
+			$stored = (string) ( $account['password'] ?? '' );
+			if ( '' === $stored || Encryption::isCurrent( $stored ) ) {
+				continue;
+			}
+			$plain = Encryption::decrypt( $stored );
+			if ( '' === $plain ) {
+				continue;
+			}
+			self::update( (int) $account['id'], array( 'password' => Encryption::encrypt( $plain ) ) );
+			++$upgraded;
+		}
+		return $upgraded;
 	}
 
 	/**
