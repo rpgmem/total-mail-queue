@@ -42,6 +42,7 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 		);
 
 		Functions\when( 'plugin_basename' )->justReturn( self::PLUGIN );
+		Functions\when( 'plugin_dir_url' )->justReturn( 'https://example.org/wp-content/plugins/total-mail-queue/' );
 		Functions\when( 'get_site_transient' )->alias( fn ( $key ) => $this->transients[ $key ] ?? false );
 		Functions\when( 'set_site_transient' )->alias(
 			function ( $key, $value ) {
@@ -250,6 +251,21 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 		self::assertSame( '2.10.0', $parsed['version'] );
 		self::assertSame( self::ZIP, $parsed['package'] );
 		self::assertSame( 'ABCDEF', $parsed['sha256'] );
+	}
+
+	public function test_the_update_and_the_details_modal_carry_the_installed_icon(): void {
+		$base     = 'https://example.org/wp-content/plugins/total-mail-queue/' . 'assets/img/brand/';
+		$expected = array(
+			'1x'  => $base . 'icon-128.png',
+			'2x'  => $base . 'icon-256.png',
+			'svg' => $base . 'icon.svg',
+		);
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+		self::assertSame( $expected, $info->icons );
+
+		$older = GithubUpdater::checkForUpdate( $this->transient( '0.0.1' ) );
+		self::assertSame( $expected, current( $older->response )->icons );
 	}
 
 	public function test_plugin_info_answers_only_for_our_slug(): void {
