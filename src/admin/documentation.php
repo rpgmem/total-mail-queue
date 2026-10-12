@@ -231,9 +231,9 @@ final class Documentation {
 		// Quick navigation: a column beside the topics that stays in view while
 		// they scroll, and the search box filters both its links and the cards.
 		echo '<div class="tmq-docs-layout">';
-		echo '<nav class="tmq-box tmq-docs-index" id="' . esc_attr( self::INDEX_ANCHOR ) . '" aria-label="' . esc_attr__( 'Quick navigation', 'total-mail-queue' ) . '">';
-		echo Icons::heading( 'search', __( 'Quick navigation', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
-		echo '<p class="tmq-docs-search"><input type="search" id="tmq-docs-search" class="regular-text" placeholder="' . esc_attr__( 'Search the documentation…', 'total-mail-queue' ) . '" aria-label="' . esc_attr__( 'Search the documentation', 'total-mail-queue' ) . '" /></p>';
+		echo '<nav class="tmq-box tmq-docs-index" id="' . esc_attr( self::INDEX_ANCHOR ) . '" aria-label="' . esc_attr__( 'Quick Navigation', 'total-mail-queue' ) . '">';
+		echo Icons::heading( 'search', __( 'Quick Navigation', 'total-mail-queue' ), 'h3' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
+		echo '<p class="tmq-docs-search"><input type="search" id="tmq-docs-search" class="regular-text" placeholder="' . esc_attr__( 'Search documentation…', 'total-mail-queue' ) . '" aria-label="' . esc_attr__( 'Search documentation', 'total-mail-queue' ) . '" /></p>';
 		// One row per group, in the menu's order, in a single column like the
 		// Free Form Certificate documentation's tree. A group with one topic is
 		// a link; a longer one is a branch that opens to list its topics.

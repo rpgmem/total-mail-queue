@@ -2749,15 +2749,15 @@ msgid "How to set up and run Total Mail Queue, one topic per card. Search or pic
 msgstr ""
 
 #: src/admin/documentation.php:222
-msgid "Quick navigation"
+msgid "Quick Navigation"
 msgstr ""
 
 #: src/admin/documentation.php:224
-msgid "Search the documentation…"
+msgid "Search documentation…"
 msgstr ""
 
 #: src/admin/documentation.php:224
-msgid "Search the documentation"
+msgid "Search documentation"
 msgstr ""
 
 #: src/admin/documentation.php:248
