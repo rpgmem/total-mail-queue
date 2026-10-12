@@ -10,6 +10,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - **⚠ Requires WordPress 6.8 and PHP 8.3** (#129). The floor moves from WordPress 5.9 and PHP 8.1 (a WordPress floor CI never ran) to the one Free Form Certificate, Email Signature Generator and Institutional Email share; sites below it keep their installed version. Tested up to 7.1.3. CI now runs the functional suite on the declared floor too, and the coverage floors rise to 90% (PHP) and 94% (JS).
+- **Dependabot's patch and minor updates merge on their own** (#131). A workflow arms squash auto-merge on them once Dependabot opens the PR, the same as Free Form Certificate; required checks still gate the merge, and majors stay manual.
 
 ## [2.12.0] (2026-10-12) — `89bef95`
 
