@@ -15,8 +15,8 @@ use TotalMailQueue\Templates\Options;
  * fully-wrapped HTML body in the queue row, so what the admin sees in the
  * queue inspector matches what the recipient receives.
  *
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
- * @covers \TotalMailQueue\Templates\Engine::apply
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Templates\Engine
  */
 final class TemplateInterceptionTest extends FunctionalTestCase {
 

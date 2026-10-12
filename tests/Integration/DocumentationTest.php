@@ -13,7 +13,7 @@ use TotalMailQueue\Admin\PluginPage;
  * The Documentation tab: the topic list and the files it names agree, and the
  * page renders an index, every topic and a way back to the index.
  *
- * @covers \TotalMailQueue\Admin\Documentation
+ * No covers annotation: the topics are partials under src/admin/docs/, which no such annotation can name; without one the test counts what it renders.
  */
 final class DocumentationTest extends IntegrationTestCase {
 

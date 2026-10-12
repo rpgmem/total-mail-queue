@@ -7,7 +7,7 @@ namespace TMQ\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \TotalMailQueue\Support\HtmlPreview::redactBase64
+ * @covers \TotalMailQueue\Support\HtmlPreview
  */
 final class RenderHtmlForDisplayTest extends TestCase {
 

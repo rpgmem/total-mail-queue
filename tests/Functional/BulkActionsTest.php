@@ -9,7 +9,7 @@ use TotalMailQueue\Admin\Tables\LogTable;
 class BulkRedirectIntercepted extends \RuntimeException {}
 
 /**
- * @covers \TotalMailQueue\Admin\Tables\LogTable::process_bulk_action
+ * @covers \TotalMailQueue\Admin\Tables\LogTable
  */
 final class BulkActionsTest extends FunctionalTestCase {
 

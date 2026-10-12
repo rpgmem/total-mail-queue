@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
+ * @covers \TotalMailQueue\Queue\MailInterceptor
  */
 final class PreWpMailTest extends IntegrationTestCase {
 

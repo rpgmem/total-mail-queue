@@ -7,7 +7,7 @@ namespace TMQ\Tests\Integration;
 use Brain\Monkey\Functions;
 
 /**
- * @covers \TotalMailQueue\Settings\Options::get
+ * @covers \TotalMailQueue\Settings\Options
  */
 final class GetSettingsTest extends IntegrationTestCase {
 

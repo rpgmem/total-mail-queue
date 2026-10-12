@@ -17,10 +17,9 @@ use TotalMailQueue\Sources\Repository as SourcesRepository;
  * the alert source is hardcoded as un-toggleable, and the Instant
  * priority header doesn't bypass the block.
  *
- * @covers \TotalMailQueue\Queue\MailInterceptor::handle
- * @covers \TotalMailQueue\Sources\Repository::isSystem
- * @covers \TotalMailQueue\Sources\Repository::setEnabled
- * @covers \TotalMailQueue\Sources\Repository::setEnabledByGroup
+ * @covers \TotalMailQueue\Queue\MailInterceptor
+ * @covers \TotalMailQueue\Sources\Repository
+ * @covers \TotalMailQueue\Admin\Pages\SourcesActions
  */
 final class SourcesEnforcementTest extends FunctionalTestCase {
 
