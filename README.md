@@ -49,6 +49,12 @@ Wrap plain-text and HTML mail in one template with your own header, footer and c
 | --- | --- |
 | ![Settings](docs/screenshots/06-settings.png) | ![Access](docs/screenshots/07-access.png) |
 
+## Cron
+
+The queue is sent by WP-Cron, which only runs when someone visits the site. The **Cron** tab says whether the queue worker is running, asleep, waiting for an SMTP limit, overdue or stalled, with its next and last run. It also shows whether WP-Cron's visit trigger is on and which scheduled events are overdue. For administrators, it builds the server cron line to copy (WP-CLI, wget or curl) at the frequency you choose.
+
+![Cron](docs/screenshots/10-cron.png)
+
 ## More
 
 - **Export / Import:** plugin settings and SMTP accounts move between sites as an XML file.
@@ -67,7 +73,7 @@ Wrap plain-text and HTML mail in one template with your own header, footer and c
 
 Later updates arrive through the normal WordPress update screen, straight from this repository's releases. Each package is checked against its SHA-256 before it is installed.
 
-The queue is sent by WP-Cron, so make sure it runs reliably. On a site behind a page cache, or with little traffic, call `wp-cron.php` from a server cron job every few minutes.
+The queue is sent by WP-Cron, so make sure it runs reliably. On a site behind a page cache, or with little traffic, call `wp-cron.php` from a server cron job every few minutes: the Cron tab gives the exact line.
 
 ## Documentation and credits
 

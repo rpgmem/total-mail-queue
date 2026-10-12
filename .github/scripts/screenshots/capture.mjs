@@ -94,6 +94,9 @@ await shot( page, '07-access' );
 await open( page, tab( 'wp_tmq_mail_queue-tab-docs' ) );
 await shot( page, '08-documentation' );
 
+await open( page, tab( 'wp_tmq_mail_queue-tab-croninfo' ) );
+await shot( page, '10-cron' );
+
 // The one dark capture.
 await setDarkMode( page, 'on' );
 await open( page, tab( 'wp_tmq_mail_queue-tab-log' ) );
