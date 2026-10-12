@@ -141,6 +141,19 @@ final class Documentation {
 			),
 			array(
 				'tabs'   => array( PluginPage::TAB_CRON_INFO ),
+				'icon'   => 'cron',
+				'title'  => self::tabsTitle( array( PluginPage::TAB_CRON_INFO ) ),
+				'topics' => array(
+					array(
+						'anchor' => 'cron',
+						'icon'   => 'cron',
+						'title'  => __( 'Cron', 'total-mail-queue' ),
+						'file'   => 'cron.php',
+					),
+				),
+			),
+			array(
+				'tabs'   => array(),
 				'icon'   => 'faq',
 				'title'  => __( 'Reference and help', 'total-mail-queue' ),
 				'topics' => array(

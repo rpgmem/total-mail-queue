@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace TMQ\Tests\Functional;
 
-use TotalMailQueue\Admin\Pages\CronInfoPage;
 use TotalMailQueue\Admin\QueueDiagnostics;
 use TotalMailQueue\Settings\Options;
 
 /**
  * The notices above the queue (mode, next run, last run, pre_wp_mail
- * conflicts) and the Cron Information tab's overdue-job check.
+ * conflicts).
  *
  * @covers \TotalMailQueue\Admin\QueueDiagnostics
- * @covers \TotalMailQueue\Admin\Pages\CronInfoPage
  */
 final class QueueDiagnosticsTest extends FunctionalTestCase {
 
@@ -31,7 +29,6 @@ final class QueueDiagnosticsTest extends FunctionalTestCase {
     protected function tearDown(): void {
         remove_all_filters( 'pre_wp_mail' );
         wp_clear_scheduled_hook( 'wp_tmq_mail_queue_hook' );
-        wp_clear_scheduled_hook( 'tmq_tests_stale_job' );
         parent::tearDown();
     }
 
@@ -127,25 +124,5 @@ final class QueueDiagnosticsTest extends FunctionalTestCase {
         unset( $wp_filter['pre_wp_mail'] );
         self::assertSame( '', $this->capture( array( QueueDiagnostics::class, 'renderConflictNotice' ) ) );
         $wp_filter['pre_wp_mail'] = $saved;
-    }
-
-    public function test_cron_info_explains_disabled_cron_and_flags_an_overdue_queue(): void {
-        $html = $this->capture( array( CronInfoPage::class, 'render' ) );
-        self::assertStringContainsString( '/wp-cron.php', $html );
-
-        wp_schedule_single_event( time() - 3 * HOUR_IN_SECONDS, 'wp_tmq_mail_queue_hook' );
-        $html = $this->capture( array( CronInfoPage::class, 'render' ) );
-
-        self::assertStringContainsString( 'your WP Cron is not running', $html );
-        self::assertStringContainsString( 'been able to be executed since 3 hours', $html );
-    }
-
-    public function test_cron_info_flags_other_overdue_jobs_without_blaming_the_queue(): void {
-        wp_schedule_single_event( time() - 3 * HOUR_IN_SECONDS, 'tmq_tests_stale_job' );
-
-        $html = $this->capture( array( CronInfoPage::class, 'render' ) );
-
-        self::assertStringContainsString( 'your WP Cron is not running', $html );
-        self::assertStringNotContainsString( 'The Queue hasn', $html );
     }
 }

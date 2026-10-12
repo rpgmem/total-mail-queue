@@ -2959,3 +2959,239 @@ msgstr ""
 #: src/admin/docs/html-templates.php:27
 msgid "The Preview beside the form shows a sample email with the settings on screen, header and footer included, and updates as you change them, before anything is saved. It is drawn by the same code that wraps real mail."
 msgstr ""
+
+#: src/admin/docs/cron.php:14
+msgid "The queue is sent by a worker that WP-Cron runs at the interval set in Settings. The Cron tab shows whether that worker is running, whether WP-Cron itself is firing, and the line to add to the server so it always does."
+msgstr ""
+
+#: src/admin/docs/cron.php:16
+#: src/admin/pages/cron-info-page.php:120
+msgid "Queue worker"
+msgstr ""
+
+#: src/admin/docs/cron.php:20
+msgid "Running"
+msgstr ""
+
+#: src/admin/docs/cron.php:21
+msgid "The next run is due within one interval. Nothing to do."
+msgstr ""
+
+#: src/admin/docs/cron.php:24
+msgid "Asleep"
+msgstr ""
+
+#: src/admin/docs/cron.php:25
+msgid "The queue is empty, so nothing is scheduled. The next email that enters the queue wakes the worker."
+msgstr ""
+
+#: src/admin/docs/cron.php:28
+msgid "Waiting"
+msgstr ""
+
+#: src/admin/docs/cron.php:29
+msgid "With the send method set to SMTP only and every account at a limit, the worker sleeps until the first account frees up instead of waking every interval."
+msgstr ""
+
+#: src/admin/docs/cron.php:32
+msgid "Overdue"
+msgstr ""
+
+#: src/admin/docs/cron.php:33
+msgid "A run is scheduled but well past its time: WP-Cron is not firing. Add a server cron."
+msgstr ""
+
+#: src/admin/docs/cron.php:36
+msgid "Stalled"
+msgstr ""
+
+#: src/admin/docs/cron.php:37
+msgid "Emails are waiting and no run is scheduled. Saving the settings schedules one again; if it keeps happening, check the Troubleshooting topic."
+msgstr ""
+
+#: src/admin/docs/cron.php:40
+msgid "Not running"
+msgstr ""
+
+#: src/admin/docs/cron.php:41
+msgid "The operation mode is Disabled or Block, so the queue is not sent on purpose."
+msgstr ""
+
+#: src/admin/docs/cron.php:45
+msgid "The card also shows the next and the last run, how many emails are waiting, and when the last email was sent."
+msgstr ""
+
+#: src/admin/docs/cron.php:48
+msgid "This card says whether WP-Cron's visit trigger is on, and lists how many scheduled events, from any plugin, are overdue. Several overdue events mean WP-Cron is not running at all, not that this plugin has a problem."
+msgstr ""
+
+#: src/admin/docs/cron.php:50
+#: src/admin/pages/cron-info-page.php:265
+msgid "Server cron"
+msgstr ""
+
+#: src/admin/docs/cron.php:51
+msgid "Choose how often the server should wake WP-Cron and how: WP-CLI runs the due events directly, wget and curl call wp-cron.php over HTTP. Copy the line into the crontab of the user that runs the site, or into the cron jobs of your hosting panel, then set DISABLE_WP_CRON to true in wp-config.php so visits no longer trigger it."
+msgstr ""
+
+#: src/admin/docs/cron.php:52
+msgid "The line only wakes WP-Cron. How often the queue sends is still the interval in Settings, so a server cron every minute with an interval of five minutes sends every five minutes. This card shows the WordPress path, so only administrators see it."
+msgstr ""
+
+#: src/admin/docs/modes-and-queue.php:37
+msgid "The reliable setup is a real cron job on the server that calls wp-cron.php every minute or two, with WP-Cron's visit trigger turned off (DISABLE_WP_CRON in wp-config.php). The Cron tab shows whether the worker is running and gives the exact line to add."
+msgstr ""
+
+#: src/admin/documentation.php:150
+#: src/admin/plugin-page.php:122
+msgid "Cron"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:43
+msgid "WP-CLI (recommended)"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:44
+msgid "wget"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:45
+msgid "curl"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:111
+msgid "Not running: the plugin is not in Queue mode, so nothing is sent from the queue."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:112
+msgid "Asleep: the queue is empty. The next email wakes it."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:113
+msgid "Running at the configured interval."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:114
+msgid "Waiting: every SMTP account is at a limit, so the next run is set for when one frees up."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:115
+msgid "Overdue: the next run is past due. WP-Cron is not firing on this site."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:116
+msgid "Stalled: emails are waiting and no run is scheduled."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:125
+msgid "State"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:127
+msgid "Not scheduled"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:128
+msgid "Next run"
+msgstr ""
+
+#. translators: %s: human-readable duration, e.g. "5 mins"
+#: src/admin/pages/cron-info-page.php:135
+#, php-format
+msgid "Every %s"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:141
+msgid "Waiting in the queue"
+msgstr ""
+
+#. translators: 1: emails sent in that run, 2: errors in that run
+#: src/admin/pages/cron-info-page.php:151
+#, php-format
+msgid "(%1$d sent, %2$d errors)"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:160
+msgid "Last run"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:164
+msgid "Last email sent"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:184
+msgid "The visit trigger is off (<code>DISABLE_WP_CRON</code> is set in wp-config.php), so WP-Cron runs only when something calls it. Make sure a server cron does, every minute or two."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:186
+msgid "WP-Cron runs when someone visits the site. On a quiet site, or one served from a full-page cache, the queue can wait much longer than its interval."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:187
+msgid "For sending you can rely on, add a server cron that calls WP-Cron every minute or two, then turn the visit trigger off with <code>define( 'DISABLE_WP_CRON', true );</code> in wp-config.php."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:193
+msgid "No scheduled event is overdue."
+msgstr ""
+
+#. translators: %d: number of overdue WP-Cron events
+#: src/admin/pages/cron-info-page.php:201
+#, php-format
+msgid "%d scheduled event is overdue: WP-Cron does not seem to be running."
+msgid_plural "%d scheduled events are overdue: WP-Cron does not seem to be running."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: human-readable time difference
+#: src/admin/pages/cron-info-page.php:209
+#, php-format
+msgid "The queue worker has been waiting to run for %s."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:266
+msgid "Add this line to the crontab of the user that runs the site (crontab -e), or to your hosting panel's cron jobs. It only wakes WP-Cron: how often the queue sends is still set by the interval in Settings."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:269
+msgid "Frequency"
+msgstr ""
+
+#. translators: %d: number of minutes
+#: src/admin/pages/cron-info-page.php:275
+msgid "Every %d minute"
+msgid_plural "Every %d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/admin/pages/cron-info-page.php:282
+msgid "Method"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:288
+msgid "WP-CLI runs the due events directly, with no web request. Use wget or curl when WP-CLI is not installed on the server."
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:291
+msgid "Crontab line"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:293
+msgid "Copied"
+msgstr ""
+
+#: src/admin/pages/cron-info-page.php:293
+msgid "Copy"
+msgstr ""
+
+#. translators: 1: human-readable time difference, 2: date and time
+#: src/admin/pages/cron-info-page.php:343
+#, php-format
+msgid "in %1$s (%2$s)"
+msgstr ""
+
+#. translators: 1: human-readable time difference, 2: date and time
+#: src/admin/pages/cron-info-page.php:346
+#, php-format
+msgid "%1$s ago (%2$s)"
+msgstr ""

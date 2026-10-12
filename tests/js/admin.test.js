@@ -210,3 +210,65 @@ describe( 'message preview in the log', () => {
 		expect( $( '[data-tmq-list-message-content]' ).html() ).toBe( '' );
 	} );
 } );
+
+describe( 'cron tab', () => {
+	const lines = { 'wpcli:5': 'cli five', 'wpcli:1': 'cli one', 'curl:1': 'curl one' };
+
+	beforeEach( () => {
+		document.body.innerHTML = `
+			<select id="tmq-cron-frequency" data-tmq-cron-part="frequency"><option value="1"></option><option value="5" selected></option></select>
+			<select id="tmq-cron-method" data-tmq-cron-part="method"><option value="wpcli" selected></option><option value="curl"></option><option value="wget"></option></select>
+			<input id="tmq-cron-line" value="cli five" data-tmq-cron-lines='${ JSON.stringify( lines ) }'>
+			<button data-tmq-copy="#tmq-cron-line" data-tmq-copied="Copied">Copy</button>`;
+	} );
+
+	it( 'switches the line to the chosen frequency and method, and keeps it for a missing pair', () => {
+		$( '#tmq-cron-frequency' ).val( '1' ).trigger( 'change' );
+		expect( $( '#tmq-cron-line' ).val() ).toBe( 'cli one' );
+
+		$( '#tmq-cron-method' ).val( 'curl' ).trigger( 'change' );
+		expect( $( '#tmq-cron-line' ).val() ).toBe( 'curl one' );
+
+		$( '#tmq-cron-method' ).val( 'wget' ).trigger( 'change' );
+		expect( $( '#tmq-cron-line' ).val() ).toBe( 'curl one' );
+	} );
+
+	it( 'copies the line and says so on the button for a moment', async () => {
+		const writeText = vi.fn( () => Promise.resolve() );
+		vi.stubGlobal( 'navigator', { clipboard: { writeText } } );
+		vi.stubGlobal( 'isSecureContext', true );
+
+		$( '[data-tmq-copy]' ).trigger( 'click' );
+		await Promise.resolve();
+		await Promise.resolve();
+
+		expect( writeText ).toHaveBeenCalledWith( 'cli five' );
+		expect( $( '[data-tmq-copy]' ).text() ).toBe( 'Copied' );
+		vi.advanceTimersByTime( 1500 );
+		expect( $( '[data-tmq-copy]' ).text() ).toBe( 'Copy' );
+		vi.unstubAllGlobals();
+	} );
+
+	it( 'selects the text when the clipboard is unavailable or refuses', async () => {
+		vi.stubGlobal( 'isSecureContext', false );
+		$( '[data-tmq-copy]' ).trigger( 'click' );
+		const field = document.getElementById( 'tmq-cron-line' );
+		expect( document.activeElement ).toBe( field );
+		expect( field.selectionEnd - field.selectionStart ).toBe( field.value.length );
+
+		field.blur();
+		vi.stubGlobal( 'isSecureContext', true );
+		vi.stubGlobal( 'navigator', { clipboard: { writeText: () => Promise.reject( new Error( 'denied' ) ) } } );
+		$( '[data-tmq-copy]' ).trigger( 'click' );
+		await Promise.resolve();
+		await Promise.resolve();
+		expect( document.activeElement ).toBe( field );
+		expect( $( '[data-tmq-copy]' ).text() ).toBe( 'Copy' );
+		vi.unstubAllGlobals();
+	} );
+
+	it( 'does nothing when the target field is missing', () => {
+		document.body.innerHTML = '<button data-tmq-copy="#nowhere">Copy</button>';
+		expect( () => $( '[data-tmq-copy]' ).trigger( 'click' ) ).not.toThrow();
+	} );
+} );

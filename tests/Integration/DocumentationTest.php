@@ -71,7 +71,7 @@ final class DocumentationTest extends IntegrationTestCase {
     public function test_a_tab_group_is_titled_with_the_tab_label(): void {
         $labels = PluginPage::tabs();
         foreach ( Documentation::groups() as $group ) {
-            if ( array() === $group['tabs'] || ! isset( $labels[ $group['tabs'][0] ] ) || PluginPage::TAB_CRON_INFO === $group['tabs'][0] ) {
+            if ( array() === $group['tabs'] || ! isset( $labels[ $group['tabs'][0] ] ) ) {
                 continue;
             }
             self::assertStringContainsString( $labels[ $group['tabs'][0] ], $group['title'] );

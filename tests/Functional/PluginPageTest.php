@@ -118,7 +118,7 @@ final class PluginPageTest extends FunctionalTestCase {
         self::assertStringContainsString( 'is tagged with a source', $this->open( PluginPage::TAB_SOURCES ) );
         self::assertStringContainsString( 'tmq-templates-form', $this->open( PluginPage::TAB_TEMPLATES ) );
         self::assertStringContainsString( 'tmq-docs', $this->open( PluginPage::TAB_DOCS ) );
-        self::assertStringContainsString( 'Your common WP Cron is disabled', $this->open( PluginPage::TAB_CRON_INFO ) );
+        self::assertStringContainsString( 'Queue worker', $this->open( PluginPage::TAB_CRON_INFO ) );
     }
 
     public function test_the_old_faq_slug_opens_the_documentation_and_marks_its_tab(): void {
