@@ -7,6 +7,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The plugin has an icon on Dashboard → Updates and in the plugin list** (#142). Its own mark, the ring, the layered envelope and the green paper plane, now traced as a vector from the original artwork, replaces WordPress's grey placeholder, read from the installed copy. `assets/img/brand/` also ships black, white, dark-screen and no-background variants.
+
 ## [3.0.0] (2026-10-12) — `b5cec9c`
 
 A major version for two changes to what the plugin asks of a site, not to what it does: it now requires WordPress 6.8 and PHP 8.3, and the licence moves to AGPLv3 or later. The release process also catches up with the other three plugins.
