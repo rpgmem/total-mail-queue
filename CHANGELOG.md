@@ -13,6 +13,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Dependabot's patch and minor updates merge on their own** (#131). A workflow arms squash auto-merge on them once Dependabot opens the PR, the same as Free Form Certificate; required checks still gate the merge, and majors stay manual.
 - ⚠ **The licence is now AGPLv3 or later** (#134). Reuse and forks stay free, and a modified copy offered as a network service must publish its source too. The readme prose inherited from Mail Queue is rewritten; html2text stays MIT. A test holds the declarations together. Releases already published stay GPLv3.
 
+### Security
+
+- **CI jobs run with a read-only token** (#137). `lint.yml` and `tests.yml` now declare `contents: read`; no job in either writes to the repository.
+
 ## [2.12.0] (2026-10-12) — `89bef95`
 
 A Cron tab that says whether the queue is being sent and gives the server cron line, Free Form Certificate's icons, colours and documentation navigation, empty number fields that keep their value, and authenticated SMTP passwords.
