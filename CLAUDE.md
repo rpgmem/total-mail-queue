@@ -72,6 +72,7 @@ These run in CI on every PR and on pushes to `main` and `develop`:
 - The functional suite against a real WordPress and MySQL (`phpunit.functional.xml.dist`).
 - PHPStan, and PHPCS with WPCS and PHPCompatibilityWP.
 - ESLint over `assets/js` and Stylelint over `assets/css` (`npm run lint`).
+- **JS tests (Vitest)**: `tests/js/*.test.js` under jsdom, failing below the line floor in `vitest.config.mjs` (same ratchet rule as the PHP floor). Scripts load through `runScript()` in `tests/js/helpers.js`, which runs them under their real file name so V8 attributes coverage, and `installJquery()` binds real jQuery and resolves its ready event, which jsdom has already fired. jsdom has no layout: assert on `css('display')`, never `:visible`.
 - `composer validate --strict` and `composer audit --locked`.
 - **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. Raise the floor in the PR that delivers a gain, never lower it, and keep it at most 5 points below the measured figure. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it.
 
@@ -89,6 +90,7 @@ vendor/bin/phpunit --testsuite integration
 vendor/bin/phpstan analyse --no-progress
 vendor/bin/phpcs
 npm run lint
+npm run test:coverage
 ```
 
 ## Admin stylesheet
