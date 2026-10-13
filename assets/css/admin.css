@@ -788,7 +788,8 @@ span.tmq-status.tmq-status-inline {
 
 :root.tmq-dark-mode .tmq-admin .wp-list-table td,
 :root.tmq-dark-mode .tmq-admin .wp-list-table tbody th,
-:root.tmq-dark-mode .tmq-admin table.widefat td {
+:root.tmq-dark-mode .tmq-admin table.widefat td,
+:root.tmq-dark-mode .tmq-admin table.widefat tbody th {
 	color: var(--tmq-text);
 	border-color: var(--tmq-border-light);
 }
@@ -835,6 +836,31 @@ span.tmq-status.tmq-status-inline {
 :root.tmq-dark-mode .tmq-admin .notice li,
 :root.tmq-dark-mode .tmq-admin .notice strong {
 	color: var(--tmq-text);
+}
+
+:root.tmq-dark-mode .tmq-admin .notice a,
+:root.tmq-dark-mode .tmq-admin div.updated a,
+:root.tmq-dark-mode .tmq-admin div.error a {
+	color: var(--tmq-primary);
+}
+
+/* Core's colour picker (Templates). The swatch button follows `.button`, but
+   its "Select Color" label is a span core paints light on its own, and the
+   Iris popup is white. */
+:root.tmq-dark-mode .tmq-admin .wp-picker-container .wp-color-result-text {
+	color: var(--tmq-text);
+	background: var(--tmq-bg-alt);
+	border-left-color: var(--tmq-border);
+}
+
+:root.tmq-dark-mode .tmq-admin .wp-picker-container .wp-color-result:hover .wp-color-result-text,
+:root.tmq-dark-mode .tmq-admin .wp-picker-container .wp-color-result:focus .wp-color-result-text {
+	background: var(--tmq-bg-card);
+}
+
+:root.tmq-dark-mode .tmq-admin .wp-picker-container .iris-picker {
+	background: var(--tmq-bg-card);
+	border-color: var(--tmq-border);
 }
 
 :root.tmq-dark-mode .tmq-admin code,
