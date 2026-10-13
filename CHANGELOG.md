@@ -7,7 +7,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [3.1.0] (2026-10-13)
+## [3.1.0] (2026-10-13) — `55276c6`
 
 ### Added
 
