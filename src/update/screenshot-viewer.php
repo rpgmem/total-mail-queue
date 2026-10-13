@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Update;
 
+use TotalMailQueue\Admin\Assets;
 use TotalMailQueue\Plugin;
 
 /**
@@ -48,8 +49,8 @@ final class ScreenshotViewer {
 		}
 
 		$base = plugin_dir_url( Plugin::container()->get( 'plugin.file' ) );
-		wp_enqueue_style( self::HANDLE, $base . 'assets/css/screenshots.css', array(), Plugin::VERSION );
-		wp_enqueue_script( self::HANDLE, $base . 'assets/js/tmq-screenshots.js', array(), Plugin::VERSION, true );
+		wp_enqueue_style( self::HANDLE, $base . 'assets/css/screenshots' . Assets::suffix() . '.css', array(), Plugin::VERSION );
+		wp_enqueue_script( self::HANDLE, $base . 'assets/js/tmq-screenshots' . Assets::suffix() . '.js', array(), Plugin::VERSION, true );
 		wp_localize_script(
 			self::HANDLE,
 			'tmqScreenshots',

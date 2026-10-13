@@ -16,7 +16,8 @@ namespace TotalMailQueue\Admin;
  * Each icon is a CSS mask filled with `currentColor`, so it takes its
  * element's text colour and follows the dark theme with nothing extra. Markup
  * reaches one through {@see Icons::tag()}; the rules come from
- * {@see Icons::stylesheet()}, attached to the admin sheet by {@see Assets}.
+ * {@see Icons::stylesheet()}, written into `assets/css/admin.css` between the
+ * `tmq-icons` markers; `GeneratedCssTest` fails when the two disagree.
  *
  * A new icon joins {@see Icons::PATHS}; no emoji, dashicon or one-off inline
  * SVG stands in for it.

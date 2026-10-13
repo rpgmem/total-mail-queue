@@ -37,8 +37,7 @@ final class Assets {
 			return;
 		}
 		$base = plugin_dir_url( Plugin::container()->get( 'plugin.file' ) );
-		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin.css', array(), Plugin::VERSION );
-		wp_add_inline_style( 'wp_tmq_style', Icons::stylesheet() );
+		wp_enqueue_style( 'wp_tmq_style', $base . 'assets/css/admin' . self::suffix() . '.css', array(), Plugin::VERSION );
 
 		// Printed in the footer, at <body> level, so `position: fixed` is
 		// relative to the viewport and no ancestor can contain it.
@@ -50,9 +49,9 @@ final class Assets {
 		wp_register_script( 'wp_tmq_theme', false, array(), Plugin::VERSION, false );
 		wp_enqueue_script( 'wp_tmq_theme' );
 		wp_add_inline_script( 'wp_tmq_theme', self::darkModeScript( (string) Options::get()['dark_mode'] ) );
-		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin.js', array( 'jquery' ), Plugin::VERSION, true );
+		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin' . self::suffix() . '.js', array( 'jquery' ), Plugin::VERSION, true );
 		wp_add_inline_script( 'wp_tmq_script', self::inlineConfig(), 'before' );
-		wp_enqueue_script( 'wp_tmq_autosave', $base . 'assets/js/tmq-autosave.js', array( 'wp_tmq_script' ), Plugin::VERSION, true );
+		wp_enqueue_script( 'wp_tmq_autosave', $base . 'assets/js/tmq-autosave' . self::suffix() . '.js', array( 'wp_tmq_script' ), Plugin::VERSION, true );
 
 		// Templates tab carries its own asset bundle (color picker + media
 		// uploader + the test-email handler). Loaded only on that tab so the
@@ -60,19 +59,28 @@ final class Assets {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only, not a sensitive action.
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 		if ( PluginPage::TAB_DOCS === $page || PluginPage::TAB_FAQ === $page ) {
-			wp_enqueue_script( 'wp_tmq_docs', $base . 'assets/js/tmq-docs.js', array(), Plugin::VERSION, true );
+			wp_enqueue_script( 'wp_tmq_docs', $base . 'assets/js/tmq-docs' . self::suffix() . '.js', array(), Plugin::VERSION, true );
 		}
 		if ( 'wp_tmq_mail_queue-tab-templates' === $page ) {
 			wp_enqueue_style( 'wp-color-picker' );
 			wp_enqueue_media();
 			wp_enqueue_script(
 				'wp_tmq_templates',
-				$base . 'assets/js/tmq-templates.js',
+				$base . 'assets/js/tmq-templates' . self::suffix() . '.js',
 				array( 'jquery', 'wp-color-picker' ),
 				Plugin::VERSION,
 				true
 			);
 		}
+	}
+
+	/**
+	 * The file suffix for the plugin's own CSS and JS: `.min` in production,
+	 * the readable source when `SCRIPT_DEBUG` is on. `npm run build` writes
+	 * the `.min` files, and CI fails when one is older than its source.
+	 */
+	public static function suffix(): string {
+		return defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 	}
 
 	/**

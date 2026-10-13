@@ -69,18 +69,22 @@ final class AdminChromeTest extends IntegrationTestCase {
         self::assertStringContainsString( '@media (forced-colors:active)', $css );
     }
 
-    public function test_the_menu_style_rides_cores_admin_menu_sheet(): void {
-        $attached = array();
-        Functions\when( 'wp_add_inline_style' )->alias(
-            static function ( $handle, $css ) use ( &$attached ) {
-                $attached[ $handle ] = $css;
+    public function test_the_chrome_sheet_loads_after_cores_admin_menu_sheet(): void {
+        $enqueued = array();
+        Functions\when( 'plugin_dir_url' )->justReturn( 'https://example.test/wp-content/plugins/total-mail-queue/' );
+        Functions\when( 'wp_enqueue_style' )->alias(
+            static function ( $handle, $src, $deps ) use ( &$enqueued ) {
+                $enqueued[ $handle ] = array( $src, $deps );
                 return true;
             }
         );
 
-        Menu::enqueueMenuStyle();
+        Menu::enqueueChromeStyle();
 
-        self::assertSame( array( 'admin-menu' => Menu::menuStylesheet() ), $attached );
+        self::assertSame(
+            array( 'wp_tmq_chrome' => array( 'https://example.test/wp-content/plugins/total-mail-queue/assets/css/admin-chrome.min.css', array( 'admin-menu' ) ) ),
+            $enqueued
+        );
     }
 
     /**
