@@ -20,6 +20,11 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - **Two tests no longer fail when the clock crosses midnight during the run** (#151). The daily-cap tests read the next local midnight before and after the call, as the scheduler test already did; the audit of every clock-reading test is in the issue.
 - **The translation reader is linted, and the functional suite runs locally** (#153). `bin/po-catalogue.php` now runs through PHPStan and PHPCS, and `CLAUDE.md` documents running the functional suite against the container's MariaDB.
 
+### Fixed
+
+- **Dark mode reaches the Access role names, the colour picker and notice links** (#155). Each was painted by core on its own and measured under 2:1 on the dark card.
+
+
 ## [3.0.0] (2026-10-12) — `b5cec9c`
 
 A major version for two changes to what the plugin asks of a site, not to what it does: it now requires WordPress 6.8 and PHP 8.3, and the licence moves to AGPLv3 or later. The release process also catches up with the other three plugins.
