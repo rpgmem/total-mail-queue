@@ -122,10 +122,9 @@ final class SchedulerTest extends FunctionalTestCase {
         // The daily cap frees at the next local midnight. Comparing against
         // "now + the cadence" failed in the last minutes before midnight, when
         // the quota window is closer than one cadence away.
-        $midnight = static fn (): int => (int) get_gmt_from_date( wp_date( 'Y-m-d', time() + DAY_IN_SECONDS ) . ' 00:00:00', 'U' );
-        $before   = $midnight();
+        $before = self::nextLocalMidnight();
         Scheduler::adjustSchedule( Options::get() );
-        self::assertContains( (int) $this->next(), array( $before, $midnight() ), 'A capped account defers to its quota window.' );
+        self::assertContains( (int) $this->next(), array( $before, self::nextLocalMidnight() ), 'A capped account defers to its quota window.' );
 
         global $wpdb;
         $wpdb->query( "UPDATE `{$this->smtpTable()}` SET enabled = 0" );
