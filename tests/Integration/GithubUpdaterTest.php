@@ -83,6 +83,7 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 		);
 		Functions\when( 'wpautop' )->returnArg();
 		Functions\when( 'wp_kses_post' )->returnArg();
+		Functions\when( 'get_user_locale' )->justReturn( 'en_US' );
 
 		unset( $_GET['force-check'] );
 	}
@@ -301,6 +302,58 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 
 		self::assertArrayHasKey( 'description', $info->sections );
 		self::assertArrayHasKey( 'screenshots', $info->sections );
+	}
+
+	public function test_a_portuguese_viewer_reads_the_translated_readme_and_banner(): void {
+		Functions\when( 'get_user_locale' )->justReturn( 'pt_BR' );
+		$this->responses = array(
+			'api.github.com'                     => $this->responses['api.github.com'],
+			'languages/readme-pt_BR.txt'         => array(
+				'code' => 200,
+				'body' => "=== Total Mail Queue ===\n\n== Description ==\n\nColoca os e-mails em uma fila.\n\n== Screenshots ==\n\n1. O registro\n",
+			),
+			'raw.githubusercontent.com'          => array(
+				'code' => 200,
+				'body' => "=== Total Mail Queue ===\n\n== Description ==\n\nQueues email.\n",
+			),
+		);
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertSame( '<p>Coloca os e-mails em uma fila.</p>', $info->sections['description'] );
+		self::assertStringContainsString( 'alt="O registro"', $info->sections['screenshots'] );
+		self::assertStringContainsString( 'https://raw.githubusercontent.com/rpgmem/total-mail-queue/v2.10.0/languages/readme-pt_BR.txt', implode( ' ', $this->requested ) );
+		$base = 'https://example.org/wp-content/plugins/total-mail-queue/assets/img/brand/';
+		self::assertSame(
+			array(
+				'low'  => $base . 'banner-772x250-pt_BR.png',
+				'high' => $base . 'banner-1544x500-pt_BR.png',
+			),
+			$info->banners
+		);
+	}
+
+	public function test_a_missing_release_translation_falls_back_to_the_installed_one(): void {
+		Functions\when( 'get_user_locale' )->justReturn( 'pt_BR' );
+		$this->responses['languages/readme-pt_BR.txt'] = array(
+			'code' => 404,
+			'body' => '',
+		);
+		$this->responses = array_merge( array( 'languages/readme-pt_BR.txt' => $this->responses['languages/readme-pt_BR.txt'] ), $this->responses );
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertStringContainsString( 'guarda em uma fila', $info->sections['description'], 'The installed languages/readme-pt_BR.txt is the fallback.' );
+	}
+
+	public function test_a_locale_with_no_translation_reads_english(): void {
+		Functions\when( 'get_user_locale' )->justReturn( 'de_DE' );
+		$this->responses['raw.githubusercontent.com']['body'] = "=== Total Mail Queue ===\n\n== Description ==\n\nQueues email.\n";
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertSame( '<p>Queues email.</p>', $info->sections['description'] );
+		self::assertStringEndsWith( 'banner-1544x500.png', $info->banners['high'] );
 	}
 
 	public function test_plugin_info_answers_only_for_our_slug(): void {

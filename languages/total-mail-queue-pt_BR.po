@@ -3205,3 +3205,37 @@ msgstr "em %1$s (%2$s)"
 #, php-format
 msgid "%1$s ago (%2$s)"
 msgstr "há %1$s (%2$s)"
+
+#: src/update/screenshot-viewer.php
+msgid "Screenshots"
+msgstr "Capturas de tela"
+
+#: src/update/screenshot-viewer.php
+msgid "Close"
+msgstr "Fechar"
+
+#: src/update/screenshot-viewer.php
+msgid "Previous screenshot"
+msgstr "Captura anterior"
+
+#: src/update/screenshot-viewer.php
+msgid "Next screenshot"
+msgstr "Próxima captura"
+
+#: src/update/screenshot-viewer.php
+msgid "Zoom in"
+msgstr "Ampliar"
+
+#: src/update/screenshot-viewer.php
+msgid "Zoom out"
+msgstr "Reduzir"
+
+#. %1$s: number of the screenshot shown, %2$s: number of screenshots
+#: src/update/screenshot-viewer.php
+#, php-format
+msgid "%1$s of %2$s"
+msgstr "%1$s de %2$s"
+
+#: src/admin/docs/updates-and-data.php
+msgid "\"View details\" also shows the plugin's description, installation steps, FAQ and screenshots, in your language when the plugin ships a translation of them. Click a screenshot to see it larger without leaving the window: the arrows move between screenshots, and the wheel, a pinch or a click zooms in."
+msgstr "\"Ver detalhes\" também mostra a descrição do plugin, os passos de instalação, as perguntas frequentes e as capturas de tela, no seu idioma quando o plugin traz uma tradução deles. Clique em uma captura para vê-la ampliada sem sair da janela: as setas passam de uma captura para outra, e a roda do mouse, o gesto de pinça ou um clique aproximam a imagem."
