@@ -51,7 +51,8 @@ The same standard as Free Form Certificate (its `CLAUDE.md` → "Issues, pull re
 1. On `develop`, through a dedicated `release: X.Y.Z` PR:
    - bump the three version sites;
    - rename `[Unreleased]` to `## [X.Y.Z] (YYYY-MM-DD)` (the sha comes at step 5);
-   - add a fresh `[Unreleased]` above it.
+   - add a fresh `[Unreleased]` above it;
+   - read `git diff origin/main...origin/develop -- readme.txt languages/readme-pt_BR.txt`: a change on one side only is a translation left behind (see "Translations").
 2. Open the `develop → main` PR. Keep it draft until the maintainer confirms the production release.
 3. After the squash lands on `main`, tag that commit (`vX.Y.Z`) and push the tag. `.github/workflows/release.yml` then:
    - checks the tag against the header version;
@@ -97,6 +98,8 @@ Three guards in the unit suite hold what nothing else reads:
 - `ReadmeUpgradeNoticeTest`: the Upgrade Notice holds one entry, for the `Stable tag` version, in at most 300 characters, pointing at `CHANGELOG.md`, and the updater's own parser reads the same text. Rewrite it in every release PR.
 - `SuppressionTest`: every `phpcs:ignore` / `phpcs:disable` names its sniffs and gives a reason of at least 15 characters after `--`, and every `@phpstan-ignore` names an identifier and a reason; the `-line` forms are refused. A reason says why this line is safe ("the plugin's own table, name from Schema"), never "same".
 
+**A test that reads the clock must not assume a fixed offset from code that snaps to a boundary.** The scheduler and `SmtpRepository` defer a capped account to the next local midnight, so "now + the cadence" fails in the last minutes of the day (#146), and a midnight read once before the call fails when the clock crosses it during the test. `FunctionalTestCase::nextLocalMidnight()` is read before and after the call, and either answer is accepted. The audit of every clock-reading test is in #151; re-run it when a new boundary appears (a month, a quota window).
+
 Locally:
 
 ```bash
@@ -129,6 +132,14 @@ The Documentation tab is `Admin\Documentation`: one partial per topic under `src
 - **Name the labels the screen shows.** A topic quotes a button or field by the label the plugin prints, so the translated topic and the translated screen agree.
 - **The old FAQ slug** (`PluginPage::TAB_FAQ`) stays registered and opens the documentation, so old links keep working. Notices link to the Troubleshooting topic.
 - **Every option the plugin writes is deleted on uninstall.** `UninstallFootprintTest` reads each `update_option()` under `src/` and fails when the uninstaller does not delete it.
+
+## Translations
+
+`languages/` holds the `.pot`, and for pt_BR the `.po`, `.mo` and `.l10n.php`.
+- **Edit the `.po` (by hand or in Loco), then run `php bin/compile-translations.php`** (needs GNU gettext). It writes the `.mo` with `msgfmt --check` and the `.l10n.php` in the shape Loco writes it, so a catalogue saved from Loco and one compiled here are the same file. Never edit a compiled catalogue by hand: a fix that reaches one and not the other depends on which file WordPress loaded.
+- **`bin/po-catalogue.php` is the one `.po` reader.** The compiler and the tests both use it, so they cannot disagree about what an entry is. `PoCatalogueTest` exercises the shapes on a synthetic file.
+- **`TranslationCatalogueAgreementTest`** fails when the three files disagree, in either direction, plurals form by form, or when the `.l10n.php` is not byte for byte what the compiler writes. Its self-check recounts the `.po`'s entries by a different route, so a reader that read nothing fails instead of passing.
+- **`languages/readme-pt_BR.txt` is the readme "View details" shows a pt_BR administrator.** A PR that changes `readme.txt` updates it in the same PR. `PluginDetailsAssetsTest` holds the two to the same structure (tab sections, the count of other sections, the screenshot captions) and cannot see the content: a changed sentence in English passes CI with the translation still saying the old thing (#149).
 
 ## Code
 

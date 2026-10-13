@@ -105,4 +105,16 @@ abstract class FunctionalTestCase extends WP_UnitTestCase {
         $wpdb->insert( $this->smtpTable(), array_merge( $defaults, $data ) );
         return (int) $wpdb->insert_id;
     }
+
+    /**
+     * The next local midnight, as a UTC timestamp: where a daily cap frees.
+     *
+     * Read it before and after the call under test, and accept either. Code
+     * that snaps to midnight answers with tomorrow's when the clock crosses
+     * midnight between the two reads, so a single read taken first fails at
+     * the boundary (#146, #151).
+     */
+    protected static function nextLocalMidnight(): int {
+        return (int) get_gmt_from_date( wp_date( 'Y-m-d', time() + DAY_IN_SECONDS ) . ' 00:00:00', 'U' );
+    }
 }
