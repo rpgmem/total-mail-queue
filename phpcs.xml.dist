@@ -99,6 +99,8 @@
     </rule>
     <rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound">
         <exclude-pattern>src/*</exclude-pattern>
+        <!-- The translation reader shares the plugin's TotalMailQueue namespace. -->
+        <exclude-pattern>bin/po-catalogue.php</exclude-pattern>
     </rule>
     <!-- Throwing exceptions is not user-facing output; the sniff misfires here. -->
     <rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
