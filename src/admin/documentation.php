@@ -220,7 +220,7 @@ final class Documentation {
 	 * @param string $plugin_file The plugin's main file, read for the credits line.
 	 */
 	public static function render( string $banner_url, string $plugin_file ): void {
-		echo '<div class="tmq-banner"><img src="' . esc_url( $banner_url ) . '" alt="" height="300" loading="lazy" /></div>';
+		echo '<div class="tmq-banner"><img src="' . esc_url( $banner_url ) . '" alt="" width="1544" height="500" loading="lazy" /></div>';
 
 		echo '<div class="tmq-box tmq-docs-intro">';
 		echo Icons::heading( 'docs', __( 'Documentation', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
