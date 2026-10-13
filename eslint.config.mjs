@@ -19,6 +19,7 @@ export default [
 				ajaxurl: 'readonly',
 				// Localized by the admin enqueue.
 				tmq: 'readonly',
+				tmqScreenshots: 'readonly',
 			},
 		},
 		rules: {

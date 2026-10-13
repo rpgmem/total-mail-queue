@@ -3195,3 +3195,37 @@ msgstr ""
 #, php-format
 msgid "%1$s ago (%2$s)"
 msgstr ""
+
+#: src/update/screenshot-viewer.php
+msgid "Screenshots"
+msgstr ""
+
+#: src/update/screenshot-viewer.php
+msgid "Close"
+msgstr ""
+
+#: src/update/screenshot-viewer.php
+msgid "Previous screenshot"
+msgstr ""
+
+#: src/update/screenshot-viewer.php
+msgid "Next screenshot"
+msgstr ""
+
+#: src/update/screenshot-viewer.php
+msgid "Zoom in"
+msgstr ""
+
+#: src/update/screenshot-viewer.php
+msgid "Zoom out"
+msgstr ""
+
+#. %1$s: number of the screenshot shown, %2$s: number of screenshots
+#: src/update/screenshot-viewer.php
+#, php-format
+msgid "%1$s of %2$s"
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php
+msgid "\"View details\" also shows the plugin's description, installation steps, FAQ and screenshots, in your language when the plugin ships a translation of them. Click a screenshot to see it larger without leaving the window: the arrows move between screenshots, and the wheel, a pinch or a click zooms in."
+msgstr ""

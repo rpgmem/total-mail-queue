@@ -114,6 +114,9 @@ final class Plugin {
 		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
 		// scans for plugin updates from cron.
 		Update\GithubUpdater::register();
+
+		// Screenshot viewer in that update's "View details" modal.
+		Update\ScreenshotViewer::register();
 	}
 
 	/**

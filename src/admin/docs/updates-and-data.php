@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <h3><?php esc_html_e( 'Updates', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'New versions are published as GitHub releases and appear on WordPress\'s usual update screen, with their notes under "View details". Every package is checked against its published SHA-256 before it is installed, and an update that does not match is refused. To have updates installed automatically, use WordPress\'s own "Enable auto-updates" link on the Plugins screen.', 'total-mail-queue' ); ?></p>
 
+<p><?php esc_html_e( '"View details" also shows the plugin\'s description, installation steps, FAQ and screenshots, in your language when the plugin ships a translation of them. Click a screenshot to see it larger without leaving the window: the arrows move between screenshots, and the wheel, a pinch or a click zooms in.', 'total-mail-queue' ); ?></p>
+
 <h3><?php esc_html_e( 'What the plugin stores', 'total-mail-queue' ); ?></h3>
 <ul class="tmq-docs-list">
 	<li><?php esc_html_e( 'Three database tables: the queue and log, the SMTP accounts, and the sources.', 'total-mail-queue' ); ?></li>
