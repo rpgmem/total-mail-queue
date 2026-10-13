@@ -83,9 +83,9 @@ final class WpVersionNotice {
 				'</a>'
 			)
 		);
-		// The one inline style left: this notice shows on every admin screen,
-		// where the plugin's stylesheet is not loaded.
-		echo ' <a href="' . esc_url( $dismiss_url ) . '" class="button button-small" style="margin-left:8px;">' . esc_html__( 'Dismiss', 'total-mail-queue' ) . '</a>';
+		// This notice shows on every admin screen, so its one rule lives in
+		// `admin-chrome.css`, the sheet that loads wherever the menu does.
+		echo ' <a href="' . esc_url( $dismiss_url ) . '" class="button button-small tmq-wp-version-dismiss">' . esc_html__( 'Dismiss', 'total-mail-queue' ) . '</a>';
 		echo '</p></div>';
 	}
 

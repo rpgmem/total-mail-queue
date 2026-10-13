@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin;
 
+use TotalMailQueue\Plugin;
+
 /**
  * Adds the plugin's top-level menu plus one hidden submenu per tab. Every
  * entry dispatches to {@see PluginPage::render()} which then routes by `page`
@@ -37,11 +39,11 @@ final class Menu {
 	 * admin screen, since the sidebar is on every screen.
 	 *
 	 * `admin_enqueue_scripts` at the default priority: core has registered
-	 * `admin-menu` by then, which is the sheet the rules attach to.
+	 * `admin-menu` by then, which the chrome sheet depends on.
 	 */
 	public static function register(): void {
 		add_action( 'admin_menu', array( self::class, 'addMenuItems' ) );
-		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueueMenuStyle' ) );
+		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueueChromeStyle' ) );
 	}
 
 	/**
@@ -66,11 +68,16 @@ final class Menu {
 	}
 
 	/**
-	 * `admin_enqueue_scripts` callback: attach the menu rules to core's
-	 * `admin-menu` sheet, so they load wherever the sidebar does.
+	 * `admin_enqueue_scripts` callback: load `admin-chrome.css`, the sheet
+	 * for what the plugin draws on every admin screen (the menu glyph, the
+	 * WordPress-version notice), after core's `admin-menu` sheet.
+	 *
+	 * The menu rules in it are generated from {@see Menu::menuStylesheet()};
+	 * `GeneratedCssTest` fails when the file and the method disagree.
 	 */
-	public static function enqueueMenuStyle(): void {
-		wp_add_inline_style( 'admin-menu', self::menuStylesheet() );
+	public static function enqueueChromeStyle(): void {
+		$base = plugin_dir_url( Plugin::container()->get( 'plugin.file' ) );
+		wp_enqueue_style( 'wp_tmq_chrome', $base . 'assets/css/admin-chrome' . Assets::suffix() . '.css', array( 'admin-menu' ), Plugin::VERSION );
 	}
 
 	/**
