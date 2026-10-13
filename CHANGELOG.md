@@ -18,6 +18,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - **Translations compile with one command, and CI checks the three files against each other** (#150). `php bin/compile-translations.php` writes the `.mo` and the `.l10n.php` from the `.po`, and a test fails when they disagree in either direction. A readme change now carries its pt_BR copy in the same PR (#149).
 - **Two tests no longer fail when the clock crosses midnight during the run** (#151). The daily-cap tests read the next local midnight before and after the call, as the scheduler test already did; the audit of every clock-reading test is in the issue.
+- **The translation reader is linted, and the functional suite runs locally** (#153). `bin/po-catalogue.php` now runs through PHPStan and PHPCS, and `CLAUDE.md` documents running the functional suite against the container's MariaDB.
 
 ## [3.0.0] (2026-10-12) — `b5cec9c`
 

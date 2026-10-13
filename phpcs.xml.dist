@@ -9,6 +9,7 @@
     <!-- What to scan -->
     <file>total-mail-queue.php</file>
     <file>src/</file>
+    <file>bin/po-catalogue.php</file>
 
     <!-- What to skip -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
