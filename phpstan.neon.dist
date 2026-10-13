@@ -6,6 +6,7 @@ parameters:
     paths:
         - total-mail-queue.php
         - src/
+        - bin/po-catalogue.php
     excludePaths:
         - lib/*
         - tests/*

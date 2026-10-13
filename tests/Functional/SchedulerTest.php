@@ -119,8 +119,12 @@ final class SchedulerTest extends FunctionalTestCase {
         $this->insertQueueItem();
         $this->insertSmtpAccount( array( 'daily_limit' => 1, 'daily_sent' => 1 ) );
 
+        // The daily cap frees at the next local midnight. Comparing against
+        // "now + the cadence" failed in the last minutes before midnight, when
+        // the quota window is closer than one cadence away.
+        $before = self::nextLocalMidnight();
         Scheduler::adjustSchedule( Options::get() );
-        self::assertGreaterThan( time() + 300, (int) $this->next(), 'A capped account defers to its quota window.' );
+        self::assertContains( (int) $this->next(), array( $before, self::nextLocalMidnight() ), 'A capped account defers to its quota window.' );
 
         global $wpdb;
         $wpdb->query( "UPDATE `{$this->smtpTable()}` SET enabled = 0" );

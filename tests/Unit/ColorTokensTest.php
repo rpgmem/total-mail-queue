@@ -213,11 +213,15 @@ final class ColorTokensTest extends TestCase {
     }
 
     public function test_every_token_read_is_declared(): void {
-        $declared = self::block( ':root' );
+        $declared = array_keys( self::block( ':root' ) );
+        // A property a component sets on itself counts too: the generated icon
+        // rules declare `--tmq-icon` per icon, and `.tmq-icon` reads it.
+        preg_match_all( '/(--tmq-[\w-]+)\s*:/', self::css(), $own );
+        $declared = array_merge( $declared, $own[1] );
         preg_match_all( '/var\((--tmq-[\w-]+)/', self::css(), $m );
 
         self::assertNotEmpty( $m[1], 'Reading the token uses collapsed.' );
-        $missing = array_values( array_unique( array_diff( $m[1], array_keys( $declared ) ) ) );
+        $missing = array_values( array_unique( array_diff( $m[1], $declared ) ) );
         self::assertSame( array(), $missing, 'An undeclared custom property invalidates the whole declaration.' );
     }
 

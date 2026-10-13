@@ -23,7 +23,7 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '3.0.0';
+	public const VERSION = '3.1.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
@@ -114,6 +114,9 @@ final class Plugin {
 		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
 		// scans for plugin updates from cron.
 		Update\GithubUpdater::register();
+
+		// Screenshot viewer in that update's "View details" modal.
+		Update\ScreenshotViewer::register();
 	}
 
 	/**

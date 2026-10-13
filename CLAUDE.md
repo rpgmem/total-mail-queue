@@ -51,7 +51,8 @@ The same standard as Free Form Certificate (its `CLAUDE.md` → "Issues, pull re
 1. On `develop`, through a dedicated `release: X.Y.Z` PR:
    - bump the three version sites;
    - rename `[Unreleased]` to `## [X.Y.Z] (YYYY-MM-DD)` (the sha comes at step 5);
-   - add a fresh `[Unreleased]` above it.
+   - add a fresh `[Unreleased]` above it;
+   - read `git diff origin/main...origin/develop -- readme.txt languages/readme-pt_BR.txt`: a change on one side only is a translation left behind (see "Translations").
 2. Open the `develop → main` PR. Keep it draft until the maintainer confirms the production release.
 3. After the squash lands on `main`, tag that commit (`vX.Y.Z`) and push the tag. `.github/workflows/release.yml` then:
    - checks the tag against the header version;
@@ -85,6 +86,7 @@ These run in CI on every PR and on pushes to `main` and `develop`:
 - The functional suite against a real WordPress and MySQL (`phpunit.functional.xml.dist`), on the latest WordPress and on **the declared floor**: the `floor` leg reads `Requires at least` from the plugin header, resolves it to that branch's newest patch release and swaps the WordPress test library to the same branch, so moving the floor moves the test. A floor nothing runs is a claim, not a requirement.
 - PHPStan, and PHPCS with WPCS and PHPCompatibilityWP.
 - ESLint over `assets/js` and Stylelint over `assets/css` (`npm run lint`).
+- **Verify minified assets are up to date**: CI runs `npm run build` and fails when an `assets/**/*.min.*` file changes or appears. Run `npm run build` after editing any file under `assets/css` or `assets/js`, and commit the `.min` and `.map` beside it.
 - **JS tests (Vitest)**: `tests/js/*.test.js` under jsdom, failing below the line floor in `vitest.config.mjs` (same ratchet rule as the PHP floor). Scripts load through `runScript()` in `tests/js/helpers.js`, which runs them under their real file name so V8 attributes coverage, and `installJquery()` binds real jQuery and resolves its ready event, which jsdom has already fired. jsdom has no layout: assert on `css('display')`, never `:visible`.
 - `composer validate --strict` and `composer audit --locked`.
 - **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. The rule is the same in the four plugins (Free Form Certificate, Total Mail Queue, Email Signature Generator, Institutional Email), for this floor and the JS one: **a floor is the highest of 90%, the measured figure minus 5 points, and its current value.** So it is never below 90%, never more than 5 points behind what is measured, and never lowered — the one exception is an honest re-measure after deleting covered product code, recorded beside the floor. Raise it in the PR that delivers the gain, and only once the measured figure is above it. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
@@ -97,16 +99,24 @@ Three guards in the unit suite hold what nothing else reads:
 - `ReadmeUpgradeNoticeTest`: the Upgrade Notice holds one entry, for the `Stable tag` version, in at most 300 characters, pointing at `CHANGELOG.md`, and the updater's own parser reads the same text. Rewrite it in every release PR.
 - `SuppressionTest`: every `phpcs:ignore` / `phpcs:disable` names its sniffs and gives a reason of at least 15 characters after `--`, and every `@phpstan-ignore` names an identifier and a reason; the `-line` forms are refused. A reason says why this line is safe ("the plugin's own table, name from Schema"), never "same".
 
+**A test that reads the clock must not assume a fixed offset from code that snaps to a boundary.** The scheduler and `SmtpRepository` defer a capped account to the next local midnight, so "now + the cadence" fails in the last minutes of the day (#146), and a midnight read once before the call fails when the clock crosses it during the test. `FunctionalTestCase::nextLocalMidnight()` is read before and after the call, and either answer is accepted. The audit of every clock-reading test is in #151; re-run it when a new boundary appears (a month, a quota window).
+
 Locally:
 
 ```bash
 composer install && npm ci
 vendor/bin/phpunit --testsuite unit
 vendor/bin/phpunit --testsuite integration
+# The functional suite needs MySQL. A cloud session's container ships MariaDB stopped;
+# the environment's setup script starts it with the CI credentials (root / root).
+service mariadb start
+bash bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1 false latest
+vendor/bin/phpunit -c phpunit.functional.xml.dist
 vendor/bin/phpstan analyse --no-progress
 vendor/bin/phpcs
 npm run lint
 npm run test:coverage
+npm run build   # after editing assets/css or assets/js
 ```
 
 ## Admin stylesheet
@@ -117,8 +127,10 @@ npm run test:coverage
 - **`ColorTokensTest`** fails on a colour literal outside the token blocks, on a `var(--tmq-*)` nobody declares, and on a text/background pair below 4.5:1 in either theme. It checks pairs two ways: a curated `PAIRS` list, for pairs that inheritance creates, and a scan that measures every rule declaring `color` and a background together.
 - **Icons.** They come from `Admin\Icons`: 24×24 stroke drawings painted as a `currentColor` mask. A new icon joins `Icons::PATHS`; no emoji, dashicon or one-off inline SVG stands in for one.
 - **Headings and cards.** Every heading on the plugin's screens is printed by `Icons::heading()`, so it carries an icon, and a form's sections are `tmq-box tmq-settings-card` cards like the Settings tab's. A list screen (Log, Retention, SMTP accounts, Sources) has no card of its own, because the tab panel already is one, but its heading still carries the tab's icon. `AdminHeadingsTest` fails on a literal `<h2>`/`<h3>` under `src/admin/`, except the page title, the Export / Import group label and core admin notices.
-- **No inline `style=""`** on the plugin's screens. The one exception is the WordPress-update notice, which shows on screens where the sheet is not loaded.
-- **Tabs and submenus.** Each tab is its own submenu slug, listed once in `PluginPage::tabs()`. The submenus stay registered, so URLs and screen ids are stable, and `Menu::menuStylesheet()` hides them from the sidebar.
+- **CSS lives in files, never inline.** No `style=""` attribute and no `wp_add_inline_style()`: `GeneratedCssTest` refuses the second. What the plugin draws on every admin screen (the menu glyph, the WordPress-update notice) is in `assets/css/admin-chrome.css`, which loads after core's `admin-menu` sheet. Two exceptions, both because the value is not known until runtime: the e-mail template's inline styles (mail clients ignore a stylesheet) and the screenshot viewer's zoom `transform`.
+- **Generated CSS.** The icon masks (`Icons::stylesheet()`) and the menu rules (`Menu::menuStylesheet()`) stay the single source, and their output is copied into `admin.css` and `admin-chrome.css` between `tmq-icons` / `tmq-menu` markers. `GeneratedCssTest` fails when a copy is stale; regenerate with `TMQ_UPDATE_GENERATED_CSS=1 vendor/bin/phpunit --filter GeneratedCss`, then `npm run build`.
+- **Minified in production.** Every enqueue appends `Assets::suffix()`: `.min` normally, the readable source when `SCRIPT_DEBUG` is on. The zip ships both and leaves the source maps out.
+- **Tabs and submenus.** Each tab is its own submenu slug, listed once in `PluginPage::tabs()`. The submenus stay registered, so URLs and screen ids are stable, and `admin-chrome.css` hides them from the sidebar.
 
 ## Documentation
 
@@ -129,6 +141,15 @@ The Documentation tab is `Admin\Documentation`: one partial per topic under `src
 - **Name the labels the screen shows.** A topic quotes a button or field by the label the plugin prints, so the translated topic and the translated screen agree.
 - **The old FAQ slug** (`PluginPage::TAB_FAQ`) stays registered and opens the documentation, so old links keep working. Notices link to the Troubleshooting topic.
 - **Every option the plugin writes is deleted on uninstall.** `UninstallFootprintTest` reads each `update_option()` under `src/` and fails when the uninstaller does not delete it.
+
+## Translations
+
+`languages/` holds the `.pot`, and for pt_BR the `.po`, `.mo` and `.l10n.php`.
+- **Edit the `.po` (by hand or in Loco), then run `php bin/compile-translations.php`** (needs GNU gettext). It writes the `.mo` with `msgfmt --check` and the `.l10n.php` in the shape Loco writes it, so a catalogue saved from Loco and one compiled here are the same file. Never edit a compiled catalogue by hand: a fix that reaches one and not the other depends on which file WordPress loaded.
+- **`bin/po-catalogue.php` is the one `.po` reader.** The compiler and the tests both use it, so they cannot disagree about what an entry is. `PoCatalogueTest` exercises the shapes on a synthetic file. It sits inside PHPStan's and PHPCS's paths like the plugin's own code (#153).
+- **That shape is `wp i18n make-php`'s, byte for byte**, measured rather than assumed: WP-CLI run on the committed `.po` reproduces the committed `.l10n.php`. It reads the text domain from the `.po`'s `X-Domain` header, so keep that header. The other three plugins compile to the same shape.
+- **`TranslationCatalogueAgreementTest`** fails when the three files disagree, in either direction, plurals form by form, or when the `.l10n.php` is not byte for byte what the compiler writes. Its self-check recounts the `.po`'s entries by a different route, so a reader that read nothing fails instead of passing.
+- **`languages/readme-pt_BR.txt` is the readme "View details" shows a pt_BR administrator.** A PR that changes `readme.txt` updates it in the same PR. `PluginDetailsAssetsTest` holds the two to the same structure (tab sections, the count of other sections, the screenshot captions) and cannot see the content: a changed sentence in English passes CI with the translation still saying the old thing (#149).
 
 ## Code
 

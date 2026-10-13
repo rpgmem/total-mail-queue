@@ -88,7 +88,7 @@ final class PluginPage {
 			case self::TAB_FAQ:
 			case self::TAB_DOCS:
 				$plugin_file = Plugin::container()->get( 'plugin.file' );
-				Documentation::render( plugins_url( 'assets/img/total-mail-queue-postman.png', $plugin_file ), $plugin_file );
+				Documentation::render( plugins_url( 'assets/img/brand/banner-1544x500.png', $plugin_file ), $plugin_file );
 				break;
 			case self::TAB_CRON_INFO:
 				CronInfoPage::render();

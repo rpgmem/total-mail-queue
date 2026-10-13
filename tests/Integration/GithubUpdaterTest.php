@@ -42,6 +42,7 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 		);
 
 		Functions\when( 'plugin_basename' )->justReturn( self::PLUGIN );
+		Functions\when( 'plugin_dir_url' )->justReturn( 'https://example.org/wp-content/plugins/total-mail-queue/' );
 		Functions\when( 'get_site_transient' )->alias( fn ( $key ) => $this->transients[ $key ] ?? false );
 		Functions\when( 'set_site_transient' )->alias(
 			function ( $key, $value ) {
@@ -81,6 +82,8 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 			}
 		);
 		Functions\when( 'wpautop' )->returnArg();
+		Functions\when( 'wp_kses_post' )->returnArg();
+		Functions\when( 'get_user_locale' )->justReturn( 'en_US' );
 
 		unset( $_GET['force-check'] );
 	}
@@ -250,6 +253,107 @@ final class GithubUpdaterTest extends IntegrationTestCase {
 		self::assertSame( '2.10.0', $parsed['version'] );
 		self::assertSame( self::ZIP, $parsed['package'] );
 		self::assertSame( 'ABCDEF', $parsed['sha256'] );
+	}
+
+	public function test_the_update_and_the_details_modal_carry_the_installed_icon(): void {
+		$base     = 'https://example.org/wp-content/plugins/total-mail-queue/' . 'assets/img/brand/';
+		$expected = array(
+			'1x'  => $base . 'icon-128.png',
+			'2x'  => $base . 'icon-256.png',
+			'svg' => $base . 'icon.svg',
+		);
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+		self::assertSame( $expected, $info->icons );
+
+		$older = GithubUpdater::checkForUpdate( $this->transient( '0.0.1' ) );
+		self::assertSame( $expected, current( $older->response )->icons );
+	}
+
+	public function test_the_details_modal_has_the_banner_and_the_readme_tabs_in_order(): void {
+		$this->responses['raw.githubusercontent.com']['body'] = "=== Total Mail Queue ===\nRequires PHP: 8.1\n\n== Description ==\n\nQueues **every** email.\n\n== Frequently Asked Questions ==\n\n= Does it send? =\n\nYes.\n\n== Screenshots ==\n\nThe images live in the repository.\n\n1. The log\n2. Retention\n\n== Installation ==\n\nActivate it.\n\n== Privacy ==\n\nNothing leaves.\n\n== Changelog ==\n\nSee CHANGELOG.md.\n";
+		$release         = $this->release();
+		$release['body'] = "### Changed\n\n- **The licence** moved (#73).";
+		$this->responses['api.github.com']['body'] = (string) json_encode( $release );
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		$base = 'https://example.org/wp-content/plugins/total-mail-queue/assets/img/brand/';
+		self::assertSame(
+			array(
+				'low'  => $base . 'banner-772x250.png',
+				'high' => $base . 'banner-1544x500.png',
+			),
+			$info->banners
+		);
+		self::assertSame( array( 'description', 'installation', 'faq', 'changelog', 'screenshots', 'other_notes' ), array_keys( $info->sections ) );
+		self::assertSame( '<p>Queues <strong>every</strong> email.</p>', $info->sections['description'] );
+		self::assertSame( '<h4>Does it send?</h4><p>Yes.</p>', $info->sections['faq'] );
+		self::assertSame( '<h3>Privacy</h3><p>Nothing leaves.</p>', $info->sections['other_notes'] );
+		self::assertStringContainsString( '<h4>Changed</h4><ul><li><strong>The licence</strong> moved (<a href="https://github.com/rpgmem/total-mail-queue/issues/73">#73</a>).</li></ul>', $info->sections['changelog'] );
+		self::assertStringContainsString( 'https://raw.githubusercontent.com/rpgmem/total-mail-queue/v2.10.0/docs/screenshots/01-log.png', $info->sections['screenshots'] );
+		self::assertStringNotContainsString( 'live in the repository', $info->sections['screenshots'], 'Prose before the caption list is not a caption.' );
+	}
+
+	public function test_a_release_readme_that_cannot_be_fetched_falls_back_to_the_installed_one(): void {
+		$this->responses['raw.githubusercontent.com'] = null;
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertArrayHasKey( 'description', $info->sections );
+		self::assertArrayHasKey( 'screenshots', $info->sections );
+	}
+
+	public function test_a_portuguese_viewer_reads_the_translated_readme_and_banner(): void {
+		Functions\when( 'get_user_locale' )->justReturn( 'pt_BR' );
+		$this->responses = array(
+			'api.github.com'                     => $this->responses['api.github.com'],
+			'languages/readme-pt_BR.txt'         => array(
+				'code' => 200,
+				'body' => "=== Total Mail Queue ===\n\n== Description ==\n\nColoca os e-mails em uma fila.\n\n== Screenshots ==\n\n1. O registro\n",
+			),
+			'raw.githubusercontent.com'          => array(
+				'code' => 200,
+				'body' => "=== Total Mail Queue ===\n\n== Description ==\n\nQueues email.\n",
+			),
+		);
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertSame( '<p>Coloca os e-mails em uma fila.</p>', $info->sections['description'] );
+		self::assertStringContainsString( 'alt="O registro"', $info->sections['screenshots'] );
+		self::assertStringContainsString( 'https://raw.githubusercontent.com/rpgmem/total-mail-queue/v2.10.0/languages/readme-pt_BR.txt', implode( ' ', $this->requested ) );
+		$base = 'https://example.org/wp-content/plugins/total-mail-queue/assets/img/brand/';
+		self::assertSame(
+			array(
+				'low'  => $base . 'banner-772x250-pt_BR.png',
+				'high' => $base . 'banner-1544x500-pt_BR.png',
+			),
+			$info->banners
+		);
+	}
+
+	public function test_a_missing_release_translation_falls_back_to_the_installed_one(): void {
+		Functions\when( 'get_user_locale' )->justReturn( 'pt_BR' );
+		$this->responses['languages/readme-pt_BR.txt'] = array(
+			'code' => 404,
+			'body' => '',
+		);
+		$this->responses = array_merge( array( 'languages/readme-pt_BR.txt' => $this->responses['languages/readme-pt_BR.txt'] ), $this->responses );
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertStringContainsString( 'guarda em uma fila', $info->sections['description'], 'The installed languages/readme-pt_BR.txt is the fallback.' );
+	}
+
+	public function test_a_locale_with_no_translation_reads_english(): void {
+		Functions\when( 'get_user_locale' )->justReturn( 'de_DE' );
+		$this->responses['raw.githubusercontent.com']['body'] = "=== Total Mail Queue ===\n\n== Description ==\n\nQueues email.\n";
+
+		$info = GithubUpdater::pluginInfo( false, 'plugin_information', (object) array( 'slug' => GithubUpdater::SLUG ) );
+
+		self::assertSame( '<p>Queues email.</p>', $info->sections['description'] );
+		self::assertStringEndsWith( 'banner-1544x500.png', $info->banners['high'] );
 	}
 
 	public function test_plugin_info_answers_only_for_our_slug(): void {

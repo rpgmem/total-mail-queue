@@ -33,9 +33,10 @@ final class SmtpRepositoryTest extends FunctionalTestCase {
     public function test_a_daily_cap_frees_at_the_next_local_midnight(): void {
         $this->insertSmtpAccount( array( 'name' => 'Daily', 'daily_limit' => 10, 'daily_sent' => 10 ) );
 
-        $expected = (int) get_gmt_from_date( wp_date( 'Y-m-d', time() + DAY_IN_SECONDS ) . ' 00:00:00', 'U' );
+        $before = self::nextLocalMidnight();
+        $free   = SmtpRepository::nextAvailableAt( self::INTERVAL );
 
-        self::assertSame( $expected, SmtpRepository::nextAvailableAt( self::INTERVAL ) );
+        self::assertContains( $free, array( $before, self::nextLocalMidnight() ) );
         self::assertStringContainsString( 'Daily: daily limit reached (10/10), resumes ~', SmtpRepository::blockSummary( self::INTERVAL ) );
     }
 
@@ -72,8 +73,8 @@ final class SmtpRepositoryTest extends FunctionalTestCase {
         $this->insertSmtpAccount( array( 'name' => 'Month', 'monthly_limit' => 1, 'monthly_sent' => 1 ) );
         $this->insertSmtpAccount( array( 'name' => 'Day', 'daily_limit' => 1, 'daily_sent' => 1 ) );
 
-        $midnight = (int) get_gmt_from_date( wp_date( 'Y-m-d', time() + DAY_IN_SECONDS ) . ' 00:00:00', 'U' );
-        self::assertLessThanOrEqual( $midnight, SmtpRepository::nextAvailableAt( self::INTERVAL ) );
+        $free = SmtpRepository::nextAvailableAt( self::INTERVAL );
+        self::assertLessThanOrEqual( self::nextLocalMidnight(), $free );
 
         $summary = SmtpRepository::blockSummary( self::INTERVAL );
         self::assertStringContainsString( 'every account is at a limit', $summary );

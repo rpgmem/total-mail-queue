@@ -7,7 +7,27 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [3.0.0] (2026-10-12)
+## [3.1.0] (2026-10-13)
+
+### Added
+
+- **The plugin has an icon on Dashboard → Updates and in the plugin list** (#142). Its own mark, the ring, the layered envelope and the green paper plane, now traced as a vector from the original artwork, replaces WordPress's grey placeholder, read from the installed copy. `assets/img/brand/` also ships black, white, dark-screen and no-background variants, each as SVG and as 128 px and 256 px PNG.
+- **"View details" shows a banner, the readme's tabs and screenshots in place, in Portuguese too** (#145, #147). Description, Installation, FAQ, Screenshots and Other notes come from the offered release's `readme.txt` (or `languages/readme-pt_BR.txt` for a pt_BR viewer), the changelog renders its Markdown, and a screenshot opens in an overlay with arrows, swipe and zoom.
+
+
+### Changed
+
+- **Translations compile with one command, and CI checks the three files against each other** (#150). `php bin/compile-translations.php` writes the `.mo` and the `.l10n.php` from the `.po`, and a test fails when they disagree in either direction. A readme change now carries its pt_BR copy in the same PR (#149).
+- **Two tests no longer fail when the clock crosses midnight during the run** (#151). The daily-cap tests read the next local midnight before and after the call, as the scheduler test already did; the audit of every clock-reading test is in the issue.
+- **The translation reader is linted, and the functional suite runs locally** (#153). `bin/po-catalogue.php` now runs through PHPStan and PHPCS, and `CLAUDE.md` documents running the functional suite against the container's MariaDB.
+- **CSS lives in files and ships minified** (#157). The icon and menu rules leave `wp_add_inline_style()` for `admin.css` and a new `admin-chrome.css`, generated from their PHP source and held to it by a test. `npm run build` writes `.min` CSS and JS, loaded unless `SCRIPT_DEBUG` is on, and CI fails when one is stale.
+
+### Fixed
+
+- **Dark mode reaches the Access role names, the colour picker and notice links** (#155). Each was painted by core on its own and measured under 2:1 on the dark card.
+
+
+## [3.0.0] (2026-10-12) — `b5cec9c`
 
 A major version for two changes to what the plugin asks of a site, not to what it does: it now requires WordPress 6.8 and PHP 8.3, and the licence moves to AGPLv3 or later. The release process also catches up with the other three plugins.
 
