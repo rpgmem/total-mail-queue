@@ -3239,3 +3239,27 @@ msgstr "%1$s de %2$s"
 #: src/admin/docs/updates-and-data.php
 msgid "\"View details\" also shows the plugin's description, installation steps, FAQ and screenshots, in your language when the plugin ships a translation of them. Click a screenshot to see it larger without leaving the window: the arrows move between screenshots, and the wheel, a pinch or a click zooms in."
 msgstr "\"Ver detalhes\" também mostra a descrição do plugin, os passos de instalação, as perguntas frequentes e as capturas de tela, no seu idioma quando o plugin traz uma tradução deles. Clique em uma captura para vê-la ampliada sem sair da janela: as setas passam de uma captura para outra, e a roda do mouse, o gesto de pinça ou um clique aproximam a imagem."
+
+#: src/admin/settings-api.php
+msgid "Controlled by Free Form Certificate"
+msgstr "Controlado pelo Free Form Certificate"
+
+#: src/admin/docs/appearance.php
+msgid "Dark mode"
+msgstr "Modo escuro"
+
+#: src/admin/docs/appearance.php
+msgid "Settings → Appearance → \"Dark Mode\" paints the Total Mail Queue screens dark: Off, On, or \"Follow the operating system\". The rest of the WordPress admin keeps its own colour scheme."
+msgstr "Configurações → Aparência → \"Modo escuro\" deixa as telas do Total Mail Queue escuras: Desligado, Ligado ou \"Seguir o sistema operacional\". O restante do painel do WordPress mantém o próprio esquema de cores."
+
+#: src/admin/docs/appearance.php
+msgid "When Free Form Certificate is active, its Dark Mode setting decides for both plugins, so their screens always match. The field here is then shown disabled with the note \"Controlled by Free Form Certificate\"; change the theme in Free Form Certificate's settings. What you chose here is kept, and applies again if Free Form Certificate is deactivated."
+msgstr "Quando o Free Form Certificate está ativo, a configuração de modo escuro dele vale para os dois plugins, e as telas deles sempre combinam. O campo daqui aparece então desativado, com a nota \"Controlado pelo Free Form Certificate\"; mude o tema nas configurações do Free Form Certificate. O que você escolheu aqui é guardado e volta a valer se o Free Form Certificate for desativado."
+
+#: src/admin/docs/appearance.php
+msgid "Buttons"
+msgstr "Botões"
+
+#: src/admin/docs/appearance.php
+msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
+msgstr "Todo botão traz um ícone, e a cor diz o que ele faz: azul sólido salva ou conclui o formulário, cinza abre, testa ou navega, verde adiciona algo, âmbar redefine ou desliga algo sem perder dados, e vermelho exclui ou substitui. Os botões que não podem ser desfeitos perguntam antes de agir."

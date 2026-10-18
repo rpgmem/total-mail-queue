@@ -40,14 +40,18 @@ $wp_tmq_test_url = wp_nonce_url( admin_url( 'admin.php?page=' . PluginPage::TAB_
 
 <h3><?php esc_html_e( 'Testing the whole path', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'This button puts one test email into the queue, addressed to the alert address in Settings. Watch it on the Retention tab until the next run sends it, then find it in the Log.', 'total-mail-queue' ); ?></p>
-<p><a class="button" href="<?php echo esc_url( $wp_tmq_test_url ); ?>">
+<p>
 <?php
-echo esc_html(
-	sprintf(
-		/* translators: %s: email address */
-		__( 'Queue a test email to %s', 'total-mail-queue' ),
-		(string) $wp_tmq_options['email']
+\TotalMailQueue\Admin\Button::render(
+	array(
+		'label' => sprintf(
+			/* translators: %s: email address */
+			__( 'Queue a test email to %s', 'total-mail-queue' ),
+			(string) $wp_tmq_options['email']
+		),
+		'icon'  => 'send',
+		'href'  => $wp_tmq_test_url,
 	)
 );
 ?>
-</a></p>
+</p>

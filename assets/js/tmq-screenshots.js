@@ -43,13 +43,15 @@
 	var gesture = null;
 	var ui = null;
 
-	function button( name, text, glyph ) {
+	// An icon-only control: the drawing is the plugin's icon registry
+	// (`Admin\Icons`, masks copied into screenshots.css), the name is the
+	// label, read by a screen reader and shown on hover.
+	function button( name, text, icon ) {
 		var el = document.createElement( 'button' );
 		el.type = 'button';
-		el.className = 'tmq-shots__button tmq-shots__' + name;
+		el.className = 'tmq-shots__button tmq-shots__' + name + ' tmq-icon-' + icon;
 		el.setAttribute( 'aria-label', text );
 		el.title = text;
-		el.textContent = glyph;
 		return el;
 	}
 
@@ -80,11 +82,11 @@
 		bar.appendChild( caption );
 
 		var controls = {
-			zoomOut: button( 'zoom-out', labels.zoomOut, '−' ),
-			zoomIn: button( 'zoom-in', labels.zoomIn, '+' ),
-			close: button( 'close', labels.close, '×' ),
-			previous: button( 'previous', labels.previous, '‹' ),
-			next: button( 'next', labels.next, '›' ),
+			zoomOut: button( 'zoom-out', labels.zoomOut, 'minus' ),
+			zoomIn: button( 'zoom-in', labels.zoomIn, 'plus' ),
+			close: button( 'close', labels.close, 'cross' ),
+			previous: button( 'previous', labels.previous, 'previous' ),
+			next: button( 'next', labels.next, 'next' ),
 		};
 
 		var tools = document.createElement( 'div' );

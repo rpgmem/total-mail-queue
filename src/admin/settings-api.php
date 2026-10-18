@@ -361,20 +361,36 @@ final class SettingsApi {
 	/**
 	 * Dark Mode select. Applies to this plugin's screens only; the rest of
 	 * wp-admin follows WordPress's own colour scheme.
+	 *
+	 * With Free Form Certificate active the theme follows its setting
+	 * ({@see Assets::darkMode()}), so the select shows that value, disabled.
+	 * A disabled field posts nothing, and the form's save replaces the whole
+	 * option, so a hidden input carries the stored local value: switching FFC
+	 * off later brings back what was chosen here.
 	 */
 	public static function renderDarkMode(): void {
-		$options = Options::get();
-		$mode    = (string) $options['dark_mode'];
-		$labels  = array(
+		$stored = (string) Options::get()['dark_mode'];
+		$ffc    = Assets::ffcControlsDarkMode();
+		$mode   = $ffc ? Assets::darkMode() : $stored;
+		$labels = array(
 			'off'  => __( 'Off', 'total-mail-queue' ),
 			'on'   => __( 'On', 'total-mail-queue' ),
 			'auto' => __( 'Follow the operating system', 'total-mail-queue' ),
 		);
-		echo '<select id="wp_tmq_dark_mode" name="wp_tmq_settings[dark_mode]">';
+		if ( $ffc ) {
+			echo '<input type="hidden" name="wp_tmq_settings[dark_mode]" value="' . esc_attr( $stored ) . '" />';
+			echo '<select id="wp_tmq_dark_mode" disabled aria-describedby="wp_tmq_dark_mode_note">';
+		} else {
+			echo '<select id="wp_tmq_dark_mode" name="wp_tmq_settings[dark_mode]">';
+		}
 		foreach ( Options::DARK_MODES as $value ) {
 			echo '<option value="' . esc_attr( $value ) . '"' . selected( $mode, $value, false ) . '>' . esc_html( $labels[ $value ] ) . '</option>';
 		}
 		echo '</select>';
+		if ( $ffc ) {
+			echo '<p class="description" id="wp_tmq_dark_mode_note">' . esc_html__( 'Controlled by Free Form Certificate', 'total-mail-queue' ) . '</p>';
+			return;
+		}
 		echo '<p class="description">' . esc_html__( 'Applies to the Total Mail Queue screens only.', 'total-mail-queue' ) . '</p>';
 	}
 }

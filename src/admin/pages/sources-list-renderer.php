@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Admin\Access;
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Tables\SourcesTable;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -79,8 +80,27 @@ final class SourcesListRenderer {
 		}
 		echo '</select>';
 		echo '</label> ';
-		echo '<button type="submit" name="wp_tmq_sources_group_action" value="enable" class="button">' . esc_html__( 'Enable group', 'total-mail-queue' ) . '</button> ';
-		echo '<button type="submit" name="wp_tmq_sources_group_action" value="disable" class="button">' . esc_html__( 'Disable group', 'total-mail-queue' ) . '</button>';
+		Button::render(
+			array(
+				'label'    => __( 'Enable group', 'total-mail-queue' ),
+				'category' => 'neutral',
+				'icon'     => 'check',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_sources_group_action',
+				'value'    => 'enable',
+			)
+		);
+		echo ' ';
+		Button::render(
+			array(
+				'label'    => __( 'Disable group', 'total-mail-queue' ),
+				'category' => 'caution',
+				'icon'     => 'cross',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_sources_group_action',
+				'value'    => 'disable',
+			)
+		);
 		echo '</form>';
 	}
 }

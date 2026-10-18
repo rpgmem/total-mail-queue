@@ -216,7 +216,18 @@ final class PluginPage {
 		echo '<form action="options.php" method="post">';
 		settings_fields( SettingsApi::GROUP );
 		do_settings_sections( SettingsApi::PAGE );
-		submit_button();
+		echo '<p class="submit">';
+		Button::render(
+			array(
+				'label'    => __( 'Save Changes', 'total-mail-queue' ),
+				'category' => 'primary',
+				'icon'     => 'save',
+				'type'     => 'submit',
+				'name'     => 'submit',
+				'id'       => 'submit',
+			)
+		);
+		echo '</p>';
 		echo '</form>';
 
 		// Who may use the plugin, and moving SMTP accounts between sites,
@@ -241,7 +252,15 @@ final class PluginPage {
 		echo '<p>' . esc_html__( 'Download an XML file with all plugin settings and SMTP accounts. Passwords are included in encrypted form and can only be imported on a site with the same WordPress salt keys.', 'total-mail-queue' ) . '</p>';
 		echo '<form method="post">';
 		wp_nonce_field( 'wp_tmq_export', 'wp_tmq_export_nonce' );
-		echo '<button type="submit" name="wp_tmq_export" class="button button-primary">' . esc_html__( 'Export Settings', 'total-mail-queue' ) . '</button>';
+		Button::render(
+			array(
+				'label'    => __( 'Export Settings', 'total-mail-queue' ),
+				'category' => 'primary',
+				'icon'     => 'export',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_export',
+			)
+		);
 		echo '</form>';
 		echo '</div>';
 
@@ -252,7 +271,16 @@ final class PluginPage {
 		echo '<form method="post" enctype="multipart/form-data">';
 		wp_nonce_field( 'wp_tmq_import', 'wp_tmq_import_nonce' );
 		echo '<input type="file" name="wp_tmq_import_file" accept=".xml" required /> ';
-		echo '<button type="submit" name="wp_tmq_import" class="button" onclick="return confirm(\'' . esc_js( __( 'This will replace all current settings and SMTP accounts. Continue?', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Import Settings', 'total-mail-queue' ) . '</button>';
+		Button::render(
+			array(
+				'label'    => __( 'Import Settings', 'total-mail-queue' ),
+				'category' => 'danger',
+				'icon'     => 'import',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_import',
+				'confirm'  => __( 'This will replace all current settings and SMTP accounts. Continue?', 'total-mail-queue' ),
+			)
+		);
 		echo '</form>';
 		echo '</div>';
 

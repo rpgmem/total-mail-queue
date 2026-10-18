@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
@@ -28,12 +29,29 @@ final class SmtpListRenderer {
 		echo '<div class="tmq-section">';
 		echo Icons::heading( 'smtp', __( 'SMTP Accounts', 'total-mail-queue' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icons::heading() escapes the title and emits fixed markup.
 		echo '<p>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp&smtp-action=add' ) ) . '" class="button button-primary">' . esc_html__( 'Add SMTP Account', 'total-mail-queue' ) . '</a> ';
+		Button::render(
+			array(
+				'label'    => __( 'Add SMTP Account', 'total-mail-queue' ),
+				'category' => 'create',
+				'icon'     => 'plus',
+				'href'     => admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp&smtp-action=add' ),
+			)
+		);
+		echo ' ';
 
 		if ( ! empty( $accounts ) ) {
 			echo '<form method="post" class="tmq-inline-form">';
 			wp_nonce_field( 'wp_tmq_smtp_reset_counters', 'wp_tmq_smtp_reset_nonce' );
-			echo '<input type="submit" name="wp_tmq_smtp_reset_counters" class="button" value="' . esc_attr__( 'Reset Counters', 'total-mail-queue' ) . '" onclick="return confirm(\'' . esc_js( __( 'Are you sure you want to reset all sending counters to zero?', 'total-mail-queue' ) ) . '\');" />';
+			Button::render(
+				array(
+					'label'    => __( 'Reset Counters', 'total-mail-queue' ),
+					'category' => 'caution',
+					'icon'     => 'sync',
+					'type'     => 'submit',
+					'name'     => 'wp_tmq_smtp_reset_counters',
+					'confirm'  => __( 'Are you sure you want to reset all sending counters to zero?', 'total-mail-queue' ),
+				)
+			);
 			echo '</form>';
 		}
 
@@ -125,7 +143,9 @@ final class SmtpListRenderer {
 		echo '<td>' . ( intval( $acct['enabled'] ) ? '<span class="tmq-ok">' . esc_html__( 'Yes', 'total-mail-queue' ) . '</span>' : esc_html__( 'No', 'total-mail-queue' ) ) . '</td>';
 		echo '<td>';
 		echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Edit', 'total-mail-queue' ) . '</a> | ';
-		echo '<a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Are you sure you want to delete this SMTP account?', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Delete', 'total-mail-queue' ) . '</a>';
+		// A row action stays a text link, like core's; its question rides
+		// `data-tmq-confirm`, which `tmq-admin.js` asks, as a family button's does.
+		echo '<a href="' . esc_url( $delete_url ) . '" data-tmq-confirm="' . esc_attr__( 'Are you sure you want to delete this SMTP account?', 'total-mail-queue' ) . '">' . esc_html__( 'Delete', 'total-mail-queue' ) . '</a>';
 		echo '</td>';
 		echo '</tr>';
 	}

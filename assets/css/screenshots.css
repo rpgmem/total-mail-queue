@@ -50,6 +50,9 @@
 }
 
 .tmq-shots__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-width: 40px;
 	height: 40px;
 	padding: 0 8px;
@@ -57,9 +60,25 @@
 	border-radius: 4px;
 	background: rgba(255, 255, 255, 0.12);
 	color: #fff;
-	font-size: 24px;
-	line-height: 1;
 	cursor: pointer;
+}
+
+/* The control's icon, a mask in the text colour, like every icon of the
+   plugin. The drawings are the generated block at the end of this sheet. */
+.tmq-shots__button::before {
+	content: "";
+	display: block;
+	width: 24px;
+	height: 24px;
+	background-color: currentColor;
+	-webkit-mask: var(--tmq-icon) center / contain no-repeat;
+	mask: var(--tmq-icon) center / contain no-repeat;
+}
+
+.tmq-shots__previous::before,
+.tmq-shots__next::before {
+	width: 32px;
+	height: 32px;
 }
 
 .tmq-shots__button:hover,
@@ -95,7 +114,6 @@
 	top: 50%;
 	height: 64px;
 	margin-top: -32px;
-	font-size: 36px;
 }
 
 .tmq-shots__previous {
@@ -154,3 +172,20 @@
 		transition: none;
 	}
 }
+
+/* Forced colours drop backgrounds, the mask's fill included. */
+@media (forced-colors: active) {
+	.tmq-shots__button {
+		border: 1px solid ButtonText;
+	}
+
+	.tmq-shots__button::before {
+		forced-color-adjust: none;
+		background-color: ButtonText;
+	}
+}
+
+/* The viewer's icons — generated, do not edit by hand. */
+/* tmq-viewer-icons:begin -- Icons::masks( Icons::VIEWER ); regenerate with TMQ_UPDATE_GENERATED_CSS=1 vendor/bin/phpunit --filter GeneratedCss */
+.tmq-icon-minus{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-plus{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%205v14M5%2012h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-cross{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%206l12%2012M18%206L6%2018%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-previous{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15%206l-6%206%206%206%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-next{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206l6%206-6%206%22%2F%3E%3C%2Fsvg%3E")}
+/* tmq-viewer-icons:end */

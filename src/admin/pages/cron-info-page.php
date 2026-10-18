@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Admin\Access;
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Cron\Diagnostics;
 use TotalMailQueue\Cron\Scheduler;
@@ -290,7 +291,16 @@ final class CronInfoPage {
 
 		echo '<tr><th scope="row"><label for="tmq-cron-line">' . esc_html__( 'Crontab line', 'total-mail-queue' ) . '</label></th><td>';
 		echo '<input type="text" id="tmq-cron-line" class="large-text code" readonly value="' . esc_attr( $lines[ 'wpcli:' . $default_frequency ] ) . '" data-tmq-cron-lines="' . esc_attr( (string) wp_json_encode( $lines ) ) . '" /> ';
-		echo '<button type="button" class="button" data-tmq-copy="#tmq-cron-line" data-tmq-copied="' . esc_attr__( 'Copied', 'total-mail-queue' ) . '">' . esc_html__( 'Copy', 'total-mail-queue' ) . '</button>';
+		Button::render(
+			array(
+				'label' => __( 'Copy', 'total-mail-queue' ),
+				'icon'  => 'copy',
+				'attrs' => array(
+					'data-tmq-copy'   => '#tmq-cron-line',
+					'data-tmq-copied' => __( 'Copied', 'total-mail-queue' ),
+				),
+			)
+		);
 		echo '</td></tr>';
 
 		echo '</tbody></table>';

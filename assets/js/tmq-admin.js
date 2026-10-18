@@ -22,6 +22,15 @@
 		}
 	});
 
+	// A family button that asks first (`Admin\Button`'s `confirm`): its
+	// question is in `data-tmq-confirm`, so no markup carries an inline
+	// `onclick`. Cancelling stops the submit or the link.
+	$doc.on( "click", "[data-tmq-confirm]", function ( e ) {
+		if ( ! confirm( this.getAttribute( "data-tmq-confirm" ) ) ) {
+			e.preventDefault();
+		}
+	});
+
 	// remove readonly after page load to defeat browser autofill
 	// (fields start readonly so the browser skips them during autofill,
 	// then we unlock them once autofill has already run)

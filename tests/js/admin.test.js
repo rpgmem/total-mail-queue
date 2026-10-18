@@ -90,6 +90,28 @@ describe( 'bulk delete confirmation', () => {
 	} );
 } );
 
+describe( 'family buttons that ask first', () => {
+	function click() {
+		document.body.innerHTML = '<a href="#reset" class="tmq-btn tmq-btn-danger" data-tmq-confirm="Reset?">Reset</a>';
+		const event = $.Event( 'click' );
+		$( 'a' ).trigger( event );
+		return event;
+	}
+
+	it( 'asks the button\'s own question and stops the action when cancelled', () => {
+		const confirm = vi.spyOn( window, 'confirm' ).mockReturnValue( false );
+
+		expect( click().isDefaultPrevented() ).toBe( true );
+		expect( confirm ).toHaveBeenCalledWith( 'Reset?' );
+	} );
+
+	it( 'lets a confirmed action through', () => {
+		vi.spyOn( window, 'confirm' ).mockReturnValue( true );
+
+		expect( click().isDefaultPrevented() ).toBe( false );
+	} );
+} );
+
 describe( 'connection lock on the SMTP form', () => {
 	beforeEach( () => {
 		document.body.innerHTML = `
