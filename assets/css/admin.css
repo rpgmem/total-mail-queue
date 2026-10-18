@@ -719,11 +719,11 @@ span.tmq-status.tmq-status-inline {
 	color: var(--tmq-text);
 }
 
-:root.tmq-dark-mode .tmq-tabs__panel a:not(.button) {
+:root.tmq-dark-mode .tmq-tabs__panel a:not(.button):not(.tmq-btn) {
 	color: var(--tmq-primary);
 }
 
-:root.tmq-dark-mode .tmq-tabs__panel a:not(.button):hover {
+:root.tmq-dark-mode .tmq-tabs__panel a:not(.button):not(.tmq-btn):hover {
 	color: var(--tmq-primary-hover);
 }
 
@@ -1240,8 +1240,179 @@ html:has(.tmq-back-to-top) {
 }
 
 /* ==========================================================================
+   BUTTONS — one family, five categories (#164)
+
+   A slim copy of Free Form Certificate's `.ffc-btn` family, so a button reads
+   the same in both plugins. A button says what its action does, not how
+   important it looks:
+     primary   completes the form's work (solid)
+     neutral   opens, picks, tests or navigates
+     create    adds something
+     caution   recomputes or switches off without losing data
+     danger    deletes, empties or replaces
+   The four that are not primary are tonal: a soft ground in their tone, the
+   tone as text, and the tone as a border on hover. The markup comes from
+   `Admin\Button`; its icon is a `tmq-icon-<name>` class on the button, whose
+   drawing the generated block below declares, painted in `::before`.
+   ========================================================================== */
+.tmq-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-height: 34px;
+	margin: 0;
+	padding: 0 var(--tmq-space-lg);
+	border: 1px solid transparent;
+	border-radius: var(--tmq-radius-lg);
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.2;
+	cursor: pointer;
+	text-decoration: none;
+	text-align: center;
+	vertical-align: middle;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tmq-btn[class*="tmq-icon-"]::before {
+	content: "";
+	display: inline-block;
+	flex-shrink: 0;
+	width: 1.15em;
+	height: 1.15em;
+	margin-right: 0.4em;
+	background-color: currentColor;
+	-webkit-mask: var(--tmq-icon) center / contain no-repeat;
+	mask: var(--tmq-icon) center / contain no-repeat;
+}
+
+/* Core paints a focused link with a box-shadow ring; the family draws its
+   own 2px ring, so the shadow would be a second one. */
+.tmq-btn:focus {
+	box-shadow: none;
+}
+
+.tmq-btn:focus-visible {
+	outline: 2px solid var(--tmq-border-focus);
+	outline-offset: 2px;
+}
+
+/* A link button's colour is restated in every state: core's `a:hover` and
+   `a:focus` outrank a single class and would repaint the label. */
+.tmq-btn-primary,
+.tmq-btn-primary:focus,
+.tmq-btn-primary:active {
+	background: var(--tmq-primary);
+	color: var(--tmq-text-on-primary);
+}
+
+.tmq-btn-primary:hover {
+	background: var(--tmq-primary-hover);
+	color: var(--tmq-text-on-primary);
+}
+
+.tmq-btn-neutral,
+.tmq-btn-neutral:hover,
+.tmq-btn-neutral:focus,
+.tmq-btn-neutral:active {
+	background: var(--tmq-neutral-bg);
+	color: var(--tmq-text);
+}
+
+.tmq-btn-neutral {
+	border-color: var(--tmq-border-light);
+}
+
+.tmq-btn-neutral:hover {
+	border-color: var(--tmq-border);
+}
+
+.tmq-btn-create,
+.tmq-btn-create:hover,
+.tmq-btn-create:focus,
+.tmq-btn-create:active {
+	background: var(--tmq-success-bg);
+	color: var(--tmq-success-text);
+}
+
+.tmq-btn-create:hover {
+	border-color: var(--tmq-success-text);
+}
+
+.tmq-btn-caution,
+.tmq-btn-caution:hover,
+.tmq-btn-caution:focus,
+.tmq-btn-caution:active {
+	background: var(--tmq-warning-bg);
+	color: var(--tmq-warning-text);
+}
+
+.tmq-btn-caution:hover {
+	border-color: var(--tmq-warning-text);
+}
+
+.tmq-btn-danger,
+.tmq-btn-danger:hover,
+.tmq-btn-danger:focus,
+.tmq-btn-danger:active {
+	background: var(--tmq-danger-bg);
+	color: var(--tmq-danger-badge-text);
+}
+
+.tmq-btn-danger:hover {
+	border-color: var(--tmq-danger-badge-text);
+}
+
+/* Disabled takes the colour away instead of fading: `opacity` would
+   multiply down the contrast the pairs above hold. `.disabled` and
+   `aria-disabled` cover a link button, which has no `:disabled`. Declared
+   after the categories, so it wins over their hover. */
+.tmq-btn:disabled,
+.tmq-btn.disabled,
+.tmq-btn[aria-disabled="true"] {
+	background: var(--tmq-bg-alt);
+	color: var(--tmq-text-muted);
+	border-color: var(--tmq-border-light);
+	cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tmq-btn {
+		transition: none;
+	}
+}
+
+/* Forced colours: the border is transparent at rest, so every button names
+   the system colour itself, and the icon's mask takes the button text. */
+@media (forced-colors: active) {
+	.tmq-btn {
+		border: 1px solid ButtonText;
+	}
+
+	.tmq-btn[class*="tmq-icon-"]::before {
+		forced-color-adjust: none;
+		background-color: ButtonText;
+	}
+
+	.tmq-btn:disabled,
+	.tmq-btn.disabled,
+	.tmq-btn[aria-disabled="true"] {
+		border-color: GrayText;
+		color: GrayText;
+	}
+
+	.tmq-btn:disabled::before,
+	.tmq-btn.disabled::before,
+	.tmq-btn[aria-disabled="true"]::before {
+		background-color: GrayText;
+	}
+}
+
+/* ==========================================================================
    ICONS — generated, do not edit by hand
    ========================================================================== */
 /* tmq-icons:begin -- Icons::stylesheet(); regenerate with TMQ_UPDATE_GENERATED_CSS=1 vendor/bin/phpunit --filter GeneratedCss */
-.tmq-icon{display:inline-block;flex:0 0 auto;width:18px;height:18px;margin-right:8px;vertical-align:-3px;background-color:currentColor;-webkit-mask:var(--tmq-icon) center/contain no-repeat;mask:var(--tmq-icon) center/contain no-repeat}.tmq-icon-settings{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%227%22%2F%3E%3Cpath%20d%3D%22M12%202v3M12%2019v3M2%2012h3M19%2012h3M4.9%204.9L7%207M17%2017l2.1%202.1M4.9%2019.1L7%2017M17%207l2.1-2.1%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-log{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206h11M9%2012h11M9%2018h11%22%2F%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%226%22%20r%3D%221%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%2212%22%20r%3D%221%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%2218%22%20r%3D%221%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-retention{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2013l2.5-8h13L21%2013v6H3z%22%2F%3E%3Cpath%20d%3D%22M3%2013h5l1.5%202.5h5L16%2013h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-smtp{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%227%22%20rx%3D%221.5%22%2F%3E%3Crect%20x%3D%223%22%20y%3D%2213%22%20width%3D%2218%22%20height%3D%227%22%20rx%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M7%207.5h.01M7%2016.5h.01M11%207.5h6M11%2016.5h6%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-sources{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2012V4a1%201%200%200%201%201-1h8l9%209-9%209z%22%2F%3E%3Ccircle%20cx%3D%227.5%22%20cy%3D%227.5%22%20r%3D%221.5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-templates{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M3%209h18M9%209v11%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-docs{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%205a2%202%200%200%201%202-2h14v16H6a2%202%200%200%200-2%202z%22%2F%3E%3Cpath%20d%3D%22M4%2019V5M8%207h8%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-top{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2015l6-6%206%206%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-faq{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M9.5%209.5a2.5%202.5%200%201%201%203.5%202.3c-.6.3-1%20.9-1%201.6v.6%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217%22%20r%3D%221.1%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-cron{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M12%207v5l3%202%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-send{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%203L3%2010.5l7%202.5%202.5%207z%22%2F%3E%3Cpath%20d%3D%22M21%203L10%2013%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-alert{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2016v-5a6%206%200%200%201%2012%200v5l2%202H4z%22%2F%3E%3Cpath%20d%3D%22M10%2020.5a2%202%200%200%200%204%200%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-advanced{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%206h9M17%206h3M4%2012h3M11%2012h9M4%2018h11M19%2018h1%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%226%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2212%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2217%22%20cy%3D%2218%22%20r%3D%222%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-theme{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2014.5A8%208%200%201%201%209.5%204a6.5%206.5%200%200%200%2010.5%2010.5z%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-export{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%204v11M7%2010l5%205%205-5M5%2020h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-import{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2016V5M7%2010l5-5%205%205M5%2020h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-header{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M3%209.5h18M7%207h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-body{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M7%209h10M7%2012.5h10M7%2016h6%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-footer{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M3%2014.5h18M7%2017h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-chevron{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206l6%206-6%206%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-search{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%2211%22%20r%3D%226.5%22%2F%3E%3Cpath%20d%3D%22M20%2020l-4.4-4.4%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-wrapper{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222.5%22%20y%3D%222.5%22%20width%3D%2219%22%20height%3D%2219%22%20rx%3D%223%22%2F%3E%3Crect%20x%3D%227%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%221%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-preview{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012s3.5-7%2010-7%2010%207%2010%207-3.5%207-10%207S2%2012%202%2012z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-access{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%229%22%20cy%3D%228%22%20r%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M2.5%2020c.8-3.5%203.4-5.5%206.5-5.5s5.7%202%206.5%205.5%22%2F%3E%3Cpath%20d%3D%22M16%204.6a3.5%203.5%200%200%201%200%206.8M18%2014.8c2%20.7%203.2%202.5%203.5%205.2%22%2F%3E%3C%2Fsvg%3E")}
+.tmq-icon{display:inline-block;flex:0 0 auto;width:18px;height:18px;margin-right:8px;vertical-align:-3px;background-color:currentColor;-webkit-mask:var(--tmq-icon) center/contain no-repeat;mask:var(--tmq-icon) center/contain no-repeat}.tmq-icon-settings{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%227%22%2F%3E%3Cpath%20d%3D%22M12%202v3M12%2019v3M2%2012h3M19%2012h3M4.9%204.9L7%207M17%2017l2.1%202.1M4.9%2019.1L7%2017M17%207l2.1-2.1%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-log{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206h11M9%2012h11M9%2018h11%22%2F%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%226%22%20r%3D%221%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%2212%22%20r%3D%221%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%2218%22%20r%3D%221%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-retention{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2013l2.5-8h13L21%2013v6H3z%22%2F%3E%3Cpath%20d%3D%22M3%2013h5l1.5%202.5h5L16%2013h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-smtp{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%227%22%20rx%3D%221.5%22%2F%3E%3Crect%20x%3D%223%22%20y%3D%2213%22%20width%3D%2218%22%20height%3D%227%22%20rx%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M7%207.5h.01M7%2016.5h.01M11%207.5h6M11%2016.5h6%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-sources{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2012V4a1%201%200%200%201%201-1h8l9%209-9%209z%22%2F%3E%3Ccircle%20cx%3D%227.5%22%20cy%3D%227.5%22%20r%3D%221.5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-templates{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M3%209h18M9%209v11%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-docs{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%205a2%202%200%200%201%202-2h14v16H6a2%202%200%200%200-2%202z%22%2F%3E%3Cpath%20d%3D%22M4%2019V5M8%207h8%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-top{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2015l6-6%206%206%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-faq{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M9.5%209.5a2.5%202.5%200%201%201%203.5%202.3c-.6.3-1%20.9-1%201.6v.6%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217%22%20r%3D%221.1%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-cron{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M12%207v5l3%202%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-send{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%203L3%2010.5l7%202.5%202.5%207z%22%2F%3E%3Cpath%20d%3D%22M21%203L10%2013%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-alert{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2016v-5a6%206%200%200%201%2012%200v5l2%202H4z%22%2F%3E%3Cpath%20d%3D%22M10%2020.5a2%202%200%200%200%204%200%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-advanced{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%206h9M17%206h3M4%2012h3M11%2012h9M4%2018h11M19%2018h1%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%226%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2212%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2217%22%20cy%3D%2218%22%20r%3D%222%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-theme{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2014.5A8%208%200%201%201%209.5%204a6.5%206.5%200%200%200%2010.5%2010.5z%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-export{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%204v11M7%2010l5%205%205-5M5%2020h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-import{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2016V5M7%2010l5-5%205%205M5%2020h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-header{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M3%209.5h18M7%207h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-body{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M7%209h10M7%2012.5h10M7%2016h6%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-footer{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M3%2014.5h18M7%2017h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-chevron{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206l6%206-6%206%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-search{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%2211%22%20r%3D%226.5%22%2F%3E%3Cpath%20d%3D%22M20%2020l-4.4-4.4%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-wrapper{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222.5%22%20y%3D%222.5%22%20width%3D%2219%22%20height%3D%2219%22%20rx%3D%223%22%2F%3E%3Crect%20x%3D%227%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%221%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-preview{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012s3.5-7%2010-7%2010%207%2010%207-3.5%207-10%207S2%2012%202%2012z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-access{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%229%22%20cy%3D%228%22%20r%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M2.5%2020c.8-3.5%203.4-5.5%206.5-5.5s5.7%202%206.5%205.5%22%2F%3E%3Cpath%20d%3D%22M16%204.6a3.5%203.5%200%200%201%200%206.8M18%2014.8c2%20.7%203.2%202.5%203.5%205.2%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-save{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%204h11l4%204v11a1%201%200%200%201-1%201H5a1%201%200%200%201-1-1V5a1%201%200%200%201%201-1z%22%2F%3E%3Cpath%20d%3D%22M8%204v5h7V4M8%2020v-6h8v6%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-plus{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%205v14M5%2012h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-minus{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-check{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012.5l4.5%204.5L19%207%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-cross{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%206l12%2012M18%206L6%2018%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-copy{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%229%22%20y%3D%229%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M5%2015V5a2%202%200%200%201%202-2h10%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-sync{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2011a8%208%200%200%200-14.3-4.9L4%208M4%204v4h4M4%2013a8%208%200%200%200%2014.3%204.9L20%2016M20%2020v-4h-4%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-restore{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2012a9%209%200%201%200%203-6.7L3%208%22%2F%3E%3Cpath%20d%3D%22M3%203v5h5%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-filter{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%205h18l-7%208v6l-4-2v-4z%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-image{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%2210%22%20r%3D%222%22%2F%3E%3Cpath%20d%3D%22M21%2016l-5-5-9%209%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-network{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%229%22%20y%3D%223%22%20width%3D%226%22%20height%3D%225%22%20rx%3D%221%22%2F%3E%3Crect%20x%3D%223%22%20y%3D%2216%22%20width%3D%226%22%20height%3D%225%22%20rx%3D%221%22%2F%3E%3Crect%20x%3D%2215%22%20y%3D%2216%22%20width%3D%226%22%20height%3D%225%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M12%208v4M6%2016v-2h12v2%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-previous{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M15%206l-6%206%206%206%22%2F%3E%3C%2Fsvg%3E")}.tmq-icon-next{--tmq-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206l6%206-6%206%22%2F%3E%3C%2Fsvg%3E")}
 /* tmq-icons:end */

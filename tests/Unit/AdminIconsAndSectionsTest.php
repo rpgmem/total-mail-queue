@@ -13,6 +13,7 @@ use TotalMailQueue\Admin\SettingsApi;
  * The icon set and the grouped Settings tab.
  *
  * @covers \TotalMailQueue\Admin\Icons
+ * @covers \TotalMailQueue\Admin\Menu
  * @covers \TotalMailQueue\Admin\SettingsApi
  */
 final class AdminIconsAndSectionsTest extends TestCase {
@@ -47,6 +48,25 @@ final class AdminIconsAndSectionsTest extends TestCase {
             self::assertStringContainsString( '.tmq-icon-' . $name . '{--tmq-icon:url("data:image/svg+xml,', $css );
         }
         self::assertStringNotContainsString( '<svg', $css, 'The SVG must be URL-encoded inside url().' );
+    }
+
+    public function test_the_viewer_icons_are_drawn_and_masks_skip_unknown_names(): void {
+        foreach ( Icons::VIEWER as $name ) {
+            self::assertArrayHasKey( $name, Icons::PATHS, "The viewer names {$name}, which is not drawn." );
+        }
+        self::assertSame( Icons::masks( array( 'plus' ) ), Icons::masks( array( 'plus', 'no-such-icon' ) ) );
+        self::assertStringStartsWith( '.tmq-icon-plus{--tmq-icon:url("data:image/svg+xml,', Icons::masks( array( 'plus' ) ) );
+    }
+
+    public function test_the_menu_mark_lives_in_the_registry_as_plain_shapes(): void {
+        preg_match_all( '/<([a-z]+)\b/', Icons::BRAND, $tags );
+        self::assertSame( array( 'path' ), array_values( array_unique( $tags[1] ) ) );
+        self::assertStringNotContainsString( 'fill="#', Icons::BRAND, 'The mark carries a colour of its own.' );
+
+        $mask = Icons::menuMask();
+        self::assertStringStartsWith( 'url("data:image/svg+xml,', $mask );
+        self::assertStringNotContainsString( '<svg', $mask, 'The SVG must be URL-encoded inside url().' );
+        self::assertStringContainsString( $mask, \TotalMailQueue\Admin\Menu::menuStylesheet() );
     }
 
     public function test_settings_sections_keep_every_field_once_and_draw_an_icon(): void {

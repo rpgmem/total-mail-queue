@@ -11,16 +11,17 @@ use TotalMailQueue\Admin\Menu;
 /**
  * The CSS the PHP registries generate lives in files, not inline.
  *
- * The icon masks and the menu glyph are produced by {@see Icons::stylesheet()}
- * and {@see Menu::menuStylesheet()}, which stay the single source; the files
+ * The icon masks, the screenshot viewer's copy of its icons and the menu glyph
+ * are produced by {@see Icons::stylesheet()}, {@see Icons::masks()} and
+ * {@see Menu::menuStylesheet()}, which stay the single source; the files
  * carry a copy between markers so the browser can cache it and the build can
  * minify it. This test fails when a copy and its source disagree.
  *
  * After changing a drawing or the menu rules, regenerate the copies with
  * `TMQ_UPDATE_GENERATED_CSS=1 vendor/bin/phpunit --filter GeneratedCss`.
  *
- * @covers \TotalMailQueue\Admin\Icons::stylesheet
- * @covers \TotalMailQueue\Admin\Menu::menuStylesheet
+ * @covers \TotalMailQueue\Admin\Icons
+ * @covers \TotalMailQueue\Admin\Menu
  */
 final class GeneratedCssTest extends TestCase {
 
@@ -33,8 +34,9 @@ final class GeneratedCssTest extends TestCase {
      */
     public static function blocks(): array {
         return array(
-            'icons' => array( 'assets/css/admin.css', 'tmq-icons', Icons::stylesheet() ),
-            'menu'  => array( 'assets/css/admin-chrome.css', 'tmq-menu', Menu::menuStylesheet() ),
+            'icons'  => array( 'assets/css/admin.css', 'tmq-icons', Icons::stylesheet() ),
+            'menu'   => array( 'assets/css/admin-chrome.css', 'tmq-menu', Menu::menuStylesheet() ),
+            'viewer' => array( 'assets/css/screenshots.css', 'tmq-viewer-icons', Icons::masks( Icons::VIEWER ) ),
         );
     }
 

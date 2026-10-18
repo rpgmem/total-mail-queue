@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Queue\Priority;
@@ -158,8 +159,23 @@ final class SourcesEditRenderer {
 		self::renderTemplateOverrideSection( $row );
 
 		echo '<p class="submit">';
-		echo '<input type="submit" name="wp_tmq_source_edit_save" class="button button-primary" value="' . esc_attr__( 'Save', 'total-mail-queue' ) . '" /> ';
-		echo '<a href="' . esc_url( $cancel_url ) . '" class="button">' . esc_html__( 'Cancel', 'total-mail-queue' ) . '</a>';
+		Button::render(
+			array(
+				'label'    => __( 'Save', 'total-mail-queue' ),
+				'category' => 'primary',
+				'icon'     => 'save',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_source_edit_save',
+			)
+		);
+		echo ' ';
+		Button::render(
+			array(
+				'label' => __( 'Cancel', 'total-mail-queue' ),
+				'icon'  => 'cross',
+				'href'  => $cancel_url,
+			)
+		);
 		echo '</p>';
 		echo '</form>';
 	}
@@ -249,7 +265,15 @@ final class SourcesEditRenderer {
 				'wp_tmq_source_reset_template_' . (int) $row['id']
 			);
 			echo '<tr><th scope="row">' . esc_html__( 'Reset', 'total-mail-queue' ) . '</th><td>';
-			echo '<a href="' . esc_url( $reset_url ) . '" class="button" onclick="return confirm(\'' . esc_js( __( 'Reset subject and body overrides for this template? The WP default will be used again.', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Reset to WP default', 'total-mail-queue' ) . '</a>';
+			Button::render(
+				array(
+					'label'    => __( 'Reset to WP default', 'total-mail-queue' ),
+					'category' => 'danger',
+					'icon'     => 'restore',
+					'href'     => $reset_url,
+					'confirm'  => __( 'Reset subject and body overrides for this template? The WP default will be used again.', 'total-mail-queue' ),
+				)
+			);
 			echo '</td></tr>';
 		}
 
@@ -258,12 +282,19 @@ final class SourcesEditRenderer {
 		$default_recipient = $current_user instanceof \WP_User ? (string) $current_user->user_email : (string) get_option( 'admin_email' );
 		echo '<tr><th scope="row">' . esc_html__( 'Send preview test', 'total-mail-queue' ) . '</th><td>';
 		echo '<input type="email" id="tmq-template-test-to" value="' . esc_attr( $default_recipient ) . '" class="regular-text" /> ';
-		echo '<button type="button" id="tmq-template-test-send" class="button" '
-			. 'data-source-key="' . esc_attr( $source_key ) . '" '
-			. 'data-nonce="' . esc_attr( wp_create_nonce( TestEmailSender::NONCE ) ) . '" '
-			. 'data-action="' . esc_attr( TestEmailSender::ACTION ) . '">'
-			. esc_html__( 'Send preview', 'total-mail-queue' )
-			. '</button> ';
+		Button::render(
+			array(
+				'label' => __( 'Send preview', 'total-mail-queue' ),
+				'icon'  => 'send',
+				'id'    => 'tmq-template-test-send',
+				'attrs' => array(
+					'data-source-key' => $source_key,
+					'data-nonce'      => wp_create_nonce( TestEmailSender::NONCE ),
+					'data-action'     => TestEmailSender::ACTION,
+				),
+			)
+		);
+		echo ' ';
 		echo '<span id="tmq-template-test-result" aria-live="polite"></span>';
 		echo '<p class="description">' . esc_html__( 'Sends the current saved template (override OR WP default) to the address above. Save changes first if you want to preview unsaved edits.', 'total-mail-queue' ) . '</p>';
 		echo '</td></tr>';

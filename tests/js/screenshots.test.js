@@ -87,6 +87,24 @@ describe( 'opening', () => {
 		expect( viewer().querySelector( '.tmq-shots__close' ).getAttribute( 'aria-label' ) ).toBe( 'Fechar' );
 		expect( shown().count ).toBe( '1 de 3' );
 	} );
+
+	it( 'draws each control with a registry icon, never a text glyph', () => {
+		load( modal );
+		click( links()[ 0 ] );
+
+		const icons = {
+			'zoom-out': 'minus',
+			'zoom-in': 'plus',
+			close: 'cross',
+			previous: 'previous',
+			next: 'next',
+		};
+		Object.keys( icons ).forEach( ( name ) => {
+			const control = viewer().querySelector( '.tmq-shots__' + name );
+			expect( control.classList.contains( 'tmq-icon-' + icons[ name ] ) ).toBe( true );
+			expect( control.textContent ).toBe( '' );
+		} );
+	} );
 } );
 
 describe( 'moving between screenshots', () => {
