@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 6.8
 Tested up to: 7.1.3
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 Requires PHP: 8.3
 License: AGPLv3 or later
 License URI: https://www.gnu.org/licenses/agpl-3.0.html
@@ -137,5 +137,5 @@ The two most recent releases are summarised below. The full history of every rel
 
 == Upgrade Notice ==
 
-= 3.1.0 =
-A plugin icon on Dashboard → Updates, and "View details" with the readme tabs, a Portuguese translation and screenshots that open in place. CSS and JS ship minified, and dark mode reaches three more admin elements. Details in CHANGELOG.md.
+= 3.2.0 =
+With Free Form Certificate active, the admin follows its dark mode and the local setting shows as controlled by it. Admin buttons join Free Form Certificate's family, each with an icon, and confirmations no longer use inline scripts. Details in CHANGELOG.md.

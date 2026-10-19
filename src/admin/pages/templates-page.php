@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Settings\Options as PluginOptions;
@@ -77,13 +78,30 @@ final class TemplatesPage {
 		) . '</p>';
 
 		echo '<p class="submit">';
-		echo '<button type="submit" name="wp_tmq_templates_save" class="button button-primary">' . esc_html__( 'Save Changes', 'total-mail-queue' ) . '</button> ';
+		Button::render(
+			array(
+				'label'    => __( 'Save Changes', 'total-mail-queue' ),
+				'category' => 'primary',
+				'icon'     => 'save',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_templates_save',
+			)
+		);
+		echo ' ';
 
 		$reset_url = wp_nonce_url(
 			admin_url( 'admin.php?page=' . \TotalMailQueue\Admin\PluginPage::TAB_TEMPLATES . '&templates-action=reset' ),
 			self::NONCE_RESET
 		);
-		echo '<a href="' . esc_url( $reset_url ) . '" class="button" onclick="return confirm(\'' . esc_js( __( 'Reset all template settings to defaults? This cannot be undone.', 'total-mail-queue' ) ) . '\');">' . esc_html__( 'Reset to Defaults', 'total-mail-queue' ) . '</a>';
+		Button::render(
+			array(
+				'label'    => __( 'Reset to Defaults', 'total-mail-queue' ),
+				'category' => 'danger',
+				'icon'     => 'restore',
+				'href'     => $reset_url,
+				'confirm'  => __( 'Reset all template settings to defaults? This cannot be undone.', 'total-mail-queue' ),
+			)
+		);
 		echo '</p>';
 		echo '</form>';
 
@@ -360,9 +378,17 @@ final class TemplatesPage {
 
 		echo '<div class="tmq-templates-test-row">';
 		echo '<input type="email" id="tmq_test_email_to" value="' . esc_attr( $default_to ) . '" class="regular-text" /> ';
-		echo '<button type="button" id="tmq_send_test_email" class="button" data-nonce="' . esc_attr( wp_create_nonce( TestEmailSender::NONCE ) ) . '" data-action="' . esc_attr( TestEmailSender::ACTION ) . '">';
-		echo esc_html__( 'Send test email', 'total-mail-queue' );
-		echo '</button>';
+		Button::render(
+			array(
+				'label' => __( 'Send test email', 'total-mail-queue' ),
+				'icon'  => 'send',
+				'id'    => 'tmq_send_test_email',
+				'attrs' => array(
+					'data-nonce'  => wp_create_nonce( TestEmailSender::NONCE ),
+					'data-action' => TestEmailSender::ACTION,
+				),
+			)
+		);
 		echo '<span id="tmq_test_email_result" class="tmq-templates-test-result" aria-live="polite"></span>';
 		echo '</div>';
 		echo '</div>';
@@ -408,7 +434,14 @@ final class TemplatesPage {
 		$id = 'tmq_' . $name;
 		echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label></th><td>';
 		echo '<input type="url" id="' . esc_attr( $id ) . '" name="tmq_template[' . esc_attr( $name ) . ']" value="' . esc_attr( $value ) . '" class="regular-text tmq-media-url" /> ';
-		echo '<button type="button" class="button tmq-media-pick" data-target="' . esc_attr( $id ) . '">' . esc_html__( 'Choose image…', 'total-mail-queue' ) . '</button>';
+		Button::render(
+			array(
+				'label' => __( 'Choose image…', 'total-mail-queue' ),
+				'icon'  => 'image',
+				'class' => 'tmq-media-pick',
+				'attrs' => array( 'data-target' => $id ),
+			)
+		);
 		if ( '' !== $hint ) {
 			echo '<p class="description">' . esc_html( $hint ) . '</p>';
 		}

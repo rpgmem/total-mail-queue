@@ -7,7 +7,17 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [3.1.0] (2026-10-13)
+## [3.2.0] (2026-10-19)
+
+### Added
+
+- **With Free Form Certificate active, the admin follows its dark mode** (#164). Its `dark_mode` setting decides, so the two plugins' screens match; the local field shows disabled with "Controlled by Free Form Certificate" and keeps its stored value. Without FFC nothing changes, and neither plugin requires the other.
+
+### Changed
+
+- **Admin buttons share Free Form Certificate's family, each with an icon** (#164). `Admin\Button` prints `.tmq-btn` in five categories (primary, neutral, create, caution, danger), measured in both themes, and confirmations leave inline `onclick`. The icon registry gains the button icons, the menu mark and the screenshot viewer's controls.
+
+## [3.1.0] (2026-10-13) — `55276c6`
 
 ### Added
 

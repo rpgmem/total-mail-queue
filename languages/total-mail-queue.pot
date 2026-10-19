@@ -3229,3 +3229,27 @@ msgstr ""
 #: src/admin/docs/updates-and-data.php
 msgid "\"View details\" also shows the plugin's description, installation steps, FAQ and screenshots, in your language when the plugin ships a translation of them. Click a screenshot to see it larger without leaving the window: the arrows move between screenshots, and the wheel, a pinch or a click zooms in."
 msgstr ""
+
+#: src/admin/settings-api.php
+msgid "Controlled by Free Form Certificate"
+msgstr ""
+
+#: src/admin/docs/appearance.php
+msgid "Dark mode"
+msgstr ""
+
+#: src/admin/docs/appearance.php
+msgid "Settings → Appearance → \"Dark Mode\" paints the Total Mail Queue screens dark: Off, On, or \"Follow the operating system\". The rest of the WordPress admin keeps its own colour scheme."
+msgstr ""
+
+#: src/admin/docs/appearance.php
+msgid "When Free Form Certificate is active, its Dark Mode setting decides for both plugins, so their screens always match. The field here is then shown disabled with the note \"Controlled by Free Form Certificate\"; change the theme in Free Form Certificate's settings. What you chose here is kept, and applies again if Free Form Certificate is deactivated."
+msgstr ""
+
+#: src/admin/docs/appearance.php
+msgid "Buttons"
+msgstr ""
+
+#: src/admin/docs/appearance.php
+msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
+msgstr ""

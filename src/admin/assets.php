@@ -48,7 +48,7 @@ final class Assets {
 		// file behind it.
 		wp_register_script( 'wp_tmq_theme', false, array(), Plugin::VERSION, false );
 		wp_enqueue_script( 'wp_tmq_theme' );
-		wp_add_inline_script( 'wp_tmq_theme', self::darkModeScript( (string) Options::get()['dark_mode'] ) );
+		wp_add_inline_script( 'wp_tmq_theme', self::darkModeScript( self::darkMode() ) );
 		wp_enqueue_script( 'wp_tmq_script', $base . 'assets/js/tmq-admin' . self::suffix() . '.js', array( 'jquery' ), Plugin::VERSION, true );
 		wp_add_inline_script( 'wp_tmq_script', self::inlineConfig(), 'before' );
 		wp_enqueue_script( 'wp_tmq_autosave', $base . 'assets/js/tmq-autosave' . self::suffix() . '.js', array( 'wp_tmq_script' ), Plugin::VERSION, true );
@@ -124,13 +124,39 @@ final class Assets {
 	}
 
 	/**
+	 * Whether Free Form Certificate decides the theme. When it is active its
+	 * Dark Mode setting wins, so the two plugins' screens never disagree; the
+	 * check is at runtime, so neither plugin requires the other.
+	 */
+	public static function ffcControlsDarkMode(): bool {
+		return defined( 'FFC_VERSION' );
+	}
+
+	/**
+	 * The dark mode the plugin's screens use: Free Form Certificate's
+	 * `ffc_settings['dark_mode']` when it is active, this plugin's own
+	 * setting otherwise. Both take `off`, `on` and `auto`; anything else,
+	 * including FFC's setting never having been saved, reads as `off`, which
+	 * is FFC's own default.
+	 */
+	public static function darkMode(): string {
+		if ( self::ffcControlsDarkMode() ) {
+			$ffc  = get_option( 'ffc_settings', array() );
+			$mode = is_array( $ffc ) && isset( $ffc['dark_mode'] ) ? (string) $ffc['dark_mode'] : 'off';
+		} else {
+			$mode = (string) Options::get()['dark_mode'];
+		}
+		return in_array( $mode, Options::DARK_MODES, true ) ? $mode : 'off';
+	}
+
+	/**
 	 * The script that puts `tmq-dark-mode` on <html>.
 	 *
 	 * "on" and "off" are decided here; only "auto" asks the operating system,
 	 * and it keeps listening, so switching the system theme repaints the open
 	 * page. An unknown value is treated as "off".
 	 *
-	 * @param string $mode The stored `dark_mode` setting.
+	 * @param string $mode The mode {@see Assets::darkMode()} resolved.
 	 */
 	public static function darkModeScript( string $mode ): string {
 		if ( ! in_array( $mode, Options::DARK_MODES, true ) ) {

@@ -85,6 +85,12 @@ final class Documentation {
 						'title'  => __( 'Export and import', 'total-mail-queue' ),
 						'file'   => 'export-import.php',
 					),
+					array(
+						'anchor' => 'appearance',
+						'icon'   => 'theme',
+						'title'  => __( 'Appearance', 'total-mail-queue' ),
+						'file'   => 'appearance.php',
+					),
 				),
 			),
 			array(

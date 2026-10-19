@@ -64,7 +64,7 @@ final class AdminChromeTest extends IntegrationTestCase {
 
         self::assertStringContainsString( $item . ' div.wp-menu-image::before{', $css );
         self::assertStringContainsString( 'background-color:currentColor', $css );
-        self::assertStringContainsString( 'mask:url("data:image/svg+xml;base64,', $css );
+        self::assertStringContainsString( 'mask:url("data:image/svg+xml,', $css );
         self::assertStringContainsString( $item . ' .wp-submenu{display:none}', $css );
         self::assertStringContainsString( '@media (forced-colors:active)', $css );
     }

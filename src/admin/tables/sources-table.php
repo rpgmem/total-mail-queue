@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Tables;
 
 use TotalMailQueue\Admin\Access;
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Queue\Priority;
 use TotalMailQueue\Sources\KnownSources;
 use TotalMailQueue\Sources\Repository as SourcesRepository;
@@ -151,7 +152,15 @@ final class SourcesTable extends WP_List_Table {
 			);
 		}
 		echo '</select>';
-		submit_button( __( 'Filter', 'total-mail-queue' ), '', 'filter_action', false );
+		Button::render(
+			array(
+				'label' => __( 'Filter', 'total-mail-queue' ),
+				'icon'  => 'filter',
+				'type'  => 'submit',
+				'name'  => 'filter_action',
+				'id'    => 'filter_action',
+			)
+		);
 		if ( '' !== $current ) {
 			$clear_url = admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-sources' );
 			echo ' <a href="' . esc_url( $clear_url ) . '">' . esc_html__( 'Clear group filter', 'total-mail-queue' ) . '</a>';

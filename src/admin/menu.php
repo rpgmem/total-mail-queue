@@ -29,12 +29,6 @@ final class Menu {
 	public const SLUG = 'wp_tmq_mail_queue';
 
 	/**
-	 * The menu glyph. Its own colour is irrelevant: it is drawn as a mask, so
-	 * only its shape is used and the colour comes from the menu item.
-	 */
-	private const ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTc4IiBoZWlnaHQ9IjE3OCIgdmlld0JveD0iMCAwIDE3OCAxNzgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNzguNzI0MSA1LjI1MzA5Qzc2LjkwNzQgNC43MDgxIDc0Ljk0MDEgNS4wNTQxMyA3My40MTg0IDYuMTg2MjlDNzEuODk2OCA3LjMxODQ1IDcxIDkuMTAzNDEgNzEgMTEuMDAwMVYxNjdDNzEgMTY4Ljg5NyA3MS44OTY4IDE3MC42ODIgNzMuNDE4NCAxNzEuODE0Qzc0Ljk0MDEgMTcyLjk0NiA3Ni45MDc0IDE3My4yOTIgNzguNzI0MSAxNzIuNzQ3TDE1OC43MjQgMTQ4Ljc0N0MxNjEuMjYyIDE0Ny45ODYgMTYzIDE0NS42NSAxNjMgMTQzVjM1QzE2MyAzMi4zNTA0IDE2MS4yNjIgMzAuMDE0NSAxNTguNzI0IDI5LjI1MzFMNzguNzI0MSA1LjI1MzA5Wk04NS43ODg3IDIyLjM4NDZDODcuNzg1NCAyMS40Mzk0IDkwLjE3MDMgMjIuMjkxOSA5MS4xMTU0IDI0LjI4ODdMMTIyLjg1MiA5MS4zMzc4TDE0My4zMzQgNDQuNDAwMkMxNDQuMjE3IDQyLjM3NTUgMTQ2LjU3NSA0MS40NTAzIDE0OC42IDQyLjMzMzhDMTUwLjYyNSA0My4yMTc0IDE1MS41NSA0NS41NzUgMTUwLjY2NiA0Ny41OTk4TDEyNi42NjYgMTAyLjZDMTI2LjAzOSAxMDQuMDM3IDEyNC42MjkgMTA0Ljk3NiAxMjMuMDYxIDEwNUMxMjEuNDkzIDEwNS4wMjQgMTIwLjA1NiAxMDQuMTI5IDExOS4zODUgMTAyLjcxMUw4My44ODQ2IDI3LjcxMTNDODIuOTM5NCAyNS43MTQ2IDgzLjc5MTkgMjMuMzI5NyA4NS43ODg3IDIyLjM4NDZaIiBmaWxsPSIjYTdhYWFkIi8+CjxwYXRoIGQ9Ik00OSAxM0M1Mi4zMTM3IDEzIDU1IDE1LjY4NjMgNTUgMTlWMTU5QzU1IDE2Mi4zMTQgNTIuMzEzNyAxNjUgNDkgMTY1QzQ1LjY4NjMgMTY1IDQzIDE2Mi4zMTQgNDMgMTU5VjE5QzQzIDE1LjY4NjMgNDUuNjg2MyAxMyA0OSAxM1oiIGZpbGw9IiNhN2FhYWQiLz4KPHBhdGggZD0iTTIxIDIxQzI0LjMxMzcgMjEgMjcgMjMuNjg2MyAyNyAyN1YxNTFDMjcgMTU0LjMxNCAyNC4zMTM3IDE1NyAyMSAxNTdDMTcuNjg2MyAxNTcgMTUgMTU0LjMxNCAxNSAxNTFWMjdDMTUgMjMuNjg2MyAxNy42ODYzIDIxIDIxIDIxWiIgZmlsbD0iI2E3YWFhZCIvPgo8L3N2Zz4=';
-
-	/**
 	 * Hook the menu registration onto `admin_menu`, and the glyph onto every
 	 * admin screen, since the sidebar is on every screen.
 	 *
@@ -83,9 +77,11 @@ final class Menu {
 	/**
 	 * The sidebar rules: the glyph and the hidden submenu.
 	 *
-	 * The glyph is a CSS mask filled with `currentColor`, so it takes the
-	 * colour WordPress gives the menu item in every admin colour scheme, on
-	 * hover, on the current page and in the folded menu, from CSS alone. A
+	 * The glyph is the plugin's mark from the icon registry
+	 * ({@see Icons::BRAND}), drawn as a CSS mask filled with `currentColor`,
+	 * so it takes the colour WordPress gives the menu item in every admin
+	 * colour scheme, on hover, on the current page and in the folded menu,
+	 * from CSS alone. A
 	 * base64 SVG `icon_url` depends on core's svg-painter, a script that
 	 * rewrites the `fill` after load and leaves the glyph its baked-in grey
 	 * until it runs. In forced-colors mode the mask takes the system link
@@ -93,7 +89,7 @@ final class Menu {
 	 */
 	public static function menuStylesheet(): string {
 		$item = '#adminmenu #toplevel_page_' . self::SLUG;
-		$mask = 'url("' . self::ICON . '") center / 20px 20px no-repeat';
+		$mask = Icons::menuMask() . ' center / 20px 20px no-repeat';
 
 		return $item . ' div.wp-menu-image::before{content:"";display:block;width:20px;height:20px;margin:7px auto 0;padding:0;background-color:currentColor;-webkit-mask:' . $mask . ';mask:' . $mask . '}'
 			. $item . ' .wp-submenu{display:none}'

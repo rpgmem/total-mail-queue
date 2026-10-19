@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace TotalMailQueue\Admin\Pages;
 
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Admin\Toggle;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
@@ -261,9 +262,32 @@ final class SmtpFormRenderer {
 
 		echo '</table>';
 		echo '<p class="submit">';
-		echo '<input type="submit" name="wp_tmq_smtp_save" class="button button-primary" value="' . esc_attr__( 'Save SMTP Account', 'total-mail-queue' ) . '" /> ';
-		echo '<button type="button" id="tmq-test-smtp" class="button" data-smtp-id="' . esc_attr( (string) $account['id'] ) . '">' . esc_html__( 'Test Connection', 'total-mail-queue' ) . '</button> ';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ) ) . '" class="button">' . esc_html__( 'Cancel', 'total-mail-queue' ) . '</a>';
+		Button::render(
+			array(
+				'label'    => __( 'Save SMTP Account', 'total-mail-queue' ),
+				'category' => 'primary',
+				'icon'     => 'save',
+				'type'     => 'submit',
+				'name'     => 'wp_tmq_smtp_save',
+			)
+		);
+		echo ' ';
+		Button::render(
+			array(
+				'label' => __( 'Test Connection', 'total-mail-queue' ),
+				'icon'  => 'network',
+				'id'    => 'tmq-test-smtp',
+				'attrs' => array( 'data-smtp-id' => (string) $account['id'] ),
+			)
+		);
+		echo ' ';
+		Button::render(
+			array(
+				'label' => __( 'Cancel', 'total-mail-queue' ),
+				'icon'  => 'cross',
+				'href'  => admin_url( 'admin.php?page=wp_tmq_mail_queue-tab-smtp' ),
+			)
+		);
 		echo '</p>';
 		echo '<div id="tmq-test-smtp-result"></div>';
 		echo '</form>';

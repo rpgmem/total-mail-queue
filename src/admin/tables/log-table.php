@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Tables;
 
 use TotalMailQueue\Admin\Access;
+use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Queue\AttachmentStore;
 use TotalMailQueue\Queue\ListFilter;
 use TotalMailQueue\Queue\Priority;
@@ -193,7 +194,16 @@ final class LogTable extends WP_List_Table {
 		if ( '' !== $filter->source ) {
 			echo '<input type="hidden" name="source_filter" value="' . esc_attr( $filter->source ) . '"' . $form . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr() above.
 		}
-		submit_button( __( 'Filter', 'total-mail-queue' ), '', 'filter_action', false, array( 'form' => self::FILTER_FORM ) );
+		Button::render(
+			array(
+				'label' => __( 'Filter', 'total-mail-queue' ),
+				'icon'  => 'filter',
+				'type'  => 'submit',
+				'name'  => 'filter_action',
+				'id'    => 'filter_action',
+				'attrs' => array( 'form' => self::FILTER_FORM ),
+			)
+		);
 
 		if ( '' !== $filter->source ) {
 			echo ' <span class="tmq-status tmq-status-alert tmq-status-inline">' . esc_html(
