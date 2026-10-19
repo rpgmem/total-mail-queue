@@ -59,7 +59,7 @@ The queue is sent by WP-Cron, which only runs when someone visits the site. The 
 
 - **Export / Import:** plugin settings and SMTP accounts move between sites as an XML file.
 - **Documentation:** a built-in tab that explains every screen and setting.
-- **Dark mode:** for the plugin's own screens, either always on or following the operating system.
+- **Dark mode:** for the plugin's own screens, either always on or following the operating system; where Free Form Certificate is active, its dark mode decides and this setting is shown disabled.
 
 | Documentation | Dark mode |
 | --- | --- |

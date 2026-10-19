@@ -7,6 +7,8 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.2.0] (2026-10-19)
+
 ### Added
 
 - **With Free Form Certificate active, the admin follows its dark mode** (#164). Its `dark_mode` setting decides, so the two plugins' screens match; the local field shows disabled with "Controlled by Free Form Certificate" and keeps its stored value. Without FFC nothing changes, and neither plugin requires the other.
