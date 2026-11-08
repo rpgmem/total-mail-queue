@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 6.8
 Tested up to: 7.1.3
-Stable tag: 3.2.0
+Stable tag: 3.3.0
 Requires PHP: 8.3
 License: AGPLv3 or later
 License URI: https://www.gnu.org/licenses/agpl-3.0.html
@@ -25,6 +25,9 @@ Total Mail Queue holds every email WordPress sends in a queue and lets it out at
 * See whether WP-Cron is sending the queue, and copy the server cron line that makes it reliable
 * Export/import plugin settings and SMTP accounts via XML
 * Detects and resolves conflicts with other email plugins
+* Sign in to Microsoft 365 SMTP with an app instead of a password, with a warning before its client secret expires
+* Checks the queue in Tools → Site Health, and runs it from WP-CLI (`wp mail-queue status`, `wp mail-queue send`)
+* Takes part in WordPress's Export and Erase Personal Data tools, and can delete a message once it is sent
 
 **This plugin is a fork of [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM.**
 
@@ -137,5 +140,5 @@ The two most recent releases are summarised below. The full history of every rel
 
 == Upgrade Notice ==
 
-= 3.2.0 =
-With Free Form Certificate active, the admin follows its dark mode and the local setting shows as controlled by it. Admin buttons join Free Form Certificate's family, each with an icon, and confirmations no longer use inline scripts. Details in CHANGELOG.md.
+= 3.3.0 =
+SMTP accounts can sign in to Microsoft 365 with an app instead of a password, which Microsoft is retiring for SMTP, with a warning before its secret expires. Also new: Site Health checks, WP-CLI commands and the Personal Data tools. Details in CHANGELOG.md.
