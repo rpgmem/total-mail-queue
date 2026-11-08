@@ -3426,3 +3426,114 @@ msgstr ""
 #: src/admin/docs/cron.php:55
 msgid "With WP-CLI on the server, \"wp mail-queue status\" shows the mode, the emails waiting, the worker's state and the last send, and \"--format=json\" prints the same for a script. \"wp mail-queue send\" sends one batch now, as the worker would: the same batch size, SMTP limits and lock, without waiting for the interval. It ends with a warning, and the reason, when nothing could be sent."
 msgstr ""
+
+#: src/smtp/m365-token.php:85
+msgid "The Tenant ID is not valid: use the Directory (tenant) ID, or the organisation's domain."
+msgstr ""
+
+#: src/smtp/m365-token.php:88
+msgid "The Client ID is not valid: use the Application (client) ID, a GUID."
+msgstr ""
+
+#: src/smtp/m365-token.php:91
+msgid "The client secret is missing."
+msgstr ""
+
+#: src/smtp/m365-token.php:116
+#, php-format
+msgid "Microsoft could not be reached: %s"
+msgstr ""
+
+#: src/smtp/m365-token.php:126
+#, php-format
+msgid "HTTP %d"
+msgstr ""
+
+#: src/smtp/m365-token.php:129
+#, php-format
+msgid "Microsoft refused the sign-in: %s"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:317
+msgid "Sign-in method"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:320
+msgid "Microsoft 365 app"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:326
+msgid "The Microsoft 365 app signs in with a token from Microsoft; no mailbox password is stored. Choosing it fills in smtp.office365.com, 587 and TLS when the host is empty."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:340
+msgid "Tenant ID"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:340
+msgid "Directory (tenant) ID, from the app's overview in Microsoft Entra, or the organisation's domain."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:341
+msgid "Client ID"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:341
+msgid "Application (client) ID."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:351
+msgid "Client secret"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:353
+msgid "Stored encrypted. Leave blank to keep the current one. Microsoft secrets expire: note the date it was created."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:355
+msgid "How to set this up in Microsoft 365"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:357
+msgid "In Microsoft Entra, register an app and create a client secret."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:358
+msgid "Under API permissions, add Office 365 Exchange Online → Application permissions → SMTP.SendAsApp, and grant admin consent."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:359
+msgid "In Exchange Online PowerShell, register the app's service principal (New-ServicePrincipal) and give it the mailbox (Add-MailboxPermission -AccessRights FullAccess)."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:360
+msgid "Make sure SMTP AUTH is allowed for the mailbox."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:361
+msgid "Fill in the fields above, with the mailbox as Mailbox, and use Test Connection."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:372
+msgid "Mailbox"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:379
+msgid "The address the emails are sent as."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:19
+msgid "Microsoft 365 without a password"
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:20
+msgid "Microsoft is retiring password sign-in for SMTP in Exchange Online. Under Sign-in method, choose \"Microsoft 365 app\": the account then signs in with a token Microsoft issues to an app registered in your organisation, and no mailbox password is stored. The Mailbox field is the address the email is sent from."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:21
+msgid "The app needs the Office 365 Exchange Online permission SMTP.SendAsApp with admin consent, and an Exchange administrator must give its service principal access to the mailbox. The form's \"How to set this up in Microsoft 365\" lists the steps. The client secret is stored encrypted and expires on the date Microsoft set when it was created: create a new one before then and save it here."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:22
+msgid "The token is kept until shortly before it expires, so a batch asks Microsoft once. When Microsoft refuses it, the Log and Test Connection show Microsoft's own reason, such as an invalid secret or a missing permission."
+msgstr ""

@@ -55,6 +55,18 @@
 		$( ".tmq-conn-row" ).toggleClass( "tmq-conn-locked", ! unlock );
 	});
 
+	// Sign-in method (#186): show the Microsoft 365 app's rows, and fill in
+	// its host, port and encryption when the host is still empty.
+	$doc.on( "change", 'input[name="smtp_auth_type"]', function () {
+		const m365 = this.value === "m365";
+		$( ".tmq-smtp-form" ).toggleClass( "tmq-auth-m365", m365 );
+		if ( m365 && ! $( "#smtp_host" ).val() ) {
+			$( "#smtp_host" ).val( "smtp.office365.com" );
+			$( "#smtp_port" ).val( "587" );
+			$( "#smtp_encryption" ).val( "tls" );
+		}
+	});
+
 	// test SMTP connection
 	$doc.on( "click", "#tmq-test-smtp", function () {
 		const $btn = $( this );
@@ -72,6 +84,10 @@
 			auth:       $( "#smtp_auth" ).is( ":checked" ) ? 1 : 0,
 			username:   $( "#smtp_username" ).val(),
 			password:   $( "#smtp_password" ).val(),
+			auth_type:  $( 'input[name="smtp_auth_type"]:checked' ).val() || "password",
+			oauth_tenant:        $( "#smtp_oauth_tenant" ).val(),
+			oauth_client_id:     $( "#smtp_oauth_client_id" ).val(),
+			oauth_client_secret: $( "#smtp_oauth_client_secret" ).val(),
 			smtp_id:    $btn.data( "smtp-id" ) || 0
 		}).done( function ( response ) {
 			const ok = response.success;

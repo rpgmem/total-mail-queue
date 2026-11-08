@@ -42,6 +42,7 @@ final class Uninstaller {
 		// The capabilities live on the roles, not in an option.
 		Access::revokeAll();
 		delete_option( Migrator::VERSION_OPTION );
+		delete_option( Migrator::SCHEMA_REVISION_OPTION );
 		delete_option( 'wp_tmq_last_cron' );
 		delete_option( 'wp_tmq_last_send' );
 		delete_option( CronLock::OPTION );

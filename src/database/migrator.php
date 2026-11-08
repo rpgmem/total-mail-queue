@@ -34,6 +34,11 @@ final class Migrator {
 	public const VERSION_OPTION = 'wp_tmq_version';
 
 	/**
+	 * Option key under which the last-applied {@see Schema::REVISION} is kept.
+	 */
+	public const SCHEMA_REVISION_OPTION = 'wp_tmq_schema_revision';
+
+	/**
 	 * Apply the schema unconditionally, seed the known-sources catalog, and
 	 * stamp the version.
 	 *
@@ -49,6 +54,7 @@ final class Migrator {
 		self::migrateHighStatusToPriority();
 		SmtpRepository::upgradePasswordEncryption();
 		update_option( self::VERSION_OPTION, Plugin::VERSION, true );
+		update_option( self::SCHEMA_REVISION_OPTION, Schema::REVISION, true );
 	}
 
 	/**
@@ -117,12 +123,14 @@ final class Migrator {
 
 	/**
 	 * Apply the schema only if the persisted version is different from the
-	 * currently running code (i.e. an upgrade or a fresh install).
+	 * currently running code (an upgrade or a fresh install), or the stored
+	 * schema revision is behind {@see Schema::REVISION} (a schema change
+	 * merged on `develop` before the version moves).
 	 *
 	 * Used by the `plugins_loaded` action.
 	 */
 	public static function maybeMigrate(): void {
-		if ( get_option( self::VERSION_OPTION ) === Plugin::VERSION ) {
+		if ( get_option( self::VERSION_OPTION ) === Plugin::VERSION && (int) get_option( self::SCHEMA_REVISION_OPTION, 0 ) >= Schema::REVISION ) {
 			return;
 		}
 		self::install();

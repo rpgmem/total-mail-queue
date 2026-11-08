@@ -13,6 +13,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - Settings → Log → "Message after sending" can delete a sent email's message, headers and attachment list, keeping its date, status, recipients and subject; failed emails keep theirs for a resend. Off by default (#180).
 - Tools → Site Health checks that the queue is being sent, is under the alert threshold, has an SMTP account with room, and that no account signs in to Microsoft 365 with a password; its Info tab gains a Total Mail Queue section (#182).
 - WP-CLI: `wp mail-queue status` shows the queue's state (also as JSON) and `wp mail-queue send` sends one batch now through the same worker, warning with the reason when nothing could go out (#184).
+- SMTP accounts can sign in to Microsoft 365 with an app instead of a password: Sign-in method → "Microsoft 365 app" takes a tenant, a client ID and an encrypted client secret, sends with an OAuth token over XOAUTH2, and the Log and Test Connection show Microsoft's own reason when it refuses (#186).
 
 ### Security
 
