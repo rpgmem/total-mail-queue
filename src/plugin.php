@@ -111,6 +111,9 @@ final class Plugin {
 		// REST API.
 		Rest\MessageController::register();
 
+		// Tools → Export / Erase Personal Data reach the email log.
+		Privacy\PersonalData::register();
+
 		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
 		// scans for plugin updates from cron.
 		Update\GithubUpdater::register();

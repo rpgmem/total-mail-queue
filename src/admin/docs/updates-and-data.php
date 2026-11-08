@@ -24,5 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 </ul>
 <p><?php esc_html_e( 'The log holds full emails: recipients, subjects and bodies. Keep its clean-up settings in line with your privacy policy.', 'total-mail-queue' ); ?></p>
 
+<h3><?php esc_html_e( 'Personal data requests', 'total-mail-queue' ); ?></h3>
+<p><?php esc_html_e( 'The log takes part in WordPress\'s privacy tools, Tools → Export Personal Data and Tools → Erase Personal Data. An export lists every logged email sent to the address, with its date, status, subject and message; the message of an email that carries a one-time account link, such as a password reset, is withheld. An erasure deletes the address\'s sent, failed and alert emails and their stored attachments. Emails still waiting in the queue are kept until they are sent, and the request says how many.', 'total-mail-queue' ); ?></p>
+
 <h3><?php esc_html_e( 'Deactivating and deleting', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'Deactivating stops the queue and keeps everything, so nothing is lost if you turn the plugin back on. Deleting it from the Plugins screen removes all of the above: the tables, the options and the attachments folder.', 'total-mail-queue' ); ?></p>

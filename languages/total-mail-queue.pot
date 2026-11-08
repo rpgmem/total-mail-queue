@@ -3254,6 +3254,37 @@ msgstr ""
 msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
 msgstr ""
 
+#: src/privacy/personal-data.php:75
+msgid "Total Mail Queue email log"
+msgstr ""
+
+#: src/privacy/personal-data.php:116
+msgid "Email log"
+msgstr ""
+
+#: src/privacy/personal-data.php:120
+msgid "Date"
+msgstr ""
+
+#: src/privacy/personal-data.php:200
+#, php-format
+msgid "%d email to this address is still waiting in the queue. It is kept until it is sent, and a new erasure request after that removes it."
+msgid_plural "%d emails to this address are still waiting in the queue. They are kept until they are sent, and a new erasure request after that removes them."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/privacy/personal-data.php:288
+msgid "Withheld: this email carries a one-time account link."
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:29
+msgid "Personal data requests"
+msgstr ""
+
+#: src/admin/docs/updates-and-data.php:30
+msgid "The log takes part in WordPress's privacy tools, Tools → Export Personal Data and Tools → Erase Personal Data. An export lists every logged email sent to the address, with its date, status, subject and message; the message of an email that carries a one-time account link, such as a password reset, is withheld. An erasure deletes the address's sent, failed and alert emails and their stored attachments. Emails still waiting in the queue are kept until they are sent, and the request says how many."
+msgstr ""
+
 #: src/admin/settings-api.php:99
 msgid "Message after sending"
 msgstr ""
