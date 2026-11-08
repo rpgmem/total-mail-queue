@@ -3314,3 +3314,117 @@ msgstr "Mensagem apagada após o envio, conforme as configurações do Registro.
 #: src/admin/docs/log-and-retention.php:56
 msgid "Settings → Log → \"Message after sending\" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on."
 msgstr "Configurações → Registro → \"Mensagem após o envio\" guarda menos: depois que um e-mail é enviado, a mensagem, os cabeçalhos e a lista de anexos são apagados, e o Registro mantém a data, o status, os destinatários e o assunto, com uma nota na coluna Info. E-mails com falha mantêm a mensagem para que ainda possam ser reenviados. Vem desligado e vale para os e-mails enviados depois de ligado."
+
+#: src/admin/site-health.php:62
+msgid "Email queue worker"
+msgstr "Envio da fila de e-mails"
+
+#: src/admin/site-health.php:63
+msgid "Email queue size"
+msgstr "Tamanho da fila de e-mails"
+
+#: src/admin/site-health.php:64
+msgid "SMTP account for the queue"
+msgstr "Conta SMTP para a fila"
+
+#: src/admin/site-health.php:65
+msgid "Microsoft 365 SMTP sign-in"
+msgstr "Login SMTP no Microsoft 365"
+
+#: src/admin/site-health.php:91
+msgid "The email queue is being sent"
+msgstr "A fila de e-mails está sendo enviada"
+
+#: src/admin/site-health.php:91
+msgid "The worker that sends the queue ran on time, or nothing is waiting."
+msgstr "A tarefa que envia a fila rodou no horário, ou não há nada aguardando."
+
+#: src/admin/site-health.php:96
+msgid "Emails are waiting and the queue is not being sent"
+msgstr "Há e-mails aguardando e a fila não está sendo enviada"
+
+#: src/admin/site-health.php:97
+msgid "Nothing has been sent for more than two hours while emails wait, and the worker is not scheduled to run. WP-Cron runs only when the site gets visits, so on a quiet or cached site it may barely run. Add a server cron job that calls wp-cron.php; the plugin's Cron tab shows the line for this server."
+msgstr "Nada foi enviado há mais de duas horas enquanto há e-mails aguardando, e a tarefa de envio não está agendada. O WP-Cron só roda quando o site recebe visitas, então num site com pouco acesso ou com cache ele pode quase não rodar. Adicione um cron no servidor que chame o wp-cron.php; a aba Cron do plugin mostra a linha para este servidor."
+
+#: src/admin/site-health.php:111
+msgid "The email queue is within its usual size"
+msgstr "A fila de e-mails está no tamanho habitual"
+
+#: src/admin/site-health.php:111
+msgid "The number of waiting emails is not above the alert threshold set in the plugin's settings."
+msgstr "O número de e-mails aguardando não passa do limite de alerta definido nas configurações do plugin."
+
+#: src/admin/site-health.php:116
+msgid "The email queue is larger than usual"
+msgstr "A fila de e-mails está maior que o habitual"
+
+#: src/admin/site-health.php:119
+#, php-format
+msgid "%1$d emails are waiting, above the alert threshold of %2$d. A sudden flood may be a form abused by a bot; check the Retention tab for what is waiting and where it comes from."
+msgstr "%1$d e-mails estão aguardando, acima do limite de alerta de %2$d. Uma enxurrada repentina pode ser um formulário abusado por um robô; confira na aba Retenção o que está aguardando e de onde vem."
+
+#: src/admin/site-health.php:135
+msgid "An SMTP account can send the queue"
+msgstr "Uma conta SMTP pode enviar a fila"
+
+#: src/admin/site-health.php:135
+msgid "Either the queue does not depend on the plugin's SMTP accounts, or one of them still has room within its limits."
+msgstr "A fila não depende das contas SMTP do plugin, ou uma delas ainda tem espaço dentro dos seus limites."
+
+#: src/admin/site-health.php:140
+msgid "Emails wait for an SMTP account with room in its limits"
+msgstr "Há e-mails aguardando uma conta SMTP com espaço nos seus limites"
+
+#: src/admin/site-health.php:154
+msgid "No SMTP account depends on Microsoft 365 password sign-in"
+msgstr "Nenhuma conta SMTP depende de login com senha no Microsoft 365"
+
+#: src/admin/site-health.php:154
+msgid "None of the plugin's enabled SMTP accounts signs in to Microsoft 365 with a password."
+msgstr "Nenhuma das contas SMTP ativas do plugin faz login no Microsoft 365 com senha."
+
+#: src/admin/site-health.php:159
+msgid "An SMTP account signs in to Microsoft 365 with a password"
+msgstr "Uma conta SMTP faz login no Microsoft 365 com senha"
+
+#: src/admin/site-health.php:162
+#, php-format
+msgid "Microsoft is retiring password sign-in (Basic authentication) for SMTP in Exchange Online, and an account that uses it stops sending once it is turned off for your tenant. Accounts affected: %s."
+msgstr "A Microsoft está desativando o login com senha (autenticação básica) para SMTP no Exchange Online, e uma conta que o usa para de enviar quando ele for desligado para o seu locatário. Contas afetadas: %s."
+
+#: src/admin/site-health.php:199
+msgid "Operation mode"
+msgstr "Modo de operação"
+
+#: src/admin/site-health.php:207
+msgid "Queue interval (seconds)"
+msgstr "Intervalo da fila (segundos)"
+
+#: src/admin/site-health.php:211
+msgid "Emails waiting"
+msgstr "E-mails aguardando"
+
+#: src/admin/site-health.php:215
+msgid "Last send"
+msgstr "Último envio"
+
+#: src/admin/site-health.php:219
+msgid "Next worker run"
+msgstr "Próxima execução do envio"
+
+#: src/admin/site-health.php:227
+msgid "WP-Cron disabled"
+msgstr "WP-Cron desativado"
+
+#: src/admin/site-health.php:250
+msgid "Open Total Mail Queue"
+msgstr "Abrir o Total Mail Queue"
+
+#: src/admin/docs/troubleshooting.php:26
+msgid "Site Health"
+msgstr "Saúde do site"
+
+#: src/admin/docs/troubleshooting.php:27
+msgid "Tools → Site Health runs four checks of the queue: whether the worker is sending it, whether more emails wait than the alert threshold, whether an SMTP account has room when the Send Method is \"Plugin SMTP only\", and whether an SMTP account signs in to Microsoft 365 with a password, which Microsoft is retiring. Its Info tab has a Total Mail Queue section with the mode, the queue size and the last send, ready to copy into a support request."
+msgstr "Ferramentas → Saúde do site faz quatro verificações da fila: se ela está sendo enviada, se há mais e-mails aguardando que o limite de alerta, se uma conta SMTP tem espaço quando o Método de envio é \"Plugin SMTP apenas\" e se alguma conta SMTP faz login no Microsoft 365 com senha, o que a Microsoft está desativando. A aba Informação tem uma seção Total Mail Queue com o modo, o tamanho da fila e o último envio, pronta para copiar num pedido de suporte."

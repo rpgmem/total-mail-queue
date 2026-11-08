@@ -11,6 +11,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 - The email log takes part in Tools → Export / Erase Personal Data: an export lists the address's emails, withholding one-time account links; an erasure deletes its sent, failed and alert emails and their attachments, and keeps those still queued until they are sent (#178).
 - Settings → Log → "Message after sending" can delete a sent email's message, headers and attachment list, keeping its date, status, recipients and subject; failed emails keep theirs for a resend. Off by default (#180).
+- Tools → Site Health checks that the queue is being sent, is under the alert threshold, has an SMTP account with room, and that no account signs in to Microsoft 365 with a password; its Info tab gains a Total Mail Queue section (#182).
 
 ### Security
 
