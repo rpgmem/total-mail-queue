@@ -53,3 +53,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h3><?php esc_html_e( 'Clean-up', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'Settings → Log removes entries older than a number of days and can also cap the log at a number of entries (0 means no cap). Clean-up never touches emails that are still waiting.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'Settings → Log → "Message after sending" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on.', 'total-mail-queue' ); ?></p>
