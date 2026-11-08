@@ -127,16 +127,7 @@ Updates arrive through the normal WordPress update screen, straight from this pl
 
 == Changelog ==
 
-The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
-
-= 2.12.0 =
-* New: a Cron tab, always shown, says whether the queue worker is running, asleep, waiting, overdue or stalled, whether WP-Cron fires, and gives administrators the server cron line to copy.
-* Changed: icons, colours and the documentation's Quick Navigation follow Free Form Certificate.
-* Fixed: an empty number field keeps its value instead of saving 0, and Import restores every setting the form saves.
-* Security: stored SMTP passwords are authenticated as well as encrypted.
-
-= 2.11.0 =
-* New: a live preview on the Templates tab shows a sample email, header and footer included, with the settings on screen and updates as you edit, before saving.
+Every release, with what changed and why, is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md). The same notes are each release's description on [GitHub Releases](https://github.com/rpgmem/total-mail-queue/releases), and "View details" on the Plugins screen shows the ones for the version on offer.
 
 == Upgrade Notice ==
 
