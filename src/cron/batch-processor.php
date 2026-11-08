@@ -13,6 +13,7 @@ use TotalMailQueue\Queue\AttachmentStore;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Queue\Tracker;
 use TotalMailQueue\Retention\LogPruner;
+use TotalMailQueue\Retention\SentBody;
 use TotalMailQueue\Settings\Options;
 use TotalMailQueue\Smtp\Configurator;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
@@ -255,6 +256,7 @@ final class BatchProcessor {
 				),
 				array( '%s', '%s', '%s', '%s', '%d' )
 			);
+			SentBody::afterSent( $mail_id );
 			if ( $smtp_to_use ) {
 				SmtpRepository::incrementCounter( $smtp_to_use['id'] );
 				SmtpRepository::bumpMemoryCounter( $smtp_accounts, $smtp_to_use['id'] );

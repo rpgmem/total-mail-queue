@@ -3263,3 +3263,381 @@ msgstr "Botões"
 #: src/admin/docs/appearance.php
 msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
 msgstr "Todo botão traz um ícone, e a cor diz o que ele faz: azul sólido salva ou conclui o formulário, cinza abre, testa ou navega, verde adiciona algo, âmbar redefine ou desliga algo sem perder dados, e vermelho exclui ou substitui. Os botões que não podem ser desfeitos perguntam antes de agir."
+
+#: src/privacy/personal-data.php:75
+msgid "Total Mail Queue email log"
+msgstr "Registro de e-mails do Total Mail Queue"
+
+#: src/privacy/personal-data.php:116
+msgid "Email log"
+msgstr "Registro de e-mails"
+
+#: src/privacy/personal-data.php:120
+msgid "Date"
+msgstr "Data"
+
+#: src/privacy/personal-data.php:200
+#, php-format
+msgid "%d email to this address is still waiting in the queue. It is kept until it is sent, and a new erasure request after that removes it."
+msgid_plural "%d emails to this address are still waiting in the queue. They are kept until they are sent, and a new erasure request after that removes them."
+msgstr[0] "%d e-mail para este endereço ainda está aguardando na fila. Ele é mantido até ser enviado, e um novo pedido de apagamento depois disso o remove."
+msgstr[1] "%d e-mails para este endereço ainda estão aguardando na fila. Eles são mantidos até serem enviados, e um novo pedido de apagamento depois disso os remove."
+
+#: src/privacy/personal-data.php:288
+msgid "Withheld: this email carries a one-time account link."
+msgstr "Omitido: este e-mail contém um link de acesso de uso único."
+
+#: src/admin/docs/updates-and-data.php:29
+msgid "Personal data requests"
+msgstr "Pedidos sobre dados pessoais"
+
+#: src/admin/docs/updates-and-data.php:30
+msgid "The log takes part in WordPress's privacy tools, Tools → Export Personal Data and Tools → Erase Personal Data. An export lists every logged email sent to the address, with its date, status, subject and message; the message of an email that carries a one-time account link, such as a password reset, is withheld. An erasure deletes the address's sent, failed and alert emails and their stored attachments. Emails still waiting in the queue are kept until they are sent, and the request says how many."
+msgstr "O registro participa das ferramentas de privacidade do WordPress, Ferramentas → Exportar dados pessoais e Ferramentas → Apagar dados pessoais. Uma exportação lista todos os e-mails registrados enviados ao endereço, com data, status, assunto e mensagem; a mensagem de um e-mail que contém um link de acesso de uso único, como uma redefinição de senha, é omitida. Um apagamento exclui os e-mails enviados, com erro e de alerta do endereço e os anexos guardados. Os e-mails que ainda aguardam na fila são mantidos até serem enviados, e o pedido informa quantos são."
+
+#: src/admin/settings-api.php:99
+msgid "Message after sending"
+msgstr "Mensagem após o envio"
+
+#: src/admin/settings-api.php:262
+msgid "Delete the message once the email is sent."
+msgstr "Apagar a mensagem depois que o e-mail for enviado."
+
+#: src/admin/settings-api.php:263
+msgid "The Log then keeps the date, status, recipients and subject of a sent email, not its body, headers or attachment list. Emails that fail keep their message, so they can still be resent. Off by default; it applies to emails sent after it is turned on."
+msgstr "O Registro passa a guardar a data, o status, os destinatários e o assunto de um e-mail enviado, sem o corpo, os cabeçalhos ou a lista de anexos. E-mails que falham mantêm a mensagem, para que ainda possam ser reenviados. Desligado por padrão; vale para os e-mails enviados depois de ligado."
+
+#: src/retention/sent-body.php:47
+msgid "Message deleted after sending, as the Log settings ask."
+msgstr "Mensagem apagada após o envio, conforme as configurações do Registro."
+
+#: src/admin/docs/log-and-retention.php:56
+msgid "Settings → Log → \"Message after sending\" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on."
+msgstr "Configurações → Registro → \"Mensagem após o envio\" guarda menos: depois que um e-mail é enviado, a mensagem, os cabeçalhos e a lista de anexos são apagados, e o Registro mantém a data, o status, os destinatários e o assunto, com uma nota na coluna Info. E-mails com falha mantêm a mensagem para que ainda possam ser reenviados. Vem desligado e vale para os e-mails enviados depois de ligado."
+
+#: src/admin/site-health.php:62
+msgid "Email queue worker"
+msgstr "Envio da fila de e-mails"
+
+#: src/admin/site-health.php:63
+msgid "Email queue size"
+msgstr "Tamanho da fila de e-mails"
+
+#: src/admin/site-health.php:64
+msgid "SMTP account for the queue"
+msgstr "Conta SMTP para a fila"
+
+#: src/admin/site-health.php:65
+msgid "Microsoft 365 SMTP sign-in"
+msgstr "Login SMTP no Microsoft 365"
+
+#: src/admin/site-health.php:91
+msgid "The email queue is being sent"
+msgstr "A fila de e-mails está sendo enviada"
+
+#: src/admin/site-health.php:91
+msgid "The worker that sends the queue ran on time, or nothing is waiting."
+msgstr "A tarefa que envia a fila rodou no horário, ou não há nada aguardando."
+
+#: src/admin/site-health.php:96
+msgid "Emails are waiting and the queue is not being sent"
+msgstr "Há e-mails aguardando e a fila não está sendo enviada"
+
+#: src/admin/site-health.php:97
+msgid "Nothing has been sent for more than two hours while emails wait, and the worker is not scheduled to run. WP-Cron runs only when the site gets visits, so on a quiet or cached site it may barely run. Add a server cron job that calls wp-cron.php; the plugin's Cron tab shows the line for this server."
+msgstr "Nada foi enviado há mais de duas horas enquanto há e-mails aguardando, e a tarefa de envio não está agendada. O WP-Cron só roda quando o site recebe visitas, então num site com pouco acesso ou com cache ele pode quase não rodar. Adicione um cron no servidor que chame o wp-cron.php; a aba Cron do plugin mostra a linha para este servidor."
+
+#: src/admin/site-health.php:111
+msgid "The email queue is within its usual size"
+msgstr "A fila de e-mails está no tamanho habitual"
+
+#: src/admin/site-health.php:111
+msgid "The number of waiting emails is not above the alert threshold set in the plugin's settings."
+msgstr "O número de e-mails aguardando não passa do limite de alerta definido nas configurações do plugin."
+
+#: src/admin/site-health.php:116
+msgid "The email queue is larger than usual"
+msgstr "A fila de e-mails está maior que o habitual"
+
+#: src/admin/site-health.php:119
+#, php-format
+msgid "%1$d emails are waiting, above the alert threshold of %2$d. A sudden flood may be a form abused by a bot; check the Retention tab for what is waiting and where it comes from."
+msgstr "%1$d e-mails estão aguardando, acima do limite de alerta de %2$d. Uma enxurrada repentina pode ser um formulário abusado por um robô; confira na aba Retenção o que está aguardando e de onde vem."
+
+#: src/admin/site-health.php:135
+msgid "An SMTP account can send the queue"
+msgstr "Uma conta SMTP pode enviar a fila"
+
+#: src/admin/site-health.php:135
+msgid "Either the queue does not depend on the plugin's SMTP accounts, or one of them still has room within its limits."
+msgstr "A fila não depende das contas SMTP do plugin, ou uma delas ainda tem espaço dentro dos seus limites."
+
+#: src/admin/site-health.php:140
+msgid "Emails wait for an SMTP account with room in its limits"
+msgstr "Há e-mails aguardando uma conta SMTP com espaço nos seus limites"
+
+#: src/admin/site-health.php:154
+msgid "No SMTP account depends on Microsoft 365 password sign-in"
+msgstr "Nenhuma conta SMTP depende de login com senha no Microsoft 365"
+
+#: src/admin/site-health.php:154
+msgid "None of the plugin's enabled SMTP accounts signs in to Microsoft 365 with a password."
+msgstr "Nenhuma das contas SMTP ativas do plugin faz login no Microsoft 365 com senha."
+
+#: src/admin/site-health.php:159
+msgid "An SMTP account signs in to Microsoft 365 with a password"
+msgstr "Uma conta SMTP faz login no Microsoft 365 com senha"
+
+#: src/admin/site-health.php:162
+#, php-format
+msgid "Microsoft is retiring password sign-in (Basic authentication) for SMTP in Exchange Online, and an account that uses it stops sending once it is turned off for your tenant. Accounts affected: %s."
+msgstr "A Microsoft está desativando o login com senha (autenticação básica) para SMTP no Exchange Online, e uma conta que o usa para de enviar quando ele for desligado para o seu locatário. Contas afetadas: %s."
+
+#: src/admin/site-health.php:199
+msgid "Operation mode"
+msgstr "Modo de operação"
+
+#: src/admin/site-health.php:207
+msgid "Queue interval (seconds)"
+msgstr "Intervalo da fila (segundos)"
+
+#: src/admin/site-health.php:211
+msgid "Emails waiting"
+msgstr "E-mails aguardando"
+
+#: src/admin/site-health.php:215
+msgid "Last send"
+msgstr "Último envio"
+
+#: src/admin/site-health.php:219
+msgid "Next worker run"
+msgstr "Próxima execução do envio"
+
+#: src/admin/site-health.php:227
+msgid "WP-Cron disabled"
+msgstr "WP-Cron desativado"
+
+#: src/admin/site-health.php:250
+msgid "Open Total Mail Queue"
+msgstr "Abrir o Total Mail Queue"
+
+#: src/admin/docs/troubleshooting.php:26
+msgid "Site Health"
+msgstr "Saúde do site"
+
+#: src/admin/docs/troubleshooting.php:27
+msgid "Tools → Site Health runs four checks of the queue: whether the worker is sending it, whether more emails wait than the alert threshold, whether an SMTP account has room when the Send Method is \"Plugin SMTP only\", and whether an SMTP account signs in to Microsoft 365 with a password, which Microsoft is retiring. Its Info tab has a Total Mail Queue section with the mode, the queue size and the last send, ready to copy into a support request."
+msgstr "Ferramentas → Saúde do site faz quatro verificações da fila: se ela está sendo enviada, se há mais e-mails aguardando que o limite de alerta, se uma conta SMTP tem espaço quando o Método de envio é \"Plugin SMTP apenas\" e se alguma conta SMTP faz login no Microsoft 365 com senha, o que a Microsoft está desativando. A aba Informação tem uma seção Total Mail Queue com o modo, o tamanho da fila e o último envio, pronta para copiar num pedido de suporte."
+
+#: src/admin/docs/cron.php:54
+msgid "WP-CLI"
+msgstr "WP-CLI"
+
+#: src/admin/docs/cron.php:55
+msgid "With WP-CLI on the server, \"wp mail-queue status\" shows the mode, the emails waiting, the worker's state and the last send, and \"--format=json\" prints the same for a script. \"wp mail-queue send\" sends one batch now, as the worker would: the same batch size, SMTP limits and lock, without waiting for the interval. It ends with a warning, and the reason, when nothing could be sent."
+msgstr "Com o WP-CLI no servidor, \"wp mail-queue status\" mostra o modo, os e-mails aguardando, o estado da tarefa de envio e o último envio, e \"--format=json\" imprime o mesmo para um script. \"wp mail-queue send\" envia um lote agora, como a tarefa de envio faria: o mesmo tamanho de lote, os mesmos limites SMTP e a mesma trava, sem esperar o intervalo. Termina com um aviso, e o motivo, quando nada pôde ser enviado."
+
+#: src/smtp/m365-token.php:85
+msgid "The Tenant ID is not valid: use the Directory (tenant) ID, or the organisation's domain."
+msgstr "O ID do locatário não é válido: use o ID do diretório (locatário) ou o domínio da organização."
+
+#: src/smtp/m365-token.php:88
+msgid "The Client ID is not valid: use the Application (client) ID, a GUID."
+msgstr "O ID do cliente não é válido: use o ID do aplicativo (cliente), um GUID."
+
+#: src/smtp/m365-token.php:91
+msgid "The client secret is missing."
+msgstr "Falta o segredo do cliente."
+
+#: src/smtp/m365-token.php:116
+#, php-format
+msgid "Microsoft could not be reached: %s"
+msgstr "Não foi possível acessar a Microsoft: %s"
+
+#: src/smtp/m365-token.php:126
+#, php-format
+msgid "HTTP %d"
+msgstr "HTTP %d"
+
+#: src/smtp/m365-token.php:129
+#, php-format
+msgid "Microsoft refused the sign-in: %s"
+msgstr "A Microsoft recusou o login: %s"
+
+#: src/admin/pages/smtp-form-renderer.php:317
+msgid "Sign-in method"
+msgstr "Método de login"
+
+#: src/admin/pages/smtp-form-renderer.php:320
+msgid "Microsoft 365 app"
+msgstr "Aplicativo do Microsoft 365"
+
+#: src/admin/pages/smtp-form-renderer.php:326
+msgid "The Microsoft 365 app signs in with a token from Microsoft; no mailbox password is stored. Choosing it fills in smtp.office365.com, 587 and TLS when the host is empty."
+msgstr "O aplicativo do Microsoft 365 entra com um token emitido pela Microsoft; nenhuma senha da caixa de correio é guardada. Escolhê-lo preenche smtp.office365.com, 587 e TLS quando o servidor está vazio."
+
+#: src/admin/pages/smtp-form-renderer.php:340
+msgid "Tenant ID"
+msgstr "ID do locatário"
+
+#: src/admin/pages/smtp-form-renderer.php:340
+msgid "Directory (tenant) ID, from the app's overview in Microsoft Entra, or the organisation's domain."
+msgstr "ID do diretório (locatário), na visão geral do aplicativo no Microsoft Entra, ou o domínio da organização."
+
+#: src/admin/pages/smtp-form-renderer.php:341
+msgid "Client ID"
+msgstr "ID do cliente"
+
+#: src/admin/pages/smtp-form-renderer.php:341
+msgid "Application (client) ID."
+msgstr "ID do aplicativo (cliente)."
+
+#: src/admin/pages/smtp-form-renderer.php:351
+msgid "Client secret"
+msgstr "Segredo do cliente"
+
+
+#: src/admin/pages/smtp-form-renderer.php:355
+msgid "How to set this up in Microsoft 365"
+msgstr "Como configurar no Microsoft 365"
+
+#: src/admin/pages/smtp-form-renderer.php:357
+msgid "In Microsoft Entra, register an app and create a client secret."
+msgstr "No Microsoft Entra, registre um aplicativo e crie um segredo do cliente."
+
+#: src/admin/pages/smtp-form-renderer.php:358
+msgid "Under API permissions, add Office 365 Exchange Online → Application permissions → SMTP.SendAsApp, and grant admin consent."
+msgstr "Em Permissões de API, adicione Office 365 Exchange Online → Permissões de aplicativo → SMTP.SendAsApp e conceda o consentimento do administrador."
+
+#: src/admin/pages/smtp-form-renderer.php:359
+msgid "In Exchange Online PowerShell, register the app's service principal (New-ServicePrincipal) and give it the mailbox (Add-MailboxPermission -AccessRights FullAccess)."
+msgstr "No PowerShell do Exchange Online, registre a entidade de serviço do aplicativo (New-ServicePrincipal) e dê a ela a caixa de correio (Add-MailboxPermission -AccessRights FullAccess)."
+
+#: src/admin/pages/smtp-form-renderer.php:360
+msgid "Make sure SMTP AUTH is allowed for the mailbox."
+msgstr "Confirme que o SMTP AUTH está permitido para a caixa de correio."
+
+#: src/admin/pages/smtp-form-renderer.php:361
+msgid "Fill in the fields above, with the mailbox as Mailbox, and use Test Connection."
+msgstr "Preencha os campos acima, com a caixa de correio em Caixa de correio, e use Testar Conexão."
+
+#: src/admin/pages/smtp-form-renderer.php:372
+msgid "Mailbox"
+msgstr "Caixa de correio"
+
+#: src/admin/pages/smtp-form-renderer.php:379
+msgid "The address the emails are sent as."
+msgstr "O endereço com que os e-mails são enviados."
+
+#: src/admin/docs/smtp-accounts.php:19
+msgid "Microsoft 365 without a password"
+msgstr "Microsoft 365 sem senha"
+
+#: src/admin/docs/smtp-accounts.php:20
+msgid "Microsoft is retiring password sign-in for SMTP in Exchange Online. Under Sign-in method, choose \"Microsoft 365 app\": the account then signs in with a token Microsoft issues to an app registered in your organisation, and no mailbox password is stored. The Mailbox field is the address the email is sent from."
+msgstr "A Microsoft está desativando o login com senha para SMTP no Exchange Online. Em Método de login, escolha \"Aplicativo do Microsoft 365\": a conta passa a entrar com um token que a Microsoft emite para um aplicativo registrado na sua organização, e nenhuma senha da caixa de correio é guardada. O campo Caixa de correio é o endereço de onde o e-mail é enviado."
+
+#: src/admin/docs/smtp-accounts.php:21
+msgid "The app needs the Office 365 Exchange Online permission SMTP.SendAsApp with admin consent, and an Exchange administrator must give its service principal access to the mailbox. The form's \"How to set this up in Microsoft 365\" lists the steps. The client secret is stored encrypted and expires on the date Microsoft set when it was created: create a new one before then and save it here."
+msgstr "O aplicativo precisa da permissão SMTP.SendAsApp do Office 365 Exchange Online com consentimento do administrador, e um administrador do Exchange deve dar à entidade de serviço dele acesso à caixa de correio. O \"Como configurar no Microsoft 365\" do formulário lista os passos. O segredo do cliente é guardado criptografado e expira na data que a Microsoft definiu ao criá-lo: crie um novo antes disso e salve-o aqui."
+
+#: src/admin/docs/smtp-accounts.php:22
+msgid "The token is kept until shortly before it expires, so a batch asks Microsoft once. When Microsoft refuses it, the Log and Test Connection show Microsoft's own reason, such as an invalid secret or a missing permission."
+msgstr "O token é mantido até pouco antes de expirar, então um lote consulta a Microsoft uma vez. Quando a Microsoft o recusa, o Registro e o Testar Conexão mostram o motivo dado pela própria Microsoft, como um segredo inválido ou uma permissão faltando."
+
+#: src/smtp/m365-secret-expiry.php:133
+msgid "Expires today"
+msgstr "Vence hoje"
+
+#: src/smtp/m365-secret-expiry.php:146
+msgid "Secret expired"
+msgstr "Segredo vencido"
+
+#: src/smtp/m365-secret-expiry.php:149
+msgid "Secret expires today"
+msgstr "Segredo vence hoje"
+
+#: src/smtp/m365-token.php:132
+msgid "Microsoft refused the sign-in: the client secret has expired. Create a new one in Microsoft Entra → Certificates & secrets and save it in the SMTP account."
+msgstr "A Microsoft recusou o login: o segredo do cliente venceu. Crie um novo em Microsoft Entra → Certificados e segredos e salve-o na conta SMTP."
+
+#: src/admin/notices.php:79
+#, php-format
+msgid "\"%1$s\" (%2$s)"
+msgstr "\"%1$s\" (%2$s)"
+
+#: src/admin/notices.php:87
+#, php-format
+msgid "Total Mail Queue: a Microsoft 365 app's client secret has expired, and the emails of these accounts are not going out: %1$s. Create a new secret in Microsoft Entra and save it in %2$s."
+msgstr "Total Mail Queue: o segredo do cliente de um aplicativo do Microsoft 365 venceu, e os e-mails destas contas não estão saindo: %1$s. Crie um segredo novo no Microsoft Entra e salve-o em %2$s."
+
+#: src/admin/notices.php:89
+#, php-format
+msgid "Total Mail Queue: a Microsoft 365 app's client secret expires soon: %1$s. Create a new secret in Microsoft Entra and save it in %2$s before then, or the emails of these accounts stop."
+msgstr "Total Mail Queue: o segredo do cliente de um aplicativo do Microsoft 365 vence em breve: %1$s. Crie um segredo novo no Microsoft Entra e salve-o em %2$s antes disso, ou os e-mails destas contas param."
+
+#: src/admin/site-health.php:168
+#, php-format
+msgid "None of the plugin's enabled SMTP accounts signs in to Microsoft 365 with a password, and no app's client secret expires within %d days."
+msgstr "Nenhuma conta SMTP ligada do plugin entra no Microsoft 365 com senha, e nenhum segredo de aplicativo vence nos próximos %d dias."
+
+#: src/admin/site-health.php:180
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr "%1$s (%2$s)"
+
+#: src/admin/site-health.php:192
+#, php-format
+msgid "The client secret of a Microsoft 365 app has expired, and Microsoft refuses the sign-in until a new one is saved. Accounts affected: %s."
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 venceu, e a Microsoft recusa o login até que um novo seja salvo. Contas afetadas: %s."
+
+#: src/admin/site-health.php:196
+#, php-format
+msgid "The client secret of a Microsoft 365 app expires within %1$d days: create a new one in Microsoft Entra and save it in the account before then. Accounts affected: %2$s."
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 vence nos próximos %1$d dias: crie um novo no Microsoft Entra e salve-o na conta antes disso. Contas afetadas: %2$s."
+
+#: src/admin/site-health.php:208
+msgid "A Microsoft 365 app's client secret has expired"
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 venceu"
+
+#: src/admin/site-health.php:211
+msgid "A Microsoft 365 app's client secret expires soon"
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 vence em breve"
+
+#: src/admin/pages/smtp-form-renderer.php:354
+msgid "Stored encrypted. Leave blank to keep the current one."
+msgstr "Guardado criptografado. Deixe em branco para manter o atual."
+
+#: src/admin/pages/smtp-form-renderer.php:370
+msgid "Secret expires on"
+msgstr "Segredo vence em"
+
+#: src/admin/pages/smtp-form-renderer.php:376
+#, php-format
+msgid "Optional. The date under \"Expires\" in Microsoft Entra → Certificates & secrets. The plugin warns %d days before. When you save a new secret, update the date."
+msgstr "Opcional. A data em \"Expira\" em Microsoft Entra → Certificados e segredos. O plugin avisa %d dias antes. Ao salvar um segredo novo, atualize a data."
+
+#: src/admin/docs/smtp-accounts.php:22
+msgid "Microsoft client secrets expire. Fill in \"Secret expires on\" with the date Microsoft Entra shows under \"Expires\": from 30 days before, the account list, an admin notice on the plugin's screens and the Dashboard, and Tools → Site Health warn, and once the date has passed they say the account is not sending. The day ends at midnight in the site's time zone. When you save a new secret, update the date. Without a date, the plugin still says plainly when Microsoft refuses an expired secret."
+msgstr "Os segredos de cliente da Microsoft vencem. Preencha \"Segredo vence em\" com a data que o Microsoft Entra mostra em \"Expira\": a partir de 30 dias antes, a lista de contas, um aviso nas telas do plugin e no Painel e Ferramentas → Saúde do site avisam, e depois da data dizem que a conta não está enviando. O dia termina à meia-noite no fuso do site. Ao salvar um segredo novo, atualize a data. Sem data, o plugin ainda diz com clareza quando a Microsoft recusa um segredo vencido."
+
+#: src/smtp/m365-secret-expiry.php:130
+#, php-format
+msgid "Expired %d day ago"
+msgid_plural "Expired %d days ago"
+msgstr[0] "Venceu há %d dia"
+msgstr[1] "Venceu há %d dias"
+
+#: src/smtp/m365-secret-expiry.php:136
+#, php-format
+msgid "Expires in %d day"
+msgid_plural "Expires in %d days"
+msgstr[0] "Vence em %d dia"
+msgstr[1] "Vence em %d dias"
+
+#: src/smtp/m365-secret-expiry.php:152
+#, php-format
+msgid "Secret expires in %d day"
+msgid_plural "Secret expires in %d days"
+msgstr[0] "Segredo vence em %d dia"
+msgstr[1] "Segredo vence em %d dias"

@@ -33,7 +33,7 @@ final class SettingsFieldsTest extends FunctionalTestCase {
         $html = $this->page();
 
         self::assertSame( count( SettingsApi::sections() ), substr_count( $html, 'tmq-box tmq-settings-card' ) );
-        foreach ( array( 'enabled', 'alert_enabled', 'auto_block', 'block_password_reset', 'queue_amount', 'queue_interval_unit', 'clear_queue', 'log_max_records', 'max_retries', 'smtp_timeout', 'smtp_debug', 'cron_lock_ttl', 'send_method', 'email', 'email_amount', 'from_email', 'from_name', 'dark_mode' ) as $key ) {
+        foreach ( array( 'enabled', 'alert_enabled', 'auto_block', 'block_password_reset', 'queue_amount', 'queue_interval_unit', 'clear_queue', 'log_max_records', 'log_drop_body', 'max_retries', 'smtp_timeout', 'smtp_debug', 'cron_lock_ttl', 'send_method', 'email', 'email_amount', 'from_email', 'from_name', 'dark_mode' ) as $key ) {
             self::assertStringContainsString( 'name="wp_tmq_settings[' . $key . ']"', $html, $key );
         }
     }

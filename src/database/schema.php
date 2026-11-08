@@ -42,6 +42,15 @@ final class Schema {
 	public const SOURCES_TABLE = 'total_mail_queue_sources';
 
 	/**
+	 * Revision of the schema below. Bump it in the PR that changes a table:
+	 * `develop` keeps the released version for a whole batch, so a column
+	 * gated on the version alone would not reach the testes site until the
+	 * release ({@see Migrator::maybeMigrate()}). 2: the Microsoft 365 sign-in
+	 * columns of the SMTP table (#186).
+	 */
+	public const REVISION = 3;
+
+	/**
 	 * Apply the schema via `dbDelta()`.
 	 *
 	 * Idempotent: running twice in a row is a no-op against an up-to-date
@@ -84,8 +93,13 @@ final class Schema {
 		port smallint(5) DEFAULT 587 NOT NULL,
 		encryption varchar(10) DEFAULT 'tls' NOT NULL,
 		auth tinyint(1) DEFAULT 1 NOT NULL,
+		auth_type varchar(20) DEFAULT 'password' NOT NULL,
 		username varchar(255) DEFAULT '' NOT NULL,
 		password text NOT NULL,
+		oauth_tenant varchar(100) DEFAULT '' NOT NULL,
+		oauth_client_id varchar(100) DEFAULT '' NOT NULL,
+		oauth_client_secret text,
+		oauth_secret_expires date DEFAULT NULL,
 		from_email varchar(255) DEFAULT '' NOT NULL,
 		from_name varchar(255) DEFAULT '' NOT NULL,
 		priority mediumint(9) DEFAULT 0 NOT NULL,

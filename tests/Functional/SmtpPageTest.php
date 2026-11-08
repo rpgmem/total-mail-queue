@@ -104,7 +104,7 @@ final class SmtpPageTest extends FunctionalTestCase {
         self::assertStringContainsString( 'value="ssl" selected', $html );
         self::assertStringContainsString( 'Leave blank to keep the current password.', $html );
         self::assertStringNotContainsString( Encryption::encrypt( 'pass' ), $html );
-        self::assertSame( 6, substr_count( $html, 'tmq-conn-row tmq-conn-locked' ), 'Host, port, encryption, auth, username and password.' );
+        self::assertSame( 7, substr_count( $html, 'tmq-conn-row tmq-conn-locked' ), 'Host, port, encryption, auth, sign-in method, username and password.' );
     }
 
     public function test_editing_a_missing_account_falls_back_to_an_empty_form(): void {

@@ -421,13 +421,15 @@ span.tmq-status.tmq-status-queue {
 }
 
 span.tmq-status.tmq-status-high,
-span.tmq-status.tmq-status-instant {
+span.tmq-status.tmq-status-instant,
+span.tmq-status.tmq-status-secret-soon {
 	color: var(--tmq-warning-text);
 	background: var(--tmq-warning-bg);
 }
 
 span.tmq-status.tmq-status-error,
-span.tmq-status.tmq-status-blocked-by-source {
+span.tmq-status.tmq-status-blocked-by-source,
+span.tmq-status.tmq-status-secret-expired {
 	color: var(--tmq-danger-badge-text);
 	background: var(--tmq-danger-bg);
 }
@@ -652,6 +654,20 @@ span.tmq-status.tmq-status-inline {
  * username/password aren't pre-filled with the WordPress admin
  * credentials. Visually hidden + removed from the tab order.
  */
+/* SMTP sign-in method (#186): the form shows the rows of the chosen method. */
+.tmq-smtp-form:not(.tmq-auth-m365) .tmq-m365-only,
+.tmq-smtp-form.tmq-auth-m365 .tmq-password-only {
+	display: none;
+}
+
+.tmq-sign-in-method label {
+	margin-right: 1.5em;
+}
+
+.tmq-m365-setup ol {
+	margin-top: 0.5em;
+}
+
 .tmq-autofill-decoy {
 	position: absolute;
 	left: -9999px;

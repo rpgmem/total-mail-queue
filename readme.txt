@@ -2,7 +2,7 @@
 Tags: email, mail, queue, email log, wp_mail
 Requires at least: 6.8
 Tested up to: 7.1.3
-Stable tag: 3.2.0
+Stable tag: 3.3.0
 Requires PHP: 8.3
 License: AGPLv3 or later
 License URI: https://www.gnu.org/licenses/agpl-3.0.html
@@ -25,6 +25,9 @@ Total Mail Queue holds every email WordPress sends in a queue and lets it out at
 * See whether WP-Cron is sending the queue, and copy the server cron line that makes it reliable
 * Export/import plugin settings and SMTP accounts via XML
 * Detects and resolves conflicts with other email plugins
+* Sign in to Microsoft 365 SMTP with an app instead of a password, with a warning before its client secret expires
+* Checks the queue in Tools → Site Health, and runs it from WP-CLI (`wp mail-queue status`, `wp mail-queue send`)
+* Takes part in WordPress's Export and Erase Personal Data tools, and can delete a message once it is sent
 
 **This plugin is a fork of [Mail Queue](https://wordpress.org/plugins/mail-queue/) by WDM.**
 
@@ -124,18 +127,9 @@ Updates arrive through the normal WordPress update screen, straight from this pl
 
 == Changelog ==
 
-The two most recent releases are summarised below. The full history of every release is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md).
-
-= 2.12.0 =
-* New: a Cron tab, always shown, says whether the queue worker is running, asleep, waiting, overdue or stalled, whether WP-Cron fires, and gives administrators the server cron line to copy.
-* Changed: icons, colours and the documentation's Quick Navigation follow Free Form Certificate.
-* Fixed: an empty number field keeps its value instead of saving 0, and Import restores every setting the form saves.
-* Security: stored SMTP passwords are authenticated as well as encrypted.
-
-= 2.11.0 =
-* New: a live preview on the Templates tab shows a sample email, header and footer included, with the settings on screen and updates as you edit, before saving.
+Every release, with what changed and why, is in [CHANGELOG.md](https://github.com/rpgmem/total-mail-queue/blob/main/CHANGELOG.md). The same notes are each release's description on [GitHub Releases](https://github.com/rpgmem/total-mail-queue/releases), and "View details" on the Plugins screen shows the ones for the version on offer.
 
 == Upgrade Notice ==
 
-= 3.2.0 =
-With Free Form Certificate active, the admin follows its dark mode and the local setting shows as controlled by it. Admin buttons join Free Form Certificate's family, each with an icon, and confirmations no longer use inline scripts. Details in CHANGELOG.md.
+= 3.3.0 =
+SMTP accounts can sign in to Microsoft 365 with an app instead of a password, which Microsoft is retiring for SMTP, with a warning before its secret expires. Also new: Site Health checks, WP-CLI commands and the Personal Data tools. Details in CHANGELOG.md.

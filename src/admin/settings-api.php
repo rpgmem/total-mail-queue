@@ -96,7 +96,8 @@ final class SettingsApi {
 				'title'  => __( 'Log', 'total-mail-queue' ),
 				'icon'   => 'log',
 				'fields' => array(
-					'wp_tmq_log' => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
+					'wp_tmq_log'           => array( __( 'Log', 'total-mail-queue' ), 'renderLog' ),
+					'wp_tmq_log_drop_body' => array( __( 'Message after sending', 'total-mail-queue' ), 'renderLogDropBody' ),
 				),
 			),
 			'wp_tmq_section_alerts'     => array(
@@ -249,6 +250,14 @@ final class SettingsApi {
 			' <input name="wp_tmq_settings[log_max_records]" type="number" required min="0" value="' . esc_attr( (string) intval( $options['log_max_records'] ) ) . '" /> ' .
 			esc_html__( 'log records.', 'total-mail-queue' );
 		echo ' <span class="description">' . esc_html__( '0 = unlimited', 'total-mail-queue' ) . '</span>';
+	}
+
+	/**
+	 * Whether a sent email keeps its message in the Log (#180).
+	 */
+	public static function renderLogDropBody(): void {
+		self::settingToggle( 'log_drop_body', __( 'Delete the message once the email is sent.', 'total-mail-queue' ) );
+		echo '<p class="description">' . esc_html__( 'The Log then keeps the date, status, recipients and subject of a sent email, not its body, headers or attachment list. Emails that fail keep their message, so they can still be resent. Off by default; it applies to emails sent after it is turned on.', 'total-mail-queue' ) . '</p>';
 	}
 
 	/**

@@ -18,6 +18,9 @@ O Total Mail Queue guarda em uma fila cada e-mail que o WordPress envia e o libe
 * Veja se o WP-Cron está enviando a fila e copie a linha de cron do servidor que torna o envio confiável
 * Exporte e importe as configurações e as contas SMTP em XML
 * Detecta e resolve conflitos com outros plugins de e-mail
+* Entre no SMTP do Microsoft 365 com um aplicativo em vez de senha, com aviso antes de o segredo do cliente vencer
+* Verifica a fila em Ferramentas → Saúde do site e a executa pelo WP-CLI (`wp mail-queue status`, `wp mail-queue send`)
+* Participa das ferramentas de Exportar e Apagar Dados Pessoais do WordPress, e pode apagar a mensagem depois de enviada
 
 **Este plugin é um fork do [Mail Queue](https://wordpress.org/plugins/mail-queue/), da WDM.**
 

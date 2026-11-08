@@ -23,7 +23,7 @@ final class Plugin {
 	 * Plugin version. Kept in sync with the header in total-mail-queue.php
 	 * and used by the upgrade routine to detect schema bumps.
 	 */
-	public const VERSION = '3.2.0';
+	public const VERSION = '3.3.0';
 
 	/**
 	 * Minimum required PHP version (mirrors the plugin header).
@@ -110,6 +110,15 @@ final class Plugin {
 
 		// REST API.
 		Rest\MessageController::register();
+
+		// WP-CLI: `wp mail-queue status|send`.
+		Cli\Command::register();
+
+		// Tools → Export / Erase Personal Data reach the email log.
+		Privacy\PersonalData::register();
+
+		// Tools → Site Health: the queue's tests and its Info section.
+		Admin\SiteHealth::register();
 
 		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
 		// scans for plugin updates from cron.

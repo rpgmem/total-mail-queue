@@ -32,6 +32,7 @@ final class Sanitizer {
 		'queue_interval_unit',
 		'clear_queue',
 		'log_max_records',
+		'log_drop_body',
 		'send_method',
 		'max_retries',
 		'cron_lock_ttl',
