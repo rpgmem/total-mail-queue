@@ -26,6 +26,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 ### Security
 
 - Dev toolchain: `minimatch` is forced to `^11.0.1` through `overrides` and `fast-uri` moves to 3.1.9, clearing four moderate Dependabot alerts; nothing that ships changes (#176).
+- Dev toolchain: `undici` moves to 8.12.3 (a moderate Dependabot alert); the update merged straight to `main` and was brought back to `develop`. Nothing that ships changes (#173, #193).
 
 ## [3.2.0] (2026-10-19) — `dea47bb`
 
