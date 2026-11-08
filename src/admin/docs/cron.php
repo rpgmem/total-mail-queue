@@ -50,3 +50,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <h3><?php esc_html_e( 'Server cron', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'Choose how often the server should wake WP-Cron and how: WP-CLI runs the due events directly, wget and curl call wp-cron.php over HTTP. Copy the line into the crontab of the user that runs the site, or into the cron jobs of your hosting panel, then set DISABLE_WP_CRON to true in wp-config.php so visits no longer trigger it.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'The line only wakes WP-Cron. How often the queue sends is still the interval in Settings, so a server cron every minute with an interval of five minutes sends every five minutes. This card shows the WordPress path, so only administrators see it.', 'total-mail-queue' ); ?></p>
+
+<h3><?php esc_html_e( 'WP-CLI', 'total-mail-queue' ); ?></h3>
+<p><?php esc_html_e( 'With WP-CLI on the server, "wp mail-queue status" shows the mode, the emails waiting, the worker\'s state and the last send, and "--format=json" prints the same for a script. "wp mail-queue send" sends one batch now, as the worker would: the same batch size, SMTP limits and lock, without waiting for the interval. It ends with a warning, and the reason, when nothing could be sent.', 'total-mail-queue' ); ?></p>

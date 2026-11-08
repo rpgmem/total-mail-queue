@@ -3428,3 +3428,11 @@ msgstr "Saúde do site"
 #: src/admin/docs/troubleshooting.php:27
 msgid "Tools → Site Health runs four checks of the queue: whether the worker is sending it, whether more emails wait than the alert threshold, whether an SMTP account has room when the Send Method is \"Plugin SMTP only\", and whether an SMTP account signs in to Microsoft 365 with a password, which Microsoft is retiring. Its Info tab has a Total Mail Queue section with the mode, the queue size and the last send, ready to copy into a support request."
 msgstr "Ferramentas → Saúde do site faz quatro verificações da fila: se ela está sendo enviada, se há mais e-mails aguardando que o limite de alerta, se uma conta SMTP tem espaço quando o Método de envio é \"Plugin SMTP apenas\" e se alguma conta SMTP faz login no Microsoft 365 com senha, o que a Microsoft está desativando. A aba Informação tem uma seção Total Mail Queue com o modo, o tamanho da fila e o último envio, pronta para copiar num pedido de suporte."
+
+#: src/admin/docs/cron.php:54
+msgid "WP-CLI"
+msgstr "WP-CLI"
+
+#: src/admin/docs/cron.php:55
+msgid "With WP-CLI on the server, \"wp mail-queue status\" shows the mode, the emails waiting, the worker's state and the last send, and \"--format=json\" prints the same for a script. \"wp mail-queue send\" sends one batch now, as the worker would: the same batch size, SMTP limits and lock, without waiting for the interval. It ends with a warning, and the reason, when nothing could be sent."
+msgstr "Com o WP-CLI no servidor, \"wp mail-queue status\" mostra o modo, os e-mails aguardando, o estado da tarefa de envio e o último envio, e \"--format=json\" imprime o mesmo para um script. \"wp mail-queue send\" envia um lote agora, como a tarefa de envio faria: o mesmo tamanho de lote, os mesmos limites SMTP e a mesma trava, sem esperar o intervalo. Termina com um aviso, e o motivo, quando nada pôde ser enviado."

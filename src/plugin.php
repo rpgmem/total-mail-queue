@@ -111,6 +111,9 @@ final class Plugin {
 		// REST API.
 		Rest\MessageController::register();
 
+		// WP-CLI: `wp mail-queue status|send`.
+		Cli\Command::register();
+
 		// Tools → Export / Erase Personal Data reach the email log.
 		Privacy\PersonalData::register();
 

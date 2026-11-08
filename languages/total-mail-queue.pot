@@ -3418,3 +3418,11 @@ msgstr ""
 #: src/admin/docs/troubleshooting.php:27
 msgid "Tools → Site Health runs four checks of the queue: whether the worker is sending it, whether more emails wait than the alert threshold, whether an SMTP account has room when the Send Method is \"Plugin SMTP only\", and whether an SMTP account signs in to Microsoft 365 with a password, which Microsoft is retiring. Its Info tab has a Total Mail Queue section with the mode, the queue size and the last send, ready to copy into a support request."
 msgstr ""
+
+#: src/admin/docs/cron.php:54
+msgid "WP-CLI"
+msgstr ""
+
+#: src/admin/docs/cron.php:55
+msgid "With WP-CLI on the server, \"wp mail-queue status\" shows the mode, the emails waiting, the worker's state and the last send, and \"--format=json\" prints the same for a script. \"wp mail-queue send\" sends one batch now, as the worker would: the same batch size, SMTP limits and lock, without waiting for the interval. It ends with a warning, and the reason, when nothing could be sent."
+msgstr ""
