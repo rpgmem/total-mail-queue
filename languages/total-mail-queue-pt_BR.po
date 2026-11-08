@@ -3496,9 +3496,6 @@ msgstr "ID do aplicativo (cliente)."
 msgid "Client secret"
 msgstr "Segredo do cliente"
 
-#: src/admin/pages/smtp-form-renderer.php:353
-msgid "Stored encrypted. Leave blank to keep the current one. Microsoft secrets expire: note the date it was created."
-msgstr "Guardado criptografado. Deixe em branco para manter o atual. Os segredos da Microsoft expiram: anote a data em que foi criado."
 
 #: src/admin/pages/smtp-form-renderer.php:355
 msgid "How to set this up in Microsoft 365"
@@ -3547,3 +3544,100 @@ msgstr "O aplicativo precisa da permissão SMTP.SendAsApp do Office 365 Exchange
 #: src/admin/docs/smtp-accounts.php:22
 msgid "The token is kept until shortly before it expires, so a batch asks Microsoft once. When Microsoft refuses it, the Log and Test Connection show Microsoft's own reason, such as an invalid secret or a missing permission."
 msgstr "O token é mantido até pouco antes de expirar, então um lote consulta a Microsoft uma vez. Quando a Microsoft o recusa, o Registro e o Testar Conexão mostram o motivo dado pela própria Microsoft, como um segredo inválido ou uma permissão faltando."
+
+#: src/smtp/m365-secret-expiry.php:133
+msgid "Expires today"
+msgstr "Vence hoje"
+
+#: src/smtp/m365-secret-expiry.php:146
+msgid "Secret expired"
+msgstr "Segredo vencido"
+
+#: src/smtp/m365-secret-expiry.php:149
+msgid "Secret expires today"
+msgstr "Segredo vence hoje"
+
+#: src/smtp/m365-token.php:132
+msgid "Microsoft refused the sign-in: the client secret has expired. Create a new one in Microsoft Entra → Certificates & secrets and save it in the SMTP account."
+msgstr "A Microsoft recusou o login: o segredo do cliente venceu. Crie um novo em Microsoft Entra → Certificados e segredos e salve-o na conta SMTP."
+
+#: src/admin/notices.php:79
+#, php-format
+msgid "\"%1$s\" (%2$s)"
+msgstr "\"%1$s\" (%2$s)"
+
+#: src/admin/notices.php:87
+#, php-format
+msgid "Total Mail Queue: a Microsoft 365 app's client secret has expired, and the emails of these accounts are not going out: %1$s. Create a new secret in Microsoft Entra and save it in %2$s."
+msgstr "Total Mail Queue: o segredo do cliente de um aplicativo do Microsoft 365 venceu, e os e-mails destas contas não estão saindo: %1$s. Crie um segredo novo no Microsoft Entra e salve-o em %2$s."
+
+#: src/admin/notices.php:89
+#, php-format
+msgid "Total Mail Queue: a Microsoft 365 app's client secret expires soon: %1$s. Create a new secret in Microsoft Entra and save it in %2$s before then, or the emails of these accounts stop."
+msgstr "Total Mail Queue: o segredo do cliente de um aplicativo do Microsoft 365 vence em breve: %1$s. Crie um segredo novo no Microsoft Entra e salve-o em %2$s antes disso, ou os e-mails destas contas param."
+
+#: src/admin/site-health.php:168
+#, php-format
+msgid "None of the plugin's enabled SMTP accounts signs in to Microsoft 365 with a password, and no app's client secret expires within %d days."
+msgstr "Nenhuma conta SMTP ligada do plugin entra no Microsoft 365 com senha, e nenhum segredo de aplicativo vence nos próximos %d dias."
+
+#: src/admin/site-health.php:180
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr "%1$s (%2$s)"
+
+#: src/admin/site-health.php:192
+#, php-format
+msgid "The client secret of a Microsoft 365 app has expired, and Microsoft refuses the sign-in until a new one is saved. Accounts affected: %s."
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 venceu, e a Microsoft recusa o login até que um novo seja salvo. Contas afetadas: %s."
+
+#: src/admin/site-health.php:196
+#, php-format
+msgid "The client secret of a Microsoft 365 app expires within %1$d days: create a new one in Microsoft Entra and save it in the account before then. Accounts affected: %2$s."
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 vence nos próximos %1$d dias: crie um novo no Microsoft Entra e salve-o na conta antes disso. Contas afetadas: %2$s."
+
+#: src/admin/site-health.php:208
+msgid "A Microsoft 365 app's client secret has expired"
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 venceu"
+
+#: src/admin/site-health.php:211
+msgid "A Microsoft 365 app's client secret expires soon"
+msgstr "O segredo do cliente de um aplicativo do Microsoft 365 vence em breve"
+
+#: src/admin/pages/smtp-form-renderer.php:354
+msgid "Stored encrypted. Leave blank to keep the current one."
+msgstr "Guardado criptografado. Deixe em branco para manter o atual."
+
+#: src/admin/pages/smtp-form-renderer.php:370
+msgid "Secret expires on"
+msgstr "Segredo vence em"
+
+#: src/admin/pages/smtp-form-renderer.php:376
+#, php-format
+msgid "Optional. The date under \"Expires\" in Microsoft Entra → Certificates & secrets. The plugin warns %d days before. When you save a new secret, update the date."
+msgstr "Opcional. A data em \"Expira\" em Microsoft Entra → Certificados e segredos. O plugin avisa %d dias antes. Ao salvar um segredo novo, atualize a data."
+
+#: src/admin/docs/smtp-accounts.php:22
+msgid "Microsoft client secrets expire. Fill in \"Secret expires on\" with the date Microsoft Entra shows under \"Expires\": from 30 days before, the account list, an admin notice on the plugin's screens and the Dashboard, and Tools → Site Health warn, and once the date has passed they say the account is not sending. The day ends at midnight in the site's time zone. When you save a new secret, update the date. Without a date, the plugin still says plainly when Microsoft refuses an expired secret."
+msgstr "Os segredos de cliente da Microsoft vencem. Preencha \"Segredo vence em\" com a data que o Microsoft Entra mostra em \"Expira\": a partir de 30 dias antes, a lista de contas, um aviso nas telas do plugin e no Painel e Ferramentas → Saúde do site avisam, e depois da data dizem que a conta não está enviando. O dia termina à meia-noite no fuso do site. Ao salvar um segredo novo, atualize a data. Sem data, o plugin ainda diz com clareza quando a Microsoft recusa um segredo vencido."
+
+#: src/smtp/m365-secret-expiry.php:130
+#, php-format
+msgid "Expired %d day ago"
+msgid_plural "Expired %d days ago"
+msgstr[0] "Venceu há %d dia"
+msgstr[1] "Venceu há %d dias"
+
+#: src/smtp/m365-secret-expiry.php:136
+#, php-format
+msgid "Expires in %d day"
+msgid_plural "Expires in %d days"
+msgstr[0] "Vence em %d dia"
+msgstr[1] "Vence em %d dias"
+
+#: src/smtp/m365-secret-expiry.php:152
+#, php-format
+msgid "Secret expires in %d day"
+msgid_plural "Secret expires in %d days"
+msgstr[0] "Segredo vence em %d dia"
+msgstr[1] "Segredo vence em %d dias"

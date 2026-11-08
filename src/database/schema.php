@@ -48,7 +48,7 @@ final class Schema {
 	 * release ({@see Migrator::maybeMigrate()}). 2: the Microsoft 365 sign-in
 	 * columns of the SMTP table (#186).
 	 */
-	public const REVISION = 2;
+	public const REVISION = 3;
 
 	/**
 	 * Apply the schema via `dbDelta()`.
@@ -99,6 +99,7 @@ final class Schema {
 		oauth_tenant varchar(100) DEFAULT '' NOT NULL,
 		oauth_client_id varchar(100) DEFAULT '' NOT NULL,
 		oauth_client_secret text,
+		oauth_secret_expires date DEFAULT NULL,
 		from_email varchar(255) DEFAULT '' NOT NULL,
 		from_name varchar(255) DEFAULT '' NOT NULL,
 		priority mediumint(9) DEFAULT 0 NOT NULL,

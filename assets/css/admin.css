@@ -421,13 +421,15 @@ span.tmq-status.tmq-status-queue {
 }
 
 span.tmq-status.tmq-status-high,
-span.tmq-status.tmq-status-instant {
+span.tmq-status.tmq-status-instant,
+span.tmq-status.tmq-status-secret-soon {
 	color: var(--tmq-warning-text);
 	background: var(--tmq-warning-bg);
 }
 
 span.tmq-status.tmq-status-error,
-span.tmq-status.tmq-status-blocked-by-source {
+span.tmq-status.tmq-status-blocked-by-source,
+span.tmq-status.tmq-status-secret-expired {
 	color: var(--tmq-danger-badge-text);
 	background: var(--tmq-danger-bg);
 }

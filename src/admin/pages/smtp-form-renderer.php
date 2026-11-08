@@ -12,6 +12,7 @@ namespace TotalMailQueue\Admin\Pages;
 use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
 use TotalMailQueue\Admin\Toggle;
+use TotalMailQueue\Smtp\M365SecretExpiry;
 use TotalMailQueue\Smtp\M365Token;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
@@ -350,7 +351,29 @@ final class SmtpFormRenderer {
 		echo $row; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the row opening tag is a fixed string.
 		echo '<th scope="row"><label for="smtp_oauth_client_secret">' . esc_html__( 'Client secret', 'total-mail-queue' ) . '</label></th>';
 		echo '<td><input type="password" id="smtp_oauth_client_secret" name="smtp_oauth_client_secret" value="" class="regular-text tmq-conn-field tmq-no-autofill" autocomplete="off"' . ( $is_edit ? ' disabled="disabled"' : ' readonly="readonly"' ) . ( $has_secret ? ' placeholder="' . esc_attr( str_repeat( "\xE2\x80\xA2", 8 ) ) . '"' : '' ) . ' />';
-		echo '<p class="description">' . esc_html__( 'Stored encrypted. Leave blank to keep the current one. Microsoft secrets expire: note the date it was created.', 'total-mail-queue' ) . '</p></td></tr>';
+		echo '<p class="description">' . esc_html__( 'Stored encrypted. Leave blank to keep the current one.', 'total-mail-queue' ) . '</p></td></tr>';
+
+		// When the secret runs out (#188): optional, and locked with it.
+		$expires = M365SecretExpiry::sanitizeDate( $account['oauth_secret_expires'] ?? '' );
+		$status  = M365SecretExpiry::status(
+			array_merge(
+				$account,
+				array(
+					'enabled'   => 1,
+					'auth'      => 1,
+					'auth_type' => M365Token::AUTH_TYPE,
+				)
+			),
+			time()
+		);
+		echo $row; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the row opening tag is a fixed string.
+		echo '<th scope="row"><label for="smtp_oauth_secret_expires">' . esc_html__( 'Secret expires on', 'total-mail-queue' ) . '</label></th>';
+		echo '<td><input type="date" id="smtp_oauth_secret_expires" name="smtp_oauth_secret_expires" value="' . esc_attr( $expires ) . '" class="tmq-conn-field"' . $disabled . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $disabled is a fixed attribute string.
+		if ( null !== $status ) {
+			echo ' <span class="tmq-status tmq-status-secret-' . esc_attr( $status['state'] ) . '">' . esc_html( M365SecretExpiry::note( $status ) ) . '</span>';
+		}
+		/* translators: %d: days of warning */
+		echo '<p class="description">' . esc_html( sprintf( __( 'Optional. The date under "Expires" in Microsoft Entra → Certificates & secrets. The plugin warns %d days before. When you save a new secret, update the date.', 'total-mail-queue' ), M365SecretExpiry::WARN_DAYS ) ) . '</p></td></tr>';
 
 		echo '<tr class="tmq-m365-only"><td colspan="2"><details class="tmq-m365-setup"><summary>' . esc_html__( 'How to set this up in Microsoft 365', 'total-mail-queue' ) . '</summary><ol>';
 		foreach ( array(

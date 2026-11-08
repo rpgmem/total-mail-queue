@@ -3486,9 +3486,6 @@ msgstr ""
 msgid "Client secret"
 msgstr ""
 
-#: src/admin/pages/smtp-form-renderer.php:353
-msgid "Stored encrypted. Leave blank to keep the current one. Microsoft secrets expire: note the date it was created."
-msgstr ""
 
 #: src/admin/pages/smtp-form-renderer.php:355
 msgid "How to set this up in Microsoft 365"
@@ -3537,3 +3534,100 @@ msgstr ""
 #: src/admin/docs/smtp-accounts.php:22
 msgid "The token is kept until shortly before it expires, so a batch asks Microsoft once. When Microsoft refuses it, the Log and Test Connection show Microsoft's own reason, such as an invalid secret or a missing permission."
 msgstr ""
+
+#: src/smtp/m365-secret-expiry.php:133
+msgid "Expires today"
+msgstr ""
+
+#: src/smtp/m365-secret-expiry.php:146
+msgid "Secret expired"
+msgstr ""
+
+#: src/smtp/m365-secret-expiry.php:149
+msgid "Secret expires today"
+msgstr ""
+
+#: src/smtp/m365-token.php:132
+msgid "Microsoft refused the sign-in: the client secret has expired. Create a new one in Microsoft Entra → Certificates & secrets and save it in the SMTP account."
+msgstr ""
+
+#: src/admin/notices.php:79
+#, php-format
+msgid "\"%1$s\" (%2$s)"
+msgstr ""
+
+#: src/admin/notices.php:87
+#, php-format
+msgid "Total Mail Queue: a Microsoft 365 app's client secret has expired, and the emails of these accounts are not going out: %1$s. Create a new secret in Microsoft Entra and save it in %2$s."
+msgstr ""
+
+#: src/admin/notices.php:89
+#, php-format
+msgid "Total Mail Queue: a Microsoft 365 app's client secret expires soon: %1$s. Create a new secret in Microsoft Entra and save it in %2$s before then, or the emails of these accounts stop."
+msgstr ""
+
+#: src/admin/site-health.php:168
+#, php-format
+msgid "None of the plugin's enabled SMTP accounts signs in to Microsoft 365 with a password, and no app's client secret expires within %d days."
+msgstr ""
+
+#: src/admin/site-health.php:180
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr ""
+
+#: src/admin/site-health.php:192
+#, php-format
+msgid "The client secret of a Microsoft 365 app has expired, and Microsoft refuses the sign-in until a new one is saved. Accounts affected: %s."
+msgstr ""
+
+#: src/admin/site-health.php:196
+#, php-format
+msgid "The client secret of a Microsoft 365 app expires within %1$d days: create a new one in Microsoft Entra and save it in the account before then. Accounts affected: %2$s."
+msgstr ""
+
+#: src/admin/site-health.php:208
+msgid "A Microsoft 365 app's client secret has expired"
+msgstr ""
+
+#: src/admin/site-health.php:211
+msgid "A Microsoft 365 app's client secret expires soon"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:354
+msgid "Stored encrypted. Leave blank to keep the current one."
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:370
+msgid "Secret expires on"
+msgstr ""
+
+#: src/admin/pages/smtp-form-renderer.php:376
+#, php-format
+msgid "Optional. The date under \"Expires\" in Microsoft Entra → Certificates & secrets. The plugin warns %d days before. When you save a new secret, update the date."
+msgstr ""
+
+#: src/admin/docs/smtp-accounts.php:22
+msgid "Microsoft client secrets expire. Fill in \"Secret expires on\" with the date Microsoft Entra shows under \"Expires\": from 30 days before, the account list, an admin notice on the plugin's screens and the Dashboard, and Tools → Site Health warn, and once the date has passed they say the account is not sending. The day ends at midnight in the site's time zone. When you save a new secret, update the date. Without a date, the plugin still says plainly when Microsoft refuses an expired secret."
+msgstr ""
+
+#: src/smtp/m365-secret-expiry.php:130
+#, php-format
+msgid "Expired %d day ago"
+msgid_plural "Expired %d days ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/smtp/m365-secret-expiry.php:136
+#, php-format
+msgid "Expires in %d day"
+msgid_plural "Expires in %d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/smtp/m365-secret-expiry.php:152
+#, php-format
+msgid "Secret expires in %d day"
+msgid_plural "Secret expires in %d days"
+msgstr[0] ""
+msgstr[1] ""
