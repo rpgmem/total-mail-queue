@@ -3285,6 +3285,26 @@ msgstr ""
 msgid "The log takes part in WordPress's privacy tools, Tools → Export Personal Data and Tools → Erase Personal Data. An export lists every logged email sent to the address, with its date, status, subject and message; the message of an email that carries a one-time account link, such as a password reset, is withheld. An erasure deletes the address's sent, failed and alert emails and their stored attachments. Emails still waiting in the queue are kept until they are sent, and the request says how many."
 msgstr ""
 
+#: src/admin/settings-api.php:99
+msgid "Message after sending"
+msgstr ""
+
+#: src/admin/settings-api.php:262
+msgid "Delete the message once the email is sent."
+msgstr ""
+
+#: src/admin/settings-api.php:263
+msgid "The Log then keeps the date, status, recipients and subject of a sent email, not its body, headers or attachment list. Emails that fail keep their message, so they can still be resent. Off by default; it applies to emails sent after it is turned on."
+msgstr ""
+
+#: src/retention/sent-body.php:47
+msgid "Message deleted after sending, as the Log settings ask."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:56
+msgid "Settings → Log → \"Message after sending\" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on."
+msgstr ""
+
 #: src/admin/site-health.php:62
 msgid "Email queue worker"
 msgstr ""
