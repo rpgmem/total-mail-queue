@@ -7,10 +7,6 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Changed
-
-- `readme.txt`'s Changelog section points to `CHANGELOG.md` and the GitHub Releases instead of copying two releases, which had stopped at 2.12.0; "View details" already reads the release notes (#192).
-
 ## [3.3.0] (2026-11-08)
 
 ### Added
@@ -21,6 +17,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 - WP-CLI: `wp mail-queue status` shows the queue's state (also as JSON) and `wp mail-queue send` sends one batch now through the same worker, warning with the reason when nothing could go out (#184).
 - SMTP accounts can sign in to Microsoft 365 with an app instead of a password: Sign-in method → "Microsoft 365 app" takes a tenant, a client ID and an encrypted client secret, sends with an OAuth token over XOAUTH2, and the Log and Test Connection show Microsoft's own reason when it refuses (#186).
 - A Microsoft 365 app account can record when its client secret expires: from 30 days before, the account list, an admin notice and Site Health warn, and turn red once it has passed. Microsoft's "secret expired" refusal now reads plainly in the Log (#188).
+
+### Changed
+
+- `readme.txt`'s Changelog section points to `CHANGELOG.md` and the GitHub Releases instead of copying two releases, which had stopped at 2.12.0; "View details" already reads the release notes (#192).
 
 ### Security
 
