@@ -66,6 +66,7 @@ final class Options {
 			'queue_interval_unit'  => 'minutes',
 			'clear_queue'          => '14',
 			'log_max_records'      => '0',   // 0=unlimited, >0=max number of log entries to keep.
+			'log_drop_body'        => '0',   // 1=delete the message, headers and attachment list of a row once it is sent.
 			'send_method'          => 'auto', // auto=SMTP if available then captured then default, smtp=only plugin SMTP, php=default wp_mail only.
 			'max_retries'          => '3',   // 0=no retries, >0=auto-retry failed emails up to N times.
 			'cron_lock_ttl'        => '300', // seconds — safety timeout for the cross-process cron lock.

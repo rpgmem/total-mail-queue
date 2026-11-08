@@ -3253,3 +3253,23 @@ msgstr ""
 #: src/admin/docs/appearance.php
 msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
 msgstr ""
+
+#: src/admin/settings-api.php:99
+msgid "Message after sending"
+msgstr ""
+
+#: src/admin/settings-api.php:262
+msgid "Delete the message once the email is sent."
+msgstr ""
+
+#: src/admin/settings-api.php:263
+msgid "The Log then keeps the date, status, recipients and subject of a sent email, not its body, headers or attachment list. Emails that fail keep their message, so they can still be resent. Off by default; it applies to emails sent after it is turned on."
+msgstr ""
+
+#: src/retention/sent-body.php:47
+msgid "Message deleted after sending, as the Log settings ask."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:56
+msgid "Settings → Log → \"Message after sending\" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on."
+msgstr ""

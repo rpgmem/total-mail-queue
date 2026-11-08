@@ -3263,3 +3263,23 @@ msgstr "Botões"
 #: src/admin/docs/appearance.php
 msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
 msgstr "Todo botão traz um ícone, e a cor diz o que ele faz: azul sólido salva ou conclui o formulário, cinza abre, testa ou navega, verde adiciona algo, âmbar redefine ou desliga algo sem perder dados, e vermelho exclui ou substitui. Os botões que não podem ser desfeitos perguntam antes de agir."
+
+#: src/admin/settings-api.php:99
+msgid "Message after sending"
+msgstr "Mensagem após o envio"
+
+#: src/admin/settings-api.php:262
+msgid "Delete the message once the email is sent."
+msgstr "Apagar a mensagem depois que o e-mail for enviado."
+
+#: src/admin/settings-api.php:263
+msgid "The Log then keeps the date, status, recipients and subject of a sent email, not its body, headers or attachment list. Emails that fail keep their message, so they can still be resent. Off by default; it applies to emails sent after it is turned on."
+msgstr "O Registro passa a guardar a data, o status, os destinatários e o assunto de um e-mail enviado, sem o corpo, os cabeçalhos ou a lista de anexos. E-mails que falham mantêm a mensagem, para que ainda possam ser reenviados. Desligado por padrão; vale para os e-mails enviados depois de ligado."
+
+#: src/retention/sent-body.php:47
+msgid "Message deleted after sending, as the Log settings ask."
+msgstr "Mensagem apagada após o envio, conforme as configurações do Registro."
+
+#: src/admin/docs/log-and-retention.php:56
+msgid "Settings → Log → \"Message after sending\" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on."
+msgstr "Configurações → Registro → \"Mensagem após o envio\" guarda menos: depois que um e-mail é enviado, a mensagem, os cabeçalhos e a lista de anexos são apagados, e o Registro mantém a data, o status, os destinatários e o assunto, com uma nota na coluna Info. E-mails com falha mantêm a mensagem para que ainda possam ser reenviados. Vem desligado e vale para os e-mails enviados depois de ligado."
