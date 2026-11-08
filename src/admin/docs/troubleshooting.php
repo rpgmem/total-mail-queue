@@ -23,6 +23,9 @@ $wp_tmq_test_url = wp_nonce_url( admin_url( 'admin.php?page=' . PluginPage::TAB_
 <p><?php esc_html_e( 'The fix is a real server cron that calls wp-cron.php every few minutes. Caching plugins and proxy caches such as NGINX cause the same symptom, and some caching plugins have a WP-Cron option of their own; look for it before adding the server cron.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'Check the Operation Mode too: in Block mode nothing is ever sent, by design, and a red notice on the Retention tab says so.', 'total-mail-queue' ); ?></p>
 
+<h3><?php esc_html_e( 'Site Health', 'total-mail-queue' ); ?></h3>
+<p><?php esc_html_e( 'Tools → Site Health runs four checks of the queue: whether the worker is sending it, whether more emails wait than the alert threshold, whether an SMTP account has room when the Send Method is "Plugin SMTP only", and whether an SMTP account signs in to Microsoft 365 with a password, which Microsoft is retiring. Its Info tab has a Total Mail Queue section with the mode, the queue size and the last send, ready to copy into a support request.', 'total-mail-queue' ); ?></p>
+
 <h3><?php esc_html_e( 'The admin says the site has problems sending emails', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'That notice appears when the last attempt failed, and it quotes the error. Open the Log, find the failed emails and read the Info column. Errors from an SMTP account usually mean a wrong password, port or encryption setting: use Test Connection on the account. Once the cause is fixed, select the failed emails and use Force Resend.', 'total-mail-queue' ); ?></p>
 

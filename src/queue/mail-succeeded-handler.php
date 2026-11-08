@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Queue;
 
 use TotalMailQueue\Cron\Diagnostics;
+use TotalMailQueue\Retention\SentBody;
 
 /**
  * For "instant" priority emails — the only ones that flow through both
@@ -51,6 +52,7 @@ final class MailSucceededHandler {
 				),
 				array( '%s', '%s', '%s', '%s' )
 			);
+			SentBody::afterSent( $mail_id );
 		}
 		Tracker::reset();
 	}

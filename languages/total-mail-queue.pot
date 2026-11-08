@@ -3285,6 +3285,140 @@ msgstr ""
 msgid "The log takes part in WordPress's privacy tools, Tools → Export Personal Data and Tools → Erase Personal Data. An export lists every logged email sent to the address, with its date, status, subject and message; the message of an email that carries a one-time account link, such as a password reset, is withheld. An erasure deletes the address's sent, failed and alert emails and their stored attachments. Emails still waiting in the queue are kept until they are sent, and the request says how many."
 msgstr ""
 
+#: src/admin/settings-api.php:99
+msgid "Message after sending"
+msgstr ""
+
+#: src/admin/settings-api.php:262
+msgid "Delete the message once the email is sent."
+msgstr ""
+
+#: src/admin/settings-api.php:263
+msgid "The Log then keeps the date, status, recipients and subject of a sent email, not its body, headers or attachment list. Emails that fail keep their message, so they can still be resent. Off by default; it applies to emails sent after it is turned on."
+msgstr ""
+
+#: src/retention/sent-body.php:47
+msgid "Message deleted after sending, as the Log settings ask."
+msgstr ""
+
+#: src/admin/docs/log-and-retention.php:56
+msgid "Settings → Log → \"Message after sending\" keeps less: once an email is sent, its message, headers and attachment list are deleted and the Log keeps its date, status, recipients and subject, with a note in the Info column. Failed emails keep their message so they can still be resent. It is off by default and applies to emails sent after it is turned on."
+msgstr ""
+
+#: src/admin/site-health.php:62
+msgid "Email queue worker"
+msgstr ""
+
+#: src/admin/site-health.php:63
+msgid "Email queue size"
+msgstr ""
+
+#: src/admin/site-health.php:64
+msgid "SMTP account for the queue"
+msgstr ""
+
+#: src/admin/site-health.php:65
+msgid "Microsoft 365 SMTP sign-in"
+msgstr ""
+
+#: src/admin/site-health.php:91
+msgid "The email queue is being sent"
+msgstr ""
+
+#: src/admin/site-health.php:91
+msgid "The worker that sends the queue ran on time, or nothing is waiting."
+msgstr ""
+
+#: src/admin/site-health.php:96
+msgid "Emails are waiting and the queue is not being sent"
+msgstr ""
+
+#: src/admin/site-health.php:97
+msgid "Nothing has been sent for more than two hours while emails wait, and the worker is not scheduled to run. WP-Cron runs only when the site gets visits, so on a quiet or cached site it may barely run. Add a server cron job that calls wp-cron.php; the plugin's Cron tab shows the line for this server."
+msgstr ""
+
+#: src/admin/site-health.php:111
+msgid "The email queue is within its usual size"
+msgstr ""
+
+#: src/admin/site-health.php:111
+msgid "The number of waiting emails is not above the alert threshold set in the plugin's settings."
+msgstr ""
+
+#: src/admin/site-health.php:116
+msgid "The email queue is larger than usual"
+msgstr ""
+
+#: src/admin/site-health.php:119
+#, php-format
+msgid "%1$d emails are waiting, above the alert threshold of %2$d. A sudden flood may be a form abused by a bot; check the Retention tab for what is waiting and where it comes from."
+msgstr ""
+
+#: src/admin/site-health.php:135
+msgid "An SMTP account can send the queue"
+msgstr ""
+
+#: src/admin/site-health.php:135
+msgid "Either the queue does not depend on the plugin's SMTP accounts, or one of them still has room within its limits."
+msgstr ""
+
+#: src/admin/site-health.php:140
+msgid "Emails wait for an SMTP account with room in its limits"
+msgstr ""
+
+#: src/admin/site-health.php:154
+msgid "No SMTP account depends on Microsoft 365 password sign-in"
+msgstr ""
+
+#: src/admin/site-health.php:154
+msgid "None of the plugin's enabled SMTP accounts signs in to Microsoft 365 with a password."
+msgstr ""
+
+#: src/admin/site-health.php:159
+msgid "An SMTP account signs in to Microsoft 365 with a password"
+msgstr ""
+
+#: src/admin/site-health.php:162
+#, php-format
+msgid "Microsoft is retiring password sign-in (Basic authentication) for SMTP in Exchange Online, and an account that uses it stops sending once it is turned off for your tenant. Accounts affected: %s."
+msgstr ""
+
+#: src/admin/site-health.php:199
+msgid "Operation mode"
+msgstr ""
+
+#: src/admin/site-health.php:207
+msgid "Queue interval (seconds)"
+msgstr ""
+
+#: src/admin/site-health.php:211
+msgid "Emails waiting"
+msgstr ""
+
+#: src/admin/site-health.php:215
+msgid "Last send"
+msgstr ""
+
+#: src/admin/site-health.php:219
+msgid "Next worker run"
+msgstr ""
+
+#: src/admin/site-health.php:227
+msgid "WP-Cron disabled"
+msgstr ""
+
+#: src/admin/site-health.php:250
+msgid "Open Total Mail Queue"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:26
+msgid "Site Health"
+msgstr ""
+
+#: src/admin/docs/troubleshooting.php:27
+msgid "Tools → Site Health runs four checks of the queue: whether the worker is sending it, whether more emails wait than the alert threshold, whether an SMTP account has room when the Send Method is \"Plugin SMTP only\", and whether an SMTP account signs in to Microsoft 365 with a password, which Microsoft is retiring. Its Info tab has a Total Mail Queue section with the mode, the queue size and the last send, ready to copy into a support request."
+msgstr ""
+
 #: src/admin/docs/cron.php:54
 msgid "WP-CLI"
 msgstr ""

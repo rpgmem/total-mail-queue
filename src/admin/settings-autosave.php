@@ -50,6 +50,7 @@ final class SettingsAutosave {
 		'settings:alert_enabled'        => 'alert_enabled',
 		'settings:auto_block'           => 'auto_block',
 		'settings:block_password_reset' => 'block_password_reset',
+		'settings:log_drop_body'        => 'log_drop_body',
 		'settings:smtp_debug'           => 'smtp_debug',
 		'template:enabled'              => 'enabled',
 		'template:footer_powered_by'    => 'footer_powered_by',
