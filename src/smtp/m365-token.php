@@ -43,6 +43,11 @@ final class M365Token {
 	private const CACHE_PREFIX = 'tmq_m365_token_';
 
 	/**
+	 * The error code Microsoft gives for a client secret past its end date.
+	 */
+	private const SECRET_EXPIRED = 7000222;
+
+	/**
 	 * Seconds trimmed from a token's lifetime before it is reused.
 	 */
 	private const EXPIRY_MARGIN = 120;
@@ -120,6 +125,12 @@ final class M365Token {
 		$body  = is_array( $body ) ? $body : array();
 		$token = isset( $body['access_token'] ) && is_string( $body['access_token'] ) ? $body['access_token'] : '';
 		if ( '' === $token ) {
+			// AADSTS7000222: the secret's own end date has passed (#188).
+			// Microsoft's text names the app's ID and stops there, so the
+			// Log says what to do instead.
+			if ( isset( $body['error_codes'] ) && is_array( $body['error_codes'] ) && in_array( self::SECRET_EXPIRED, array_map( 'intval', $body['error_codes'] ), true ) ) {
+				return self::fail( 'tmq_m365_secret_expired', __( 'Microsoft refused the sign-in: the client secret has expired. Create a new one in Microsoft Entra → Certificates & secrets and save it in the SMTP account.', 'total-mail-queue' ) );
+			}
 			$reason = isset( $body['error_description'] ) && is_string( $body['error_description'] ) ? strtok( $body['error_description'], "\r\n" ) : '';
 			if ( false === $reason || '' === $reason ) {
 				/* translators: %d: HTTP status code */

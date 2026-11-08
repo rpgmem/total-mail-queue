@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Cron\Scheduler;
+use TotalMailQueue\Smtp\M365SecretExpiry;
 use TotalMailQueue\Smtp\M365Token;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Support\Encryption;
@@ -109,6 +110,12 @@ final class SmtpActions {
 		$raw_secret = isset( $_POST['smtp_oauth_client_secret'] ) ? wp_unslash( $_POST['smtp_oauth_client_secret'] ) : '';
 		if ( '' !== $raw_secret ) {
 			$data['oauth_client_secret'] = Encryption::encrypt( (string) $raw_secret );
+		}
+		// Posted only while the field is enabled, as the secret is; a date
+		// that is not a real day is stored as none (#188).
+		if ( isset( $_POST['smtp_oauth_secret_expires'] ) ) {
+			$expires                      = M365SecretExpiry::sanitizeDate( sanitize_text_field( wp_unslash( $_POST['smtp_oauth_secret_expires'] ) ) );
+			$data['oauth_secret_expires'] = '' === $expires ? null : $expires;
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters.

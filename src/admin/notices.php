@@ -15,6 +15,7 @@ use TotalMailQueue\Cron\Diagnostics;
 use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Smtp\M365SecretExpiry;
 
 /**
  * Renders the global admin notices the plugin emits.
@@ -52,8 +53,58 @@ final class Notices {
 		}
 
 		self::maybeRenderCronStalledNotice( $options );
+		self::maybeRenderSecretExpiryNotice();
 		self::maybeRenderConflictNotice();
 		self::maybeRenderAutoBlockNotice( $options );
+	}
+
+	/**
+	 * Warn before a Microsoft 365 app's client secret expires, and after
+	 * (#188). Only on the plugin's screens and the Dashboard: a month of the
+	 * same line on every screen teaches people to skip it.
+	 */
+	private static function maybeRenderSecretExpiryNotice(): void {
+		if ( ! Access::canView() || ! self::onPluginScreenOrDashboard() ) {
+			return;
+		}
+		$accounts = M365SecretExpiry::accounts( time() );
+		if ( array() === $accounts ) {
+			return;
+		}
+		$expired = M365SecretExpiry::EXPIRED === $accounts[0]['state'];
+		$names   = array();
+		foreach ( $accounts as $account ) {
+			$names[] = sprintf(
+				/* translators: 1: account name, 2: date */
+				__( '"%1$s" (%2$s)', 'total-mail-queue' ),
+				$account['name'],
+				M365SecretExpiry::displayDate( $account['date'] )
+			);
+		}
+		$link = '<a href="' . esc_url( admin_url( 'admin.php?page=' . PluginPage::TAB_SMTP ) ) . '">' . esc_html__( 'SMTP Accounts', 'total-mail-queue' ) . '</a>';
+		$text = $expired
+			/* translators: %1$s: accounts with their dates, %2$s: link to the SMTP tab */
+			? __( 'Total Mail Queue: a Microsoft 365 app\'s client secret has expired, and the emails of these accounts are not going out: %1$s. Create a new secret in Microsoft Entra and save it in %2$s.', 'total-mail-queue' )
+			/* translators: %1$s: accounts with their dates, %2$s: link to the SMTP tab */
+			: __( 'Total Mail Queue: a Microsoft 365 app\'s client secret expires soon: %1$s. Create a new secret in Microsoft Entra and save it in %2$s before then, or the emails of these accounts stop.', 'total-mail-queue' );
+		printf(
+			'<div class="notice %1$s"><p>%2$s</p></div>',
+			$expired ? 'notice-error' : 'notice-warning',
+			wp_kses_post( sprintf( $text, esc_html( implode( ', ', $names ) ), $link ) )
+		);
+	}
+
+	/**
+	 * The Dashboard or one of the plugin's own screens.
+	 */
+	private static function onPluginScreenOrDashboard(): bool {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( null !== $screen && 'dashboard' === $screen->id ) {
+			return true;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only reads which screen is open.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		return 0 === strpos( $page, 'wp_tmq_mail_queue' );
 	}
 
 	/**

@@ -13,6 +13,7 @@ use TotalMailQueue\Cron\Diagnostics;
 use TotalMailQueue\Cron\Scheduler;
 use TotalMailQueue\Queue\QueueRepository;
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Smtp\M365SecretExpiry;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
 /**
@@ -145,26 +146,74 @@ final class SiteHealth {
 	}
 
 	/**
-	 * No account signs in to Microsoft 365 SMTP with a password.
+	 * No account signs in to Microsoft 365 SMTP with a password, and no app
+	 * account's client secret is expired or about to be (#188).
+	 *
+	 * An expired secret is critical, because those emails are not going out;
+	 * one within M365SecretExpiry::WARN_DAYS, or password sign-in, is
+	 * recommended. The description names every account involved.
 	 *
 	 * @return array<string,mixed>
 	 */
 	public static function testM365Auth(): array {
-		$names = self::m365PasswordAccounts();
-		if ( array() === $names ) {
-			return self::result( 'tmq_m365_auth', 'good', __( 'No SMTP account depends on Microsoft 365 password sign-in', 'total-mail-queue' ), __( 'None of the plugin\'s enabled SMTP accounts signs in to Microsoft 365 with a password.', 'total-mail-queue' ) );
+		$names   = self::m365PasswordAccounts();
+		$secrets = M365SecretExpiry::accounts( time() );
+		if ( array() === $names && array() === $secrets ) {
+			return self::result(
+				'tmq_m365_auth',
+				'good',
+				__( 'No SMTP account depends on Microsoft 365 password sign-in', 'total-mail-queue' ),
+				sprintf(
+				/* translators: %d: days of warning */
+					__( 'None of the plugin\'s enabled SMTP accounts signs in to Microsoft 365 with a password, and no app\'s client secret expires within %d days.', 'total-mail-queue' ),
+					M365SecretExpiry::WARN_DAYS
+				)
+			);
 		}
-		return self::result(
-			'tmq_m365_auth',
-			'recommended',
-			__( 'An SMTP account signs in to Microsoft 365 with a password', 'total-mail-queue' ),
-			sprintf(
+
+		$parts   = array();
+		$expired = array();
+		$soon    = array();
+		foreach ( $secrets as $account ) {
+			$entry = sprintf(
+				/* translators: 1: account name, 2: date */
+				__( '%1$s (%2$s)', 'total-mail-queue' ),
+				$account['name'],
+				M365SecretExpiry::displayDate( $account['date'] )
+			);
+			if ( M365SecretExpiry::EXPIRED === $account['state'] ) {
+				$expired[] = $entry;
+			} else {
+				$soon[] = $entry;
+			}
+		}
+		if ( array() !== $expired ) {
+			/* translators: %s: comma-separated accounts with their dates */
+			$parts[] = sprintf( __( 'The client secret of a Microsoft 365 app has expired, and Microsoft refuses the sign-in until a new one is saved. Accounts affected: %s.', 'total-mail-queue' ), implode( ', ', $expired ) );
+		}
+		if ( array() !== $soon ) {
+			/* translators: 1: days of warning, 2: comma-separated accounts with their dates */
+			$parts[] = sprintf( __( 'The client secret of a Microsoft 365 app expires within %1$d days: create a new one in Microsoft Entra and save it in the account before then. Accounts affected: %2$s.', 'total-mail-queue' ), M365SecretExpiry::WARN_DAYS, implode( ', ', $soon ) );
+		}
+		if ( array() !== $names ) {
+			$parts[] = sprintf(
 				/* translators: %s: comma-separated account names */
 				__( 'Microsoft is retiring password sign-in (Basic authentication) for SMTP in Exchange Online, and an account that uses it stops sending once it is turned off for your tenant. Accounts affected: %s.', 'total-mail-queue' ),
 				implode( ', ', $names )
-			),
-			PluginPage::TAB_SMTP
-		);
+			);
+		}
+
+		if ( array() !== $expired ) {
+			$status = 'critical';
+			$label  = __( 'A Microsoft 365 app\'s client secret has expired', 'total-mail-queue' );
+		} elseif ( array() !== $soon ) {
+			$status = 'recommended';
+			$label  = __( 'A Microsoft 365 app\'s client secret expires soon', 'total-mail-queue' );
+		} else {
+			$status = 'recommended';
+			$label  = __( 'An SMTP account signs in to Microsoft 365 with a password', 'total-mail-queue' );
+		}
+		return self::result( 'tmq_m365_auth', $status, $label, implode( ' ', $parts ), PluginPage::TAB_SMTP );
 	}
 
 	/**

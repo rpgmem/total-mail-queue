@@ -11,6 +11,7 @@ namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Admin\Button;
 use TotalMailQueue\Admin\Icons;
+use TotalMailQueue\Smtp\M365SecretExpiry;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 
 /**
@@ -125,7 +126,12 @@ final class SmtpListRenderer {
 
 		echo '<tr>';
 		echo '<td>#' . esc_html( (string) $acct['id'] ) . '</td>';
-		echo '<td>' . esc_html( (string) $acct['name'] ) . '</td>';
+		$expiry = M365SecretExpiry::status( $acct, time() );
+		echo '<td>' . esc_html( (string) $acct['name'] );
+		if ( null !== $expiry ) {
+			echo '<br><span class="tmq-status tmq-status-secret-' . esc_attr( $expiry['state'] ) . '">' . esc_html( M365SecretExpiry::label( $expiry ) ) . '</span>';
+		}
+		echo '</td>';
 		echo '<td>' . esc_html( (string) $acct['host'] ) . ':' . esc_html( (string) $acct['port'] ) . '</td>';
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $from_display is pre-escaped with esc_html().
 		echo '<td>' . $from_display . '</td>';
