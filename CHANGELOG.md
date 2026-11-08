@@ -7,6 +7,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- The email log takes part in Tools → Export / Erase Personal Data: an export lists the address's emails, withholding one-time account links; an erasure deletes its sent, failed and alert emails and their attachments, and keeps those still queued until they are sent (#178).
+
 ### Security
 
 - Dev toolchain: `minimatch` is forced to `^11.0.1` through `overrides` and `fast-uri` moves to 3.1.9, clearing four moderate Dependabot alerts; nothing that ships changes (#176).
