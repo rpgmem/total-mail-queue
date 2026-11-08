@@ -114,6 +114,9 @@ final class Plugin {
 		// Tools → Export / Erase Personal Data reach the email log.
 		Privacy\PersonalData::register();
 
+		// Tools → Site Health: the queue's tests and its Info section.
+		Admin\SiteHealth::register();
+
 		// Updates from GitHub Releases. Not behind is_admin(): WordPress also
 		// scans for plugin updates from cron.
 		Update\GithubUpdater::register();
