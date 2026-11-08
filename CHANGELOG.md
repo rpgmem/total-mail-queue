@@ -7,6 +7,8 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.3.0] (2026-11-08)
+
 ### Added
 
 - The email log takes part in Tools → Export / Erase Personal Data: an export lists the address's emails, withholding one-time account links; an erasure deletes its sent, failed and alert emails and their attachments, and keeps those still queued until they are sent (#178).
