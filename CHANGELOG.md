@@ -7,6 +7,10 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- `readme.txt`'s Changelog section points to `CHANGELOG.md` and the GitHub Releases instead of copying two releases, which had stopped at 2.12.0; "View details" already reads the release notes (#192).
+
 ## [3.3.0] (2026-11-08)
 
 ### Added
