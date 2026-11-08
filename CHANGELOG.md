@@ -21,6 +21,7 @@ The format follows [Keep a Changelog] (https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - `readme.txt`'s Changelog section points to `CHANGELOG.md` and the GitHub Releases instead of copying two releases, which had stopped at 2.12.0; "View details" already reads the release notes (#192).
+- CI: Dependabot PRs opened against `main` (security updates, which ignore `target-branch`) are moved to `develop` before auto-merge is turned on, so none merges into production unreleased (#194).
 
 ### Security
 
