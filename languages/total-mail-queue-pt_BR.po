@@ -3263,3 +3263,34 @@ msgstr "Botões"
 #: src/admin/docs/appearance.php
 msgid "Every button carries an icon, and its colour says what it does: solid blue saves or completes the form, grey opens, tests or navigates, green adds something, amber resets or switches something off without losing data, and red deletes or replaces. Buttons that cannot be undone ask before they act."
 msgstr "Todo botão traz um ícone, e a cor diz o que ele faz: azul sólido salva ou conclui o formulário, cinza abre, testa ou navega, verde adiciona algo, âmbar redefine ou desliga algo sem perder dados, e vermelho exclui ou substitui. Os botões que não podem ser desfeitos perguntam antes de agir."
+
+#: src/privacy/personal-data.php:75
+msgid "Total Mail Queue email log"
+msgstr "Log de e-mails do Total Mail Queue"
+
+#: src/privacy/personal-data.php:116
+msgid "Email log"
+msgstr "Log de e-mails"
+
+#: src/privacy/personal-data.php:120
+msgid "Date"
+msgstr "Data"
+
+#: src/privacy/personal-data.php:200
+#, php-format
+msgid "%d email to this address is still waiting in the queue. It is kept until it is sent, and a new erasure request after that removes it."
+msgid_plural "%d emails to this address are still waiting in the queue. They are kept until they are sent, and a new erasure request after that removes them."
+msgstr[0] "%d e-mail para este endereço ainda está aguardando na fila. Ele é mantido até ser enviado, e um novo pedido de apagamento depois disso o remove."
+msgstr[1] "%d e-mails para este endereço ainda estão aguardando na fila. Eles são mantidos até serem enviados, e um novo pedido de apagamento depois disso os remove."
+
+#: src/privacy/personal-data.php:288
+msgid "Withheld: this email carries a one-time account link."
+msgstr "Omitido: este e-mail contém um link de acesso de uso único."
+
+#: src/admin/docs/updates-and-data.php:29
+msgid "Personal data requests"
+msgstr "Pedidos sobre dados pessoais"
+
+#: src/admin/docs/updates-and-data.php:30
+msgid "The log takes part in WordPress's privacy tools, Tools → Export Personal Data and Tools → Erase Personal Data. An export lists every logged email sent to the address, with its date, status, subject and message; the message of an email that carries a one-time account link, such as a password reset, is withheld. An erasure deletes the address's sent, failed and alert emails and their stored attachments. Emails still waiting in the queue are kept until they are sent, and the request says how many."
+msgstr "O log participa das ferramentas de privacidade do WordPress, Ferramentas → Exportar dados pessoais e Ferramentas → Apagar dados pessoais. Uma exportação lista todos os e-mails registrados enviados ao endereço, com data, status, assunto e mensagem; a mensagem de um e-mail que contém um link de acesso de uso único, como uma redefinição de senha, é omitida. Um apagamento exclui os e-mails enviados, com erro e de alerta do endereço e os anexos guardados. Os e-mails que ainda aguardam na fila são mantidos até serem enviados, e o pedido informa quantos são."
