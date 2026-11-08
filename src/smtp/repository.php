@@ -605,6 +605,20 @@ final class Repository {
 	}
 
 	/**
+	 * Look up the encrypted client secret of a Microsoft 365 account (#186).
+	 *
+	 * Used by the connection tester when the form's secret field is empty on
+	 * edit, meaning "use the stored one".
+	 *
+	 * @param int $smtp_id Account id.
+	 * @return string Encrypted payload, or '' when the account isn't found.
+	 */
+	public static function findOauthSecretById( int $smtp_id ): string {
+		$account = self::findById( $smtp_id );
+		return null === $account ? '' : (string) ( $account['oauth_client_secret'] ?? '' );
+	}
+
+	/**
 	 * Look up the encrypted password column for the given account id.
 	 *
 	 * Used by the connection-tester admin endpoint when the form has an

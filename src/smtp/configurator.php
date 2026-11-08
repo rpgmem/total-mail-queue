@@ -34,11 +34,21 @@ final class Configurator {
 		// Close any existing SMTP connection so we start fresh.
 		$phpmailer->smtpClose();
 		$phpmailer->isSMTP();
+		// A Microsoft 365 reason left by an earlier email of the batch must
+		// not be logged against this one.
+		M365Token::takeLastError();
 		$phpmailer->Host       = $smtp_account['host'];
 		$phpmailer->Port       = intval( $smtp_account['port'] );
 		$phpmailer->SMTPSecure = 'none' === $smtp_account['encryption'] ? '' : $smtp_account['encryption'];
 		$phpmailer->SMTPAuth   = (bool) $smtp_account['auth'];
-		if ( $smtp_account['auth'] ) {
+		if ( $smtp_account['auth'] && M365Token::AUTH_TYPE === (string) ( $smtp_account['auth_type'] ?? '' ) ) {
+			// The Microsoft 365 app signs in with a token (#186). Without one
+			// the send fails at AUTH, and M365Token keeps Microsoft's reason
+			// for the failure handler to log instead of the SMTP error.
+			$token = M365Token::forAccount( $smtp_account );
+			M365Credentials::apply( $phpmailer, (string) $smtp_account['username'], is_string( $token ) ? $token : '' );
+		} elseif ( $smtp_account['auth'] ) {
+			$phpmailer->AuthType = '';
 			$phpmailer->Username = $smtp_account['username'];
 			$phpmailer->Password = Encryption::decrypt( $smtp_account['password'] );
 		}

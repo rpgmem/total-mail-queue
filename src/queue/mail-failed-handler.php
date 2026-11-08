@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Queue;
 
 use TotalMailQueue\Settings\Options;
+use TotalMailQueue\Smtp\M365Token;
 use TotalMailQueue\Support\DebugCapture;
 
 /**
@@ -48,6 +49,12 @@ final class MailFailedHandler {
 		$retry_state   = QueueRepository::retryStateFor( $mail_id );
 		$retry_count   = $retry_state ? $retry_state['retry_count'] : 0;
 		$error_message = self::messageFromWpError( $wp_error );
+		// A Microsoft 365 account whose token request failed reaches here as
+		// a bare SMTP authentication error; Microsoft's reason says more.
+		$token_error = M365Token::takeLastError();
+		if ( '' !== $token_error ) {
+			$error_message = $token_error;
+		}
 
 		// Append the full (untruncated) failure detail to the row's persistent
 		// error log before the short `info` summary is overwritten below. The

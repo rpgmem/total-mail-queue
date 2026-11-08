@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace TotalMailQueue\Admin\Pages;
 
 use TotalMailQueue\Cron\Scheduler;
+use TotalMailQueue\Smtp\M365Token;
 use TotalMailQueue\Smtp\Repository as SmtpRepository;
 use TotalMailQueue\Support\Encryption;
 
@@ -95,6 +96,19 @@ final class SmtpActions {
 			$data['encryption'] = sanitize_key( wp_unslash( $_POST['smtp_encryption'] ?? 'tls' ) );
 			$data['auth']       = isset( $_POST['smtp_auth'] ) ? 1 : 0;
 			$data['username']   = sanitize_text_field( wp_unslash( $_POST['smtp_username'] ?? '' ) );
+			// The Microsoft 365 app (#186): a value that is not a tenant or a
+			// GUID is stored empty, and Test Connection then says which.
+			$data['auth_type']       = M365Token::AUTH_TYPE === sanitize_key( wp_unslash( $_POST['smtp_auth_type'] ?? '' ) ) ? M365Token::AUTH_TYPE : 'password';
+			$tenant                  = trim( sanitize_text_field( wp_unslash( $_POST['smtp_oauth_tenant'] ?? '' ) ) );
+			$client_id               = trim( sanitize_text_field( wp_unslash( $_POST['smtp_oauth_client_id'] ?? '' ) ) );
+			$data['oauth_tenant']    = M365Token::validTenant( $tenant ) ? $tenant : '';
+			$data['oauth_client_id'] = M365Token::validClientId( $client_id ) ? $client_id : '';
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a client secret must preserve special characters.
+		$raw_secret = isset( $_POST['smtp_oauth_client_secret'] ) ? wp_unslash( $_POST['smtp_oauth_client_secret'] ) : '';
+		if ( '' !== $raw_secret ) {
+			$data['oauth_client_secret'] = Encryption::encrypt( (string) $raw_secret );
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters.

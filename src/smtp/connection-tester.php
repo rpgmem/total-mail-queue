@@ -66,6 +66,11 @@ final class ConnectionTester {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- password must preserve special characters
 		$password = wp_unslash( $_POST['password'] ?? '' );
 		$smtp_id  = intval( $_POST['smtp_id'] ?? 0 );
+		$m365     = M365Token::AUTH_TYPE === sanitize_key( wp_unslash( $_POST['auth_type'] ?? '' ) );
+		$tenant   = sanitize_text_field( wp_unslash( $_POST['oauth_tenant'] ?? '' ) );
+		$client   = sanitize_text_field( wp_unslash( $_POST['oauth_client_id'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a client secret must preserve special characters
+		$secret = (string) wp_unslash( $_POST['oauth_client_secret'] ?? '' );
 
 		if ( '' === $host ) {
 			wp_send_json_error( array( 'message' => __( 'SMTP host is required.', 'total-mail-queue' ) ) );
@@ -76,6 +81,19 @@ final class ConnectionTester {
 			$stored = Repository::findPasswordById( $smtp_id );
 			if ( '' !== $stored ) {
 				$password = Encryption::decrypt( $stored );
+			}
+		}
+
+		// The Microsoft 365 app: ask Microsoft first, uncached, so a wrong
+		// secret or a missing consent is reported in Microsoft's words (#186).
+		$token = '';
+		if ( $auth && $m365 ) {
+			if ( '' === $secret && 0 < $smtp_id ) {
+				$secret = Encryption::decrypt( Repository::findOauthSecretById( $smtp_id ) );
+			}
+			$token = M365Token::fetch( $tenant, $client, $secret, false );
+			if ( is_wp_error( $token ) ) {
+				wp_send_json_error( array( 'message' => $token->get_error_message() ) );
 			}
 		}
 
@@ -93,7 +111,9 @@ final class ConnectionTester {
 			$mail->Port       = $port;
 			$mail->SMTPSecure = 'none' === $encryption ? '' : $encryption;
 			$mail->SMTPAuth   = (bool) $auth;
-			if ( $auth ) {
+			if ( $auth && $m365 ) {
+				M365Credentials::apply( $mail, $username, (string) $token );
+			} elseif ( $auth ) {
 				$mail->Username = $username;
 				$mail->Password = $password;
 			}

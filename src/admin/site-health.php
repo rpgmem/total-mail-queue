@@ -180,6 +180,10 @@ final class SiteHealth {
 			if ( empty( $account['enabled'] ) || empty( $account['auth'] ) || ! in_array( $host, self::M365_HOSTS, true ) ) {
 				continue;
 			}
+			// The Microsoft 365 app signs in with a token, not a password (#186).
+			if ( \TotalMailQueue\Smtp\M365Token::AUTH_TYPE === (string) ( $account['auth_type'] ?? '' ) ) {
+				continue;
+			}
 			$names[] = (string) $account['name'];
 		}
 		return $names;

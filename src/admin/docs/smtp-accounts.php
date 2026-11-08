@@ -16,6 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 <h3><?php esc_html_e( 'Connection', 'total-mail-queue' ); ?></h3>
 <p><?php esc_html_e( 'Host, port, encryption (none, TLS or SSL), and the user name and password if the server asks for them. The password is stored encrypted; leave the field blank when editing to keep the one already saved. Test Connection checks the settings without sending anything.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'When you edit an account, the connection fields start locked, so you can change its limits without touching how it connects. Switch on "Unlock connection fields for editing" to change them.', 'total-mail-queue' ); ?></p>
+<h3><?php esc_html_e( 'Microsoft 365 without a password', 'total-mail-queue' ); ?></h3>
+<p><?php esc_html_e( 'Microsoft is retiring password sign-in for SMTP in Exchange Online. Under Sign-in method, choose "Microsoft 365 app": the account then signs in with a token Microsoft issues to an app registered in your organisation, and no mailbox password is stored. The Mailbox field is the address the email is sent from.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'The app needs the Office 365 Exchange Online permission SMTP.SendAsApp with admin consent, and an Exchange administrator must give its service principal access to the mailbox. The form\'s "How to set this up in Microsoft 365" lists the steps. The client secret is stored encrypted and expires on the date Microsoft set when it was created: create a new one before then and save it here.', 'total-mail-queue' ); ?></p>
+<p><?php esc_html_e( 'The token is kept until shortly before it expires, so a batch asks Microsoft once. When Microsoft refuses it, the Log and Test Connection show Microsoft\'s own reason, such as an invalid secret or a missing permission.', 'total-mail-queue' ); ?></p>
 <p><?php esc_html_e( 'From Email and From Name, when filled, win over the Default Sender in Settings for every email this account sends.', 'total-mail-queue' ); ?></p>
 
 <h3><?php esc_html_e( 'Limits', 'total-mail-queue' ); ?></h3>
