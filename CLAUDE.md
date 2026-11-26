@@ -2,6 +2,8 @@
 
 Project conventions for Claude (Anthropic CLI / agent sessions) working on this repository. Sessions inherit nothing across cold starts, so the durable rules live here. The workflow mirrors `rpgmem/ffcertificate`'s; where this file is silent, that repository's `CLAUDE.md` is the reference.
 
+**Where a section lives.** This file loads in every session. A section that only work on certain files needs can move to `.claude/rules/<topic>.md` with a `paths:` list: Claude Code loads that file when a session reads or edits a matching file, and this file keeps a short pointer that names it. A rule that must be known before code is written anywhere — a prohibition, a rule a push can break, a convention across the code — stays here. A rule file without `paths:` loads in every session like this one, so its text belongs here instead.
+
 ## Language
 
 Every versioned artifact is in **English**: code, comments, docblocks, i18n source strings (translations live in `languages/`), `CHANGELOG.md`, commit messages, issue and PR titles and bodies. The conversation with the maintainer is in Brazilian Portuguese, and that does not decide the language of anything committed — a PR body is composed in the flow of the conversation, so the discipline belongs at the moment of writing it.
@@ -89,7 +91,7 @@ These run in CI on every PR and on pushes to `main` and `develop`:
 - **Verify minified assets are up to date**: CI runs `npm run build` and fails when an `assets/**/*.min.*` file changes or appears. Run `npm run build` after editing any file under `assets/css` or `assets/js`, and commit the `.min` and `.map` beside it.
 - **JS tests (Vitest)**: `tests/js/*.test.js` under jsdom, failing below the line floor in `vitest.config.mjs` (same ratchet rule as the PHP floor). Scripts load through `runScript()` in `tests/js/helpers.js`, which runs them under their real file name so V8 attributes coverage, and `installJquery()` binds real jQuery and resolves its ready event, which jsdom has already fired. jsdom has no layout: assert on `css('display')`, never `:visible`.
 - `composer validate --strict` and `composer audit --locked`.
-- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. The rule is the same in the four plugins (Free Form Certificate, Total Mail Queue, Email Signature Generator, Institutional Email), for this floor and the JS one: **a floor is the highest of 90%, the measured figure minus 5 points, and its current value.** So it is never below 90%, never more than 5 points behind what is measured, and never lowered — the one exception is an honest re-measure after deleting covered product code, recorded beside the floor. Raise it in the PR that delivers the gain, and only once the measured figure is above it. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
+- **Coverage (PHP 8.3)**: the unit, integration and functional suites each write a `.cov` file, and `bin/coverage-merge.php` fails when the merged line coverage falls below `COVERAGE_FLOOR_LINES` in `tests.yml`. The rule is the same in the four plugins (Free Form Certificate, Total Mail Queue, Email Signature Generator, Institutional Email) and in Site PWA, for this floor and the JS one: **a floor is the highest of 90%, the measured figure minus 5 points, and its current value.** So it is never below 90%, never more than 5 points behind what is measured, and never lowered — the one exception is an honest re-measure after deleting covered product code, recorded beside the floor. Raise it in the PR that delivers the gain, and only once the measured figure is above it. The figure counts what each test's `@covers` names, so a test that runs code it does not declare adds nothing to it. So:
   - **declare the class, not the method** (`@covers \TotalMailQueue\Cron\BatchProcessor`, never `…::run`): a method-level annotation drops the private helpers that method calls, which hid a fifth of the batch processor;
   - **declare every class the test exercises on purpose**, such as the cron lock in a cron-flow test, but not the incidental ones every request touches (options, schema);
   - **a test whose subject is a partial goes without the annotation**, saying why in its docblock: the `src/admin/docs/` topics and `default-html.php` are included files, which no annotation can name.
@@ -107,9 +109,10 @@ Locally:
 composer install && npm ci
 vendor/bin/phpunit --testsuite unit
 vendor/bin/phpunit --testsuite integration
-# The functional suite needs MySQL. A cloud session's container ships MariaDB stopped;
-# the environment's setup script starts it with the CI credentials (root / root).
-service mariadb start
+# The functional suite needs MySQL. A cloud session's container has MariaDB with no
+# service unit, so `service mariadb start` fails; the environment's setup script starts
+# it with mysqld_safe and the CI credentials (root / root). If it is down:
+(nohup mysqld_safe >/dev/null 2>&1 &)
 bash bin/install-wp-tests.sh wp_tmq_tests root root 127.0.0.1 false latest
 vendor/bin/phpunit -c phpunit.functional.xml.dist
 vendor/bin/phpstan analyse --no-progress
